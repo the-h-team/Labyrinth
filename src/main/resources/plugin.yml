@@ -1,0 +1,7 @@
+name: HempCore
+version: ${project.version}
+main: com.youtube.hempfest.hempcore.HempCore
+prefix: hempCore
+loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops ]
+authors: [ Hempfest, Modify, Illuminatiiiiii ]
+description: The core library for hempfest plugins.
