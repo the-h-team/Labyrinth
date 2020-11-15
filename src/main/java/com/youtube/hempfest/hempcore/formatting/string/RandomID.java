@@ -2,9 +2,9 @@ package com.youtube.hempfest.hempcore.formatting.string;
 
 public class RandomID {
 
-    int length;
+    private int length;
 
-    String assortment;
+    private String assortment;
 
     /**
      * Generate a new random ID
