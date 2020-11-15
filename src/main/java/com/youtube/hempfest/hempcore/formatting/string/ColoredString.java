@@ -9,10 +9,10 @@ import org.bukkit.ChatColor;
 public class ColoredString {
 
 
-    ColorType chosen;
-    String text;
-    String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
-    Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+    private final ColorType chosen;
+    private final String text;
+    private final String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
+    private final Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
 
     public ColoredString(String text, ColorType type) {
         this.text = text;
