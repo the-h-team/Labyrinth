@@ -1,5 +1,5 @@
 name: HempCore
-version: ${project.version}
+version: 1.0.2
 main: com.youtube.hempfest.hempcore.HempCore
 prefix: hempCore
 loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops ]
