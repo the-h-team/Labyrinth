@@ -15,6 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.plugin.AuthorNagException;
 
 
 public abstract class Menu implements InventoryHolder {
@@ -60,7 +61,7 @@ public abstract class Menu implements InventoryHolder {
 		this.setMenuItems();
 
 		// open the inventory for the player
-		guiLibrary.getViewer().openInventory(inventory);
+			guiLibrary.getViewer().openInventory(inventory);
 	}
 
 	public void start() {

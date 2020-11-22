@@ -14,7 +14,7 @@ public final class Entities {
         }
     }
 
-    public static EntityType getMaterial(String name) {
+    public static EntityType getEntity(String name) {
         return MATERIAL_ALIAS.get(name.toLowerCase().replaceAll("_", ""));
     }
 

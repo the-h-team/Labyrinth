@@ -4,7 +4,7 @@ public class RandomID {
 
     private int length;
 
-    private String assortment;
+    private final String assortment;
 
     /**
      * Generate a new random ID

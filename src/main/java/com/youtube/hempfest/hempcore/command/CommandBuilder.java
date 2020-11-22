@@ -38,7 +38,7 @@ public class CommandBuilder {
 				try {
 					clazz = Class.forName(className.substring(0, className.length() - 6));
 				} catch (ClassNotFoundException e) {
-					HempCore.getInstance().getLogger().severe("- Unable to find class" + className + "! Make sure you spelled it correctly when using the registerAllCommandsAutomatically method. See the error below for an exact line.");
+					HempCore.getInstance().getLogger().severe("- Unable to find class" + className + "! Double check package location. See the error below for more information.");
 					break;
 				}
 				if (BukkitCommand.class.isAssignableFrom(clazz)) {

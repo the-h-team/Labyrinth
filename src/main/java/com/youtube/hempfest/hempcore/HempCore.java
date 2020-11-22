@@ -24,7 +24,7 @@ public final class HempCore extends JavaPlugin {
 
     private static HempCore instance;
 
-    static HashMap<Player, GuiLibrary> guiManager = new HashMap<>();
+    private static final HashMap<Player, GuiLibrary> guiManager = new HashMap<>();
 
     @Override
     public void onEnable() {
