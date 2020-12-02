@@ -1,8 +1,10 @@
 package com.youtube.hempfest.hempcore;
 
 import com.google.common.collect.Sets;
+import com.youtube.hempfest.hempcore.data.Config;
 import com.youtube.hempfest.hempcore.gui.GuiLibrary;
 import com.youtube.hempfest.hempcore.gui.Menu;
+import java.io.InputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -37,7 +39,11 @@ public final class HempCore extends JavaPlugin implements Listener {
     public void onEnable() {
         // Plugin startup logic
         instance = this;
-        Bukkit.getPluginManager().registerEvents(this, this);
+        run();
+        Config main = new Config("Config", "Configuration");
+        if (main.getConfig().getBoolean("use-click-event")) {
+            Bukkit.getPluginManager().registerEvents(this, this);
+        }
     }
 
     @Override
@@ -60,6 +66,14 @@ public final class HempCore extends JavaPlugin implements Listener {
             return gui;
         } else {
             return guiManager.get(p);
+        }
+    }
+
+    private void run() {
+        Config main = new Config("Config", "Configuration");
+        if (!main.exists()) {
+            InputStream is = getResource("Config.yml");
+            Config.copy(is, main.getFile());
         }
     }
 
@@ -87,5 +101,6 @@ public final class HempCore extends JavaPlugin implements Listener {
         } catch (AuthorNagException ignored) {
         }
     }
+
 
 }
