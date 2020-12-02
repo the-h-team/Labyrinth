@@ -174,12 +174,20 @@ public class PaginatedAssortment {
                     }
                 }
                 if (page == (totalPageCount - 1)) {
-                        p.spigot().sendMessage(new Text().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
+                      if (Bukkit.getVersion().contains("1.16")) {
+                          p.spigot().sendMessage(new Text().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
+                      } else {
+                          p.spigot().sendMessage(Text_R2.textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
+                      }
                 }
             } if (page == 0) {
                 point = page + 1 + 1;
                 p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-                    p.spigot().sendMessage(new Text().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
+                  if (Bukkit.getVersion().contains("1.16")) {
+                      p.spigot().sendMessage(new Text().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
+                  } else {
+                      p.spigot().sendMessage(Text_R2.textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
+                  }
             }
             }
         }
