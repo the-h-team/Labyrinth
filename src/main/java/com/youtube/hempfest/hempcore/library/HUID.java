@@ -31,7 +31,7 @@ public class HUID implements Serializable {
 	}
 
 	public static HUID fromString(String wID) {
-		return new HUID(wID);
+		return new HUID(wID.replace("-", ""));
 	}
 
 }
