@@ -1,8 +1,8 @@
 name: HempCore
-version: 1.0.6
+version: 1.0.7
 main: com.youtube.hempfest.hempcore.HempCore
-prefix: hempCore
+prefix: HempCore
 api-version: 1.13
-loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops ]
-authors: [ Hempfest, Modify, Illuminatiiiiii ]
+loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops , Clans]
+authors: [ Hempfest, Modify, Illuminatiiiiii, ms5984 ]
 description: The core library for hempfest plugins.

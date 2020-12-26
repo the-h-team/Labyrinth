@@ -2,6 +2,8 @@ package com.youtube.hempfest.hempcore;
 
 import com.google.common.collect.Sets;
 import com.youtube.hempfest.hempcore.data.Config;
+import com.youtube.hempfest.hempcore.data.DataContainer;
+import com.youtube.hempfest.hempcore.data.VaultHook;
 import com.youtube.hempfest.hempcore.gui.GuiLibrary;
 import com.youtube.hempfest.hempcore.gui.Menu;
 import java.io.InputStream;
@@ -44,11 +46,31 @@ public final class HempCore extends JavaPlugin implements Listener {
         if (main.getConfig().getBoolean("use-click-event")) {
             Bukkit.getPluginManager().registerEvents(this, this);
         }
+        new VaultHook(this);
+        boolean success;
+        try {
+            getLogger().info("- Attempting automatic data container query process..");
+            DataContainer.querySaved();
+            success = true;
+        } catch (NullPointerException e) {
+            getLogger().info("- Process failed. No directory found to process.");
+            getLogger().info("- Store a new instance of data for query to take effect on enable.");
+            success = false;
+        }
+        if (success) {
+            if (DataContainer.get().length == 0) {
+                success = false;
+                getLogger().info("- Process failed. No data found to process.");
+            }
+            getLogger().info("- Query success! All found meta cached. (" + DataContainer.get().length + ")");
+        } else {
+            getLogger().info("- Query failed! (SEE ABOVE FOR INFO)");
+        }
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        guiManager.clear();
     }
 
     public static HempCore getInstance() {
