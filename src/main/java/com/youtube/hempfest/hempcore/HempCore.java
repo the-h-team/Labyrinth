@@ -46,7 +46,7 @@ public final class HempCore extends JavaPlugin implements Listener {
         if (main.getConfig().getBoolean("use-click-event")) {
             Bukkit.getPluginManager().registerEvents(this, this);
         }
-        new VaultHook(this);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new VaultHook(this), 5);
         boolean success;
         try {
             getLogger().info("- Attempting automatic data container query process..");

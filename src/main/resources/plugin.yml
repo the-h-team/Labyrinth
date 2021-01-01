@@ -1,5 +1,5 @@
 name: HempCore
-version: 1.0.7
+version: 1.0.9
 main: com.youtube.hempfest.hempcore.HempCore
 prefix: HempCore
 api-version: 1.13

@@ -57,6 +57,7 @@ public class Config {
     }
 
     public boolean delete() {
+        Config.configs.removeIf(c -> c.getName().equals(getName()));
         return this.getFile().delete();
     }
 
@@ -119,6 +120,7 @@ public class Config {
             File defConfigStream = new File(this.plugin.getDataFolder(), getName() + ".yml");
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
             this.fc.setDefaults(defConfig);
+            Config.configs.removeIf(c -> c.getName().equals(this.n));
         }
     }
 
