@@ -96,19 +96,33 @@ public interface EconomyExpansion {
 
 	EconomyAction bankDeposit(String accountID, String world, double amount);
 
-	EconomyAction createAccount(AccountType type);
+	EconomyAction createAccount(AccountType type, String name);
 
-	EconomyAction createAccount(AccountType type, double amount);
+	EconomyAction createAccount(AccountType type, String name, double amount);
 
-	EconomyAction createAccount(AccountType type, String world);
+	EconomyAction createAccount(AccountType type, String name, String world);
 
-	EconomyAction createAccount(AccountType type, String world, double amount);
+	EconomyAction createAccount(AccountType type, String name, String world, double amount);
 
-	EconomyAction createAccount(AccountType type, double amount, String accountType);
+	EconomyAction createAccount(AccountType type, String name, double amount, String accountType);
 
-	EconomyAction createAccount(AccountType type, String world, String accountType);
+	EconomyAction createAccount(AccountType type, String name, String world, String accountType);
 
-	EconomyAction createAccount(AccountType type, String world, double amount, String accountType);
+	EconomyAction createAccount(AccountType type, String name, String world, double amount, String accountType);
+
+	EconomyAction createAccount(AccountType type, UUID uuid);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, double amount);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, String world);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, String world, double amount);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, double amount, String accountType);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, String world, String accountType);
+
+	EconomyAction createAccount(AccountType type, UUID uuid, String world, double amount, String accountType);
 
 	EconomyAction deleteEntityAccount(String name);
 
