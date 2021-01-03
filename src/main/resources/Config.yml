@@ -12,3 +12,4 @@
 # Use the default HempCore GUI event listener? (Recommended 'true' by default)
 use-click-event: true
 # ============================================================================================
+log-economy-events: true

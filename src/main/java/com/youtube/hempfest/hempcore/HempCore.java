@@ -6,6 +6,7 @@ import com.youtube.hempfest.hempcore.data.DataContainer;
 import com.youtube.hempfest.hempcore.data.VaultHook;
 import com.youtube.hempfest.hempcore.gui.GuiLibrary;
 import com.youtube.hempfest.hempcore.gui.Menu;
+import com.youtube.hempfest.hempcore.library.Message;
 import java.io.InputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
@@ -34,6 +35,8 @@ public final class HempCore extends JavaPlugin implements Listener {
 
 
     private static HempCore instance;
+
+    public final Message log = new Message("[Economy]");
 
     private static final HashMap<Player, GuiLibrary> guiManager = new HashMap<>();
 
@@ -89,6 +92,10 @@ public final class HempCore extends JavaPlugin implements Listener {
         } else {
             return guiManager.get(p);
         }
+    }
+
+    public boolean logRunning() {
+        return Config.get("Config", "Configuration").getConfig().getBoolean("log-economy-events");
     }
 
     private void run() {

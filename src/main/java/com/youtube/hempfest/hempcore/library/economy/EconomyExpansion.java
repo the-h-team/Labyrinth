@@ -152,6 +152,22 @@ public interface EconomyExpansion {
 
 	EconomyAction isBankMember(UUID uuid, String accountID, String world);
 
+	EconomyAction addBankMember(String name, String accountID);
+
+	EconomyAction addBankMember(String name, String accountID, String world);
+
+	EconomyAction addBankMember(UUID uuid, String accountID);
+
+	EconomyAction addBankMember(UUID uuid, String accountID, String world);
+
+	EconomyAction removeBankMember(String name, String accountID);
+
+	EconomyAction removeBankMember(String name, String accountID, String world);
+
+	EconomyAction removeBankMember(UUID uuid, String accountID);
+
+	EconomyAction removeBankMember(UUID uuid, String accountID, String world);
+
 	List<BankAccount> getBankAccounts();
 
 	List<String> getBanks();
