@@ -28,6 +28,10 @@ public interface EconomyExpansion {
 
     boolean hasPlayerAccount(String name, String world);
 
+	boolean hasPlayerAccount(UUID uuid);
+
+	boolean hasPlayerAccount(UUID uuid, String world);
+
     boolean hasBankAccount(String name);
 
     boolean hasBankAccount(String name, String world);
