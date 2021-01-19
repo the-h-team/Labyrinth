@@ -20,23 +20,23 @@ public abstract class Cooldown implements Serializable {
 		return Integer.parseInt(String.valueOf(getTimePassed()).replace("-", ""));
 	}
 
-	protected int getDaysLeft() {
+	public int getDaysLeft() {
 		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
 	}
 
-	protected long getHoursLeft() {
+	public long getHoursLeft() {
 		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
 	}
 
-	protected long getMinutesLeft() {
+	public long getMinutesLeft() {
 		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
 	}
 
-	protected long getSecondsLeft() {
+	public long getSecondsLeft() {
 		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
 	}
 
-	protected boolean isComplete() {
+	public boolean isComplete() {
 		Config cooldowns = Config.get("Storage", "Cooldowns");
 		Long a = cooldowns.getConfig().getLong(getId() + ".expiration");
 		Long b = System.currentTimeMillis();
@@ -51,7 +51,7 @@ public abstract class Cooldown implements Serializable {
 		return "(S)" + getSecondsLeft() + " : (M)" + getMinutesLeft() + " : (H)" + getHoursLeft() + " : (D)" + getDaysLeft();
 	}
 
-	protected void save() {
+	public void save() {
 		Config cooldowns = Config.get("Storage", "Cooldowns");
 		cooldowns.getConfig().set(getId() + ".expiration", getCooldown());
 		try {
@@ -79,7 +79,7 @@ public abstract class Cooldown implements Serializable {
 		return Objects.hash(getId(), getCooldown());
 	}
 
-	protected static Cooldown getById(String id) {
+	public static Cooldown getById(String id) {
 		Config cooldowns = Config.get("Storage", "Cooldowns");
 		Cooldown result = null;
 		try {
@@ -90,7 +90,7 @@ public abstract class Cooldown implements Serializable {
 		return result;
 	}
 
-	protected static void remove(Cooldown c) {
+	public static void remove(Cooldown c) {
 		Config cooldowns = Config.get("Storage", "Cooldowns");
 		cooldowns.getConfig().set(c.getId(), null);
 		cooldowns.saveConfig();
