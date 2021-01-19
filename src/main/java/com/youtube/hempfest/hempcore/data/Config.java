@@ -10,17 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class Config {
     private final String n;
     private final String d;
     private FileConfiguration fc;
     private File file;
-    private final HempCore plugin;
+    private final JavaPlugin plugin;
     private static final List<Config> configs = new ArrayList<>();
 
     public Config(final String n, final String d) {
-        this.plugin = HempCore.getInstance();
+        this.plugin = JavaPlugin.getProvidingPlugin(Config.class);
         this.n = n;
         this.d = d;
         Config.configs.add(this);
@@ -45,10 +46,13 @@ public class Config {
         return (n == null) ? "" : n;
     }
 
+    public String getDirectory() {
+        return (d == null) ? "" : d;
+    }
 
     public static Config get(final String n, final String d) {
         for(final Config c: Config.configs) {
-            if(c.getName().equals(n)) {
+            if(c.getName().equals(n) && c.getDirectory().equals(d)) {
                 return c;
             }
         }

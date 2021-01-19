@@ -3,6 +3,7 @@ package com.youtube.hempfest.hempcore.library;
 import com.youtube.hempfest.hempcore.HempCore;
 import com.youtube.hempfest.hempcore.formatting.string.ColoredString;
 import java.util.logging.Logger;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,6 +21,10 @@ public class Message {
 	 */
 	public Message(String prefix) {
 		this.prefix = prefix;
+	}
+
+	public void assignPlayer(Player player) {
+		this.p = player;
 	}
 
 	public Message(Player p, String prefix) {
@@ -47,6 +52,10 @@ public class Message {
 
 	public void build(TextComponent component) {
 		p.spigot().sendMessage(component);
+	}
+
+	public void build(BaseComponent... components) {
+		p.spigot().sendMessage(components);
 	}
 
 	public void info(String text) {
