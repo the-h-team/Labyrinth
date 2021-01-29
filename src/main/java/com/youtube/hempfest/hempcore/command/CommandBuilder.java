@@ -53,7 +53,7 @@ public class CommandBuilder {
 				commandMapField.setAccessible(true);
 
 				final CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-				commandMap.register(command.getLabel(), command);
+				commandMap.register(command.getLabel(), plugin.getName(), command);
 			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | NoSuchFieldException e) {
 				HempCore.getInstance().getLogger().severe("- Unable to cast BukkitCommand to the class " + aClass.getName() + ". This likely means you are not extending BukkitCommand for your command class.");
 				e.printStackTrace();
