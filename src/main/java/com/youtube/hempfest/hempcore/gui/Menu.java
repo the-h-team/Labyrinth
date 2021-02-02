@@ -15,7 +15,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.plugin.AuthorNagException;
 
 
 public abstract class Menu implements InventoryHolder {
