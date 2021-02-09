@@ -8,7 +8,7 @@ public class VaultHook {
 
 	private static Economy econ = null;
 
-	private Labyrinth instance;
+	private final Labyrinth instance;
 
 	public VaultHook(Labyrinth instance){
 		this.instance = instance;
@@ -31,6 +31,10 @@ public class VaultHook {
 		return true;
 	}
 
+	/**
+	 * Get the Vault economy interface, provided if possible onEnable natively.
+	 * @return A labyrinth native compilation of Vault's economy interface.
+	 */
 	public static Economy getEconomy() {
 		return econ;
 	}

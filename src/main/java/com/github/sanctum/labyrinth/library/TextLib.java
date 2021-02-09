@@ -10,14 +10,77 @@ public abstract class TextLib {
 
 	private TextLib() { }
 
+	/**
+	 * Meta: {Hoverable}
+	 *
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage);
+
+	/**
+	 * Meta: {Hoverable}
+	 *
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage);
+
+	/**
+	 * Meta: {Hoverable}
+	 *
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message);
+
+	/**
+	 * Meta: {Suggestable}
+	 * Suggest commands from interaction with the message.
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName);
+
+	/**
+	 * Meta: {Runnable}
+	 * Run commands from interaction with the message.
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName);
+
+	/**
+	 * Meta: {Runnable}
+	 * Run commands from interaction with the message.
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName);
+
+	/**
+	 * Meta: {Runnable}
+	 * Run commands from interaction with the message.
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * @return The compiled TextComponent object.
+	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2);
-	public abstract TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3);
+
+	/**
+	 * Meta: {Runnable}
+	 * Run commands from interaction with the message.
+	 * Compiles a color translated text component where N = normal, and H = hoverable
+	 * ( AsyncChatEvent -> player -> 'HHH' )
+	 * @return The compiled TextComponent object.
+	 */
+	public abstract TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3);
 
 	public static TextLib getInstance() {
 		if (instance == null) {
@@ -60,8 +123,8 @@ public abstract class TextLib {
 					}
 
 					@Override
-					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
-						return text1_16.textRunnable(hoverText, hoverText2, hoverTextBody3, hoverTextMessage, hoverText2Message, hoverMessage3, commandName, commandName2, commandName3);
+					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3) {
+						return text1_16.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
 					}
 				};
 			} else {
@@ -102,8 +165,8 @@ public abstract class TextLib {
 					}
 
 					@Override
-					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
-						return Text_R2.textRunnable(hoverText, hoverText2, hoverTextBody3, hoverTextMessage, hoverText2Message, hoverMessage3, commandName, commandName2, commandName3);
+					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3) {
+						return Text_R2.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
 					}
 				};
 			}

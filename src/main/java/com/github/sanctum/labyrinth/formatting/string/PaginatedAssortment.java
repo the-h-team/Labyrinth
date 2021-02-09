@@ -16,13 +16,14 @@ import java.util.*;
 
 public class PaginatedAssortment {
 
-    private List<String> targetList;
+    private Collection<String> targetList;
     private Map<String, Long> targetMap;
     private Map<String, Double> targetMapDouble;
+    private MapType type;
 
     private int linesPerPage;
     private String navigateCommand;
-    private Player p;
+    private final Player p;
 
     // ------------ Formatting ------------- //
     private String listTitle = "&o-- [Specify the returned list's title here] --";
@@ -40,27 +41,25 @@ public class PaginatedAssortment {
         return b2.doubleValue();
     }
 
-    public PaginatedAssortment(List<String> targetList) {
-        this.targetList = targetList;
-    }
-
-    public PaginatedAssortment(Player p, List<String> targetList) {
+    public PaginatedAssortment(Player p, Collection<String> targetList) {
         this.targetList = targetList;
         this.p = p;
     }
 
-    public PaginatedAssortment(Map<String, Long> targetMap, Map<String, Double> targetMap2) {
-        this.targetMap = targetMap;
-        if (targetMap2 != null) {
-            this.targetMapDouble = targetMap2;
-        }
-    }
-
-    public PaginatedAssortment(Player p, Map<String, Long> targetMap, Map<String, Double> targetMap2) {
+    public PaginatedAssortment(Player p, Map<String, ?> targetMap) {
         this.p = p;
-        this.targetMap = targetMap;
-        if (targetMap2 != null) {
-            this.targetMapDouble = targetMap2;
+        for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
+            if (entry.getValue().getClass().isAssignableFrom(Double.class)) {
+                this.type = MapType.DOUBLE;
+                this.targetMapDouble = new HashMap<>();
+                targetMapDouble.put(entry.getKey(), (double) entry.getValue());
+            } else {
+                if (entry.getValue().getClass().isAssignableFrom(Long.class)) {
+                    this.type = MapType.LONG;
+                    this.targetMap = new HashMap<>();
+                    this.targetMap.put(entry.getKey(), (long) entry.getValue());
+                }
+            }
         }
     }
 
@@ -454,6 +453,98 @@ public class PaginatedAssortment {
         return new TreeMap<>(comp);
     }
 
+    /**
+     * Gets the collection of strings to be exported into a list.
+     * @return The list of strings to be sent to the player.
+     */
+    public Collection<String> getTargetList() {
+        return targetList;
+    }
 
+    /**
+     * Gets the map of specified type with all its orignal values.
+     * @param type The map type to obtain
+     * @return A map with values in need of conversion.
+     */
+    public Map<String, ?> getTargetMap(MapType type) {
+        Map<String, ?> result = null;
+        switch (type) {
+            case LONG:
+                result = targetMap;
+                break;
+            case DOUBLE:
+                result = targetMapDouble;
+                break;
+        }
+        return result;
+    }
+
+
+    public String getNormalText() {
+        return normalText;
+    }
+
+    public String getCommandToRun() {
+        return commandToRun;
+    }
+
+    public String getListTitle() {
+        return listTitle;
+    }
+
+    public String getListBorder() {
+        return listBorder;
+    }
+
+    public String getHoverText() {
+        return hoverText;
+    }
+
+    public String getHoverTextMessage() {
+        return hoverTextMessage;
+    }
+
+    public String getNavigateCommand() {
+        return navigateCommand;
+    }
+
+    public int getLinesPerPage() {
+        return linesPerPage;
+    }
+
+    public MapType getType() {
+        return type;
+    }
+
+    public void setType(MapType type) {
+        this.type = type;
+    }
+
+    public void setTargetList(Collection<String> targetList) {
+        this.targetList = targetList;
+    }
+
+    public void setTargetMap(MapType type, Map<String, ?> targetMap) {
+        switch (type) {
+            case LONG:
+                for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
+                    if (entry.getValue().getClass().isAssignableFrom(Long.class)) {
+                        this.type = MapType.LONG;
+                        this.targetMap = new HashMap<>();
+                        this.targetMap.put(entry.getKey(), (long) entry.getValue());
+                    }
+                }
+                break;
+            case DOUBLE:
+                for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
+                    if (entry.getValue().getClass().isAssignableFrom(Double.class)) {
+                        this.type = MapType.DOUBLE;
+                        this.targetMapDouble = new HashMap<>();
+                        this.targetMapDouble.put(entry.getKey(), (double) entry.getValue());
+                    }
+                }
+                break;
+        }
+    }
 
 }

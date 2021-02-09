@@ -9,8 +9,10 @@ public class SortedLongMap implements Comparator<String> {
     public SortedLongMap(Map<String,Long> base){
         this.base = base;
     }
- 
-    // Note: this comparator imposes orderings that are inconsistent with equals.   
+
+    /**
+     * Note: this comparator imposes orderings that are inconsistent with equals.
+     */
     public int compare(String a,String b){
         // sorting from high to low
         if(base.get(a) > base.get(b)){

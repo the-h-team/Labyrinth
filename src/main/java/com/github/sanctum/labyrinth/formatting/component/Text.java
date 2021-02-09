@@ -7,12 +7,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 
 public class Text {
-
-
-		// *
-		//
-		// SEND TEXT THE PLAYER CAN ONLY HOVER OVER AND SEE MORE TEXT WITH
-		//
 	
 	private static String color(String text) {
 		return ChatColor.translateAlternateColorCodes('&', text);

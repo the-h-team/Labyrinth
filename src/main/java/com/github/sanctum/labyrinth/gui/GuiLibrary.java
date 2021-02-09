@@ -4,13 +4,12 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-/*
-Companion class to all menus. This is needed to pass information across the entire
- menu system no matter how many inventories are opened or closed.
-
- Each player has one of these objects, and only one.
+/**
+ * Companion class to all menus. This is needed to pass information across the entire
+ *  menu system no matter how many inventories are opened or closed.
+ *
+ *  Each player has one of these objects, and only one.
  */
-
 public class GuiLibrary {
 	private final Player viewer;
 	private final UUID viewerID;

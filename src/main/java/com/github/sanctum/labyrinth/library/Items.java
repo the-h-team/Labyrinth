@@ -14,6 +14,11 @@ public final class Items {
         }
     }
 
+    /**
+     * Query for a material by its name ignoring cap sensitivity and underscores.
+     * @param name The material to search for disregarding caps and underscores.
+     * @return A material from query or null.
+     */
     public static Material getMaterial(String name) {
         return MATERIAL_ALIAS.get(name.toLowerCase().replaceAll("_", ""));
     }

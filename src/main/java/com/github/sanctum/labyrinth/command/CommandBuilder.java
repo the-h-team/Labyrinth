@@ -23,6 +23,11 @@ public class CommandBuilder {
 		this.plugin = instance;
 	}
 
+	/**
+	 * Look for any compatible object types representative of BukkitCommand within a
+	 * desired package location and automatically register each of them individually if possible.
+	 * @param packageName The location to query.
+	 */
 	public void compileFields(String packageName) {
 		Set<Class<?>> classes = Sets.newHashSet();
 		JarFile jarFile = null;

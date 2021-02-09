@@ -102,10 +102,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
         }
     }
 
-    public boolean logRunning() {
-        return Config.get("Config", "Configuration").getConfig().getBoolean("log-economy-events");
-    }
-
     private void run() {
         Config main = new Config("Config", "Configuration");
         if (!main.exists()) {
@@ -114,25 +110,17 @@ public final class Labyrinth extends JavaPlugin implements Listener {
         }
     }
 
-    // GUI interact event
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMenuClick(InventoryClickEvent e) {
 
         InventoryHolder holder = e.getInventory().getHolder();
-        // If the inventory holder of the inventory clicked on
-        // is an instance of Menu, then gg. The reason that
-        // an InventoryHolder can be a Menu is because our Menu
-        // class implements InventoryHolder!!
         try {
             if (holder instanceof Menu) {
-                e.setCancelled(true); // prevent them from fucking with the inventory
-                if (e.getCurrentItem() == null) { // deal with null exceptions
+                e.setCancelled(true);
+                if (e.getCurrentItem() == null) {
                     return;
                 }
-                // Since we know our inventory holder is a menu, get the Menu Object representing
-                // the menu we clicked on
                 Menu menu = (Menu) holder;
-                // Call the handleMenu object which takes the event and processes it
                 menu.handleMenu(e);
             }
         } catch (AuthorNagException ignored) {
