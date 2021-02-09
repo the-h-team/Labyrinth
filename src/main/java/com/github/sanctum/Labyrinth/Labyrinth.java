@@ -34,7 +34,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-        run();
+        run();//
         Config main = new Config("Config", "Configuration");
         if (main.getConfig().getBoolean("use-click-event")) {
             Bukkit.getPluginManager().registerEvents(this, this);
