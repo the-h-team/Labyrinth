@@ -39,7 +39,7 @@ public class HUID implements Serializable {
 	}
 
 	private void setId() {
-		this.hUID = new RandomID(10).generate();
+		this.hUID = new RandomID(12).generate();
 	}
 
 	public static HUID randomID() {
@@ -52,8 +52,8 @@ public class HUID implements Serializable {
 		if (!StringUtils.isAlphanumeric(wID) && !wID.contains("-")) {
 			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, not alphanumeric."));
 		}
-		if (wID.replace("-", "").length() != 10) {
-			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, size exceeds 10 char limit."));
+		if (wID.replace("-", "").length() != 12) {
+			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, size exceeds 12 char limit."));
 		}
 		return new HUID(wID.replace("-", ""));
 	}
