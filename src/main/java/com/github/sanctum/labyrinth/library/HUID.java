@@ -39,6 +39,7 @@ public class HUID implements Serializable {
 		if (!hUID.contains("-")) {
 			StringBuilder sb = new StringBuilder(hUID);
 			sb.insert(4, '-');
+			sb.insert(9, '-');
 			return sb.toString().endsWith("-") ? sb.substring(0, sb.length() - 1) : sb.toString();
 		}
 		return hUID;
