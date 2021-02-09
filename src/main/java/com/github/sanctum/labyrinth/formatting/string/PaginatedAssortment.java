@@ -46,21 +46,11 @@ public class PaginatedAssortment {
         this.p = p;
     }
 
-    public PaginatedAssortment(Player p, Map<String, ?> targetMap) {
+    public PaginatedAssortment(Player p, Map<String, Long> targetMap, Map<String, Double> targetMap2) {
         this.p = p;
-        for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
-            if (entry.getValue().getClass().isAssignableFrom(Double.class)) {
-                this.type = MapType.DOUBLE;
-                this.targetMapDouble = new HashMap<>();
-                targetMapDouble.put(entry.getKey(), (double) entry.getValue());
-            } else {
-                if (entry.getValue().getClass().isAssignableFrom(Long.class)) {
-                    this.type = MapType.LONG;
-                    this.targetMap = new HashMap<>();
-                    this.targetMap.put(entry.getKey(), (long) entry.getValue());
-                }
-            }
-        }
+        this.targetMap = targetMap;
+        if (targetMap2 != null)
+            this.targetMapDouble = targetMap2;
     }
 
     public enum MapType {
@@ -461,25 +451,6 @@ public class PaginatedAssortment {
         return targetList;
     }
 
-    /**
-     * Gets the map of specified type with all its orignal values.
-     * @param type The map type to obtain
-     * @return A map with values in need of conversion.
-     */
-    public Map<String, ?> getTargetMap(MapType type) {
-        Map<String, ?> result = null;
-        switch (type) {
-            case LONG:
-                result = targetMap;
-                break;
-            case DOUBLE:
-                result = targetMapDouble;
-                break;
-        }
-        return result;
-    }
-
-
     public String getNormalText() {
         return normalText;
     }
@@ -522,29 +493,6 @@ public class PaginatedAssortment {
 
     public void setTargetList(Collection<String> targetList) {
         this.targetList = targetList;
-    }
-
-    public void setTargetMap(MapType type, Map<String, ?> targetMap) {
-        switch (type) {
-            case LONG:
-                for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
-                    if (entry.getValue().getClass().isAssignableFrom(Long.class)) {
-                        this.type = MapType.LONG;
-                        this.targetMap = new HashMap<>();
-                        this.targetMap.put(entry.getKey(), (long) entry.getValue());
-                    }
-                }
-                break;
-            case DOUBLE:
-                for (Map.Entry<String, ?> entry : targetMap.entrySet()) {
-                    if (entry.getValue().getClass().isAssignableFrom(Double.class)) {
-                        this.type = MapType.DOUBLE;
-                        this.targetMapDouble = new HashMap<>();
-                        this.targetMapDouble.put(entry.getKey(), (double) entry.getValue());
-                    }
-                }
-                break;
-        }
     }
 
 }
