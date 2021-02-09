@@ -32,7 +32,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
     private static final HashMap<Player, GuiLibrary> guiManager = new HashMap<>();
 
     @Override
-    public void onEnable() {//
+    public void onEnable() {
         instance = this;
         run();
         Config main = new Config("Config", "Configuration");
