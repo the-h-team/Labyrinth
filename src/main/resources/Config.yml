@@ -9,6 +9,6 @@
 #     .JMML.    .JMML.  .JMML..JMMmmmmMMM       `"bmmmd'    `"bmmd"' .JMML. .JMM..JMMmmmmMMM
 #
 # ============================================================================================
-# Use the default HempCore GUI event listener? (Recommended 'true' by default)
+# Use the default Labyrinth GUI event listener? (Recommended 'true' by default)
 use-click-event: true
 # ============================================================================================
