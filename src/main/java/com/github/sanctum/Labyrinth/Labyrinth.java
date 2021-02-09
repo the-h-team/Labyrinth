@@ -33,7 +33,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
         instance = this;
         run();
         Config main = new Config("Config", "Configuration");
