@@ -1,6 +1,6 @@
 name: Labyrinth
 version: 1.2.0
-main: com.youtube.hempfest.hempcore.Labyrinth
+main: com.github.sanctum.labyrinth.Labyrinth
 prefix: Labyrinth
 api-version: 1.13
 loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops , Clans, ClansPro]
