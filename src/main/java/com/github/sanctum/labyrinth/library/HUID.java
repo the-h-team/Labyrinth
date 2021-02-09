@@ -1,9 +1,11 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import java.io.Serializable;
 import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 
 public class HUID implements Serializable {
 
@@ -67,9 +69,25 @@ public class HUID implements Serializable {
 			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, not alphanumeric."));
 		}
 		if (wID.replace("-", "").length() != 12) {
-			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, size exceeds 12 char limit."));
+			try {
+				return fromOldString(wID);
+			} catch (NullPointerException e) {
+				throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, size greater/less than 12 char spec."));
+			}
 		}
 		return new HUID(wID.replace("-", ""));
+	}
+
+	private static HUID fromOldString(String wID) {
+		if (!wID.contains("-")) {
+			throw new NullPointerException("[hempCore] - Unable to parse HUID");
+		}
+		if (wID.replace("-", "").length() != 6) {
+			throw new NullPointerException("[hempCore] - Unable to parse HUID");
+		}
+		Labyrinth.getInstance().getLogger().warning("- Mocking full size NEW HUID, it is recommended you append an extra 6 characters to all your meta id's equaling 12 total in length");
+		String add = new RandomID(6).generate();
+		return new HUID(wID.replace("-", "") + add);
 	}
 
 }
