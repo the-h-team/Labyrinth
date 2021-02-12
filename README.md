@@ -1,6 +1,8 @@
 ## What is Labyrinth?
 It is an easy access spigot development library that assists you in areas that may otherwise have been far more time consuming.
 
+
+
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 ### Importing with maven
 ```
