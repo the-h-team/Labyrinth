@@ -30,7 +30,6 @@ public class TimeUtils {
 		if (result == null) {
 			return false;
 		}
-
 		return Duration.between(then, Instant.now()).toSeconds() > result.toSeconds();
 	}
 
