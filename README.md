@@ -12,8 +12,8 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
-  - [Strings]()
-  - [Time Util]()
+  - [Strings](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/formatting/string/RandomID.java)
+  - [Time Util](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/library/TimeUtils.java)
   - [Listing Collections]()
   - [Automatic registration]()
   - [Base64 Serialization]()
