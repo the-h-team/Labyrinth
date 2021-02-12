@@ -1,6 +1,35 @@
 ## What is Labyrinth?
 It is an easy access spigot development library that assists you in areas that may otherwise have been far more time consuming.
 
+[![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
+### Importing with maven
+```
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+  	<dependency>
+	    <groupId>com.github.the-h-team</groupId>
+	    <artifactId>Labyrinth</artifactId>
+	    <version>1.2.3</version>
+	</dependency>
+```
+### Importing with gradle
+```
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+	dependencies {
+	        implementation 'com.github.the-h-team:Labyrinth:1.2.3'
+	}
+```
+
 ## What are its key points?
 + Easy collection pagination
 + Automatic command and listener registration
