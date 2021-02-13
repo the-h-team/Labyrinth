@@ -58,8 +58,12 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>interval:2</updatePolicy>
+            </snapshots>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -89,9 +93,9 @@
             <version>1.7</version>
         </dependency>
         <dependency>
-            <groupId>com.github.ms5984</groupId>
+            <groupId>com.github.ms5984.api</groupId>
             <artifactId>MenuMan</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
