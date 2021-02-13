@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.ms5984.api:MenuMan:1.0.3-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/ms5984/api/MenuMan/1.0.3-SNAPSHOT/MenuMan-1.0.3-20210213.100343-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/ms5984/api/MenuMan/1.0.3-SNAPSHOT/MenuMan-1.0.3-20210213.100343-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/ms5984/api/MenuMan/1.0.3-SNAPSHOT/MenuMan-1.0.3-20210213.100343-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
