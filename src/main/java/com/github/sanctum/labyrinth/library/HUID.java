@@ -5,7 +5,6 @@ import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import java.io.Serializable;
 import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 
 public class HUID implements Serializable {
 

@@ -15,7 +15,7 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.2.3</version>
+	    <version>1.2.4R2</version>
 	</dependency>
 ```
 ### Importing with gradle
@@ -28,7 +28,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.2.3'
+	        implementation 'com.github.the-h-team:Labyrinth:1.2.4R2'
 	}
 ```
 
@@ -38,18 +38,19 @@ It is an easy access spigot development library that assists you in areas that m
 + Time and string utilities for color translation & more (Random unique/custom ID's, Sorted maps)
 + Custom object Persistent Data Container using Base64 serialization
 + Easy access to said serialization above using object constructors for string/object conversion.
++ Easy common library access to amazing plugins like (Vault & PlaceholderAPI)
 & More!
 
 
 _API Table of Contents_:
 --
-  - [Strings](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/formatting/string/RandomID.java)
-  - [Time Util](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/library/TimeUtils.java)
-  - [Listing Collections]()
+  - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#1-string-formatting)
+  - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
+  - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#3-list-pagination)
   - [Automatic registration]()
   - [Base64 Serialization]()
-  - [PDC Uses]()
-  - [Custom GUI]()
+  - [Labyrinth PDC Uses]()
+  - [Custom GUI w/ MenuMan](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
 
 *More api additions are underway including a new runnable like interface*
 

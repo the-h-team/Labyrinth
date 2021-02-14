@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import java.util.regex.Pattern;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
