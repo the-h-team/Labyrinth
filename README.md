@@ -38,6 +38,7 @@ It is an easy access spigot development library that assists you in areas that m
 + Time and string utilities for color translation & more (Random unique/custom ID's, Sorted maps)
 + Custom object Persistent Data Container using Base64 serialization
 + Easy access to said serialization above using object constructors for string/object conversion.
++ Easy common library access to amazing plugins like (Vault & PlaceholderAPI)
 & More!
 
 
