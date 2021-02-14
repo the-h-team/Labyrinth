@@ -43,9 +43,9 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
-  - [Strings](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/formatting/string/RandomID.java)
+  - [Strings](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#1-string-formatting)
   - [Time Util](https://github.com/the-h-team/Labyrinth/blob/master/src/main/java/com/github/sanctum/labyrinth/library/TimeUtils.java)
-  - [Listing Collections]()
+  - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#3-list-pagination)
   - [Automatic registration]()
   - [Base64 Serialization]()
   - [PDC Uses]()
