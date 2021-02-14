@@ -107,7 +107,7 @@ public class DataContainer extends DataStream implements Serializable {
 	/**
 	 * @return A persistent data id by set delimiter
 	 */
-	public HUID getHuid(String metaId) {
+	public static HUID getHuid(String metaId) {
 		Config data = Config.get("Meta", "Persistent");
 		HUID result = null;
 		try {
