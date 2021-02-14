@@ -15,7 +15,7 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.2.3</version>
+	    <version>1.2.4R2</version>
 	</dependency>
 ```
 ### Importing with gradle
@@ -28,7 +28,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.2.3'
+	        implementation 'com.github.the-h-team:Labyrinth:1.2.4R2'
 	}
 ```
 
