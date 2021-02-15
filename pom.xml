@@ -38,7 +38,23 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.github.MilkBowl:VaultAPI</include>
+                                    <include>com.github.ms5984.api:MenuMan</include>
+                                </includes>
+                            </artifactSet>
                             <filters>
+                                <filter>
+                                    <artifact>com.github.MilkBowl:VaultAPI</artifact>
+                                    <includes>
+                                        <include>net/milkbowl/vault/economy/Economy**</include>
+                                        <include>META-INF/**</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
                                 <filter>
                                     <artifact>com.github.ms5984.api:MenuMan</artifact>
                                     <excludes>
@@ -100,7 +116,7 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.ms5984.api</groupId>
