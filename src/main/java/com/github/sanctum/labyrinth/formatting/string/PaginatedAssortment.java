@@ -57,36 +57,44 @@ public class PaginatedAssortment {
         LONG, DOUBLE
     }
 
-    public void setLinesPerPage(int linesPerPage) {
+    public PaginatedAssortment setLinesPerPage(int linesPerPage) {
         this.linesPerPage = linesPerPage;
+        return this;
     }
 
-    public void setNavigateCommand(String navigateCommand) {
+    public PaginatedAssortment setNavigateCommand(String navigateCommand) {
         this.navigateCommand = navigateCommand;
+        return this;
     }
 
-    public void setNormalText(String normalText) {
+    public PaginatedAssortment setNormalText(String normalText) {
         this.normalText = normalText;
+        return this;
     }
 
-    public void setHoverText(String hoverText) {
+    public PaginatedAssortment setHoverText(String hoverText) {
         this.hoverText = hoverText;
+        return this;
     }
 
-    public void setHoverTextMessage(String hoverTextMessage) {
+    public PaginatedAssortment setHoverTextMessage(String hoverTextMessage) {
         this.hoverTextMessage = hoverTextMessage;
+        return this;
     }
 
-    public void setListBorder(String listBorder) {
+    public PaginatedAssortment setListBorder(String listBorder) {
         this.listBorder = listBorder;
+        return this;
     }
 
-    public void setListTitle(String listTitle) {
+    public PaginatedAssortment setListTitle(String listTitle) {
         this.listTitle = listTitle;
+        return this;
     }
 
-    public void setCommandToRun(String commandToRun) {
+    public PaginatedAssortment setCommandToRun(String commandToRun) {
         this.commandToRun = commandToRun;
+        return this;
     }
 
     /**
@@ -487,12 +495,14 @@ public class PaginatedAssortment {
         return type;
     }
 
-    public void setType(MapType type) {
+    public PaginatedAssortment setType(MapType type) {
         this.type = type;
+        return this;
     }
 
-    public void setTargetList(Collection<String> targetList) {
+    public PaginatedAssortment setTargetList(Collection<String> targetList) {
         this.targetList = targetList;
+        return this;
     }
 
 }

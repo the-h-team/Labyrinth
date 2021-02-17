@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.economy.construct.account.permissive.AccountType;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Optional;
@@ -50,6 +51,34 @@ public abstract class EconomyProvision {
 			return Optional.of(AdvancedHook.getEconomy().getWallet(p).withdraw(amount, world).isSuccess());
 		}
 		return Optional.of(VaultHook.getEconomy().withdrawPlayer(p, world, amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Boolean> depositAccount(BigDecimal amount, OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).deposit(amount).isSuccess());
+		}
+		return Optional.of(VaultHook.getEconomy().bankDeposit(p.getUniqueId().toString(), amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Boolean> depositAccount(BigDecimal amount, OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).deposit(amount, world).isSuccess());
+		}
+		return Optional.of(VaultHook.getEconomy().bankDeposit(p.getUniqueId().toString(), amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Boolean> withdrawAccount(BigDecimal amount, OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).withdraw(amount).isSuccess());
+		}
+		return Optional.of(VaultHook.getEconomy().bankWithdraw(p.getUniqueId().toString(), amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Boolean> withdrawAccount(BigDecimal amount, OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).withdraw(amount, world).isSuccess());
+		}
+		return Optional.of(VaultHook.getEconomy().bankWithdraw(p.getUniqueId().toString(), amount.doubleValue()).transactionSuccess());
 	}
 
 
