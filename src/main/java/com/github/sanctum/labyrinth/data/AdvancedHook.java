@@ -2,7 +2,6 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.economy.construct.implement.AdvancedEconomy;
 import com.github.sanctum.labyrinth.Labyrinth;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class AdvancedHook {

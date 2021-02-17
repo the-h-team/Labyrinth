@@ -42,6 +42,7 @@
                                 <includes>
                                     <include>com.github.MilkBowl:VaultAPI</include>
                                     <include>com.github.ms5984.api:MenuMan</include>
+                                    <include>com.github.the-h-team:Enterprise</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -60,6 +61,13 @@
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:Enterprise</artifact>
+                                    <includes>
+                                        <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
+                                        <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
+                                    </includes>
                                 </filter>
                             </filters>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -126,8 +134,7 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
-            <version> 1.4</version>
-            <scope>provided</scope>
+            <version>1.4</version>
         </dependency>
     </dependencies>
 </project>
