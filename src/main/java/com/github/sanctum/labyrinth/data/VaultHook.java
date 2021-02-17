@@ -14,7 +14,7 @@ public class VaultHook {
 		this.instance = instance;
 		if (!economyFound()) {
 			instance.getLogger().warning("- No vault economy provider found.");
-			instance.getLogger().warning("- Economy implementations from Labyrinth will not work.");
+			instance.getLogger().warning("- Vault economy implementations from Labyrinth will not work.");
 		}
 	}
 

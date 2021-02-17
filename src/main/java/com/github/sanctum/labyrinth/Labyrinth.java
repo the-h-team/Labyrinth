@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth;
 
+import com.github.sanctum.labyrinth.data.AdvancedHook;
 import com.github.sanctum.labyrinth.data.Config;
+import com.github.sanctum.labyrinth.data.EconomyProvision;
+import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.gui.Menu;
@@ -22,6 +25,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.AuthorNagException;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Labyrinth extends JavaPlugin implements Listener {
@@ -34,12 +38,14 @@ public final class Labyrinth extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
+        Bukkit.getServicesManager().register(EconomyProvision.class, new DefaultProvision(), this, ServicePriority.Normal);
         run();
         Config main = new Config("Config", "Configuration");
         if (main.getConfig().getBoolean("use-click-event")) {
             Bukkit.getPluginManager().registerEvents(this, this);
         }
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new VaultHook(this), 5);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new AdvancedHook(this), 5);
         boolean success;
         try {
             DataContainer.querySaved();

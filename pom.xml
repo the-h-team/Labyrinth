@@ -107,5 +107,11 @@
             <artifactId>MenuMan</artifactId>
             <version>1.0.3-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>Enterprise</artifactId>
+            <version> 1.4</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
