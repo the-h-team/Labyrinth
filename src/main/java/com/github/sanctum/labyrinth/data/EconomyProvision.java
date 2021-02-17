@@ -11,7 +11,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public abstract class EconomyProvision {
 
-	public EconomyProvision getInstance() {
+	public static EconomyProvision getInstance() {
 		Comparator<RegisteredServiceProvider<EconomyProvision>> myComparator = Comparator.comparing(RegisteredServiceProvider::getPriority,
 				Comparator.nullsLast(Comparator.naturalOrder()));
 		Queue<RegisteredServiceProvider<EconomyProvision>> queue = new PriorityQueue<>(myComparator);
