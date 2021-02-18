@@ -38,12 +38,36 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.github.MilkBowl:VaultAPI</include>
+                                    <include>com.github.ms5984.api:MenuMan</include>
+                                    <include>com.github.the-h-team:Enterprise</include>
+                                </includes>
+                            </artifactSet>
                             <filters>
+                                <filter>
+                                    <artifact>com.github.MilkBowl:VaultAPI</artifact>
+                                    <includes>
+                                        <include>net/milkbowl/vault/economy/Economy**</include>
+                                        <include>META-INF/**</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
                                 <filter>
                                     <artifact>com.github.ms5984.api:MenuMan</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:Enterprise</artifact>
+                                    <includes>
+                                        <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
+                                        <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
+                                    </includes>
                                 </filter>
                             </filters>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -100,7 +124,7 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.ms5984.api</groupId>
@@ -110,8 +134,7 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
-            <version> 1.4</version>
-            <scope>provided</scope>
+            <version>1.4</version>
         </dependency>
     </dependencies>
 </project>
