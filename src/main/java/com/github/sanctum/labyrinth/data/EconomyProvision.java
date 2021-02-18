@@ -25,6 +25,20 @@ public abstract class EconomyProvision {
 
 	public abstract String getImplementation();
 
+	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getWallet(p).has(amount));
+		}
+		return Optional.of(VaultHook.getEconomy().has(p, amount.doubleValue()));
+	}
+
+	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getWallet(p).has(amount, world));
+		}
+		return Optional.of(VaultHook.getEconomy().has(p, world, amount.doubleValue()));
+	}
+
 	public Optional<Boolean> deposit(BigDecimal amount, OfflinePlayer p) {
 		if (AdvancedHook.getEconomy() != null) {
 			return Optional.of(AdvancedHook.getEconomy().getWallet(p).deposit(amount).isSuccess());
@@ -51,6 +65,20 @@ public abstract class EconomyProvision {
 			return Optional.of(AdvancedHook.getEconomy().getWallet(p).withdraw(amount, world).isSuccess());
 		}
 		return Optional.of(VaultHook.getEconomy().withdrawPlayer(p, world, amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Boolean> accountHas(BigDecimal amount, OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).has(amount));
+		}
+		return Optional.of(VaultHook.getEconomy().bankBalance(p.getUniqueId().toString()).amount - amount.doubleValue() >= 0);
+	}
+
+	public Optional<Boolean> accountHas(BigDecimal amount, OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p, AccountType.BANK_ACCOUNT).has(amount, world));
+		}
+		return Optional.of(VaultHook.getEconomy().bankBalance(p.getUniqueId().toString()).amount - amount.doubleValue() >= 0);
 	}
 
 	public Optional<Boolean> depositAccount(BigDecimal amount, OfflinePlayer p) {

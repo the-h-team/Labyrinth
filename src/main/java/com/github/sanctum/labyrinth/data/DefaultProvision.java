@@ -30,4 +30,14 @@ public class DefaultProvision extends EconomyProvision {
 	public Optional<Boolean> withdraw(BigDecimal amount, OfflinePlayer p, String world) {
 		return super.withdraw(amount, p, world);
 	}
+
+	@Override
+	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p) {
+		return super.has(amount, p);
+	}
+
+	@Override
+	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p, String world) {
+		return super.has(amount, p, world);
+	}
 }
