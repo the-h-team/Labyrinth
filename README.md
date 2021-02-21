@@ -55,6 +55,14 @@ _API Table of Contents_:
 *More api additions are underway including a new runnable like interface*
 
 ---
-Labyrinth
+###### Labyrinth
 A spigot development tool that makes certain tasks much easier.
-*License registered under CC LGPL 2.1*
+
+*Original components licensed for use under the terms of the [GNU Lesser General Public License, version 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html).*
+
+*Ships with shaded, unedited LGPLv3 components:*
+- *from **VaultAPI** by [Morgan Humes](https://github.com/MilkBowl/) (aka MilkBowl); sources for these components can be found [here](https://github.com/MilkBowl/VaultAPI/).*
+- *from **Enterprise** by [Sanctum](https://github.com/the-h-team/); sources for included components can be found [here](https://github.com/the-h-team/Enterprise).*
+- *the whole of **MenuMan** by [ms5984](https://github.com/ms5984/); source code can be found [here](https://github.com/ms5984/MenuMan/).*
+
+*You may inspect the [pom.xml](./pom.xml) for further detail on the shading process.*
