@@ -168,7 +168,7 @@ public class DataContainer extends DataStream implements Serializable {
 	public static void deleteInstance(HUID huid) {
 		Arrays.stream(get()).forEach(I -> {
 			if (I.toString().equals(huid.toString())) {
-				Config data = Config.get(metaDataContainer.get(I).getMetaId(), "Persistent");
+				Config data = Config.get("Meta", "Persistent");
 				if (!data.getConfig().isConfigurationSection("Data")) {
 					throw new NullPointerException("[Labyrinth] - No data is currently saved.");
 				}
