@@ -42,6 +42,7 @@ public class EventBuilder {
 					clazz = Class.forName(className.substring(0, className.length() - 6));
 				} catch (ClassNotFoundException e) {
 					Labyrinth.getInstance().getLogger().severe("- Unable to find class" + className + "! Double check package location. See the error below for more information.");
+					e.printStackTrace();
 					break;
 				}
 				if (Listener.class.isAssignableFrom(clazz)) {

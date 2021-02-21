@@ -26,8 +26,9 @@ public abstract class Menu implements InventoryHolder {
 	// Protected values that can be accessed in the menus
 	protected GuiLibrary guiLibrary;
 	protected Inventory inventory;
-	protected ItemStack FILLER_GLASS = makeItem(Material.BLACK_STAINED_GLASS_PANE, " ");
-	protected ItemStack FILLER_GLASS_LIGHT = makeItem(Material.LIGHT_BLUE_STAINED_GLASS_PANE,
+	protected boolean  isNew = Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.15") || Bukkit.getVersion().contains("1.14") || Bukkit.getVersion().contains("1.13");
+	protected ItemStack FILLER_GLASS = makeItem(isNew ? Material.getMaterial("BLACK_STAINED_GLASS_PANE") : Material.getMaterial("STAINED_GLASS_PANE"), " ");
+	protected ItemStack FILLER_GLASS_LIGHT = makeItem(isNew ? Material.LIGHT_BLUE_STAINED_GLASS_PANE : Material.getMaterial("STAINED_GLASS_PANE"),
 			new ColoredString("&7&oOther items will appear here.", ColoredString.ColorType.MC).toString());
 
 	// Constructor for Menu. Pass in a gui so that

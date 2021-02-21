@@ -6,7 +6,7 @@
 
     <groupId>com.github.sanctum.Labyrinth</groupId>
     <artifactId>Labyrinth</artifactId>
-    <version>1.2.6</version>
+    <version>1.2.7</version>
     <packaging>jar</packaging>
 
     <name>Labyrinth</name>
@@ -130,11 +130,13 @@
             <groupId>com.github.ms5984.api</groupId>
             <artifactId>MenuMan</artifactId>
             <version>1.0.3-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
             <version>1.4</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
