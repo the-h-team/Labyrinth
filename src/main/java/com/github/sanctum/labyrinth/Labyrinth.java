@@ -7,6 +7,7 @@ import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.gui.Menu;
+import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.gui.GuiLibrary;
 import java.io.InputStream;
@@ -88,6 +89,13 @@ public final class Labyrinth extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         guiManager.clear();
+
+        if (Item.getCache().size() > 0) {
+            for (Item i : Item.getCache()) {
+                Item.removeEntry(i);
+            }
+        }
+
     }
 
     public static Labyrinth getInstance() {
