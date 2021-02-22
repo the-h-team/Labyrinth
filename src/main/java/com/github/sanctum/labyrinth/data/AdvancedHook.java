@@ -27,7 +27,7 @@ public class AdvancedHook {
 			return false;
 		}
 		econ = rsp.getProvider();
-		instance.getLogger().info("- Economy provider found. Now using: " + rsp.getProvider().getPlugin().getName());
+		instance.getLogger().info("- Enterprise economy provider found. Now using: " + rsp.getProvider().getPlugin().getName());
 		return true;
 	}
 

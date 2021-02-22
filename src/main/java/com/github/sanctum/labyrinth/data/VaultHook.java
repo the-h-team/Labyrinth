@@ -27,7 +27,7 @@ public class VaultHook {
 			return false;
 		}
 		econ = rsp.getProvider();
-		instance.getLogger().info("- Economy provider found. Now using: " + rsp.getProvider().getName());
+		instance.getLogger().info("- Vault economy provider found. Now using: " + rsp.getProvider().getName());
 		return true;
 	}
 

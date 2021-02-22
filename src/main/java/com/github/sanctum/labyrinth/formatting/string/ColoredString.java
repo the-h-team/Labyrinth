@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
+import com.github.sanctum.labyrinth.library.StringUtils;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 public class ColoredString {
@@ -44,7 +46,7 @@ public class ColoredString {
      * @return Returns a string of text embedded as a Component
      */
     public TextComponent toComponent() {
-        return translateHexComponent(text);
+        return Bukkit.getVersion().contains("1.16") ? translateHexComponent(text) : new TextComponent(StringUtils.translate(text));
     }
 
     private String translateHexString(String text){
