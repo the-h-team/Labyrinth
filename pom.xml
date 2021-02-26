@@ -6,7 +6,7 @@
 
     <groupId>com.github.sanctum.Labyrinth</groupId>
     <artifactId>Labyrinth</artifactId>
-    <version>1.2.7</version>
+    <version>1.2.8</version>
     <packaging>jar</packaging>
 
     <name>Labyrinth</name>
@@ -127,9 +127,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.ms5984.api</groupId>
-            <artifactId>MenuMan</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <groupId>com.github.ms5984.lib</groupId>
+            <artifactId>menu-man</artifactId>
+            <version>1.0.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
