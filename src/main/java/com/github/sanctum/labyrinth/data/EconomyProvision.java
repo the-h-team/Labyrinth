@@ -2,25 +2,18 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.economy.construct.account.permissive.AccountType;
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 public abstract class EconomyProvision {
 
 	public static EconomyProvision getInstance() {
-		Comparator<RegisteredServiceProvider<EconomyProvision>> myComparator = Comparator.comparing(RegisteredServiceProvider::getPriority,
-				Comparator.nullsLast(Comparator.naturalOrder()));
-		Queue<RegisteredServiceProvider<EconomyProvision>> queue = new PriorityQueue<>(myComparator);
-		queue.addAll(Bukkit.getServicesManager().getRegistrations(EconomyProvision.class));
-		if (queue.isEmpty()) {
-			return null;
-		}
-		return queue.peek().getProvider();
+		EconomyProvision provision = Bukkit.getServicesManager().load(EconomyProvision.class);
+		if (provision == null) {
+			return new DefaultProvision();
+		} else
+			return provision;
 	}
 
 	public abstract String getImplementation();
