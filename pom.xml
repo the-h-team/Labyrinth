@@ -41,7 +41,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.github.MilkBowl:VaultAPI</include>
-                                    <include>com.github.ms5984.api:MenuMan</include>
+                                    <include>com.github.ms5984.lib:menu-man</include>
                                     <include>com.github.the-h-team:Enterprise</include>
                                 </includes>
                             </artifactSet>
@@ -57,7 +57,7 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.ms5984.api:MenuMan</artifact>
+                                    <artifact>com.github.ms5984.lib:menu-man</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>com.github.ms5984.lib</groupId>
             <artifactId>menu-man</artifactId>
-            <version>1.0.3</version>
+            <version>1.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
