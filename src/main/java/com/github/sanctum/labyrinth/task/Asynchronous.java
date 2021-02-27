@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.Applicable;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -13,6 +14,8 @@ public class Asynchronous {
 
 	private boolean check;
 
+	private boolean fallback;
+
 	private boolean debug;
 
 	private Player p = null;
@@ -23,6 +26,11 @@ public class Asynchronous {
 			public void run() {
 				try {
 					if (cancel == null) {
+						if (fallback) {
+							if (Bukkit.getOnlinePlayers().size() == 0) {
+								this.cancel();
+							}
+						}
 						if (check) {
 							if (p == null || !p.isOnline()) {
 								if (debug) {
@@ -36,6 +44,11 @@ public class Asynchronous {
 						int count = Integer.parseInt(cancel);
 						count--;
 						cancel = String.valueOf(count);
+						if (fallback) {
+							if (Bukkit.getOnlinePlayers().size() == 0) {
+								this.cancel();
+							}
+						}
 						if (count > 0) {
 							if (check) {
 								if (p == null || !p.isOnline()) {
@@ -90,6 +103,16 @@ public class Asynchronous {
 	 */
 	public Asynchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
+		return this;
+	}
+
+	/**
+	 * Automatically cancel the task upon the instance of an empty server.
+	 *
+	 * @return The same synchronous task builder.
+	 */
+	public Asynchronous cancelEmpty() {
+		this.fallback = true;
 		return this;
 	}
 
