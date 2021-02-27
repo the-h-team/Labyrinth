@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Synchronous {
 
+	private BukkitRunnable outer;
 	private final BukkitRunnable runnable;
 
 	private String cancel = null;
@@ -27,7 +28,7 @@ public class Synchronous {
 								if (debug) {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player left server.");
 								}
-								this.cancel();
+								cancelTask();
 							}
 						}
 						applicable.apply();
@@ -41,7 +42,7 @@ public class Synchronous {
 									if (debug) {
 										Labyrinth.getInstance().getLogger().info("Closing un-used task, target player left server.");
 									}
-									this.cancel();
+									cancelTask();
 								}
 							}
 							applicable.apply();
@@ -49,18 +50,32 @@ public class Synchronous {
 							if (debug) {
 								Labyrinth.getInstance().getLogger().info("Closing task, max usage counter achieved.");
 							}
-							this.cancel();
+							cancelTask();
 						}
 					}
 				} catch (Exception e) {
 					if (debug) {
-						Labyrinth.getInstance().getLogger().severe("Closing task, an exception occurred and was stopped. ");
+						Labyrinth.getInstance().getLogger().severe("Closing task, an exception occurred and was stopped.");
+						e.printStackTrace();
 					}
-					this.cancel();
-					Labyrinth.getInstance().getLogger().severe(e.getMessage());
+					cancelTask();
+					Labyrinth.getInstance().getLogger().severe(e::getMessage);
 				}
 			}
 		};
+	}
+
+	private void cancelTask() {
+		if (outer != null) {
+			outer.cancel();
+			outer = null;
+			return;
+		}
+		try {
+			runnable.cancel();
+		} catch (IllegalStateException e) {
+			// runnable wasn't scheduled yet, ignore
+		}
 	}
 
 	public Synchronous cancelAfter(Player p) {
@@ -87,8 +102,46 @@ public class Synchronous {
 		runnable.runTaskLater(Labyrinth.getInstance(), interval);
 	}
 
+	/**
+	 * Wait an interval of time before running this sync task.
+	 * <p>
+	 * This method uses 20 ticks = 1 second exactly, so if your
+	 * delay logic is based on real time, use this method.
+	 *
+	 * @param interval real-time delay where 20 ticks = 1 second
+	 */
+	public void waitReal(int interval) {
+		outer = new BukkitRunnable() {
+			@Override
+			public void run() {
+				Synchronous.this.run();
+			}
+		};
+		outer.runTaskLaterAsynchronously(Labyrinth.getInstance(), interval);
+	}
+
 	public void repeat(int delay, int period) {
 		runnable.runTaskTimer(Labyrinth.getInstance(), delay, period);
+	}
+
+	/**
+	 * Wait a delay of real time before running this sync task and
+	 * repeat it every period elapsed until cancelled.
+	 * <p>
+	 * This method uses 20 ticks = 1 second exactly, so if your
+	 * delay+repeat logic is based on real time, use this method.
+	 *
+	 * @param delay real-time delay where 20 ticks = 1 second
+	 * @param period real-time period where 20 ticks = 1 second
+	 */
+	public void repeatReal(int delay, int period) {
+		outer = new BukkitRunnable() {
+			@Override
+			public void run() {
+				Synchronous.this.run();
+			}
+		};
+		outer.runTaskTimerAsynchronously(Labyrinth.getInstance(), delay, period);
 	}
 
 }
