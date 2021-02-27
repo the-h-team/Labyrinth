@@ -109,6 +109,19 @@ public class Synchronous {
 	}
 
 	/**
+	 * Automatically cancel the task from a specified pre-condition.
+	 *
+	 * <p>This will simply cancel the task of your own will @ pre-condition.</p>
+	 *
+	 * @param condition The condition to fire the cancellation
+	 * @return The same synchronous task builder.
+	 */
+	public Synchronous cancelAfter(boolean condition) {
+		this.check = condition;
+		return this;
+	}
+
+	/**
 	 * Automatically cancel the task after a specified amount of executions
 	 *
 	 * <p>Will work in tandem with other cancellation pre-conditions.
