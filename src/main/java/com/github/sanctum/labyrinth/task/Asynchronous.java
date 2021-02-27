@@ -30,7 +30,7 @@ public class Asynchronous {
 						if (check) {
 							if (p == null || !p.isOnline()) {
 								if (debug) {
-									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player left server.");
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
 								this.cancel();
 							}
