@@ -53,7 +53,7 @@ public class Synchronous {
 							if (check) {
 								if (p == null || !p.isOnline()) {
 									if (debug) {
-										Labyrinth.getInstance().getLogger().info("Closing un-used task, target player left server.");
+										Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 									}
 									cancelTask();
 								}
@@ -146,10 +146,10 @@ public class Synchronous {
 	}
 
 	/**
-	 * Use this to apply defined logic to the runnable as soon as it finishes.
+	 * Use this to apply defined logic to the task as soon as it finishes.
 	 *
-	 * <p>The information passed here will have secondary important and will be called
-	 * directly after the initial runnable has executed one time for each time ran.</p>
+	 * <p>The information passed here will have secondary importance and will be called
+	 * directly after the initial task has executed one time for each time ran.</p>
 	 *
 	 * @param applicable The information to pass be it via Void or lambda reference.
 	 * @return The same synchronous task builder.
