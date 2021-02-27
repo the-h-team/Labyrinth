@@ -10,6 +10,7 @@ import com.github.sanctum.labyrinth.gui.GuiLibrary;
 import com.github.sanctum.labyrinth.gui.Menu;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.SkullItem;
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
