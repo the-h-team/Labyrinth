@@ -5,7 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-public class ItemStackBuildEvent extends Event {
+public class ItemStackProcessEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
 
@@ -13,7 +13,7 @@ public class ItemStackBuildEvent extends Event {
 
 	private final String name;
 
-	public ItemStackBuildEvent(String name, ItemStack item) {
+	public ItemStackProcessEvent(String name, ItemStack item) {
 		this.item = item;
 		this.name = name;
 	}

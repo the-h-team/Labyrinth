@@ -126,7 +126,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMenuClick(InventoryClickEvent e) {
-
         InventoryHolder holder = e.getInventory().getHolder();
         try {
             if (holder instanceof Menu) {

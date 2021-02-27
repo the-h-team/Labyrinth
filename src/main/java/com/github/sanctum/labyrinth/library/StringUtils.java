@@ -9,6 +9,7 @@ public class StringUtils {
 	/**
 	 * Checks if a string ignoring all case sensitivity contains a
 	 * specified target string.
+	 *
 	 * @param context The string to look through
 	 * @param target The non-case-sensitive string to check for
 	 * @return result = true if the string has an exact character match for the given target
@@ -20,6 +21,7 @@ public class StringUtils {
 	/**
 	 * Translate a string automatically with minecraft color codes
 	 * or HEX following '&' delimiters if your version allows for it.
+	 *
 	 * @param text The string to be color translated
 	 * @return A fully color translated string.
 	 */

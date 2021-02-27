@@ -12,6 +12,7 @@ public class TimeUtils {
 	 * NOTE: Asynchronous logic applied
 	 * Using the callable interface compare a time instance with a duration
 	 * (Check if x amount of time has passed).
+	 *
 	 * @param then The starting point
 	 * @param threshold The amount of time to check has passed.
 	 * @return If the desired amount of time has since passed this will = true
@@ -35,6 +36,7 @@ public class TimeUtils {
 
 	/**
 	 * Check if x amount of seconds has passed since a starting date.
+	 *
 	 * @param date The starting point date
 	 * @param seconds The amount of time to check has passed in seconds
 	 * @return If the amount of time has passed this = true
@@ -45,6 +47,7 @@ public class TimeUtils {
 
 	/**
 	 * Check if x amount of minutes has passed since a starting date.
+	 *
 	 * @param date The starting point date
 	 * @param minutes The amount of time to check has passed in minutes
 	 * @return If the amount of time has passed this = true
@@ -55,6 +58,7 @@ public class TimeUtils {
 
 	/**
 	 * Check if x amount of hours has passed since a starting date.
+	 *
 	 * @param date The starting point date
 	 * @param hours The amount of time to check has passed in hours
 	 * @return If the amount of time has passed this = true
@@ -65,6 +69,7 @@ public class TimeUtils {
 
 	/**
 	 * Check if x amount of days has passed since a starting date.
+	 *
 	 * @param date The starting point date
 	 * @param days The amount of time to check has passed in days
 	 * @return If the amount of time has passed this = true

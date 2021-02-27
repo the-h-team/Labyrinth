@@ -10,12 +10,14 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * Get the cooldown object's delimiter-id
+	 *
 	 * @return The cooldown object's custom delimiter
 	 */
 	public abstract String getId();
 
 	/**
 	 * Get the original cooldown period.
+	 *
 	 * @return The original specified cooldown period.
 	 */
 	public abstract long getCooldown();
@@ -26,6 +28,7 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * The raw value for total cooldown time remaining.
+	 *
 	 * @return Gets the total amount of time left from the conversion table
 	 */
 	protected int getTimeLeft() {
@@ -35,6 +38,7 @@ public abstract class Cooldown implements Serializable {
 	 * Get the amount of seconds left from the total cooldown length equated.
 	 * This != total cooldown time converted to days its a soft=cap representative of
 	 * the cooldown's 'SS:MM:HH:DD' format.
+	 *
 	 * @return Get's the amount of days left within the conversion table.
 	 */
 	public int getDaysLeft() {
@@ -44,6 +48,7 @@ public abstract class Cooldown implements Serializable {
 	 * Get the amount of hours left from the total cooldown length equated.
 	 * This != total cooldown time converted to hours its a soft=cap representative of
 	 * the cooldown's 'SS:MM:HH:DD' format.
+	 *
 	 * @return Get's the amount of hours left within the conversion table.
 	 */
 	public long getHoursLeft() {
@@ -53,6 +58,7 @@ public abstract class Cooldown implements Serializable {
 	 * Get the amount of minutes left from the total cooldown length equated.
 	 * This != total cooldown time converted to minutes its a soft=cap representative of
 	 * the cooldown's 'SS:MM:HH:DD' format.
+	 *
 	 * @return Get's the amount of minutes left within the conversion table.
 	 */
 	public long getMinutesLeft() {
@@ -63,6 +69,7 @@ public abstract class Cooldown implements Serializable {
 	 * Get the amount of seconds left from the total cooldown length equated.
 	 * This != total cooldown time converted to seconds its a soft=cap representative of
 	 * the cooldown's 'SS:MM:HH:DD' format.
+	 *
 	 * @return Get's the amount of seconds left within the conversion table.
 	 */
 	public long getSecondsLeft() {
@@ -71,6 +78,7 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * Check's if the cooldown from Labyrinth cache is complete.
+	 *
 	 * @return The result of completion for the cooldown.
 	 */
 	public boolean isComplete() {
@@ -88,6 +96,7 @@ public abstract class Cooldown implements Serializable {
 	 * Get a formatted string containing the remaining time for the cooldown.
 	 * It's reccomended you override this and implement your own beautiful time format using the
 	 * provided time variables such as "getSeconds, getMinutes" etc.
+	 *
 	 * @return Get's the full amount of time left within the cooldown from seconds to days
 	 */
 	public String fullTimeLeft() {
@@ -111,6 +120,7 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * Convert's seconds into milliseconds for final time conversions.
+	 *
 	 * @param seconds The amount of time to convert.
 	 * @return The milliseconds needed for conversion.
 	 */
@@ -133,6 +143,7 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * Get a native cooldown object by its set delimiter-id
+	 *
 	 * @param id The custom delimiter to search for
 	 * @return A cooldown based object retaining original values from save.
 	 */
@@ -149,6 +160,7 @@ public abstract class Cooldown implements Serializable {
 
 	/**
 	 * Remove an object of Cooldown inheritance from Labyrinth cache.
+	 *
 	 * @param c The cooldown representative to remove from cache.
 	 */
 	public static void remove(Cooldown c) {

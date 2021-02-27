@@ -14,16 +14,32 @@ public class HFEncoded implements Serializable {
 
 	private String objSerial;
 
+	/**
+	 * Convert the entire object into a string while retaining all of its values.
+	 *
+	 * <p>WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
+	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
+	 *
+	 * @param obj The Java Serializable implemented object to convert.
+	 */
 	public HFEncoded(Object obj) {
 		this.obj = obj;
 	}
 
+	/**
+	 * Convert a serialized object from its string form back into an object of desired type
+	 * while retaining all originally saved values.
+	 *
+	 * <p>WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
+	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
+	 *
+	 * @param objSerial The serialized object string to convert.
+	 */
 	public HFEncoded(String objSerial) { this.objSerial = objSerial; }
 
 	/**
-	 * Convert the entire object into a string while retaining all of its values.
-	 * WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
-	 * could have negative effects, ensure you have proper object handling when dealing with serialization.
+	 * The original stored object retaining all values converted to a string.
+	 *
 	 * @return Get's a serialized hash for this object with retained values.
 	 * @throws IOException Throw's an exception if Bukkit cannot serialize the object due to no
 	 * inheritance of the java.io Serializable interface.
@@ -39,10 +55,10 @@ public class HFEncoded implements Serializable {
 	}
 
 	/**
-	 * Convert a serialized object from its string form back into an object of desired type
-	 * while retaining all originally saved values.
-	 * WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
-	 * could have negative effects, ensure you have proper object handling when dealing with serialization.
+	 * The original stored object retaining all values converted back to an object.
+	 *
+	 * <p>WARN: You will need to pass a type to the object upon use.</p>
+	 *
 	 * @return Get's an object back from a serialized string with all original values.
 	 * @throws IOException Throw's IO if something had been modified in comparison to
 	 * it's original methods/class structure.

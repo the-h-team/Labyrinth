@@ -1,5 +1,7 @@
-package com.github.sanctum.labyrinth.library;
+package com.github.sanctum.labyrinth.task;
 
+
+import com.github.sanctum.labyrinth.library.Applicable;
 
 public class Schedule {
 

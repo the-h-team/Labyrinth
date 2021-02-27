@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class NewItemCreationEvent extends Event {
+public class ItemRecipeProcessEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
 
@@ -12,7 +12,7 @@ public class NewItemCreationEvent extends Event {
 
 	private final String name;
 
-	public NewItemCreationEvent(Material appearance, String name) {
+	public ItemRecipeProcessEvent(Material appearance, String name) {
 		this.type = appearance;
 		this.name = name;
 	}

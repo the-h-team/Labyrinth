@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.event.ItemStackBuildEvent;
-import com.github.sanctum.labyrinth.event.NewItemCreationEvent;
+import com.github.sanctum.labyrinth.event.ItemStackProcessEvent;
+import com.github.sanctum.labyrinth.event.ItemRecipeProcessEvent;
 import com.google.common.collect.MapMaker;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -52,7 +52,7 @@ public class Item implements Serializable {
 		this.mat = appearance;
 		this.name = itemName;
 		Item.cache.add(this);
-		NewItemCreationEvent event = new NewItemCreationEvent(appearance, name);
+		ItemRecipeProcessEvent event = new ItemRecipeProcessEvent(appearance, name);
 		Bukkit.getPluginManager().callEvent(event);
 	}
 
@@ -76,7 +76,7 @@ public class Item implements Serializable {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(StringUtils.translate(name));
 		item.setItemMeta(meta);
-		ItemStackBuildEvent event = new ItemStackBuildEvent(name, item);
+		ItemStackProcessEvent event = new ItemStackProcessEvent(name, item);
 		Bukkit.getPluginManager().callEvent(event);
 		this.item = event.getItem();
 		return this;
