@@ -10,6 +10,7 @@ public class Synchronous {
 
 	private BukkitRunnable outer;
 	private final BukkitRunnable runnable;
+	private Applicable apply = null;
 	private boolean check;
 	private boolean debug;
 	private boolean fallback;
@@ -36,6 +37,9 @@ public class Synchronous {
 							}
 						}
 						applicable.apply();
+						if (apply != null) {
+							apply.apply();
+						}
 					} else {
 						int count = Integer.parseInt(cancel);
 						count--;
@@ -55,6 +59,9 @@ public class Synchronous {
 								}
 							}
 							applicable.apply();
+							if (apply != null) {
+								apply.apply();
+							}
 						} else {
 							if (debug) {
 								Labyrinth.getInstance().getLogger().info("Closing task, max usage counter achieved.");
@@ -135,6 +142,20 @@ public class Synchronous {
 	 */
 	public Synchronous debug() {
 		this.debug = true;
+		return this;
+	}
+
+	/**
+	 * Use this to apply defined logic to the runnable as soon as it finishes.
+	 *
+	 * <p>The information passed here will have secondary important and will be called
+	 * directly after the initial runnable has executed one time for each time ran.</p>
+	 *
+	 * @param applicable The information to pass be it via Void or lambda reference.
+	 * @return The same synchronous task builder.
+	 */
+	public Synchronous applyAfter(Applicable applicable) {
+		this.apply = applicable;
 		return this;
 	}
 
