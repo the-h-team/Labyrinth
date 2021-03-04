@@ -200,7 +200,10 @@ public class Synchronous {
 		outer = new BukkitRunnable() {
 			@Override
 			public void run() {
-				Synchronous.this.run();
+				try {
+					Synchronous.this.run();
+				} catch (IllegalStateException ignored) {
+				}
 			}
 		};
 		outer.runTaskLaterAsynchronously(Labyrinth.getInstance(), interval);
@@ -234,7 +237,10 @@ public class Synchronous {
 		outer = new BukkitRunnable() {
 			@Override
 			public void run() {
-				Synchronous.this.run();
+				try {
+					Synchronous.this.run();
+				} catch (IllegalStateException ignored) {
+				}
 			}
 		};
 		outer.runTaskTimerAsynchronously(Labyrinth.getInstance(), delay, period);
