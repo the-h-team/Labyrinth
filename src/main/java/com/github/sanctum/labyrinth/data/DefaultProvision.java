@@ -2,13 +2,22 @@ package com.github.sanctum.labyrinth.data;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 public class DefaultProvision extends EconomyProvision {
 
 	@Override
 	public String getImplementation() {
-		return "Default";
+		boolean isVault = Bukkit.getPluginManager().isPluginEnabled("Vault");
+		if (Bukkit.getPluginManager().isPluginEnabled("Enterprise")) {
+			isVault = false;
+		} else {
+			if (!isVault) {
+				return "Default | No Economy Bridge";
+			}
+		}
+		return "Default (Normal) | Interface: " + (isVault ? "Vault" : "Enterprise");
 	}
 
 	@Override
@@ -39,5 +48,25 @@ public class DefaultProvision extends EconomyProvision {
 	@Override
 	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p, String world) {
 		return super.has(amount, p, world);
+	}
+
+	@Override
+	public Optional<Double> balance(OfflinePlayer p) {
+		return super.balance(p);
+	}
+
+	@Override
+	public Optional<Double> balance(OfflinePlayer p, String world) {
+		return super.balance(p, world);
+	}
+
+	@Override
+	public Optional<Double> accountBalance(OfflinePlayer p) {
+		return super.accountBalance(p);
+	}
+
+	@Override
+	public Optional<Double> accountBalance(OfflinePlayer p, String world) {
+		return super.accountBalance(p, world);
 	}
 }

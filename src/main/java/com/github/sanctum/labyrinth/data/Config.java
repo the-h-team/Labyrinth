@@ -51,8 +51,8 @@ public class Config {
     }
 
     public static Config get(final String n, final String d) {
-        for(final Config c: Config.configs) {
-            if(c.getName().equals(n) && c.getDirectory().equals(d)) {
+        for (final Config c: configs) {
+            if(c.getName().equals(n) && (c.getDirectory() != null && c.getDirectory().equals(d))) {
                 return c;
             }
         }
@@ -60,8 +60,12 @@ public class Config {
         return new Config(n, d);
     }
 
+    public void flush() {
+        configs.removeIf(c -> c.getName().equals(getName()));
+    }
+
     public boolean delete() {
-        Config.configs.removeIf(c -> c.getName().equals(getName()));
+        configs.removeIf(c -> c.getName().equals(getName()));
         return this.getFile().delete();
     }
 

@@ -63,6 +63,5 @@ A spigot development tool that makes certain tasks much easier.
 *Ships with shaded, unedited LGPLv3 components:*
 - *from **VaultAPI** by [Morgan Humes](https://github.com/MilkBowl/) (aka MilkBowl); sources for these components can be found [here](https://github.com/MilkBowl/VaultAPI/).*
 - *from **Enterprise** by [Sanctum](https://github.com/the-h-team/); sources for included components can be found [here](https://github.com/the-h-team/Enterprise).*
-- *the whole of **MenuMan** by [ms5984](https://github.com/ms5984/); source code can be found [here](https://github.com/ms5984/MenuMan/).*
 
 *You may inspect the [pom.xml](./pom.xml) for further detail on the shading process.*

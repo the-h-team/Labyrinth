@@ -8,9 +8,12 @@ import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.gui.GuiLibrary;
 import com.github.sanctum.labyrinth.gui.Menu;
+import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.Synchronous;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,38 +43,53 @@ public final class Labyrinth extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-        Bukkit.getServicesManager().register(EconomyProvision.class, new DefaultProvision(), this, ServicePriority.Normal);
-        run();
-        Config main = new Config("Config", "Configuration");
-        if (main.getConfig().getBoolean("use-click-event")) {
-            Bukkit.getPluginManager().registerEvents(this, this);
-        }
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new VaultHook(this), 5);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new AdvancedHook(this), 5);
+        EconomyProvision provision = new DefaultProvision();
+        Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
+        getLogger().info("- Registered factory implementation, " + provision.getImplementation());
+        run(() -> {
+            Config main = Config.get("Config", "Configuration");
+            if (!main.exists()) {
+                InputStream is = getResource("Config.yml");
+                Config.copy(is, main.getFile());
+            }
+        }).applyAfter(() -> {
+            Config main = Config.get("Config", "Configuration");
+            if (main.getConfig().getBoolean("use-click-event")) {
+                Bukkit.getPluginManager().registerEvents(this, this);
+            }
+            run(() -> new VaultHook(this)).applyAfter(() -> {
+                new AdvancedHook(this);
+            }).run();
+        }).wait(2);
+
+
         boolean success;
+        getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        getLogger().info("Labyrinth (C) 2021, Open-source spigot development tool.");
+        getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
         try {
             DataContainer.querySaved();
             success = true;
         } catch (NullPointerException e) {
             getLogger().info("- Process failed. No directory found to process.");
             getLogger().info("- Store a new instance of data for query to take effect on enable.");
+            getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
             success = false;
         }
         if (success) {
             if (DataContainer.get().length == 0) {
-                success = false;
                 getLogger().info("- Process failed. No data found to process.");
             }
             getLogger().info("- Query success! All found meta cached. (" + DataContainer.get().length + ")");
         } else {
             getLogger().info("- Query failed! (SEE ABOVE FOR INFO)");
         }
+        getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
-        boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
 
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-
-            Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+        final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+        final Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+        Arrays.stream(Bukkit.getOfflinePlayers()).forEach(p -> {
             ItemStack item = new ItemStack(type, 1);
 
             if (!isNew) {
@@ -79,18 +97,18 @@ public final class Labyrinth extends JavaPlugin implements Listener {
             }
 
             SkullMeta meta = (SkullMeta) item.getItemMeta();
-            if (!meta.hasOwner()) {
-                meta.setOwningPlayer(p);
-            }
+            assert meta != null;
+            meta.setOwningPlayer(p);
             item.setItemMeta(meta);
             new SkullItem(p.getUniqueId().toString(), item);
-        }
+        });
+
     }
 
     @Override
     public void onDisable() {
         guiManager.clear();
-
+        SkullItem.getLog().clear();
         if (Item.getCache().size() > 0) {
             for (Item i : Item.getCache()) {
                 Item.removeEntry(i);
@@ -117,15 +135,11 @@ public final class Labyrinth extends JavaPlugin implements Listener {
         }
     }
 
-    private void run() {
-        Config main = new Config("Config", "Configuration");
-        if (!main.exists()) {
-            InputStream is = getResource("Config.yml");
-            Config.copy(is, main.getFile());
-        }
+    private Synchronous run(Applicable applicable) {
+        return Schedule.sync(applicable);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onMenuClick(InventoryClickEvent e) {
         InventoryHolder holder = e.getInventory().getHolder();
         try {

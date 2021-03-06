@@ -85,7 +85,7 @@ public class HUID implements Serializable {
 		if (wID.replace("-", "").length() != 6) {
 			throw new NullPointerException("[hempCore] - Unable to parse HUID");
 		}
-		Labyrinth.getInstance().getLogger().warning("- Mocking full size NEW HUID, it is recommended you append an extra 6 characters to all your meta id's equaling 12 total in length");
+		Labyrinth.getInstance().getLogger().warning("- Mocking full size NEW HUID, this is not guaranteed to work and could cause problems.");
 		String add = new RandomID(6).generate();
 		return new HUID(wID.replace("-", "") + add);
 	}

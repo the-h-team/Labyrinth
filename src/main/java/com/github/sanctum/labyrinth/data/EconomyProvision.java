@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.economy.construct.account.permissive.AccountType;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -17,6 +18,20 @@ public abstract class EconomyProvision {
 	}
 
 	public abstract String getImplementation();
+
+	public Optional<Double> balance(OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getWallet(p).getBalance().doubleValue());
+		}
+		return Optional.of(VaultHook.getEconomy().getBalance(p));
+	}
+
+	public Optional<Double> balance(OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getWallet(p).getBalance(world).doubleValue());
+		}
+		return Optional.of(VaultHook.getEconomy().getBalance(p, world));
+	}
 
 	public Optional<Boolean> has(BigDecimal amount, OfflinePlayer p) {
 		if (AdvancedHook.getEconomy() != null) {
@@ -58,6 +73,20 @@ public abstract class EconomyProvision {
 			return Optional.of(AdvancedHook.getEconomy().getWallet(p).withdraw(amount, world).isSuccess());
 		}
 		return Optional.of(VaultHook.getEconomy().withdrawPlayer(p, world, amount.doubleValue()).transactionSuccess());
+	}
+
+	public Optional<Double> accountBalance(OfflinePlayer p) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p).getBalance().doubleValue());
+		}
+		return Optional.of(VaultHook.getEconomy().bankBalance(p.getUniqueId().toString()).amount);
+	}
+
+	public Optional<Double> accountBalance(OfflinePlayer p, String world) {
+		if (AdvancedHook.getEconomy() != null) {
+			return Optional.of(AdvancedHook.getEconomy().getAccount(p).getBalance(world).doubleValue());
+		}
+		return Optional.of(VaultHook.getEconomy().bankBalance(p.getUniqueId().toString()).amount);
 	}
 
 	public Optional<Boolean> accountHas(BigDecimal amount, OfflinePlayer p) {

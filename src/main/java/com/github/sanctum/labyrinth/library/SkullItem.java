@@ -21,7 +21,9 @@ public class SkullItem {
 	public SkullItem(String holder, ItemStack head) {
 		this.holder = holder;
 		this.head = head;
-		SkullItem.log.add(this);
+		if (Head.find(UUID.fromString(holder)) == null) {
+			SkullItem.log.add(this);
+		}
 	}
 
 	/**

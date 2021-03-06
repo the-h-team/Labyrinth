@@ -1,14 +1,12 @@
-#
-#
-#  MMP""MM""YMM `7MMF'  `7MMF'`7MM"""YMM        .g8"""bgd   .g8""8q. `7MM"""Mq.  `7MM"""YMM
-#  P'   MM   `7   MM      MM    MM    `7      .dP'     `M .dP'    `YM. MM   `MM.   MM    `7
-#       MM        MM      MM    MM   d        dM'       ` dM'      `MM MM   ,M9    MM   d
-#       MM        MMmmmmmmMM    MMmmMM        MM          MM        MM MMmmdM9     MMmmMM
-#       MM        MM      MM    MM   Y  ,     MM.         MM.      ,MP MM  YM.     MM   Y  ,
-#       MM        MM      MM    MM     ,M     `Mb.     ,' `Mb.    ,dP' MM   `Mb.   MM     ,M
-#     .JMML.    .JMML.  .JMML..JMMmmmmMMM       `"bmmmd'    `"bmmd"' .JMML. .JMM..JMMmmmmMMM
-#
+#   ___        ________   ________       ___    ___  ________   ___   ________    _________   ___  ___
+#  |\  \      |\   __  \ |\   __  \     |\  \  /  /||\   __  \ |\  \ |\   ___  \ |\___   ___\|\  \|\  \
+#  \ \  \     \ \  \|\  \\ \  \|\ /_    \ \  \/  / /\ \  \|\  \\ \  \\ \  \\ \  \\|___ \  \_|\ \  \\\  \
+#   \ \  \     \ \   __  \\ \   __  \    \ \    / /  \ \   _  _\\ \  \\ \  \\ \  \    \ \  \  \ \   __  \
+#    \ \  \____ \ \  \ \  \\ \  \|\  \    \/  /  /    \ \  \\  \|\ \  \\ \  \\ \  \    \ \  \  \ \  \ \  \
+#     \ \_______\\ \__\ \__\\ \_______\ __/  / /       \ \__\\ _\ \ \__\\ \__\\ \__\    \ \__\  \ \__\ \__\
+#      \|_______| \|__|\|__| \|_______||\___/ /         \|__|\|__| \|__| \|__| \|__|     \|__|   \|__|\|__|
+#                                      \|___|/
 # ============================================================================================
-# Use the default Labyrinth GUI event listener? (Recommended 'true' by default)
+# Use the default Labyrinth GUI event listener? (Recommended 'true' by default for MC versions 1.16 and below.)
 use-click-event: true
 # ============================================================================================
