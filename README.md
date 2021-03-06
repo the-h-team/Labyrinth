@@ -51,8 +51,8 @@ _API Table of Contents_:
   - [Base64 Serialization]()
   - [Labyrinth PDC Uses]()
   - [Custom GUI w/ MenuMan](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
-
-*More api additions are underway including a new runnable like interface*
+  - [Applicable Data]()
+  - [Task Scheduling]()
 
 ---
 ###### Labyrinth
