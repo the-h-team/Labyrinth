@@ -15,7 +15,7 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.2.4R2</version>
+	    <version>1.3.3</version>
 	</dependency>
 ```
 ### Importing with gradle
@@ -28,7 +28,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.2.4R2'
+	        implementation 'com.github.the-h-team:Labyrinth:1.3.3'
 	}
 ```
 
@@ -51,8 +51,8 @@ _API Table of Contents_:
   - [Base64 Serialization]()
   - [Labyrinth PDC Uses]()
   - [Custom GUI w/ MenuMan](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
-
-*More api additions are underway including a new runnable like interface*
+  - [Applicable Data]()
+  - [Task Scheduling]()
 
 ---
 ###### Labyrinth
