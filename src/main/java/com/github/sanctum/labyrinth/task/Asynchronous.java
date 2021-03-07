@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.Applicable;
+import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -15,6 +16,8 @@ public class Asynchronous {
 	private boolean fallback;
 	private boolean debug;
 	private Player p = null;
+	private Map<?, ?> map = null;
+	private Object o = null;
 
 	protected Asynchronous(Applicable applicable) {
 		this.runnable = new BukkitRunnable() {
@@ -25,6 +28,14 @@ public class Asynchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								this.cancel();
+							}
+						}
+						if (map != null) {
+							if (!map.containsKey(o)) {
+								this.cancel();
+								if (debug) {
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
+								}
 							}
 						}
 						if (check) {
@@ -46,6 +57,14 @@ public class Asynchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								this.cancel();
+							}
+						}
+						if (map != null) {
+							if (!map.containsKey(o)) {
+								this.cancel();
+								if (debug) {
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
+								}
 							}
 						}
 						if (count > 0) {
@@ -86,7 +105,7 @@ public class Asynchronous {
 	 * for easy automatic task cleanup.</p>
 	 *
 	 * @param p The player to query.
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous cancelAfter(Player p) {
 		this.check = true;
@@ -100,7 +119,7 @@ public class Asynchronous {
 	 * <p>This will simply cancel the task of your own will @ pre-condition.</p>
 	 *
 	 * @param condition The condition to fire the cancellation
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous cancelAfter(boolean condition) {
 		this.check = condition;
@@ -114,7 +133,7 @@ public class Asynchronous {
 	 * Use for easy automatic task cleanup.</p>
 	 *
 	 * @param count The amount of executions to run.
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
@@ -122,9 +141,22 @@ public class Asynchronous {
 	}
 
 	/**
+	 * Automatically cancel the task if a target object goes missing from a map.
+	 *
+	 * @param map The map to query keys from
+	 * @param o The object to check for removal
+	 * @return The same asynchronous task builder.
+	 */
+	public Asynchronous cancelAbsence(Map<?, ?> map, Object o) {
+		this.map = map;
+		this.o = o;
+		return this;
+	}
+
+	/**
 	 * Automatically cancel the task upon the instance of an empty server.
 	 *
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous cancelEmpty() {
 		this.fallback = true;
@@ -137,7 +169,7 @@ public class Asynchronous {
 	 *
 	 * <p>If the task throws an un-caught exception it is recommended this is used to display
 	 * any possible source to possible problems that occur.</p>
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous debug() {
 		this.debug = true;
@@ -151,7 +183,7 @@ public class Asynchronous {
 	 * directly after the initial task has executed one time for each time ran.</p>
 	 *
 	 * @param applicable The information to pass be it via Void or lambda reference.
-	 * @return The same synchronous task builder.
+	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous applyAfter(Applicable applicable) {
 		this.apply = applicable;

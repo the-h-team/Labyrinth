@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.Applicable;
+import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -11,6 +12,8 @@ public class Synchronous {
 	private BukkitRunnable outer;
 	private final BukkitRunnable runnable;
 	private Applicable apply = null;
+	private Map<?, ?> map = null;
+	private Object o = null;
 	private boolean check;
 	private boolean debug;
 	private boolean fallback;
@@ -26,6 +29,14 @@ public class Synchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								cancelTask();
+							}
+						}
+						if (map != null) {
+							if (!map.containsKey(o)) {
+								cancelTask();
+								if (debug) {
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
+								}
 							}
 						}
 						if (check) {
@@ -47,6 +58,14 @@ public class Synchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								cancelTask();
+							}
+						}
+						if (map != null) {
+							if (!map.containsKey(o)) {
+								cancelTask();
+								if (debug) {
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
+								}
 							}
 						}
 						if (count > 0) {
@@ -132,6 +151,19 @@ public class Synchronous {
 	 */
 	public Synchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
+		return this;
+	}
+
+	/**
+	 * Automatically cancel the task if a target object goes missing from a map.
+	 *
+	 * @param map The map to query keys from
+	 * @param o The object to check for removal
+	 * @return The same synchronous task builder.
+	 */
+	public Synchronous cancelAbsence(Map<?, ?> map, Object o) {
+		this.map = map;
+		this.o = o;
 		return this;
 	}
 

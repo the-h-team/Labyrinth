@@ -1,5 +1,5 @@
 name: Labyrinth
-version: 1.3.3
+version: 1.3.4
 main: com.github.sanctum.labyrinth.Labyrinth
 prefix: Labyrinth
 api-version: 1.13

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -57,9 +56,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
             if (main.getConfig().getBoolean("use-click-event")) {
                 Bukkit.getPluginManager().registerEvents(this, this);
             }
-            run(() -> new VaultHook(this)).applyAfter(() -> {
-                new AdvancedHook(this);
-            }).run();
+            run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).run();
         }).wait(2);
 
 

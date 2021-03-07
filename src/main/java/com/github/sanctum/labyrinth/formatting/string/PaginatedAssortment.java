@@ -23,7 +23,7 @@ public class PaginatedAssortment {
 
     private int linesPerPage;
     private String navigateCommand;
-    private final Player p;
+    private Player p;
 
     // ------------ Formatting ------------- //
     private String listTitle = "&o-- [Specify the returned list's title here] --";
@@ -497,6 +497,11 @@ public class PaginatedAssortment {
 
     public PaginatedAssortment setType(MapType type) {
         this.type = type;
+        return this;
+    }
+
+    public PaginatedAssortment setPlayer(Player p) {
+        this.p = p;
         return this;
     }
 
