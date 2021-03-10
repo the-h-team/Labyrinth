@@ -36,6 +36,7 @@ public final class PaginatedBuilder {
 	protected LinkedList<String> collection;
 	protected ItemStack border;
 	protected ItemStack fill;
+	protected InventoryClose closeAction;
 	protected final Map<ItemStack, Integer> navLeft = new HashMap<>();
 	protected final Map<ItemStack, Integer> navRight = new HashMap<>();
 	protected final Map<ItemStack, Integer> navBack = new HashMap<>();
@@ -87,12 +88,88 @@ public final class PaginatedBuilder {
 		return this;
 	}
 
+	public PaginatedBuilder setCloseAction(InventoryClose inventoryClose) {
+		this.closeAction = inventoryClose;
+		return this;
+	}
+
 	public BorderElement addBorder() {
 		return new BorderElement(this);
 	}
 
 	public UUID getId() {
 		return id;
+	}
+
+	protected PaginatedBuilder adjust(int desiredPage) {
+		page = desiredPage;
+		if (border != null) {
+			int j;
+			for (j = 0; j < 10; j++) {
+				if (inv.getItem(j) == null)
+					inv.setItem(j, border);
+			}
+			inv.setItem(17, border);
+			inv.setItem(18, border);
+			inv.setItem(26, border);
+			inv.setItem(27, border);
+			inv.setItem(35, border);
+			inv.setItem(36, border);
+			for (j = 44; j < 54; j++) {
+				if (inv.getItem(j) == null)
+					inv.setItem(j, border);
+			}
+		}
+		if (collection == null) {
+			collection = new LinkedList<>();
+		}
+		LinkedList<String> members = collection;
+		if (!members.isEmpty()) {
+			for (int i = 0; i < amountPer; i++) {
+				index = amountPer * page + i;
+				if (index >= members.size())
+					break;
+				if (members.get(index) != null) {
+					boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+					ItemStack item;
+					if (isNew) {
+						item = new ItemStack(Material.valueOf("PLAYER_HEAD"));
+					} else {
+						item = new ItemStack(Material.valueOf("SKULL_ITEM"));
+					}
+					ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
+					ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
+					ItemStack back = navBack.keySet().stream().findFirst().orElse(null);
+					if (left != null) {
+						if (!inv.contains(left)) {
+							inv.setItem(navLeft.get(left), left);
+							inv.setItem(navRight.get(right), right);
+							inv.setItem(navBack.get(back), back);
+						}
+					}
+					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
+					Bukkit.getPluginManager().callEvent(event);
+
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							inv.addItem(event.getItem());
+							if (!contents.contains(event.getItem())) {
+								contents.add(event.getItem());
+							}
+							if (fill != null) {
+								for (int i = 0; i < 54; i++) {
+									if (inv.getItem(i) == null) {
+										inv.setItem(i, fill);
+									}
+								}
+							}
+						}
+					}.runTask(plugin);
+				}
+			}
+		}
+		return this;
 	}
 
 	protected PaginatedBuilder adjust() {
@@ -140,7 +217,7 @@ public final class PaginatedBuilder {
 							inv.setItem(navBack.get(back), back);
 						}
 					}
-					SyncMenuItemFillingEvent event = new SyncMenuItemFillingEvent(this, members.get(index), item);
+					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
 					Bukkit.getPluginManager().callEvent(event);
 
 					new BukkitRunnable() {
@@ -224,7 +301,7 @@ public final class PaginatedBuilder {
 		}
 
 		@EventHandler(priority = EventPriority.LOW)
-		public void onFill(SyncMenuItemFillingEvent e) {
+		public void onFill(SyncMenuItemPreProcessEvent e) {
 			try {
 				UUID id = UUID.fromString(e.getContext());
 			} catch (IllegalArgumentException ignored) {
@@ -248,6 +325,9 @@ public final class PaginatedBuilder {
 			if (e.getView().getTopInventory().getSize() < 54)
 				return;
 			if (builder.getInventory() == e.getInventory()) {
+				if (builder.closeAction != null) {
+					builder.closeAction.closeEvent(new PaginatedClose(builder, (Player) e.getPlayer(), e.getView()));
+				}
 				builder.page = 0;
 				builder.index = 0;
 			}
@@ -269,6 +349,12 @@ public final class PaginatedBuilder {
 				Player p = (Player) e.getWhoClicked();
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
+					SyncMenuClickEvent event = new SyncMenuClickEvent(builder, p, e.getView(), item);
+					Bukkit.getPluginManager().callEvent(event);
+					if (event.isCancelled()) {
+						e.setCancelled(true);
+						return;
+					}
 					if (builder.contents.contains(item)) {
 						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
 						e.setCancelled(true);

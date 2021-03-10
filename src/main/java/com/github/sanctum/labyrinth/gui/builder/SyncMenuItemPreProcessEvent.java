@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-public class SyncMenuItemFillingEvent extends Event {
+public class SyncMenuItemPreProcessEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
 
@@ -18,7 +18,7 @@ public class SyncMenuItemFillingEvent extends Event {
 
 	private final PaginatedBuilder builder;
 
-	public SyncMenuItemFillingEvent(PaginatedBuilder builder, String context, ItemStack item) {
+	public SyncMenuItemPreProcessEvent(PaginatedBuilder builder, String context, ItemStack item) {
 		this.builder = builder;
 		this.context = context;
 		this.item = item;
