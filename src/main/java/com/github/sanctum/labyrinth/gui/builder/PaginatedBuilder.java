@@ -43,6 +43,7 @@ public final class PaginatedBuilder {
 	protected final Map<ItemStack, Integer> navLeft = new HashMap<>();
 	protected final Map<ItemStack, Integer> navRight = new HashMap<>();
 	protected final Map<ItemStack, Integer> navBack = new HashMap<>();
+	protected final Map<ItemStack, Integer> additional = new HashMap<>();
 	protected final PaginatedListener listener;
 	protected final NamespacedKey key;
 	protected final LinkedList<ItemStack> contents = new LinkedList<>();
@@ -235,6 +236,15 @@ public final class PaginatedBuilder {
 					}).debug().run();
 				}
 			}
+			if (!additional.isEmpty()) {
+				for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
+					if (entry.getValue() == -1) {
+						inv.addItem(entry.getKey());
+					} else {
+						inv.setItem(entry.getValue(), entry.getKey());
+					}
+				}
+			}
 		}
 		return this;
 	}
@@ -307,6 +317,15 @@ public final class PaginatedBuilder {
 							}).debug().wait(1);
 						}
 					}).debug().run();
+				}
+			}
+			if (!additional.isEmpty()) {
+				for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
+					if (entry.getValue() == -1) {
+						inv.addItem(entry.getKey());
+					} else {
+						inv.setItem(entry.getValue(), entry.getKey());
+					}
 				}
 			}
 		}

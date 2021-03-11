@@ -23,7 +23,7 @@ public class SpareElement {
 	public SpareElement invoke(ItemStack item, InventoryClick inventoryClick) {
 		builder.actions.putIfAbsent(item, inventoryClick);
 		builder.contents.add(item);
-		builder.inv.addItem(item);
+		builder.additional.putIfAbsent(item, -1);
 		return this;
 	}
 
@@ -36,7 +36,7 @@ public class SpareElement {
 	public SpareElement invoke(ItemStack item, int slot, InventoryClick inventoryClick) {
 		builder.actions.putIfAbsent(item, inventoryClick);
 		builder.contents.add(item);
-		builder.inv.setItem(slot, item);
+		builder.additional.putIfAbsent(item, slot);
 		return this;
 	}
 
@@ -50,7 +50,7 @@ public class SpareElement {
 		ItemStack item = supplier.get();
 		builder.actions.putIfAbsent(item, inventoryClick);
 		builder.contents.add(item);
-		builder.inv.addItem(item);
+		builder.additional.putIfAbsent(item, -1);
 		return this;
 	}
 
@@ -64,7 +64,7 @@ public class SpareElement {
 		ItemStack item = supplier.get();
 		builder.actions.putIfAbsent(item, inventoryClick);
 		builder.contents.add(item);
-		builder.inv.setItem(slot, item);
+		builder.additional.putIfAbsent(item, slot);
 		return this;
 	}
 
