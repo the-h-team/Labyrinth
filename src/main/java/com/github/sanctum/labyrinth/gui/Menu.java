@@ -16,7 +16,10 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * @deprecated Fully replaced by functional menu builder.
+ */
+@Deprecated
 public abstract class Menu implements InventoryHolder {
 
 	/*

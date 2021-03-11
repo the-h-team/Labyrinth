@@ -3,14 +3,10 @@ package com.github.sanctum.labyrinth.gui;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
-/*
-
-A class extending the functionality of the regular Menu, but making it Paginated
-
-This pagination system was made from Jer's code sample. <3
-
+/**
+ * @deprecated Fully replaced by functional paginaton builder. {@link com.github.sanctum.labyrinth.gui.builder.PaginatedBuilder}
  */
-
+@Deprecated
 public abstract class Pagination extends Menu {
 
     // Keep track of what page the menu is on

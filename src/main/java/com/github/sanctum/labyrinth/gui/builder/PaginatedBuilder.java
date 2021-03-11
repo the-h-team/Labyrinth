@@ -19,8 +19,11 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * The primary object used to initialize a PaginatedMenu object.
+ * Use this to customize everything from click,close events to element specifications.
+ */
 public final class PaginatedBuilder {
 
 	protected Inventory inv;
@@ -62,50 +65,100 @@ public final class PaginatedBuilder {
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
+	/**
+	 * Set the title to be viewed when players open this menu.
+	 *
+	 * @param title The title of the GUI.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setTitle(String title) {
 		this.title = title.replace("{PAGE}", "" + page);
 		return this;
 	}
 
+	/**
+	 * Store a specified collection to be converted to customized elements
+	 *
+	 * @param collection The collection of strings to use
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder collect(LinkedList<String> collection) {
 		this.collection = collection;
 		return this;
 	}
 
+	/**
+	 * Limit the amount of items to be displayed per page.
+	 *
+	 * @param amountPer The amount of items per page.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder limit(int amountPer) {
 		this.amountPer = amountPer;
 		return this;
 	}
 
+	/**
+	 * Set the message to be displayed when a player attempts to switch to a previous page on the initial page.
+	 *
+	 * @param context The message to be displayed otherwise empty.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setAlreadyFirst(String context) {
 		this.alreadyFirstPage = context.replace("{PAGE}", "" + page);
 		return this;
 	}
 
+	/**
+	 * Set the message to be displayed when a player attempts to switch to the next page on the last page.
+	 *
+	 * @param context The message to be displayed otherwise empty.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setAlreadyLast(String context) {
 		this.alreadyLastPage = context.replace("{PAGE}", "" + page);
 		;
 		return this;
 	}
 
+	/**
+	 * Set the operation to be ran in the event of this menu being closed.
+	 *
+	 * @param inventoryClose The inventory close action
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setCloseAction(InventoryClose inventoryClose) {
 		this.closeAction = inventoryClose;
 		return this;
 	}
 
+	/**
+	 * Create a {@link ProcessElement} to customize each item to be displayed within the collection
+	 * as-well as add any addition {@link ItemStack} elements.
+	 *
+	 * @param inventoryProcess The inventory processing operation.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setupProcess(InventoryProcess inventoryProcess) {
 		this.inventoryProcess = inventoryProcess;
 		return this;
 	}
 
+	/**
+	 * Initialize a border for the menu or fill remaining slots with specified materials.
+	 *
+	 * @return A border building elemement.
+	 */
 	public BorderElement addBorder() {
 		return new BorderElement(this);
 	}
 
-	public UUID getId() {
-		return id;
-	}
-
+	/**
+	 * Automatically format all menu items in accordance and default to a specific page for opening.
+	 *
+	 * @param desiredPage The desired page to be opened.
+	 * @return The same menu builder.
+	 */
 	protected PaginatedBuilder adjust(int desiredPage) {
 		page = desiredPage;
 		if (border != null) {
@@ -177,6 +230,11 @@ public final class PaginatedBuilder {
 		return this;
 	}
 
+	/**
+	 * Automatically format all menu items in accordance for opening.
+	 *
+	 * @return The same menu builder.
+	 */
 	protected PaginatedBuilder adjust() {
 		if (border != null) {
 			int j;
@@ -246,56 +304,132 @@ public final class PaginatedBuilder {
 		return this;
 	}
 
+	/**
+	 * Customize a page-back navigation key for the menu.
+	 *
+	 * @param item The item to be used to page-back with.
+	 * @param slot The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setNavigationLeft(ItemStack item, int slot, InventoryClick click) {
 		this.navLeft.putIfAbsent(item, slot);
 		this.actions.putIfAbsent(item, click);
 		return this;
 	}
 
+	/**
+	 * Customize a page-forward navigation key for the menu.
+	 *
+	 * @param item The item to be used to page-forward with.
+	 * @param slot The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setNavigationRight(ItemStack item, int slot, InventoryClick click) {
 		this.navRight.putIfAbsent(item, slot);
 		this.actions.putIfAbsent(item, click);
 		return this;
 	}
 
+	/**
+	 * Customize a page-exit navigation key for the menu.
+	 *
+	 * @param item The item to be used to page-exit with.
+	 * @param slot The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
 	public PaginatedBuilder setNavigationBack(ItemStack item, int slot, InventoryClick click) {
 		this.navBack.putIfAbsent(item, slot);
 		this.actions.putIfAbsent(item, click);
 		return this;
 	}
 
+	/**
+	 * Complete the menu building process and convert the builder into a Paginated Menu ready to be used.
+	 *
+	 * @return A fully built paginated menu.
+	 */
 	public PaginatedMenu build() {
 		return new PaginatedMenu(this);
 	}
 
+	/**
+	 * Get the unique ID of this menu.
+	 *
+	 * @return A UUID.
+	 */
+	public UUID getId() {
+		return id;
+	}
+
+	/**
+	 * Get the inventory for this menu.
+	 *
+	 * @return An inventory object.
+	 */
 	public Inventory getInventory() {
 		return inv;
 	}
 
+	/**
+	 * Get the listener registered with this menu.
+	 *
+	 * @return A bukkit listener.
+	 */
 	public PaginatedListener getListener() {
 		return listener;
 	}
 
+	/**
+	 * Get the amount of items specified per page.
+	 *
+	 * @return Amount of items per page.
+	 */
 	public int getAmountPerPage() {
 		return amountPer;
 	}
 
+	/**
+	 * Get the max amount of pages after collection conversions.
+	 *
+	 * @return Max amount of GUI pages.
+	 */
 	public int getMaxPages() {
 		return (collection.size() / (amountPer - 1)) < 0 ? collection.size() / amountPer : collection.size() / amountPer - 1;
 	}
 
+	/**
+	 * Get the default namespace used when one isnt provided.
+	 *
+	 * @return A namespaced key.
+	 */
 	public NamespacedKey getKey() {
 		return key;
 	}
 
+	/**
+	 * Get the collection involed with the menu.
+	 *
+	 * @return The string collection used in the GUI.
+	 */
 	public LinkedList<String> getCollection() {
 		return collection;
 	}
 
+	/**
+	 * Get the plugin registered with the menu.
+	 *
+	 * @return The plugin connected with the menu.
+	 */
 	public Plugin getPlugin() {
 		return plugin;
 	}
 
+	/**
+	 * Internal bukkit event logic, everything built within the paginated builder will be applied here automatically.
+	 */
 	private static class PaginatedListener implements Listener {
 
 		private final PaginatedBuilder builder;
@@ -340,7 +474,7 @@ public final class PaginatedBuilder {
 				Player p = (Player) e.getWhoClicked();
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
-					SyncMenuClickEvent event = new SyncMenuClickEvent(builder, p, e.getView(), item);
+					SyncMenuClickItemEvent event = new SyncMenuClickItemEvent(builder, p, e.getView(), item);
 					Bukkit.getPluginManager().callEvent(event);
 					if (event.isCancelled()) {
 						e.setCancelled(true);
@@ -358,15 +492,23 @@ public final class PaginatedBuilder {
 						if (builder.page == 0) {
 							p.sendMessage(builder.alreadyFirstPage);
 						} else {
-							builder.page -= 1;
+							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(builder, p, e.getView(), item, builder.page);
+							Bukkit.getPluginManager().callEvent(event1);
+							if (!event1.isCancelled()) {
+								builder.page -= 1;
+							}
 							builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
 						}
 						e.setCancelled(true);
 					}
 					if (builder.navRight.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						if (!((builder.index + 1) >= builder.collection.size())) {
-							builder.page += 1;
-							builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(builder, p, e.getView(), item, builder.page);
+							Bukkit.getPluginManager().callEvent(event1);
+							if (!event1.isCancelled()) {
+								builder.page += 1;
+								builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+							}
 						} else {
 							p.sendMessage(builder.alreadyLastPage);
 						}
