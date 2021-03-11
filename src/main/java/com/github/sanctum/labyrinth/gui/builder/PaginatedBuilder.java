@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.gui.builder;
 
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,8 +18,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -37,6 +36,7 @@ public final class PaginatedBuilder {
 	protected ItemStack border;
 	protected ItemStack fill;
 	protected InventoryClose closeAction;
+	protected InventoryProcess inventoryProcess;
 	protected final Map<ItemStack, Integer> navLeft = new HashMap<>();
 	protected final Map<ItemStack, Integer> navRight = new HashMap<>();
 	protected final Map<ItemStack, Integer> navBack = new HashMap<>();
@@ -90,6 +90,11 @@ public final class PaginatedBuilder {
 
 	public PaginatedBuilder setCloseAction(InventoryClose inventoryClose) {
 		this.closeAction = inventoryClose;
+		return this;
+	}
+
+	public PaginatedBuilder setupProcess(InventoryProcess inventoryProcess) {
+		this.inventoryProcess = inventoryProcess;
 		return this;
 	}
 
@@ -147,25 +152,25 @@ public final class PaginatedBuilder {
 							inv.setItem(navBack.get(back), back);
 						}
 					}
+
 					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
 					Bukkit.getPluginManager().callEvent(event);
 
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							inv.addItem(event.getItem());
-							if (!contents.contains(event.getItem())) {
-								contents.add(event.getItem());
-							}
-							if (fill != null) {
-								for (int i = 0; i < 54; i++) {
-									if (inv.getItem(i) == null) {
-										inv.setItem(i, fill);
+					Schedule.sync(() -> {
+						inv.addItem(event.getItem());
+						if (!contents.contains(event.getItem())) {
+							contents.add(event.getItem());
+						}
+						if (fill != null) {
+							Schedule.sync(() -> {
+								for (int l = 0; l < 54; l++) {
+									if (inv.getItem(l) == null) {
+										inv.setItem(l, fill);
 									}
 								}
-							}
+							}).debug().wait(1);
 						}
-					}.runTask(plugin);
+					}).debug().run();
 				}
 			}
 		}
@@ -220,22 +225,21 @@ public final class PaginatedBuilder {
 					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
 					Bukkit.getPluginManager().callEvent(event);
 
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							inv.addItem(event.getItem());
-							if (!contents.contains(event.getItem())) {
-								contents.add(event.getItem());
-							}
-							if (fill != null) {
-								for (int i = 0; i < 54; i++) {
-									if (inv.getItem(i) == null) {
-										inv.setItem(i, fill);
+					Schedule.sync(() -> {
+						inv.addItem(event.getItem());
+						if (!contents.contains(event.getItem())) {
+							contents.add(event.getItem());
+						}
+						if (fill != null) {
+							Schedule.sync(() -> {
+								for (int l = 0; l < 54; l++) {
+									if (inv.getItem(l) == null) {
+										inv.setItem(l, fill);
 									}
 								}
-							}
+							}).debug().wait(1);
 						}
-					}.runTask(plugin);
+					}).debug().run();
 				}
 			}
 		}
@@ -300,22 +304,9 @@ public final class PaginatedBuilder {
 			this.builder = builder;
 		}
 
-		@EventHandler(priority = EventPriority.LOW)
-		public void onFill(SyncMenuItemPreProcessEvent e) {
-			try {
-				UUID id = UUID.fromString(e.getContext());
-			} catch (IllegalArgumentException ignored) {
-				return;
-			}
-			e.buildItem(() -> {
-				ItemStack item = e.getItem();
-				ItemMeta meta = item.getItemMeta();
-				UUID id = UUID.fromString(e.getContext());
-				meta.setDisplayName(Bukkit.getOfflinePlayer(id).getName());
-				meta.getPersistentDataContainer().set(builder.key, PersistentDataType.STRING, e.getContext());
-				item.setItemMeta(meta);
-				return item;
-			});
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onProcess(SyncMenuItemPreProcessEvent e) {
+			builder.inventoryProcess.processEvent(new ProcessElement(builder, e));
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
