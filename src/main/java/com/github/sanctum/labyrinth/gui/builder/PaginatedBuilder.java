@@ -154,6 +154,15 @@ public final class PaginatedBuilder {
 	}
 
 	/**
+	 * Initialize any additional elements with defined logic.
+	 *
+	 * @return An spare element builder.
+	 */
+	public SpareElement newItem() {
+		return new SpareElement(this);
+	}
+
+	/**
 	 * Automatically format all menu items in accordance and default to a specific page for opening.
 	 *
 	 * @param desiredPage The desired page to be opened.
@@ -440,7 +449,7 @@ public final class PaginatedBuilder {
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onProcess(SyncMenuItemPreProcessEvent e) {
-			builder.inventoryProcess.processEvent(new ProcessElement(builder, e));
+			builder.inventoryProcess.processEvent(new ProcessElement(e));
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
