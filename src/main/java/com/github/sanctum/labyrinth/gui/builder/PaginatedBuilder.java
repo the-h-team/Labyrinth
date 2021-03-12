@@ -31,6 +31,7 @@ public final class PaginatedBuilder {
 	protected int amountPer;
 	protected int index;
 	protected int page;
+	protected int size;
 	protected final UUID id;
 	protected String title;
 	protected String alreadyFirstPage;
@@ -96,6 +97,28 @@ public final class PaginatedBuilder {
 	 */
 	public PaginatedBuilder limit(int amountPer) {
 		this.amountPer = amountPer;
+		return this;
+	}
+
+	/**
+	 * Define how large the inventory will be
+	 *
+	 * @param size The size of the inventory
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder setSize(int size) {
+		this.size = size;
+		return this;
+	}
+
+	/**
+	 * Define how large the inventory will be
+	 *
+	 * @param rows The size of the inventory
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder setSize(InventoryRows rows) {
+		this.size = rows.getSlotCount();
 		return this;
 	}
 
@@ -172,20 +195,67 @@ public final class PaginatedBuilder {
 	protected PaginatedBuilder adjust(int desiredPage) {
 		page = desiredPage;
 		if (border != null) {
-			int j;
-			for (j = 0; j < 10; j++) {
-				if (inv.getItem(j) == null)
-					inv.setItem(j, border);
-			}
-			inv.setItem(17, border);
-			inv.setItem(18, border);
-			inv.setItem(26, border);
-			inv.setItem(27, border);
-			inv.setItem(35, border);
-			inv.setItem(36, border);
-			for (j = 44; j < 54; j++) {
-				if (inv.getItem(j) == null)
-					inv.setItem(j, border);
+			switch (size) {
+				case 27:
+					int f;
+					for (f = 0; f < 10; f++) {
+						if (inv.getItem(f) == null)
+							inv.setItem(f, border);
+					}
+					inv.setItem(17, border);
+					for (f = 18; f < 27; f++) {
+						if (inv.getItem(f) == null)
+							inv.setItem(f, border);
+					}
+					break;
+				case 36:
+					int h;
+					for (h = 0; h < 10; h++) {
+						if (inv.getItem(h) == null)
+							inv.setItem(h, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					for (h = 27; h < 36; h++) {
+						if (inv.getItem(h) == null)
+							inv.setItem(h, border);
+					}
+					break;
+				case 45:
+					int o;
+					for (o = 0; o < 10; o++) {
+						if (inv.getItem(o) == null)
+							inv.setItem(o, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					inv.setItem(27, border);
+					inv.setItem(35, border);
+					inv.setItem(36, border);
+					for (o = 36; o < 45; o++) {
+						if (inv.getItem(o) == null)
+							inv.setItem(o, border);
+					}
+					break;
+				case 54:
+					int j;
+					for (j = 0; j < 10; j++) {
+						if (inv.getItem(j) == null)
+							inv.setItem(j, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					inv.setItem(27, border);
+					inv.setItem(35, border);
+					inv.setItem(36, border);
+					for (j = 44; j < 54; j++) {
+						if (inv.getItem(j) == null)
+							inv.setItem(j, border);
+					}
+					break;
 			}
 		}
 		if (collection == null) {
@@ -226,7 +296,7 @@ public final class PaginatedBuilder {
 						}
 						if (fill != null) {
 							Schedule.sync(() -> {
-								for (int l = 0; l < 54; l++) {
+								for (int l = 0; l < size; l++) {
 									if (inv.getItem(l) == null) {
 										inv.setItem(l, fill);
 									}
@@ -256,20 +326,67 @@ public final class PaginatedBuilder {
 	 */
 	protected PaginatedBuilder adjust() {
 		if (border != null) {
-			int j;
-			for (j = 0; j < 10; j++) {
-				if (inv.getItem(j) == null)
-					inv.setItem(j, border);
-			}
-			inv.setItem(17, border);
-			inv.setItem(18, border);
-			inv.setItem(26, border);
-			inv.setItem(27, border);
-			inv.setItem(35, border);
-			inv.setItem(36, border);
-			for (j = 44; j < 54; j++) {
-				if (inv.getItem(j) == null)
-					inv.setItem(j, border);
+			switch (size) {
+				case 27:
+					int f;
+					for (f = 0; f < 10; f++) {
+						if (inv.getItem(f) == null)
+							inv.setItem(f, border);
+					}
+					inv.setItem(17, border);
+					for (f = 18; f < 27; f++) {
+						if (inv.getItem(f) == null)
+							inv.setItem(f, border);
+					}
+					break;
+				case 36:
+					int h;
+					for (h = 0; h < 10; h++) {
+						if (inv.getItem(h) == null)
+							inv.setItem(h, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					for (h = 27; h < 36; h++) {
+						if (inv.getItem(h) == null)
+							inv.setItem(h, border);
+					}
+					break;
+				case 45:
+					int o;
+					for (o = 0; o < 10; o++) {
+						if (inv.getItem(o) == null)
+							inv.setItem(o, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					inv.setItem(27, border);
+					inv.setItem(35, border);
+					inv.setItem(36, border);
+					for (o = 36; o < 45; o++) {
+						if (inv.getItem(o) == null)
+							inv.setItem(o, border);
+					}
+					break;
+				case 54:
+					int j;
+					for (j = 0; j < 10; j++) {
+						if (inv.getItem(j) == null)
+							inv.setItem(j, border);
+					}
+					inv.setItem(17, border);
+					inv.setItem(18, border);
+					inv.setItem(26, border);
+					inv.setItem(27, border);
+					inv.setItem(35, border);
+					inv.setItem(36, border);
+					for (j = 44; j < 54; j++) {
+						if (inv.getItem(j) == null)
+							inv.setItem(j, border);
+					}
+					break;
 			}
 		}
 		if (collection == null) {
@@ -309,7 +426,7 @@ public final class PaginatedBuilder {
 						}
 						if (fill != null) {
 							Schedule.sync(() -> {
-								for (int l = 0; l < 54; l++) {
+								for (int l = 0; l < size; l++) {
 									if (inv.getItem(l) == null) {
 										inv.setItem(l, fill);
 									}
@@ -475,7 +592,7 @@ public final class PaginatedBuilder {
 		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < 54)
+			if (e.getView().getTopInventory().getSize() < builder.size)
 				return;
 			if (builder.getInventory() == e.getInventory()) {
 				if (builder.closeAction != null) {
@@ -490,7 +607,7 @@ public final class PaginatedBuilder {
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getWhoClicked() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < 54)
+			if (e.getView().getTopInventory().getSize() < builder.size)
 				return;
 
 			if (e.getHotbarButton() != -1) {

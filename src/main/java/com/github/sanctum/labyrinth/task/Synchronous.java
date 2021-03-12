@@ -29,6 +29,7 @@ public class Synchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								cancelTask();
+								return;
 							}
 						}
 						if (map != null) {
@@ -37,6 +38,7 @@ public class Synchronous {
 								if (debug) {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
+								return;
 							}
 						}
 						if (check) {
@@ -45,6 +47,7 @@ public class Synchronous {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
 								cancelTask();
+								return;
 							}
 						}
 						applicable.apply();
@@ -58,6 +61,7 @@ public class Synchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								cancelTask();
+								return;
 							}
 						}
 						if (map != null) {
@@ -66,6 +70,7 @@ public class Synchronous {
 								if (debug) {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
+								return;
 							}
 						}
 						if (count > 0) {
@@ -75,6 +80,7 @@ public class Synchronous {
 										Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 									}
 									cancelTask();
+									return;
 								}
 							}
 							applicable.apply();

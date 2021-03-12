@@ -28,6 +28,7 @@ public class Asynchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								this.cancel();
+								return;
 							}
 						}
 						if (map != null) {
@@ -36,6 +37,7 @@ public class Asynchronous {
 								if (debug) {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
+								return;
 							}
 						}
 						if (check) {
@@ -44,6 +46,7 @@ public class Asynchronous {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
 								this.cancel();
+								return;
 							}
 						}
 						applicable.apply();
@@ -57,6 +60,7 @@ public class Asynchronous {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
 								this.cancel();
+								return;
 							}
 						}
 						if (map != null) {
@@ -65,6 +69,7 @@ public class Asynchronous {
 								if (debug) {
 									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 								}
+								return;
 							}
 						}
 						if (count > 0) {
@@ -74,6 +79,7 @@ public class Asynchronous {
 										Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
 									}
 									this.cancel();
+									return;
 								}
 							}
 							applicable.apply();
