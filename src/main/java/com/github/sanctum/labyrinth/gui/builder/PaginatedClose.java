@@ -45,7 +45,7 @@ public class PaginatedClose {
 	 * Re-opens the GUI back to the same page the player was in.
 	 */
 	public void cancel() {
-		builder.inv = Bukkit.createInventory(null, 54, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust(builder.page).getInventory());
 	}
 

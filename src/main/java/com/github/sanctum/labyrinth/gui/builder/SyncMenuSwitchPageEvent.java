@@ -96,7 +96,7 @@ public class SyncMenuSwitchPageEvent extends Event implements Cancellable {
 	 * @param page The page to open for the player.
 	 */
 	public void open(int page) {
-		builder.inv = Bukkit.createInventory(null, 54, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		whoClicked.openInventory(builder.adjust(page).getInventory());
 	}
 
@@ -104,7 +104,7 @@ public class SyncMenuSwitchPageEvent extends Event implements Cancellable {
 	 * Re-open the menu page the player is currently on.
 	 */
 	public void refresh() {
-		builder.inv = Bukkit.createInventory(null, 54, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		whoClicked.openInventory(builder.adjust(page).getInventory());
 	}
 

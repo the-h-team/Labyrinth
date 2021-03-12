@@ -47,7 +47,7 @@ public class PaginatedClick {
 	 * *RECOMMENDED*: Used to update the items displayed.
 	 */
 	public void sync() {
-		builder.inv = Bukkit.createInventory(null, 54, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust().getInventory());
 	}
 

@@ -85,7 +85,7 @@ public class SyncMenuClickItemEvent extends Event implements Cancellable {
 	 * Re-open the current page the player is on.
 	 */
 	public void refresh() {
-		builder.inv = Bukkit.createInventory(null, 54, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		whoClicked.openInventory(builder.adjust(builder.page).getInventory());
 	}
 
