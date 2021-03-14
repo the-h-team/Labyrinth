@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -157,8 +158,7 @@ public final class PaginatedBuilder {
 	}
 
 	/**
-	 * Create a {@link ProcessElement} to customize each item to be displayed within the collection
-	 * as-well as add any addition {@link ItemStack} elements.
+	 * Create a {@link ProcessElement} to customize each item to be displayed within the collection.
 	 *
 	 * @param inventoryProcess The inventory processing operation.
 	 * @return The same menu builder.
@@ -421,9 +421,11 @@ public final class PaginatedBuilder {
 
 					Schedule.sync(() -> {
 						inv.addItem(event.getItem());
-						if (!contents.contains(event.getItem())) {
-							contents.add(event.getItem());
-						}
+						Schedule.sync(() -> {
+							if (!contents.contains(event.getItem())) {
+								contents.add(event.getItem());
+							}
+						}).debug().wait(1);
 						if (fill != null) {
 							Schedule.sync(() -> {
 								for (int l = 0; l < size; l++) {
@@ -584,8 +586,21 @@ public final class PaginatedBuilder {
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
-		public void onProcess(SyncMenuItemPreProcessEvent e) {
-			builder.inventoryProcess.processEvent(new ProcessElement(e));
+		public void onProcess(SyncMenuItemPreProcessEvent e) throws IllegalMenuStateException {
+			if (builder.inventoryProcess == null) {
+				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(builder.title) + "'");
+			} else {
+				builder.inventoryProcess.processEvent(new ProcessElement(e));
+			}
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onProcess(SyncMenuSwitchPageEvent e) throws IllegalMenuStateException {
+			if (builder.inventoryProcess == null) {
+				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(builder.title) + "'");
+			} else {
+				builder.inventoryProcess.processEvent(new ProcessElement(e));
+			}
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
@@ -625,7 +640,7 @@ public final class PaginatedBuilder {
 						e.setCancelled(true);
 						return;
 					}
-					if (builder.contents.contains(item)) {
+					if (builder.contents.stream().anyMatch(i -> i.isSimilar(item))) {
 						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
 						e.setCancelled(true);
 					}

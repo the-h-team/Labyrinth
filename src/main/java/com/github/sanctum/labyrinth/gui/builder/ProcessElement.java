@@ -7,10 +7,16 @@ import java.util.function.Consumer;
  */
 public class ProcessElement {
 
-	private final SyncMenuItemPreProcessEvent event;
+	private SyncMenuItemPreProcessEvent event;
+
+	private SyncMenuSwitchPageEvent e;
 
 	protected ProcessElement(SyncMenuItemPreProcessEvent event) {
 		this.event = event;
+	}
+
+	protected ProcessElement(SyncMenuSwitchPageEvent event) {
+		this.e = event;
 	}
 
 	/**
@@ -20,6 +26,15 @@ public class ProcessElement {
 	 */
 	public void applyLogic(Consumer<SyncMenuItemPreProcessEvent> syncMenuItemPreProcessEventConsumer) {
 		syncMenuItemPreProcessEventConsumer.accept(event);
+	}
+
+	/**
+	 * Create a lambda expression to formulate and customize successful page switches.
+	 *
+	 * @param syncMenuSwitchPageEventConsumer The item pre-process event.
+	 */
+	public void applyRunningLogic(Consumer<SyncMenuSwitchPageEvent> syncMenuSwitchPageEventConsumer) {
+		syncMenuSwitchPageEventConsumer.accept(e);
 	}
 
 }
