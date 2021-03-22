@@ -19,6 +19,15 @@ public class FileList {
 		REGISTRY.add(this);
 	}
 
+	/**
+	 * Using a {@link org.bukkit.plugin.java.JavaPlugin} as the key, look for specific files.
+	 * <p>
+	 * Using your plugins main class instance create custom data files with ease sourcing from
+	 * your plugins main folder.
+	 *
+	 * @param plugin The plugin source to browse.
+	 * @return A potential listing of configuration.
+	 */
 	public static FileList search(@NotNull final Plugin plugin) {
 		FileList list = null;
 		for (FileList listing : REGISTRY) {
@@ -33,9 +42,8 @@ public class FileList {
 	/**
 	 * Retrieve a Config instance via its name and description.
 	 * <p>
-	 * This method only resolves config objects for myEssentials; if you
-	 * wish to manage your own configs see this method and the fields
-	 * above for a general format of a static backing.
+	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
+	 * main class passed through the initial search query.
 	 *
 	 * @param name Name of config file
 	 * @param desc Description of config file (designate subdirectory)

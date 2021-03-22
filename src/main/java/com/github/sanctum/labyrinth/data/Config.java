@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * @deprecated No longer supported. Replaced by {@link} and marked for later removal.
+ * @deprecated No longer supported. Replaced by {@link FileList#search(Plugin)} and marked for later removal.
  */
 public class Config {
     private final String n;
