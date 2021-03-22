@@ -1,7 +1,14 @@
-package com.github.sanctum.labyrinth.gui.builder;
+package com.github.sanctum.labyrinth.gui;
+
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.InventoryHolder;
 
 /**
- * Helpful enum to define inventory size with.
+ * Define inventory size.
+ * <p>
+ * Helps enforce slot parameter contract of
+ * {@link Bukkit#createInventory(InventoryHolder, int, String)}
+ * (int must be divisible by 9)
  */
 public enum InventoryRows {
         ONE(9),
@@ -14,7 +21,7 @@ public enum InventoryRows {
         /**
          * Number of slots in an Inventory of these rows.
          */
-        private final int slotCount;
+        public final int slotCount;
 
         InventoryRows(int slots) {
             this.slotCount = slots;

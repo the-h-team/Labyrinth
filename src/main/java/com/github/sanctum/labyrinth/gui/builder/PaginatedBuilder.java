@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.gui.builder;
 
+import com.github.sanctum.labyrinth.gui.InventoryRows;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ public final class PaginatedBuilder {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder setSize(InventoryRows rows) {
-		this.size = rows.getSlotCount();
+		this.size = rows.slotCount;
 		return this;
 	}
 

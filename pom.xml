@@ -10,11 +10,17 @@
     <packaging>jar</packaging>
 
     <name>Labyrinth</name>
+    <description>A Spigot development library</description>
 
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <organization>
+        <name>Sanctum</name>
+        <url>https://github.com/the-h-team</url>
+    </organization>
 
     <build>
         <plugins>
@@ -124,6 +130,12 @@
             <artifactId>Enterprise</artifactId>
             <version>1.5</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>20.1.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
