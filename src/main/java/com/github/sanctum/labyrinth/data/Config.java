@@ -12,6 +12,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * @deprecated No longer supported. Replaced by {@link} and marked for later removal.
+ */
 public class Config {
     private final String n;
     private final String d;

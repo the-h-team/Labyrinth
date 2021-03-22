@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.gui.builder;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * An object designed to provide quick and easy filler to the remaining slots
@@ -26,7 +27,11 @@ public class BorderElement {
 	 * @return A border element.
 	 */
 	public BorderElement setBorderType(Material material) {
-		this.materialB = new ItemStack(material);
+		ItemStack item = new ItemStack(material);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(" ");
+		item.setItemMeta(meta);
+		this.materialB = item;
 		return this;
 	}
 
@@ -37,7 +42,11 @@ public class BorderElement {
 	 * @return A border element.
 	 */
 	public BorderElement setFillType(Material material) {
-		this.materialF = new ItemStack(material);
+		ItemStack item = new ItemStack(material);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(" ");
+		item.setItemMeta(meta);
+		this.materialF = item;
 		return this;
 	}
 
