@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.gui.builder;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -644,6 +646,28 @@ public final class PaginatedBuilder {
 					if (builder.contents.stream().anyMatch(i -> i.isSimilar(item))) {
 						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
 						e.setCancelled(true);
+					}
+					if (item.hasItemMeta()) {
+						final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+						Material skull = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+						if (item.getType() == skull) {
+							SkullMeta meta = (SkullMeta) item.getItemMeta();
+							if (meta.hasOwner()) {
+								for (ItemStack it : builder.actions.keySet()) {
+									if (it.hasItemMeta()) {
+										if (it.getType() == skull) {
+											SkullMeta sm = (SkullMeta) it.getItemMeta();
+											if (sm.hasOwner()) {
+												if (sm.getOwningPlayer().getUniqueId().equals(meta.getOwningPlayer().getUniqueId())) {
+													builder.actions.get(it).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+													break;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 					if (builder.navBack.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
