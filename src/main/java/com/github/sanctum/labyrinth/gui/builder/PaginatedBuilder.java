@@ -600,11 +600,14 @@ public final class PaginatedBuilder {
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onProcess(SyncMenuSwitchPageEvent e) throws IllegalMenuStateException {
+			/*
 			if (builder.inventoryProcess == null) {
 				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(builder.title) + "'");
 			} else {
 				builder.inventoryProcess.processEvent(new ProcessElement(e));
 			}
+
+			 */
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)

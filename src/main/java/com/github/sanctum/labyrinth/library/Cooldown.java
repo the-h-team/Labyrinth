@@ -1,12 +1,16 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.data.Config;
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Cooldown implements Serializable {
+
+	private static final LinkedList<Cooldown> cooldowns = new LinkedList<>();
 
 	/**
 	 * Get the cooldown object's delimiter-id
@@ -108,14 +112,8 @@ public abstract class Cooldown implements Serializable {
 	 * Note: If a cooldown is already saved with the same Id it will be overwritten
 	 */
 	public void save() {
-		Config cooldowns = Config.get("Storage", "Cooldowns");
-		cooldowns.getConfig().set(getId() + ".expiration", getCooldown());
-		try {
-			cooldowns.getConfig().set(getId() + ".instance", new HFEncoded(this).serialize());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		cooldowns.saveConfig();
+		cooldowns.remove(this);
+		cooldowns.add(this);
 	}
 
 	/**
@@ -148,14 +146,7 @@ public abstract class Cooldown implements Serializable {
 	 * @return A cooldown based object retaining original values from save.
 	 */
 	public static Cooldown getById(String id) {
-		Config cooldowns = Config.get("Storage", "Cooldowns");
-		Cooldown result = null;
-		try {
-			result = (Cooldown) new HFEncoded(cooldowns.getConfig().getString(id + ".instance")).deserialized();
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-		}
-		return result;
+		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
 	}
 
 	/**
@@ -164,9 +155,7 @@ public abstract class Cooldown implements Serializable {
 	 * @param c The cooldown representative to remove from cache.
 	 */
 	public static void remove(Cooldown c) {
-		Config cooldowns = Config.get("Storage", "Cooldowns");
-		cooldowns.getConfig().set(c.getId(), null);
-		cooldowns.saveConfig();
+		Schedule.sync(() ->cooldowns.remove(c)).run();
 	}
 
 
