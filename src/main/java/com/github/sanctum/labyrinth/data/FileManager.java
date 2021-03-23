@@ -168,16 +168,20 @@ public class FileManager {
         if (!this.file.exists()) {
             this.fc = new YamlConfiguration();
         }
+
         this.fc = YamlConfiguration.loadConfiguration(this.file);
+        File defConfigStream = new File(this.plugin.getDataFolder(), getName() + ".yml");
+        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+        this.fc.setDefaults(defConfig);
+
         if (FileList.CACHE.get(this.plugin) == null) {
             LinkedList<FileManager> managers = new LinkedList<>();
             managers.add(this);
             FileList.CACHE.putIfAbsent(this.plugin, managers);
         } else {
             LinkedList<FileManager> managers = new LinkedList<>(FileList.CACHE.get(this.plugin));
-            if (!managers.contains(this)) {
-                managers.add(this);
-            }
+            managers.removeIf(m -> m.getName().equals(getName()) && m.getDescription().equals(getDescription()));
+            managers.add(this);
             FileList.CACHE.put(this.plugin, managers);
         }
     }
