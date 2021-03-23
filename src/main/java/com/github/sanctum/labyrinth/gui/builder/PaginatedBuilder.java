@@ -299,23 +299,23 @@ public final class PaginatedBuilder {
 					}).debug().run();
 				}
 			}
-			ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
-			ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
-			ItemStack back = navBack.keySet().stream().findFirst().orElse(null);
-			if (left != null) {
-				if (!inv.contains(left)) {
-					inv.setItem(navLeft.get(left), left);
-					inv.setItem(navRight.get(right), right);
-					inv.setItem(navBack.get(back), back);
-				}
+		}
+		ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
+		ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
+		ItemStack back = navBack.keySet().stream().findFirst().orElse(null);
+		if (left != null) {
+			if (!inv.contains(left)) {
+				inv.setItem(navLeft.get(left), left);
+				inv.setItem(navRight.get(right), right);
+				inv.setItem(navBack.get(back), back);
 			}
-			if (!additional.isEmpty()) {
-				for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
-					if (entry.getValue() == -1) {
-						inv.addItem(entry.getKey());
-					} else {
-						inv.setItem(entry.getValue(), entry.getKey());
-					}
+		}
+		if (!additional.isEmpty()) {
+			for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
+				if (entry.getValue() == -1) {
+					inv.addItem(entry.getKey());
+				} else {
+					inv.setItem(entry.getValue(), entry.getKey());
 				}
 			}
 		}
@@ -432,23 +432,23 @@ public final class PaginatedBuilder {
 					}).debug().run();
 				}
 			}
-			ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
-			ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
-			ItemStack back = navBack.keySet().stream().findFirst().orElse(null);
-			if (left != null) {
-				if (!inv.contains(left)) {
-					inv.setItem(navLeft.get(left), left);
-					inv.setItem(navRight.get(right), right);
-					inv.setItem(navBack.get(back), back);
-				}
+		}
+		ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
+		ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
+		ItemStack back = navBack.keySet().stream().findFirst().orElse(null);
+		if (left != null) {
+			if (!inv.contains(left)) {
+				inv.setItem(navLeft.get(left), left);
+				inv.setItem(navRight.get(right), right);
+				inv.setItem(navBack.get(back), back);
 			}
-			if (!additional.isEmpty()) {
-				for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
-					if (entry.getValue() == -1) {
-						inv.addItem(entry.getKey());
-					} else {
-						inv.setItem(entry.getValue(), entry.getKey());
-					}
+		}
+		if (!additional.isEmpty()) {
+			for (Map.Entry<ItemStack, Integer> entry : additional.entrySet()) {
+				if (entry.getValue() == -1) {
+					inv.addItem(entry.getKey());
+				} else {
+					inv.setItem(entry.getValue(), entry.getKey());
 				}
 			}
 		}
