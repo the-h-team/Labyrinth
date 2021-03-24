@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.formatting.component.Text;
-import com.github.sanctum.labyrinth.formatting.component.Text_R2;
+import com.github.sanctum.labyrinth.formatting.component.NewComponent;
+import com.github.sanctum.labyrinth.formatting.component.OldComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 
@@ -86,87 +86,88 @@ public abstract class TextLib {
 		if (instance == null) {
 			if (Bukkit.getVersion().contains("1.16")) {
 				instance = new TextLib() {
-					final Text text1_16 = new Text();
+					final NewComponent textNew = new NewComponent();
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
-						return text1_16.textHoverable(normalText, hoverText, hoverTextMessage);
+						return textNew.textHoverable(normalText, hoverText, hoverTextMessage);
 					}
 
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage) {
-						return text1_16.textHoverable(normalText, hoverText, normalText2, hoverTextMessage);
+						return textNew.textHoverable(normalText, hoverText, normalText2, hoverTextMessage);
 					}
 
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
-						return text1_16.textHoverable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message);
+						return textNew.textHoverable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message);
 					}
 
 					@Override
 					public TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
-						return text1_16.textSuggestable(normalText, hoverText, hoverTextMessage, commandName);
+						return textNew.textSuggestable(normalText, hoverText, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
-						return text1_16.textRunnable(normalText, hoverText, hoverTextMessage, commandName);
+						return textNew.textRunnable(normalText, hoverText, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
-						return text1_16.textRunnable(normalText, hoverText, normalText2, hoverTextMessage, commandName);
+						return textNew.textRunnable(normalText, hoverText, normalText2, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
-						return text1_16.textRunnable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message, commandName, commandName2);
+						return textNew.textRunnable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message, commandName, commandName2);
 					}
 
 					@Override
 					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3) {
-						return text1_16.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
+						return textNew.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
 					}
 				};
 			} else {
 				instance = new TextLib() {
+					final OldComponent textOld = new OldComponent();
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
-						return Text_R2.textHoverable(normalText, hoverText, hoverTextMessage);
+						return textOld.textHoverable(normalText, hoverText, hoverTextMessage);
 					}
 
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage) {
-						return Text_R2.textHoverable(normalText, hoverText, normalText2, hoverTextMessage);
+						return textOld.textHoverable(normalText, hoverText, normalText2, hoverTextMessage);
 					}
 
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
-						return Text_R2.textHoverable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message);
+						return textOld.textHoverable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message);
 					}
 
 					@Override
 					public TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
-						return Text_R2.textSuggestable(normalText, hoverText, hoverTextMessage, commandName);
+						return textOld.textSuggestable(normalText, hoverText, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
-						return Text_R2.textRunnable(normalText, hoverText, hoverTextMessage, commandName);
+						return textOld.textRunnable(normalText, hoverText, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
-						return Text_R2.textRunnable(normalText, hoverText, normalText2, hoverTextMessage, commandName);
+						return textOld.textRunnable(normalText, hoverText, normalText2, hoverTextMessage, commandName);
 					}
 
 					@Override
 					public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
-						return Text_R2.textRunnable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message, commandName, commandName2);
+						return textOld.textRunnable(normalText, hoverText, normalText2, hoverText2, hoverTextMessage, hoverText2Message, commandName, commandName2);
 					}
 
 					@Override
 					public TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3) {
-						return Text_R2.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
+						return textOld.textRunnable(hoverText, hoverText2, hoverText3, hoverTextMessage, hover2TextMessage, hover3TextMessage, commandName, commandName2, commandName3);
 					}
 				};
 			}

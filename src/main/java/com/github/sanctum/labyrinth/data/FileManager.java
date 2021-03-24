@@ -203,6 +203,16 @@ public class FileManager {
         }
     }
 
+    /**
+     * Save the configuration to its backing file then immediately reload changes.
+     *
+     * @throws IllegalStateException if an error is encountered while saving
+     */
+    synchronized public void refreshConfig() {
+        saveConfig();
+        reload();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -9,7 +9,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Synchronous {
 
-	private BukkitRunnable outer;
 	private final BukkitRunnable runnable;
 	private Applicable apply = null;
 	private Map<?, ?> map = null;
@@ -107,15 +106,7 @@ public class Synchronous {
 	}
 
 	private void cancelTask() {
-		if (outer != null) {
-			outer.cancel();
-			outer = null;
-			return;
-		}
-		try {
-			runnable.cancel();
-		} catch (IllegalStateException ignored) {
-		}
+		runnable.cancel();
 	}
 
 	/**
@@ -235,16 +226,7 @@ public class Synchronous {
 	 * @param interval real-time delay where 20 ticks = 1 second
 	 */
 	public void waitReal(int interval) {
-		outer = new BukkitRunnable() {
-			@Override
-			public void run() {
-				try {
-					Synchronous.this.run();
-				} catch (IllegalStateException ignored) {
-				}
-			}
-		};
-		outer.runTaskLaterAsynchronously(Labyrinth.getInstance(), interval);
+		Schedule.async(this::run).debug().wait(interval);
 	}
 
 	/**
@@ -272,16 +254,7 @@ public class Synchronous {
 	 * @param period real-time period where 20 ticks = 1 second
 	 */
 	public void repeatReal(int delay, int period) {
-		outer = new BukkitRunnable() {
-			@Override
-			public void run() {
-				try {
-					Synchronous.this.run();
-				} catch (IllegalStateException ignored) {
-				}
-			}
-		};
-		outer.runTaskTimerAsynchronously(Labyrinth.getInstance(), delay, period);
+		Schedule.async(this::run).debug().repeat(delay, period);
 	}
 
 }

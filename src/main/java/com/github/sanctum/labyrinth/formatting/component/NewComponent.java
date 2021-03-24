@@ -6,10 +6,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 
-/**
- * @deprecated Replaced by {@link NewComponent}
- */
-public class Text {
+public class NewComponent {
 	
 	private static String color(String text) {
 		return ChatColor.translateAlternateColorCodes('&', text);

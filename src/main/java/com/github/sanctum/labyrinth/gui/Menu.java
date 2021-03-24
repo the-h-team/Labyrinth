@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @deprecated Fully replaced by functional menu builder.
+ * @deprecated Fully replaced by {@link com.github.sanctum.labyrinth.gui.menuman.Menu}
  */
 @Deprecated
 public abstract class Menu implements InventoryHolder {

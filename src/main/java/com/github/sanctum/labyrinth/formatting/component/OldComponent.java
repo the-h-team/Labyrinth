@@ -7,16 +7,13 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 
-/**
- * @deprecated Replaced by {@link OldComponent}
- */
-public class Text_R2 {
+public class OldComponent {
 
-	private static String color(String text) {
+	private String color(String text) {
 		return ChatColor.translateAlternateColorCodes('&', text);
 	}
 
-	public static TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
+	public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		text.addExtra(hover);
@@ -24,7 +21,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage) {
+	public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		TextComponent text2 = new TextComponent(color(normalText2));
@@ -34,7 +31,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
+	public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		TextComponent text2 = new TextComponent(color(normalText2));
@@ -47,7 +44,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
+	public TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		text.addExtra(hover);
@@ -56,7 +53,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
+	public TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		text.addExtra(hover);
@@ -65,7 +62,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
+	public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		TextComponent text2 = new TextComponent(color(normalText2));
@@ -76,7 +73,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
+	public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
 		TextComponent text = new TextComponent(color(normalText));
 		TextComponent hover = new TextComponent(color(hoverText));
 		TextComponent text2 = new TextComponent(color(normalText2));
@@ -91,7 +88,7 @@ public class Text_R2 {
 		return text;
 	}
 
-	public static TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
+	public TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
 		TextComponent hover = new TextComponent(color(hoverText));
 		TextComponent hover2 = new TextComponent(color(hoverText2));
 		TextComponent hover3 = new TextComponent(color(hoverTextBody3));
