@@ -72,9 +72,7 @@ public class FileList {
 		} else {
 			result = new FileManager(this.plugin, name, desc);
 		}
-		// We know its not null because we fall back on new instantiation w/ stream
-		assert result != null;
-		return result;
+		return result != null ? result : new FileManager(this.plugin, name, desc);
 	}
 
 

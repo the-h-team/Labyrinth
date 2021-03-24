@@ -148,7 +148,11 @@ public class FileManager {
     synchronized public FileConfiguration getConfig() {
         if(this.fc == null) {
             // fast exit with new blank configuration in the case of nonexistent file
-            if (!file.exists()) return new YamlConfiguration();
+            if (!file.exists()) {
+                YamlConfiguration result = new YamlConfiguration();
+                this.fc = result;
+                return result;
+            }
             // load configuration from file
             this.fc = YamlConfiguration.loadConfiguration(file);
         }

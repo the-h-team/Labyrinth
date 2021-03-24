@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.Config;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -86,14 +84,10 @@ public abstract class Cooldown implements Serializable {
 	 * @return The result of completion for the cooldown.
 	 */
 	public boolean isComplete() {
-		Config cooldowns = Config.get("Storage", "Cooldowns");
-		Long a = cooldowns.getConfig().getLong(getId() + ".expiration");
+		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		if (!cooldowns.getConfig().isLong(getId() + ".expiration")) {
-			return true;
-		}
-		return compareNum <= 0;
+		return cooldowns.contains(this) && compareNum <= 0;
 	}
 
 	/**
@@ -112,8 +106,9 @@ public abstract class Cooldown implements Serializable {
 	 * Note: If a cooldown is already saved with the same Id it will be overwritten
 	 */
 	public void save() {
-		cooldowns.remove(this);
-		cooldowns.add(this);
+		if (!cooldowns.contains(this)) {
+			cooldowns.add(this);
+		}
 	}
 
 	/**

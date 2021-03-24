@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.data.Config;
+import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import com.github.sanctum.labyrinth.library.HUID;
-import com.github.sanctum.labyrinth.Labyrinth;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -58,8 +59,10 @@ public class DataContainer extends DataStream implements Serializable {
 	public String getMetaId() {
 		return metaId;
 	}
+
 	/**
 	 * Save any specified object to the meta data.
+	 *
 	 * @param o The object data to be stored within the container.
 	 */
 	public void setValue(Object o) {
@@ -73,7 +76,8 @@ public class DataContainer extends DataStream implements Serializable {
 
 	/**
 	 * Save any specified object to the meta data large container.
-	 * @param o The object to insert
+	 *
+	 * @param o     The object to insert
 	 * @param index Insert an object into the value array at the given position.
 	 */
 	public void setValue(Object o, int index) {
@@ -87,6 +91,7 @@ public class DataContainer extends DataStream implements Serializable {
 
 	/**
 	 * Get all currently loaded meta id's
+	 *
 	 * @return Gets an array of all loaded data id's
 	 */
 	public static HUID[] get() {
@@ -108,7 +113,7 @@ public class DataContainer extends DataStream implements Serializable {
 	 * @return A persistent data id by set delimiter
 	 */
 	public static HUID getHuid(String metaId) {
-		Config data = Config.get("Meta", "Persistent");
+		FileManager data = FileList.search(Labyrinth.getInstance()).find("Meta", "Persistent");
 		HUID result = null;
 		try {
 			for (String d : data.getConfig().getConfigurationSection("Data").getKeys(false)) {
@@ -123,7 +128,8 @@ public class DataContainer extends DataStream implements Serializable {
 
 	/**
 	 * Load an instance of meta data from cache
-	 * @param huid The id to load from cache
+	 *
+	 * @param huid    The id to load from cache
 	 * @param persist if temp result null persist into hard storage?
 	 * @return Gets a cached data instance.
 	 */
@@ -136,7 +142,7 @@ public class DataContainer extends DataStream implements Serializable {
 		}
 		if (meta == null) {
 			if (persist) {
-				Config file = Config.get(huid.toString(), "Container");
+				FileManager file = FileList.search(Labyrinth.getInstance()).find(huid.toString(), "Container");
 				DataContainer dataContainer = null;
 				if (file.exists()) {
 					try {
@@ -163,12 +169,13 @@ public class DataContainer extends DataStream implements Serializable {
 
 	/**
 	 * Delete an instance of meta data from both cache and hard storage.
+	 *
 	 * @param huid The id to delete from cache/storage
 	 */
 	public static void deleteInstance(HUID huid) {
 		Arrays.stream(get()).forEach(I -> {
 			if (I.toString().equals(huid.toString())) {
-				Config data = Config.get("Meta", "Persistent");
+				FileManager data = FileList.search(Labyrinth.getInstance()).find("Meta", "Persistent");
 				if (!data.getConfig().isConfigurationSection("Data")) {
 					throw new NullPointerException("[Labyrinth] - No data is currently saved.");
 				}
@@ -179,7 +186,7 @@ public class DataContainer extends DataStream implements Serializable {
 						break;
 					}
 				}
-				Config meta = Config.get(I.toString(), "Container");
+				FileManager meta = FileList.search(Labyrinth.getInstance()).find(I.toString(), "Container");
 				meta.delete();
 				if (debugging) {
 					Bukkit.getServer().getLogger().info("[Labyrinth] - Instance for ID #" + I.toString() + " deleted.");
@@ -194,7 +201,7 @@ public class DataContainer extends DataStream implements Serializable {
 	 * this should not be used as it is already logged on server enable.
 	 */
 	public static void querySaved() {
-		final File dir = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
+		final File dir = Labyrinth.getInstance().getDataFolder();
 		File file = new File(dir.getParentFile().getPath(), Labyrinth.getInstance().getName() + "/Container/");
 		Arrays.stream(file.listFiles()).forEach(f -> {
 			HUID id = HUID.fromString(f.getName().replace(".yml", ""));
@@ -205,7 +212,7 @@ public class DataContainer extends DataStream implements Serializable {
 
 
 	private static DataContainer loadSavedInstance(HUID huid) {
-		Config file = Config.get(huid.toString(), "Container");
+		FileManager file = FileList.search(Labyrinth.getInstance()).find(huid.toString(), "Container");
 		DataContainer dataContainer = null;
 		if (file.exists()) {
 			try {
@@ -239,10 +246,10 @@ public class DataContainer extends DataStream implements Serializable {
 	 * Store the data into hard storage under your specified suffix
 	 */
 	public void saveMeta() {
-		Config data = Config.get("Meta", "Persistent");
+		FileManager data = FileList.search(Labyrinth.getInstance()).find("Meta", "Persistent");
 		data.getConfig().set("Data." + instance.huid.toString(), "core:" + metaId);
 		data.saveConfig();
-		Config meta = Config.get(huid.toString(), "Container");
+		FileManager meta = FileList.search(Labyrinth.getInstance()).find(huid.toString(), "Container");
 		try {
 			meta.getConfig().set("Data", new HFEncoded(instance).serialize());
 			meta.saveConfig();
@@ -257,7 +264,6 @@ public class DataContainer extends DataStream implements Serializable {
 			e.printStackTrace();
 		}
 	}
-
 
 
 }

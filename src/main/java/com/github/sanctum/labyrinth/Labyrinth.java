@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.data.AdvancedHook;
-import com.github.sanctum.labyrinth.data.Config;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
+import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.gui.GuiLibrary;
@@ -46,13 +47,14 @@ public final class Labyrinth extends JavaPlugin implements Listener {
         Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
         getLogger().info("- Registered factory implementation, " + provision.getImplementation());
         run(() -> {
-            Config main = Config.get("Config", "Configuration");
+            FileManager main = FileList.search(this).find("Config", "Configuration");
             if (!main.exists()) {
                 InputStream is = getResource("Config.yml");
-                Config.copy(is, main.getFile());
+                assert is != null;
+                FileManager.copy(is, main.getFile());
             }
         }).applyAfter(() -> {
-            Config main = Config.get("Config", "Configuration");
+            FileManager main = FileList.search(this).find("Config", "Configuration");
             if (main.getConfig().getBoolean("use-click-event")) {
                 Bukkit.getPluginManager().registerEvents(this, this);
             }
