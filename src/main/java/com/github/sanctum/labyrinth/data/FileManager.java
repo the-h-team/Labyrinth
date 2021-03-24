@@ -21,8 +21,9 @@ import org.jetbrains.annotations.Nullable;
 public class FileManager {
     protected final String n;
     protected final String d;
-    protected final File file;
+    protected File file;
     protected FileConfiguration fc;
+    protected final File parent;
     protected final Plugin plugin;
 
     protected FileManager(@NotNull Plugin plugin, @NotNull final String n, @Nullable final String d) {
@@ -31,12 +32,17 @@ public class FileManager {
         this.plugin = plugin;
         // Get the data directory of the plugin that is providing this Config implementation
         final File pluginDataDir = plugin.getDataFolder();
+        if (!pluginDataDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            pluginDataDir.mkdir();
+        }
         // If d is null or empty, use plugin's data folder. If not get the file describing the subdirectory.
         final File parent = (d == null || d.isEmpty()) ? pluginDataDir : new File(pluginDataDir, d);
         if (!parent.exists()) {
             //noinspection ResultOfMethodCallIgnored
             parent.mkdir();
         }
+        this.parent = parent;
         this.file = new File(parent, n.concat(".yml"));
         if (FileList.CACHE.get(plugin) == null) {
             LinkedList<FileManager> managers = new LinkedList<>();
@@ -134,7 +140,7 @@ public class FileManager {
                 //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
             } catch(final IOException e) {
-                throw new IllegalStateException("Unable to create file! See log:", e);
+                throw new IllegalStateException("Unable to create file! See log: " + this.file, e);
             }
         }
         return file;

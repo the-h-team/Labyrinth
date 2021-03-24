@@ -10,6 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class Synchronous {
 
 	private final BukkitRunnable runnable;
+	private final Applicable initial;
 	private Applicable apply = null;
 	private Map<?, ?> map = null;
 	private Object o = null;
@@ -20,6 +21,7 @@ public class Synchronous {
 	private Player p = null;
 
 	protected Synchronous(Applicable applicable) {
+		this.initial = applicable;
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -254,7 +256,8 @@ public class Synchronous {
 	 * @param period real-time period where 20 ticks = 1 second
 	 */
 	public void repeatReal(int delay, int period) {
-		Schedule.async(this::run).debug().repeat(delay, period);
+		Schedule.async(() -> Schedule.sync(initial).debug
+				().run()).debug().repeat(delay, period);
 	}
 
 }
