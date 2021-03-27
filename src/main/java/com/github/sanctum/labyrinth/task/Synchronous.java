@@ -236,7 +236,7 @@ public class Synchronous {
 	 * @param interval real-time delay where 20 ticks = 1 second
 	 */
 	public void waitReal(int interval) {
-		Schedule.async(this::run).debug().wait(interval);
+		Schedule.async(() -> Schedule.sync(initial).run()).debug().wait(interval);
 	}
 
 	/**
