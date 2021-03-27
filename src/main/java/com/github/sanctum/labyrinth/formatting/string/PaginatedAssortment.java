@@ -146,28 +146,16 @@ public class PaginatedAssortment {
 					point = point + 1;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 					if (page < (totalPageCount - 1)) {
-						if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
-						} else {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
-						}
+						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
 					}
 					if (page == (totalPageCount - 1)) {
-						if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
-						} else {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
-						}
+						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
 					}
 				}
 				if (page == 0) {
 					point = page + 1 + 1;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-					if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
-					} else {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
-					}
+					p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
 				}
 			}
 		} else {
@@ -200,18 +188,10 @@ public class PaginatedAssortment {
 					k++;
 					if ((((page * linesPerPage) + i + 1) == k) && (k != ((page * linesPerPage) + linesPerPage + 1))) {
 						i++;
-						if (Bukkit.getServer().getVersion().contains("1.16")) {
-							if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverTextMessage, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(commandToRun, PlaceholderAPI.setBracketPlaceholders(p, entry))));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, entry), String.format(hoverText, entry), String.format(hoverTextMessage, entry), String.format(commandToRun, entry)));
-							}
+						if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverTextMessage, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(commandToRun, PlaceholderAPI.setBracketPlaceholders(p, entry))));
 						} else {
-							if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverTextMessage, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(commandToRun, PlaceholderAPI.setBracketPlaceholders(p, entry))));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, entry), String.format(hoverText, entry), String.format(hoverTextMessage, entry), String.format(commandToRun, entry)));
-							}
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, entry), String.format(hoverText, entry), String.format(hoverTextMessage, entry), String.format(commandToRun, entry)));
 						}
 					}
 				}
@@ -223,28 +203,16 @@ public class PaginatedAssortment {
 					point = point + 1;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 					if (page < (totalPageCount - 1)) {
-						if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
-						} else {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
-						}
+						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
 					}
 					if (page == (totalPageCount - 1)) {
-						if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
-						} else {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
-						}
+						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
 					}
 				}
 				if (page == 0) {
 					point = page + 1 + 1;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-					if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
-					} else {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
-					}
+					p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
 				}
 			}
 		} else {
@@ -300,11 +268,7 @@ public class PaginatedAssortment {
 								i1++;
 
 
-								if (Bukkit.getServer().getVersion().contains("1.16")) {
-									p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
-								} else {
-									p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
-								}
+								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
 
 							}
 							tempMap.remove(nextTop);
@@ -317,20 +281,12 @@ public class PaginatedAssortment {
 							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 							int last = point - 1;
 							point = point + 1;
-							if (Bukkit.getServer().getVersion().contains("1.16")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
-							}
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
 						}
 						if (page == 0) {
 							point = page + 2;
 							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-							if (Bukkit.getServer().getVersion().contains("1.16")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
-							}
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
 						}
 					}
 					// end line
@@ -376,11 +332,7 @@ public class PaginatedAssortment {
 							k++;
 							if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
 								i1++;
-								if (Bukkit.getServer().getVersion().contains("1.16")) {
-									p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
-								} else {
-									p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
-								}
+								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
 
 
 							}
@@ -394,20 +346,12 @@ public class PaginatedAssortment {
 							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 							int last = point - 1;
 							point = point + 1;
-							if (Bukkit.getServer().getVersion().contains("1.16")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
-							}
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
 						}
 						if (page == 0) {
 							point = page + 2;
 							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-							if (Bukkit.getServer().getVersion().contains("1.16")) {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
-							} else {
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
-							}
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
 						}
 					}
 					// end line
