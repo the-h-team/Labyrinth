@@ -19,12 +19,17 @@ public class Asynchronous {
 	private Player p = null;
 	private Map<?, ?> map = null;
 	private Object o = null;
+	private TaskCancellation cancellation = null;
 
 	protected Asynchronous(Applicable applicable) {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
 				try {
+					if (cancellation != null) {
+						cancellation.execute(new ScheduledTask(this));
+						return;
+					}
 					if (cancel == null) {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
@@ -144,6 +149,17 @@ public class Asynchronous {
 	 */
 	public Asynchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
+		return this;
+	}
+
+	/**
+	 * Define your own running logic for cancellations.
+	 *
+	 * @param cancellation The cancellation objective.
+	 * @return The same asynchronous task builder.
+	 */
+	public Asynchronous cancelAfter(TaskCancellation cancellation) {
+		this.cancellation = cancellation;
 		return this;
 	}
 

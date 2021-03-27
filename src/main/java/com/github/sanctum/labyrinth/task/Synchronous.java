@@ -20,6 +20,7 @@ public class Synchronous {
 	private boolean fallback;
 	private String cancel = null;
 	private Player p = null;
+	private TaskCancellation cancellation = null;
 
 	protected Synchronous(Applicable applicable) {
 		this.initial = applicable;
@@ -27,6 +28,10 @@ public class Synchronous {
 			@Override
 			public void run() {
 				try {
+					if (cancellation != null) {
+						cancellation.execute(new ScheduledTask(this));
+						return;
+					}
 					if (cancel == null) {
 						if (fallback) {
 							if (Bukkit.getOnlinePlayers().size() == 0) {
@@ -151,6 +156,17 @@ public class Synchronous {
 	 */
 	public Synchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
+		return this;
+	}
+
+	/**
+	 * Define your own running logic for cancellations.
+	 *
+	 * @param cancellation The cancellation objective.
+	 * @return The same synchronous task builder.
+	 */
+	public Synchronous cancelAfter(TaskCancellation cancellation) {
+		this.cancellation = cancellation;
 		return this;
 	}
 
