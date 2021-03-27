@@ -33,6 +33,7 @@ public class FileManager {
         // Get the data directory of the plugin that is providing this Config implementation
         final File pluginDataDir = plugin.getDataFolder();
         if (!pluginDataDir.exists()) {
+            // If no primary plugin folder is found, create it.
             //noinspection ResultOfMethodCallIgnored
             pluginDataDir.mkdir();
         }
@@ -125,24 +126,30 @@ public class FileManager {
      * @return true if file exists
      */
     public boolean exists() {
-        return file.exists();
+        return file.exists() && parent.exists();
     }
 
     /**
-     * Get the backing file for this Config; additionally creates
-     * if not found.
+     * Attempt creating the file location.
+     * <p>
+     * If the parent location doesn't exist (The backing location for our file)
+     * One will be created before attempting file creation.
+     *
+     * @return true if creation was successful
+     */
+    public boolean create() throws IOException {
+        return parent.exists() ? file.createNewFile() : parent.mkdir() && file.createNewFile();
+    }
+
+    /**
+     * Get the backing file for this Config.
+     * <p>
+     * A mandatory {@link FileManager#exists()} check should also be used before
+     * accessing a file directly following the {@link FileManager#create()} method.
      *
      * @return backing file File object
      */
     public File getFile() {
-        if(!file.exists()) {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                file.createNewFile();
-            } catch(final IOException e) {
-                throw new IllegalStateException("Unable to create file! See log: " + this.file, e);
-            }
-        }
         return file;
     }
 

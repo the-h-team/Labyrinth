@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.library.Applicable;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Synchronous {
@@ -69,7 +70,7 @@ public class Synchronous {
 							if (!map.containsKey(o)) {
 								cancelTask();
 								if (debug) {
-									Labyrinth.getInstance().getLogger().info("Closing un-used task, target player in-activity.");
+									Labyrinth.getInstance().getLogger().info("Closing un-used task, target object in-activity.");
 								}
 								return;
 							}
@@ -157,7 +158,7 @@ public class Synchronous {
 	 * Automatically cancel the task if a target object goes missing from a map.
 	 *
 	 * @param map The map to query keys from
-	 * @param o The object to check for removal
+	 * @param o   The object to check for removal
 	 * @return The same synchronous task builder.
 	 */
 	public Synchronous cancelAbsence(Map<?, ?> map, Object o) {
@@ -182,6 +183,7 @@ public class Synchronous {
 	 *
 	 * <p>If the task throws an un-caught exception it is recommended this is used to display
 	 * any possible source to possible problems that occur.</p>
+	 *
 	 * @return The same synchronous task builder.
 	 */
 	public Synchronous debug() {
@@ -207,7 +209,10 @@ public class Synchronous {
 	 * Run this scheduled task on the very next tick.
 	 */
 	public void run() {
-		runnable.runTask(Labyrinth.getInstance());
+		try {
+			runnable.runTask(Labyrinth.getInstance());
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 	/**
@@ -216,7 +221,10 @@ public class Synchronous {
 	 * @param interval The amount of in game ticks to wait.
 	 */
 	public void wait(int interval) {
-		runnable.runTaskLater(Labyrinth.getInstance(), interval);
+		try {
+			runnable.runTaskLater(Labyrinth.getInstance(), interval);
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 	/**
@@ -238,11 +246,14 @@ public class Synchronous {
 	 * Immediately after the delay finishes the task will run once and wait the specified "period" until re-cycling.
 	 * Therefore running the delay > task > period , all over again.</p>
 	 *
-	 * @param delay The amount of time to wait before executing the task.
+	 * @param delay  The amount of time to wait before executing the task.
 	 * @param period The amount of time to wait to cycle the task.
 	 */
 	public void repeat(int delay, int period) {
-		runnable.runTaskTimer(Labyrinth.getInstance(), delay, period);
+		try {
+			runnable.runTaskTimer(Labyrinth.getInstance(), delay, period);
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 	/**
@@ -252,12 +263,30 @@ public class Synchronous {
 	 * This method uses 20 ticks = 1 second exactly, so if your
 	 * delay+repeat logic is based on real time, use this method.</p>
 	 *
-	 * @param delay real-time delay where 20 ticks = 1 second
+	 * @param delay  real-time delay where 20 ticks = 1 second
 	 * @param period real-time period where 20 ticks = 1 second
 	 */
 	public void repeatReal(int delay, int period) {
-		Schedule.async(() -> Schedule.sync(initial).debug
-				().run()).debug().repeat(delay, period);
+		Asynchronous schedule = Schedule.async(() -> Schedule.sync(initial).debug().wait(1)).debug();
+		if (map != null) {
+			schedule.cancelAbsence(map, o);
+		}
+		if (this.cancel != null) {
+			if (check) {
+				schedule.cancelAfter(Integer.parseInt(this.cancel));
+			}
+		}
+		if (this.p != null) {
+			schedule.cancelAfter(this.p);
+		}
+		if (this.check) {
+			schedule.cancelAfter(true);
+		}
+		if (apply != null) {
+			schedule.applyAfter(apply);
+		}
+
+		schedule.repeat(delay, period);
 	}
 
 }

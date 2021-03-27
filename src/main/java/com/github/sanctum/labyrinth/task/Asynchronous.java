@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.library.Applicable;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Asynchronous {
@@ -150,7 +151,7 @@ public class Asynchronous {
 	 * Automatically cancel the task if a target object goes missing from a map.
 	 *
 	 * @param map The map to query keys from
-	 * @param o The object to check for removal
+	 * @param o   The object to check for removal
 	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous cancelAbsence(Map<?, ?> map, Object o) {
@@ -175,6 +176,7 @@ public class Asynchronous {
 	 *
 	 * <p>If the task throws an un-caught exception it is recommended this is used to display
 	 * any possible source to possible problems that occur.</p>
+	 *
 	 * @return The same asynchronous task builder.
 	 */
 	public Asynchronous debug() {
@@ -200,7 +202,10 @@ public class Asynchronous {
 	 * Run this scheduled task on the very next tick.
 	 */
 	public void run() {
-		runnable.runTaskAsynchronously(Labyrinth.getInstance());
+		try {
+			runnable.runTaskAsynchronously(Labyrinth.getInstance());
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 	/**
@@ -209,7 +214,10 @@ public class Asynchronous {
 	 * @param interval The amount of in game ticks to wait.
 	 */
 	public void wait(int interval) {
-		runnable.runTaskLaterAsynchronously(Labyrinth.getInstance(), interval);
+		try {
+			runnable.runTaskLaterAsynchronously(Labyrinth.getInstance(), interval);
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 	/**
@@ -219,11 +227,14 @@ public class Asynchronous {
 	 * Immediately after the delay finishes the task will run once and wait the specified "period" until re-cycling.
 	 * Therefore running the delay > task > period , all over again.</p>
 	 *
-	 * @param delay The amount of time to wait before executing the task.
+	 * @param delay  The amount of time to wait before executing the task.
 	 * @param period The amount of time to wait to cycle the task.
 	 */
 	public void repeat(int delay, int period) {
-		runnable.runTaskTimerAsynchronously(Labyrinth.getInstance(), delay, period);
+		try {
+			runnable.runTaskTimerAsynchronously(Labyrinth.getInstance(), delay, period);
+		} catch (IllegalPluginAccessException ignored) {
+		}
 	}
 
 }
