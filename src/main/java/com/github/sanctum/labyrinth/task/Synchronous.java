@@ -30,6 +30,10 @@ public class Synchronous {
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
+						applicable.apply();
+						if (apply != null) {
+							apply.apply();
+						}
 						return;
 					}
 					if (cancel == null) {
