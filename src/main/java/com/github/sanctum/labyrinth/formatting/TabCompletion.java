@@ -8,11 +8,11 @@ public class TabCompletion {
 	/**
 	 * Build a list of tab completions using the provided string arguments.
 	 *
-	 * @param args The string arguments to provide
+	 * @param command The command the completion building is for.
 	 * @return A tab completion filtration builder.
 	 */
-	public static TabCompletionBuilder build(String command, String[] args) {
-		return new TabCompletionBuilder(args).forCommand(command);
+	public static TabCompletionBuilder build(String command) {
+		return new TabCompletionBuilder().forCommand(command);
 	}
 
 }

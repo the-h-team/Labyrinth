@@ -13,13 +13,23 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TabCompletionBuilder {
 
-	protected final String[] args;
+	protected String[] args;
 	protected String commandLabel;
 	protected static Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
 	protected static Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
 
-	protected TabCompletionBuilder(String[] args) {
+	protected TabCompletionBuilder() {
+	}
+
+	/**
+	 * Supply the string arguments for completion.
+	 *
+	 * @param args The string arguments to provide.
+	 * @return The same completion builder.
+	 */
+	public TabCompletionBuilder forArgs(String[] args) {
 		this.args = args;
+		return this;
 	}
 
 	/**

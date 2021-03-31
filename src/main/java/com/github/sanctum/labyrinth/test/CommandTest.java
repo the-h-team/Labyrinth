@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.test;
 
 import com.github.sanctum.labyrinth.formatting.TabCompletion;
+import com.github.sanctum.labyrinth.formatting.TabCompletionBuilder;
 import com.github.sanctum.labyrinth.gui.shared.SharedMenu;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,10 +22,13 @@ public class CommandTest extends Command {
 		super("fart");
 	}
 
+	private final TabCompletionBuilder builder = TabCompletion.build(getName());
+
 
 	@Override
 	public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-		return TabCompletion.build(getName(), args)
+		return builder
+				.forArgs(args)
 				.level(1)
 				.completeAnywhere(getName())
 				.filter(() -> {
