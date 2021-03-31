@@ -1,20 +1,16 @@
 package com.github.sanctum.labyrinth;
 
-import com.github.sanctum.labyrinth.command.CommandBuilder;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
-import com.github.sanctum.labyrinth.gui.InventoryRows;
-import com.github.sanctum.labyrinth.gui.shared.SharedBuilder;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
-import com.github.sanctum.labyrinth.test.CommandTest;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -33,7 +29,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		instance = this;
-		CommandBuilder.register(new CommandTest());
 		EconomyProvision provision = new DefaultProvision();
 		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
 		getLogger().info("- Registered factory implementation, " + provision.getImplementation());
@@ -41,7 +36,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth (C) 2021, Open-source spigot development tool.");
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-		SharedBuilder.create(this, 4208, "Test Menu", InventoryRows.FOUR.getSlotCount());
 		try {
 			DataContainer.querySaved();
 			success = true;
@@ -69,7 +63,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			if (!isNew) {
 				item.setDurability((short) 3);
 			}
-
 			SkullMeta meta = (SkullMeta) item.getItemMeta();
 			assert meta != null;
 			meta.setOwningPlayer(p);
