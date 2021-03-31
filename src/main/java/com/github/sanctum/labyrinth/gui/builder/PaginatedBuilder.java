@@ -664,6 +664,7 @@ public final class PaginatedBuilder {
 											if (sm.hasOwner()) {
 												if (sm.getOwningPlayer().getUniqueId().equals(meta.getOwningPlayer().getUniqueId())) {
 													builder.actions.get(it).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+													e.setCancelled(true);
 													break;
 												}
 											}

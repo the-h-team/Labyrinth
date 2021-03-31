@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.Plugin;
@@ -47,14 +48,14 @@ public class CommandBuilder {
 					e.printStackTrace();
 					break;
 				}
-				if (BukkitCommand.class.isAssignableFrom(clazz)) {
+				if (Command.class.isAssignableFrom(clazz)) {
 					classes.add(clazz);
 				}
 			}
 		}
 		for (Class<?> aClass : classes) {
 			try {
-				BukkitCommand command = ((BukkitCommand) aClass.getDeclaredConstructor().newInstance());
+				Command command = ((Command) aClass.getDeclaredConstructor().newInstance());
 				final Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
 
