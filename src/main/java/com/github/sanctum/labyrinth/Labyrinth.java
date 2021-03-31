@@ -14,6 +14,7 @@ import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
+import com.github.sanctum.labyrinth.test.CommandTest;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -32,7 +33,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		instance = this;
-		new CommandBuilder(this).compileFields("com.github.sanctum.labyrinth.test");
+		CommandBuilder.register(new CommandTest());
 		EconomyProvision provision = new DefaultProvision();
 		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
 		getLogger().info("- Registered factory implementation, " + provision.getImplementation());
