@@ -77,6 +77,7 @@ public class TabCompletionBuilder {
 							if (completion.toLowerCase().startsWith(args[index.index].toLowerCase())) {
 								if (APPLICABLE_MAP.get(completion) != null) {
 									APPLICABLE_MAP.get(completion).apply();
+									APPLICABLE_MAP.remove(completion);
 								}
 								results.add(completion);
 							}
@@ -90,6 +91,7 @@ public class TabCompletionBuilder {
 							if (completion.toLowerCase().startsWith(args[Math.max(args.length - 1, 0)].toLowerCase())) {
 								if (APPLICABLE_MAP.get(completion) != null) {
 									APPLICABLE_MAP.get(completion).apply();
+									APPLICABLE_MAP.remove(completion);
 								}
 								results.add(completion);
 							}
