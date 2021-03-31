@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class TabCompletionBuilder {
 
 	protected final String[] args;
+	protected String commandLabel;
 	protected static Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
 	protected static Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
 
@@ -32,6 +33,17 @@ public class TabCompletionBuilder {
 	 */
 	public TabCompletionFilter level(int length) {
 		return new TabCompletionFilter(this, length);
+	}
+
+	/**
+	 * For internal use. Specify the command needed for anywhere completion.
+	 *
+	 * @param label The command to check for.
+	 * @return The same builder.
+	 */
+	protected TabCompletionBuilder forCommand(String label) {
+		this.commandLabel = label;
+		return this;
 	}
 
 	/**
@@ -63,12 +75,14 @@ public class TabCompletionBuilder {
 				}
 			} else {
 				if (args.length == index.length) {
-					for (String completion : index.completions) {
-						if (completion.toLowerCase().startsWith(args[Math.max(args.length - 1, 0)].toLowerCase())) {
-							if (APPLICABLE_MAP.get(completion) != null) {
-								APPLICABLE_MAP.get(completion).apply();
+					if (index.key.equals(commandLabel)) {
+						for (String completion : index.completions) {
+							if (completion.toLowerCase().startsWith(args[Math.max(args.length - 1, 0)].toLowerCase())) {
+								if (APPLICABLE_MAP.get(completion) != null) {
+									APPLICABLE_MAP.get(completion).apply();
+								}
+								results.add(completion);
 							}
-							results.add(completion);
 						}
 					}
 				}

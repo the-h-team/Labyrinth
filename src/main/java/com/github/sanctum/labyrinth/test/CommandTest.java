@@ -24,9 +24,9 @@ public class CommandTest extends Command {
 
 	@Override
 	public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-		return TabCompletion.build(args)
+		return TabCompletion.build(getName(), args)
 				.level(1)
-				.completeAnywhere()
+				.completeAnywhere(getName())
 				.filter(() -> {
 					List<String> toAdd = new ArrayList<>();
 					if (sender.isOp()) {

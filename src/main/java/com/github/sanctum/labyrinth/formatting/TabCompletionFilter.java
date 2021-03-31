@@ -46,8 +46,9 @@ public class TabCompletionFilter {
 	 *
 	 * @return The same filtered tab completion.
 	 */
-	public TabCompletionFilter completeAnywhere() {
+	public TabCompletionFilter completeAnywhere(String commandLabel) {
 		this.anywhere = true;
+		this.key = commandLabel;
 		return this;
 	}
 

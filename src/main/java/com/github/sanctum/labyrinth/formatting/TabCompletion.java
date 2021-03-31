@@ -11,8 +11,8 @@ public class TabCompletion {
 	 * @param args The string arguments to provide
 	 * @return A tab completion filtration builder.
 	 */
-	public static TabCompletionBuilder build(String[] args) {
-		return new TabCompletionBuilder(args);
+	public static TabCompletionBuilder build(String command, String[] args) {
+		return new TabCompletionBuilder(args).forCommand(command);
 	}
 
 }
