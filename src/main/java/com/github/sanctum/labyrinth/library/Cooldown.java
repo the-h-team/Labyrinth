@@ -17,8 +17,6 @@ public abstract class Cooldown {
 	 */
 	public abstract String getId();
 
-	public abstract Cooldown getInstance();
-
 	/**
 	 * Get the original cooldown period.
 	 *
@@ -92,7 +90,7 @@ public abstract class Cooldown {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		return Labyrinth.getInstance().COOLDOWNS.contains(getInstance()) && compareNum <= 0;
+		return Labyrinth.getInstance().COOLDOWNS.contains(this) && compareNum <= 0;
 	}
 
 	/**
@@ -114,7 +112,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", getCooldown());
 		library.saveConfig();
-		Labyrinth.getInstance().COOLDOWNS.add(getInstance());
+		Labyrinth.getInstance().COOLDOWNS.add(this);
 	}
 
 	/**
@@ -147,7 +145,35 @@ public abstract class Cooldown {
 	 * @return A cooldown based object retaining original values from save.
 	 */
 	public static Cooldown getById(String id) {
-		return Labyrinth.getInstance().COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
+		return Labyrinth.getInstance().COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
+			FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
+			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
+
+				long time = library.getConfig().getLong("Library." + id + ".expiration");
+				Long a = time;
+				Long b = System.currentTimeMillis();
+				int compareNum = a.compareTo(b);
+				if (!(compareNum <= 0)) {
+					Cooldown toMake = new Cooldown() {
+						@Override
+						public String getId() {
+							return id;
+						}
+
+						@Override
+						public long getCooldown() {
+							return time;
+						}
+					};
+					toMake.save();
+					return toMake;
+				} else {
+					library.getConfig().set("Library." + id, null);
+					library.saveConfig();
+				}
+			}
+			return null;
+		});
 	}
 
 	/**
