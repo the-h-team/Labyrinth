@@ -101,7 +101,7 @@ public abstract class Cooldown {
 	 * @return Get's the full amount of time left within the cooldown from seconds to days
 	 */
 	public String fullTimeLeft() {
-		return "(S)" + getSecondsLeft() + " : (M)" + getMinutesLeft() + " : (H)" + getHoursLeft() + " : (D)" + getDaysLeft();
+		return "&e" + getDaysLeft() + " &rDays &e" + getHoursLeft() + " &rHours &e" + getMinutesLeft() + " &rMinutes &e" + getSecondsLeft() + " &rSeconds";
 	}
 
 	/**
