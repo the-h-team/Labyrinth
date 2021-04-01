@@ -1,14 +1,14 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.Bukkit;
 
-public abstract class Cooldown implements Serializable {
-
-	private static final LinkedList<Cooldown> cooldowns = new LinkedList<>();
+public abstract class Cooldown {
 
 	/**
 	 * Get the cooldown object's delimiter-id
@@ -16,6 +16,8 @@ public abstract class Cooldown implements Serializable {
 	 * @return The cooldown object's custom delimiter
 	 */
 	public abstract String getId();
+
+	public abstract Cooldown getInstance();
 
 	/**
 	 * Get the original cooldown period.
@@ -36,6 +38,7 @@ public abstract class Cooldown implements Serializable {
 	protected int getTimeLeft() {
 		return Integer.parseInt(String.valueOf(getTimePassed()).replace("-", ""));
 	}
+
 	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
 	 * This != total cooldown time converted to days its a soft=cap representative of
@@ -46,6 +49,7 @@ public abstract class Cooldown implements Serializable {
 	public int getDaysLeft() {
 		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
 	}
+
 	/**
 	 * Get the amount of hours left from the total cooldown length equated.
 	 * This != total cooldown time converted to hours its a soft=cap representative of
@@ -56,6 +60,7 @@ public abstract class Cooldown implements Serializable {
 	public long getHoursLeft() {
 		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
 	}
+
 	/**
 	 * Get the amount of minutes left from the total cooldown length equated.
 	 * This != total cooldown time converted to minutes its a soft=cap representative of
@@ -87,7 +92,7 @@ public abstract class Cooldown implements Serializable {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		return cooldowns.contains(this) && compareNum <= 0;
+		return Labyrinth.getInstance().COOLDOWNS.contains(getInstance()) && compareNum <= 0;
 	}
 
 	/**
@@ -106,9 +111,10 @@ public abstract class Cooldown implements Serializable {
 	 * Note: If a cooldown is already saved with the same Id it will be overwritten
 	 */
 	public void save() {
-		if (!cooldowns.contains(this)) {
-			cooldowns.add(this);
-		}
+		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
+		library.getConfig().set("Library." + getId() + ".expiration", getCooldown());
+		library.saveConfig();
+		Labyrinth.getInstance().COOLDOWNS.add(getInstance());
 	}
 
 	/**
@@ -125,13 +131,13 @@ public abstract class Cooldown implements Serializable {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Cooldown)) return false;
-		Cooldown cooldown = (Cooldown) o;
-		return Objects.equals(getId(), cooldown.getId()) && Objects.equals(getCooldown(), cooldown.getCooldown());
+		Cooldown cool = (Cooldown) o;
+		return Objects.equals(getId(), cool.getId());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getId(), getCooldown());
+		return Objects.hash(getId());
 	}
 
 	/**
@@ -141,7 +147,7 @@ public abstract class Cooldown implements Serializable {
 	 * @return A cooldown based object retaining original values from save.
 	 */
 	public static Cooldown getById(String id) {
-		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
+		return Labyrinth.getInstance().COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
 	}
 
 	/**
@@ -150,7 +156,10 @@ public abstract class Cooldown implements Serializable {
 	 * @param c The cooldown representative to remove from cache.
 	 */
 	public static void remove(Cooldown c) {
-		Schedule.sync(() ->cooldowns.remove(c)).run();
+		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
+		library.getConfig().set("Library." + c.getId(), null);
+		library.saveConfig();
+		Schedule.sync(() -> Labyrinth.getInstance().COOLDOWNS.remove(c)).run();
 	}
 
 

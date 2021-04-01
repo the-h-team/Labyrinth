@@ -6,12 +6,14 @@ import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,7 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Labyrinth extends JavaPlugin implements Listener {
 
-
+	public final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	private static Labyrinth instance;
 
 	@Override
