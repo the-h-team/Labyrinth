@@ -44,9 +44,11 @@ public class TabCompletionFilter {
 	 * Primarily to be used @ {@link TabCompletionBuilder#level(int)} = 1
 	 * for base command to initial sub-command completions.
 	 *
+	 * Only checks for the specified label at args[0] then feeds completions.
+	 *
 	 * @return The same filtered tab completion.
 	 */
-	public TabCompletionFilter completeAnywhere(String commandLabel) {
+	public TabCompletionFilter completeAt(String commandLabel) {
 		this.anywhere = true;
 		this.key = commandLabel;
 		return this;
