@@ -24,7 +24,7 @@ public abstract class Cooldown {
 	 */
 	public abstract long getCooldown();
 
-	protected long getTimePassed() {
+	public final long getTimePassed() {
 		return (System.currentTimeMillis() - getCooldown()) / 1000;
 	}
 
@@ -33,7 +33,7 @@ public abstract class Cooldown {
 	 *
 	 * @return Gets the total amount of time left from the conversion table
 	 */
-	protected int getTimeLeft() {
+	public final int getTimeLeft() {
 		return Integer.parseInt(String.valueOf(getTimePassed()).replace("-", ""));
 	}
 
@@ -44,7 +44,7 @@ public abstract class Cooldown {
 	 *
 	 * @return Get's the amount of days left within the conversion table.
 	 */
-	public int getDaysLeft() {
+	public final int getDaysLeft() {
 		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
 	}
 
@@ -55,7 +55,7 @@ public abstract class Cooldown {
 	 *
 	 * @return Get's the amount of hours left within the conversion table.
 	 */
-	public long getHoursLeft() {
+	public final long getHoursLeft() {
 		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
 	}
 
@@ -66,7 +66,7 @@ public abstract class Cooldown {
 	 *
 	 * @return Get's the amount of minutes left within the conversion table.
 	 */
-	public long getMinutesLeft() {
+	public final long getMinutesLeft() {
 		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
 	}
 
@@ -77,7 +77,7 @@ public abstract class Cooldown {
 	 *
 	 * @return Get's the amount of seconds left within the conversion table.
 	 */
-	public long getSecondsLeft() {
+	public final long getSecondsLeft() {
 		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
 	}
 
@@ -86,7 +86,7 @@ public abstract class Cooldown {
 	 *
 	 * @return The result of completion for the cooldown.
 	 */
-	public boolean isComplete() {
+	public final boolean isComplete() {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
@@ -108,9 +108,21 @@ public abstract class Cooldown {
 	 * Save the cooldown to Labyrinth cache.
 	 * Note: If a cooldown is already saved with the same Id it will be overwritten
 	 */
-	public void save() {
+	public synchronized final void save() {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", getCooldown());
+		library.saveConfig();
+		Labyrinth.getInstance().COOLDOWNS.add(this);
+	}
+
+	/**
+	 * Update the hard-storage for persistence to this cooldown's remaining time.
+	 * Note: If a cooldown is already saved with the same Id it will be overwritten, primarily
+	 * to be used on plugin disable.
+	 */
+	public synchronized final void update() {
+		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
+		library.getConfig().set("Library." + getId() + ".expiration", abv(getTimeLeft()));
 		library.saveConfig();
 		Labyrinth.getInstance().COOLDOWNS.add(this);
 	}
@@ -121,7 +133,7 @@ public abstract class Cooldown {
 	 * @param seconds The amount of time to convert.
 	 * @return The milliseconds needed for conversion.
 	 */
-	protected long abv(int seconds) {
+	protected final long abv(int seconds) {
 		return System.currentTimeMillis() + (seconds * 1000);
 	}
 
