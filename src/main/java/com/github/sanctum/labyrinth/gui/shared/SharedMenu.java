@@ -33,16 +33,16 @@ import org.jetbrains.annotations.NotNull;
 public abstract class SharedMenu implements Listener {
 
 	private final Plugin plugin;
-	private final int id;
+	private final String id;
 	private final HUID huid;
-	private static final Map<Integer, SharedMenu> MENU_MAP = new HashMap<>();
+	private static final Map<String, SharedMenu> MENU_MAP = new HashMap<>();
 	private static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
 	private static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
 	private static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
 	private final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
 	private final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
 
-	protected SharedMenu(Plugin plugin, int id) {
+	protected SharedMenu(Plugin plugin, String id) {
 		this.plugin = plugin;
 		this.id = id;
 		this.huid = HUID.randomID();
@@ -136,11 +136,9 @@ public abstract class SharedMenu implements Listener {
 	 * @return false if the option already exists.
 	 */
 	public final synchronized boolean addOption(final @NotNull Option option) {
-		for (Option o : MENU_OPTIONS) {
-			if (!o.name().contains(option.name().split("_")[1])) {
-				Schedule.sync(() -> MENU_OPTIONS.add(option)).run();
-				return true;
-			}
+		if (!MENU_OPTIONS.contains(option)) {
+			MENU_OPTIONS.add(option);
+			return true;
 		}
 		return false;
 	}
@@ -346,7 +344,7 @@ public abstract class SharedMenu implements Listener {
 	 * @return A shared menu by id otherwise a labyrinth provided menu.
 	 */
 	public static @NotNull
-	synchronized SharedMenu get(int id) {
+	synchronized SharedMenu get(String id) {
 		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(Labyrinth.getInstance(), i) {
 			@Override
 			public @NotNull String getName() {
