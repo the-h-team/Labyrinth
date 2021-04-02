@@ -61,12 +61,12 @@ public class Item implements Serializable {
 		return this;
 	}
 
-	public Item setItem(Character key, Material item) {
+	public Item setItem(char key, Material item) {
 		recipeMap.put(key, item);
 		return this;
 	}
 
-	public Item setItem(Character key, ItemStack item) {
+	public Item setItem(char key, ItemStack item) {
 		recipeStackMap.put(key, item);
 		return this;
 	}

@@ -20,12 +20,13 @@ import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Labyrinth extends JavaPlugin implements Listener {
 
-	public final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
+	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	private static Labyrinth instance;
 
 	@Override
@@ -85,7 +86,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	}
 
-	public static Labyrinth getInstance() {
+	public static Plugin getInstance() {
 		return instance;
 	}
 

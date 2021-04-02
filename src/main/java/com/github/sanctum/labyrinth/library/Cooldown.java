@@ -4,11 +4,14 @@ import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 
 public abstract class Cooldown {
+
+	private String format = "&e{MONTHS} &rMonths &e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
 
 	/**
 	 * Get the cooldown object's delimiter-id
@@ -44,8 +47,21 @@ public abstract class Cooldown {
 	 *
 	 * @return Get's the amount of days left within the conversion table.
 	 */
+	public final int getMonthsLeft() {
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(getTimeLeft());
+		return c.get(Calendar.MONTH);
+	}
+
+	/**
+	 * Get the amount of seconds left from the total cooldown length equated.
+	 * This != total cooldown time converted to days its a soft=cap representative of
+	 * the cooldown's 'SS:MM:HH:DD' format.
+	 *
+	 * @return Get's the amount of days left within the conversion table.
+	 */
 	public final int getDaysLeft() {
-		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
+		return (int) ((int) TimeUnit.SECONDS.toDays(getTimeLeft()) - (TimeUnit.SECONDS.toDays(getMonthsLeft() * 12)));
 	}
 
 	/**
@@ -90,7 +106,7 @@ public abstract class Cooldown {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		return Labyrinth.getInstance().COOLDOWNS.contains(this) && compareNum <= 0;
+		return Labyrinth.COOLDOWNS.contains(this) && compareNum <= 0;
 	}
 
 	/**
@@ -98,10 +114,22 @@ public abstract class Cooldown {
 	 * It's reccomended you override this and implement your own beautiful time format using the
 	 * provided time variables such as "getSeconds, getMinutes" etc.
 	 *
+	 * For persistent format's use the {@link Cooldown#format(String)} method when using {@link Cooldown#getById(String)}
+	 *
 	 * @return Get's the full amount of time left within the cooldown from seconds to days
 	 */
 	public String fullTimeLeft() {
-		return "&e" + getDaysLeft() + " &rDays &e" + getHoursLeft() + " &rHours &e" + getMinutesLeft() + " &rMinutes &e" + getSecondsLeft() + " &rSeconds";
+		return this.format
+				.replace("{MONTHS}", "" + getMonthsLeft())
+				.replace("{DAYS}", "" + getDaysLeft())
+				.replace("{HOURS}", "" + getHoursLeft())
+				.replace("{MINUTES}", "" + getMinutesLeft())
+				.replace("{SECONDS}", "" + getSecondsLeft());
+	}
+
+	public Cooldown format(String format) {
+		this.format = format;
+		return this;
 	}
 
 	/**
@@ -112,7 +140,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", getCooldown());
 		library.saveConfig();
-		Labyrinth.getInstance().COOLDOWNS.add(this);
+		Labyrinth.COOLDOWNS.add(this);
 	}
 
 	/**
@@ -124,7 +152,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", abv(getTimeLeft()));
 		library.saveConfig();
-		Labyrinth.getInstance().COOLDOWNS.add(this);
+		Labyrinth.COOLDOWNS.add(this);
 	}
 
 	/**
@@ -157,7 +185,7 @@ public abstract class Cooldown {
 	 * @return A cooldown based object retaining original values from save.
 	 */
 	public static Cooldown getById(String id) {
-		return Labyrinth.getInstance().COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
+		return Labyrinth.COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
 			FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
 
@@ -197,7 +225,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + c.getId(), null);
 		library.saveConfig();
-		Schedule.sync(() -> Labyrinth.getInstance().COOLDOWNS.remove(c)).run();
+		Schedule.sync(() -> Labyrinth.COOLDOWNS.remove(c)).run();
 	}
 
 
