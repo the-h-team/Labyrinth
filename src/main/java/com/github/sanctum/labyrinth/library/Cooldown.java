@@ -4,14 +4,21 @@ import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.MonthDay;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 
 public abstract class Cooldown {
 
-	private String format = "&e{MONTHS} &rMonths &e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
+	private String format = "&e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
 
 	/**
 	 * Get the cooldown object's delimiter-id
@@ -37,20 +44,7 @@ public abstract class Cooldown {
 	 * @return Gets the total amount of time left from the conversion table
 	 */
 	public final int getTimeLeft() {
-		return Integer.parseInt(String.valueOf(getTimePassed()).replace("-", ""));
-	}
-
-	/**
-	 * Get the amount of seconds left from the total cooldown length equated.
-	 * This != total cooldown time converted to days its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
-	 *
-	 * @return Get's the amount of days left within the conversion table.
-	 */
-	public final int getMonthsLeft() {
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(getTimeLeft());
-		return c.get(Calendar.MONTH);
+		return (int) Math.abs(getTimePassed());
 	}
 
 	/**
@@ -61,7 +55,7 @@ public abstract class Cooldown {
 	 * @return Get's the amount of days left within the conversion table.
 	 */
 	public final int getDaysLeft() {
-		return (int) ((int) TimeUnit.SECONDS.toDays(getTimeLeft()) - (TimeUnit.SECONDS.toDays(getMonthsLeft() * 12)));
+		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
 	}
 
 	/**
@@ -120,7 +114,6 @@ public abstract class Cooldown {
 	 */
 	public String fullTimeLeft() {
 		return this.format
-				.replace("{MONTHS}", "" + getMonthsLeft())
 				.replace("{DAYS}", "" + getDaysLeft())
 				.replace("{HOURS}", "" + getHoursLeft())
 				.replace("{MINUTES}", "" + getMinutesLeft())
