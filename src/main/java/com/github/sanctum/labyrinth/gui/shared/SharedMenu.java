@@ -8,10 +8,13 @@ import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,17 +34,20 @@ public abstract class SharedMenu implements Listener {
 
 	private final Plugin plugin;
 	private final int id;
+	private final HUID huid;
 	private static final Map<Integer, SharedMenu> MENU_MAP = new HashMap<>();
-	private static final Map<Plugin, Listener> LISTENER_MAP = new HashMap<>();
+	private static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
 	private static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
 	private static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
+	private final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
 	private final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
 
 	protected SharedMenu(Plugin plugin, int id) {
 		this.plugin = plugin;
 		this.id = id;
-		LISTENER_MAP.computeIfAbsent(plugin, pl -> {
-			Bukkit.getPluginManager().registerEvents(this, pl);
+		this.huid = HUID.randomID();
+		LISTENER_MAP.computeIfAbsent(huid, h -> {
+			Bukkit.getPluginManager().registerEvents(this, plugin);
 			return this;
 		});
 		MENU_MAP.put(id, this);
@@ -49,7 +55,7 @@ public abstract class SharedMenu implements Listener {
 
 	/**
 	 * Check's if the parent file location exists and creates if it doesn't
-	 *
+	 * <p>
 	 * This method isn't necessary as its handled automatically with {@link SharedBuilder#create(Plugin, int, String, int)}
 	 *
 	 * @return The same menu w/ parent file location creation.
@@ -80,7 +86,9 @@ public abstract class SharedMenu implements Listener {
 	 *
 	 * @return The menu's id.
 	 */
-	public abstract @NotNull HUID getId();
+	public @NotNull HUID getId() {
+		return this.huid;
+	}
 
 	/**
 	 * Get the size of the menu.
@@ -99,6 +107,45 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
+	 * @return The configured settings for this menu.
+	 */
+	public LinkedList<Option> getOptions() {
+		return MENU_OPTIONS;
+	}
+
+	/**
+	 * Remove a configured option from this menu's cache.
+	 *
+	 * @param option The option to remove.
+	 * @return false if the option isn't configured.
+	 */
+	public final synchronized boolean removeOption(final @NotNull Option option) {
+		for (Option o : MENU_OPTIONS) {
+			if (o == option) {
+				Schedule.sync(() -> MENU_OPTIONS.remove(option)).run();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Add a configured option to this menu's cache.
+	 *
+	 * @param option The option to add.
+	 * @return false if the option already exists.
+	 */
+	public final synchronized boolean addOption(final @NotNull Option option) {
+		for (Option o : MENU_OPTIONS) {
+			if (!o.name().contains(option.name().split("_")[1])) {
+				Schedule.sync(() -> MENU_OPTIONS.add(option)).run();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Update the contents of the inventory
 	 *
 	 * @param newContents The new item's to fill in.
@@ -110,8 +157,8 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * For GUI purposes. Set an item with custom meta within the inventory.
 	 *
-	 * @param index The slot the item goes in
-	 * @param item The item to place.
+	 * @param index   The slot the item goes in
+	 * @param item    The item to place.
 	 * @param process The process to run when the item is interacted with.
 	 */
 	public final synchronized void setItem(int index, Supplier<ItemStack> item, SharedProcess process) {
@@ -124,7 +171,8 @@ public abstract class SharedMenu implements Listener {
 	 *
 	 * @return The inventory's contents
 	 */
-	public final @NotNull synchronized ItemStack[] getContents() {
+	public final @NotNull
+	synchronized ItemStack[] getContents() {
 		ItemStack[] content = new ItemStack[getSize()];
 		try {
 			DataStream meta = DataContainer.loadInstance(DataContainer.getHuid(plugin.getName() + ":" + id), true);
@@ -150,7 +198,8 @@ public abstract class SharedMenu implements Listener {
 	 *
 	 * @return The menu's inventory.
 	 */
-	public final @NotNull synchronized Inventory getInventory() {
+	public final @NotNull
+	synchronized Inventory getInventory() {
 		return INVENTORY_MAP.computeIfAbsent(getId(), menu -> {
 			Inventory inventory = Bukkit.createInventory(null, getSize(), getName());
 			inventory.setContents(getContents());
@@ -169,8 +218,8 @@ public abstract class SharedMenu implements Listener {
 	 * Re-register the listener's for this menu.
 	 */
 	public final synchronized void register() {
-		LISTENER_MAP.computeIfAbsent(plugin, pl -> {
-			Bukkit.getPluginManager().registerEvents(this, pl);
+		LISTENER_MAP.computeIfAbsent(huid, h -> {
+			Bukkit.getPluginManager().registerEvents(this, this.plugin);
 			return this;
 		});
 	}
@@ -184,8 +233,8 @@ public abstract class SharedMenu implements Listener {
 		} catch (NullPointerException ignored) {
 		}
 		INVENTORY_MAP.remove(getId());
-		HandlerList.unregisterAll(LISTENER_MAP.get(plugin));
-		LISTENER_MAP.remove(plugin);
+		HandlerList.unregisterAll(LISTENER_MAP.get(this.huid));
+		LISTENER_MAP.remove(this.huid);
 		MENU_MAP.remove(id);
 	}
 
@@ -218,8 +267,44 @@ public abstract class SharedMenu implements Listener {
 		if (e.getInventory().getSize() < getSize()) {
 			return;
 		}
-		if (this.PROCESS_MAP.get(e.getCurrentItem()) != null) {
-			this.PROCESS_MAP.get(e.getCurrentItem()).clickEvent(new SharedClick(e));
+
+		for (Option option : MENU_OPTIONS) {
+			switch (option) {
+				case ALLOW_HOTBAR:
+					if (e.getHotbarButton() != -1) {
+						e.setCancelled(option.get());
+						break;
+					}
+				case ALLOW_UPPER:
+					if (e.getClickedInventory() == getInventory()) {
+						e.setCancelled(option.get());
+						break;
+					}
+				case ALLOW_LOWER:
+					if (e.getClickedInventory() == e.getView().getBottomInventory()) {
+						e.setCancelled(option.get());
+						break;
+					}
+				case CANCEL_HOTBAR:
+					if (e.getHotbarButton() != -1) {
+						e.setCancelled(option.get());
+						break;
+					}
+				case CANCEL_UPPER:
+					if (e.getClickedInventory() == getInventory()) {
+						e.setCancelled(option.get());
+						break;
+					}
+				case CANCEL_LOWER:
+					if (e.getClickedInventory() == e.getView().getBottomInventory()) {
+						e.setCancelled(option.get());
+						break;
+					}
+			}
+		}
+		if (this.PROCESS_MAP.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
+			ItemStack item = this.PROCESS_MAP.keySet().stream().filter(it -> it.isSimilar(e.getCurrentItem())).findFirst().orElse(null);
+			this.PROCESS_MAP.get(item).clickEvent(new SharedClick(e));
 		}
 		Schedule.sync(() -> save(clickedInventory.getContents())).run();
 	}
@@ -256,12 +341,14 @@ public abstract class SharedMenu implements Listener {
 	 * @param target The player to target.
 	 * @return The target's inventory.
 	 */
-	public static @NotNull synchronized Inventory open(Player target) {
+	public static @NotNull
+	synchronized Inventory open(Player target) {
 		final UUID id = target.getUniqueId();
 		Schedule.async(() -> {
 		}).cancelAfter(task -> {
 			if (!Bukkit.getOfflinePlayer(id).isOnline()) {
 				PLAYER_MAP.remove(id);
+				task.cancel();
 			}
 		}).repeat(0, 600);
 		return PLAYER_MAP.computeIfAbsent(target.getUniqueId(), uid -> target.getInventory());
@@ -275,21 +362,12 @@ public abstract class SharedMenu implements Listener {
 	 * @param id The menu id to look for.
 	 * @return A shared menu by id otherwise a labyrinth provided menu.
 	 */
-	public static @NotNull synchronized SharedMenu get(int id) {
+	public static @NotNull
+	synchronized SharedMenu get(int id) {
 		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(Labyrinth.getInstance(), i) {
-			private final HUID id;
-			{
-				id = HUID.randomID();
-			}
-
 			@Override
 			public @NotNull String getName() {
 				return "Labyrinth Provided";
-			}
-
-			@Override
-			public @NotNull HUID getId() {
-				return id;
 			}
 
 			@Override
@@ -298,5 +376,20 @@ public abstract class SharedMenu implements Listener {
 			}
 		});
 	}
+
+	public static @NotNull synchronized List<SharedMenu> collect(Plugin plugin) {
+		return MENU_MAP.values().stream().filter(m -> m.getPlugin().equals(plugin)).collect(Collectors.toList());
+	}
+
+	public enum Option {
+
+		CANCEL_LOWER, CANCEL_UPPER, CANCEL_HOTBAR, ALLOW_HOTBAR, ALLOW_UPPER, ALLOW_LOWER;
+
+		public boolean get() {
+			return true;
+		}
+
+	}
+
 
 }
