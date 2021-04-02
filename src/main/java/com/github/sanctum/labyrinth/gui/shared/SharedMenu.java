@@ -267,39 +267,22 @@ public abstract class SharedMenu implements Listener {
 		if (e.getInventory().getSize() < getSize()) {
 			return;
 		}
-
-		for (Option option : MENU_OPTIONS) {
-			switch (option) {
-				case ALLOW_HOTBAR:
-					if (e.getHotbarButton() != -1) {
-						e.setCancelled(option.get());
-						break;
-					}
-				case ALLOW_UPPER:
-					if (e.getClickedInventory() == getInventory()) {
-						e.setCancelled(option.get());
-						break;
-					}
-				case ALLOW_LOWER:
-					if (e.getClickedInventory() == e.getView().getBottomInventory()) {
-						e.setCancelled(option.get());
-						break;
-					}
-				case CANCEL_HOTBAR:
-					if (e.getHotbarButton() != -1) {
-						e.setCancelled(option.get());
-						break;
-					}
-				case CANCEL_UPPER:
-					if (e.getClickedInventory() == getInventory()) {
-						e.setCancelled(option.get());
-						break;
-					}
-				case CANCEL_LOWER:
-					if (e.getClickedInventory() == e.getView().getBottomInventory()) {
-						e.setCancelled(option.get());
-						break;
-					}
+		if (e.getHotbarButton() != -1) {
+			if (MENU_OPTIONS.contains(Option.CANCEL_HOTBAR)) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+		if (e.getClickedInventory() == getInventory()) {
+			if (MENU_OPTIONS.contains(Option.CANCEL_UPPER)) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+		if (e.getClickedInventory() == e.getView().getBottomInventory()) {
+			if (MENU_OPTIONS.contains(Option.CANCEL_LOWER)) {
+				e.setCancelled(true);
+				return;
 			}
 		}
 		if (this.PROCESS_MAP.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
@@ -383,11 +366,7 @@ public abstract class SharedMenu implements Listener {
 
 	public enum Option {
 
-		CANCEL_LOWER, CANCEL_UPPER, CANCEL_HOTBAR, ALLOW_HOTBAR, ALLOW_UPPER, ALLOW_LOWER;
-
-		public boolean get() {
-			return true;
-		}
+		CANCEL_LOWER, CANCEL_UPPER, CANCEL_HOTBAR
 
 	}
 
