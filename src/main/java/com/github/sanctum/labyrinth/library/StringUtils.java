@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -44,6 +46,27 @@ public class StringUtils {
 			return PlaceholderAPI.setPlaceholders(source, translate(text));
 		}
 		return translate(text);
+	}
+
+	/**
+	 * Similar to the {@link String#join(CharSequence, CharSequence...)} method append a specified element
+	 * to the end of each list entry except for the last one.
+	 *
+	 * @param delimiter The character to append.
+	 * @param list The list to append characters to.
+	 * @return A new list of strings containing the previous entries with the newly
+	 * appended delimiters.
+	 */
+	public static List<String> join(CharSequence delimiter, List<String> list) {
+		List<String> array = new ArrayList<>();
+		for (int i = 0; i < list.size(); i++) {
+			if (i != list.size() - 1) {
+				array.add(list.get(i) + "\n");
+			} else {
+				array.add(list.get(i));
+			}
+		}
+		return array;
 	}
 
 }

@@ -174,7 +174,7 @@ public abstract class TextLib {
 	public static TextComponent formatHoverMeta(Player source, TextComponent component, String... messages) {
 		List<Content> array = new ArrayList<>();
 		for (String msg : messages) {
-			array.add(new Text(StringUtils.translate(source, msg)));
+			array.add(new Text(StringUtils.translate(source, msg) + "\n"));
 		}
 		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, array));
 		return component;
