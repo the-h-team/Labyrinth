@@ -2,7 +2,9 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.regex.Pattern;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 public class StringUtils {
 
@@ -27,6 +29,21 @@ public class StringUtils {
 	 */
 	public static String translate(String text) {
 		return Bukkit.getVersion().contains("1.16") ? new ColoredString(text, ColoredString.ColorType.HEX).toString() : new ColoredString(text, ColoredString.ColorType.MC).toString();
+	}
+
+	/**
+	 * Translate a string automatically with minecraft color codes
+	 * or HEX if your version allows for it, also check for placeholders.
+	 *
+	 * @param source The source player to grab data for.
+	 * @param text The text to be colored.
+	 * @return A fully colored placeholder translated string.
+	 */
+	public static String translate(OfflinePlayer source, String text) {
+		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+			return PlaceholderAPI.setPlaceholders(source, translate(text));
+		}
+		return translate(text);
 	}
 
 }
