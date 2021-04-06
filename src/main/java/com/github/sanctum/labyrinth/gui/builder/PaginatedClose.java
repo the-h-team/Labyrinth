@@ -3,6 +3,8 @@ package com.github.sanctum.labyrinth.gui.builder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,7 +38,9 @@ public class PaginatedClose {
 	 * Clear cache, remove un-used handlers.
 	 */
 	public void clear() {
-		HandlerList.unregisterAll(builder.getListener());
+		InventoryClickEvent.getHandlerList().unregister(builder.getListener());
+		InventoryCloseEvent.getHandlerList().unregister(builder.getListener());
+		SyncMenuItemPreProcessEvent.getHandlerList().unregister(builder.getListener());
 	}
 
 	/**

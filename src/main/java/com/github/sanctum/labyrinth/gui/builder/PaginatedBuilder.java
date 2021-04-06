@@ -58,7 +58,7 @@ public final class PaginatedBuilder {
 		this.plugin = plugin;
 		this.id = UUID.randomUUID();
 		key = new NamespacedKey(plugin, "paginated_utility_manager");
-		listener = new PaginatedListener(this);
+		listener = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
@@ -67,7 +67,7 @@ public final class PaginatedBuilder {
 		this.plugin = plugin;
 		this.id = UUID.randomUUID();
 		key = new NamespacedKey(plugin, "paginated_utility_manager");
-		listener = new PaginatedListener(this);
+		listener = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
@@ -581,47 +581,57 @@ public final class PaginatedBuilder {
 	/**
 	 * Internal bukkit event logic, everything built within the paginated builder will be applied here automatically.
 	 */
-	private static class PaginatedListener implements Listener {
+	public class PaginatedListener implements Listener {
 
-		private final PaginatedBuilder builder;
-
-		protected PaginatedListener(PaginatedBuilder builder) {
-			this.builder = builder;
+		private boolean metaMatches(ItemStack one, ItemStack two) {
+			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+			Material type;
+			if (isNew) {
+				type = Material.valueOf("PLAYER_HEAD");
+			} else {
+				type = Material.valueOf("SKULL_ITEM");
+			}
+			if (one.getType() == type && two.getType() == type) {
+				if (one.hasItemMeta() && two.hasItemMeta()) {
+					if (one.getItemMeta() instanceof SkullMeta && two.getItemMeta() instanceof SkullMeta) {
+						SkullMeta Meta1 = (SkullMeta) one.getItemMeta();
+						SkullMeta Meta2 = (SkullMeta) one.getItemMeta();
+						if (Meta1.hasOwner() && Meta2.hasOwner()) {
+							if (Meta1.getOwningPlayer().getUniqueId().equals(Meta2.getOwningPlayer().getUniqueId())) {
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+				return false;
+			}
+			return false;
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onProcess(SyncMenuItemPreProcessEvent e) throws IllegalMenuStateException {
-			if (builder.inventoryProcess == null) {
-				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(builder.title) + "'");
+			if (!e.getId().equals(getId()))
+				return;
+			if (inventoryProcess == null) {
+				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(title) + "'");
 			} else {
-				builder.inventoryProcess.processEvent(new ProcessElement(e));
+				inventoryProcess.processEvent(new ProcessElement(e));
 			}
-		}
-
-		@EventHandler(priority = EventPriority.NORMAL)
-		public void onProcess(SyncMenuSwitchPageEvent e) throws IllegalMenuStateException {
-			/*
-			if (builder.inventoryProcess == null) {
-				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(builder.title) + "'");
-			} else {
-				builder.inventoryProcess.processEvent(new ProcessElement(e));
-			}
-
-			 */
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < builder.size)
+			if (e.getView().getTopInventory().getSize() < size)
 				return;
-			if (builder.getInventory() == e.getInventory()) {
-				if (builder.closeAction != null) {
-					builder.closeAction.closeEvent(new PaginatedClose(builder, (Player) e.getPlayer(), e.getView()));
+			if (getInventory() == e.getInventory()) {
+				if (closeAction != null) {
+					closeAction.closeEvent(new PaginatedClose(PaginatedBuilder.this, (Player) e.getPlayer(), e.getView()));
 				}
-				builder.page = 0;
-				builder.index = 0;
+				page = 0;
+				index = 0;
 			}
 		}
 
@@ -629,7 +639,7 @@ public final class PaginatedBuilder {
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getWhoClicked() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < builder.size)
+			if (e.getView().getTopInventory().getSize() < size)
 				return;
 
 			if (e.getHotbarButton() != -1) {
@@ -637,74 +647,56 @@ public final class PaginatedBuilder {
 				return;
 			}
 
+			if (getInventory() != e.getInventory())
+				return;
+
 			if (e.getClickedInventory() == e.getInventory()) {
 				Player p = (Player) e.getWhoClicked();
+
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
-					SyncMenuClickItemEvent event = new SyncMenuClickItemEvent(builder, p, e.getView(), item);
+					SyncMenuClickItemEvent event = new SyncMenuClickItemEvent(PaginatedBuilder.this, p, e.getView(), item);
 					Bukkit.getPluginManager().callEvent(event);
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 						return;
 					}
-					if (builder.contents.stream().anyMatch(i -> i.isSimilar(item))) {
-						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+					if (contents.stream().anyMatch(i -> i.isSimilar(item) || metaMatches(i, item))) {
+						actions.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
+						e.setCancelled(true);
+						return;
+					}
+					if (navBack.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
 						e.setCancelled(true);
 					}
-					if (item.hasItemMeta()) {
-						final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-						Material skull = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-						if (item.getType() == skull) {
-							SkullMeta meta = (SkullMeta) item.getItemMeta();
-							if (meta.hasOwner()) {
-								for (ItemStack it : builder.actions.keySet()) {
-									if (it.hasItemMeta()) {
-										if (it.getType() == skull) {
-											SkullMeta sm = (SkullMeta) it.getItemMeta();
-											if (sm.hasOwner()) {
-												if (sm.getOwningPlayer().getUniqueId().equals(meta.getOwningPlayer().getUniqueId())) {
-													builder.actions.get(it).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
-													e.setCancelled(true);
-													break;
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if (builder.navBack.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
-						e.setCancelled(true);
-					}
-					if (builder.navLeft.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (builder.page == 0) {
-							p.sendMessage(builder.alreadyFirstPage);
+					if (navLeft.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						if (page == 0) {
+							p.sendMessage(alreadyFirstPage);
 						} else {
-							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(builder, p, e.getView(), item, builder.page);
+							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(PaginatedBuilder.this, p, e.getView(), item, page);
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
-								builder.page -= 1;
+								page -= 1;
 							}
-							builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+							actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
 						}
 						e.setCancelled(true);
 					}
-					if (builder.navRight.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (!((builder.index + 1) >= builder.collection.size())) {
-							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(builder, p, e.getView(), item, builder.page);
+					if (navRight.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						if (!((index + 1) >= collection.size())) {
+							SyncMenuSwitchPageEvent event1 = new SyncMenuSwitchPageEvent(PaginatedBuilder.this, p, e.getView(), item, page);
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
-								builder.page += 1;
-								builder.actions.get(item).clickEvent(new PaginatedClick(builder, p, e.getView(), item));
+								page += 1;
+								actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
 							}
 						} else {
-							p.sendMessage(builder.alreadyLastPage);
+							p.sendMessage(alreadyLastPage);
 						}
 						e.setCancelled(true);
 					}
-					if (e.getCurrentItem().equals(builder.border) || item.equals(builder.fill)) {
+					if (e.getCurrentItem().equals(border) || item.equals(fill)) {
 						e.setCancelled(true);
 					}
 				}
