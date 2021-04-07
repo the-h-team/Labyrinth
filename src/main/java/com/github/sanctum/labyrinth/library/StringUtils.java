@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.library;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -46,6 +47,20 @@ public class StringUtils {
 			return PlaceholderAPI.setPlaceholders(source, translate(text));
 		}
 		return translate(text);
+	}
+
+	/**
+	 * Find a specific case insensitive regex to match from a source sequence and replace it with
+	 * the desired string.
+	 *
+	 * @param source The source sequence to format.
+	 * @param target The target regex to replace.
+	 * @param replacement The regex to replace the target with.
+	 * @return The formatted string replaced with desired information.
+	 */
+	public static String replace(CharSequence source, String target, String replacement) {
+		return Pattern.compile(target, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(source)
+				.replaceAll(Matcher.quoteReplacement(replacement));
 	}
 
 	/**
