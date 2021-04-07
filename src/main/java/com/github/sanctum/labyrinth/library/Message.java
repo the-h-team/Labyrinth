@@ -10,36 +10,25 @@ import org.bukkit.plugin.Plugin;
 
 public class Message {
 
-	private final Logger logger = Logger.getLogger("Minecraft");
+	private Plugin plugin;
+	private Logger logger = Logger.getLogger("Minecraft");
 	private String prefix;
 	private Player p;
 
 
+	public Message(Plugin plugin) {
+		this.plugin = plugin;
+		this.logger = plugin.getLogger();
+	}
+
 	/**
 	 * NOTE: Only for console use
 	 * Send easy messages through console with prefix specification.
-	 *
+	 * @deprecated Use {@link Message#loggedFor(Plugin)}
 	 * @param prefix The prefix to be used for console.
 	 */
+	@Deprecated
 	public Message(String prefix) {
-		this.prefix = prefix;
-	}
-
-	/**
-	 * Update the player to recieve the messages.
-	 *
-	 * @param player The player to now recieve messages.
-	 */
-	public void assignPlayer(Player player) {
-		this.p = player;
-	}
-
-	/**
-	 * Update the prefix used for the message.
-	 *
-	 * @param prefix The prefix to use.
-	 */
-	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 
@@ -65,11 +54,31 @@ public class Message {
 	}
 
 	/**
+	 * Update the player to recieve the messages.
+	 *
+	 * @param player The player to now recieve messages.
+	 */
+	public Message assignPlayer(Player player) {
+		this.p = player;
+		return this;
+	}
+
+	/**
+	 * Update the prefix used for the message.
+	 *
+	 * @param prefix The prefix to use.
+	 */
+	public Message setPrefix(String prefix) {
+		this.prefix = prefix;
+		return this;
+	}
+
+	/**
 	 * Send a string message to a player automatically colored.
 	 *
 	 * @param text The context to send the player
 	 */
-	public void send(String text) {
+	public Message send(String text) {
 		String result;
 		if (prefix == null || prefix.isEmpty()) {
 			if (Bukkit.getVersion().contains("1.16")) {
@@ -85,6 +94,7 @@ public class Message {
 			}
 		}
 		p.sendMessage(result);
+		return this;
 	}
 
 	/**
@@ -92,8 +102,9 @@ public class Message {
 	 *
 	 * @param component The component to build and send.
 	 */
-	public void build(BaseComponent component) {
+	public Message build(BaseComponent component) {
 		p.spigot().sendMessage(component);
+		return this;
 	}
 
 	/**
@@ -101,8 +112,9 @@ public class Message {
 	 *
 	 * @param components The list of interactive chat to send.
 	 */
-	public void build(BaseComponent... components) {
+	public Message build(BaseComponent... components) {
 		p.spigot().sendMessage(components);
+		return this;
 	}
 
 	/**
@@ -111,8 +123,9 @@ public class Message {
 	 *
 	 * @param text The text to be used within the message
 	 */
-	public void info(String text) {
-		logger.info(String.format("[%s] - " + text, prefix));
+	public Message info(String text) {
+		logger.info(text);
+		return this;
 	}
 
 	/**
@@ -121,8 +134,9 @@ public class Message {
 	 *
 	 * @param text The text to be used within the message
 	 */
-	public void error(String text) {
-		logger.severe(String.format("[%s] - " + text, prefix));
+	public Message error(String text) {
+		logger.severe(text);
+		return this;
 	}
 
 	/**
@@ -131,8 +145,9 @@ public class Message {
 	 *
 	 * @param text The text to be used within the message
 	 */
-	public void warn(String text) {
-		logger.severe(String.format("[%s] - " + text, prefix));
+	public Message warn(String text) {
+		logger.warning(text);
+		return this;
 	}
 
 	/**
@@ -142,7 +157,7 @@ public class Message {
 	 * @return A console messagiwng object.
 	 */
 	public static Message loggedFor(Plugin plugin) {
-		return new Message(plugin.getName());
+		return new Message(plugin);
 	}
 
 	/**
