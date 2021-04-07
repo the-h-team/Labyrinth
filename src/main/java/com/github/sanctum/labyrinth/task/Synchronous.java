@@ -296,6 +296,9 @@ public class Synchronous {
 				schedule.cancelAfter(Integer.parseInt(this.cancel));
 			}
 		}
+		if (this.cancellation != null) {
+			schedule.cancelAfter(this.cancellation);
+		}
 		if (this.p != null) {
 			schedule.cancelAfter(this.p);
 		}

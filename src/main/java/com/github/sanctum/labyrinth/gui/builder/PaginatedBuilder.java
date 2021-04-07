@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.gui.builder;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
-import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,11 +13,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -145,7 +147,6 @@ public final class PaginatedBuilder {
 	 */
 	public PaginatedBuilder setAlreadyLast(String context) {
 		this.alreadyLastPage = context.replace("{PAGE}", "" + page);
-		;
 		return this;
 	}
 
@@ -597,9 +598,7 @@ public final class PaginatedBuilder {
 						SkullMeta Meta1 = (SkullMeta) one.getItemMeta();
 						SkullMeta Meta2 = (SkullMeta) one.getItemMeta();
 						if (Meta1.hasOwner() && Meta2.hasOwner()) {
-							if (Meta1.getOwningPlayer().getUniqueId().equals(Meta2.getOwningPlayer().getUniqueId())) {
-								return true;
-							}
+							return Meta1.getOwningPlayer().getUniqueId().equals(Meta2.getOwningPlayer().getUniqueId());
 						}
 					}
 					return false;
@@ -632,6 +631,27 @@ public final class PaginatedBuilder {
 				}
 				page = 0;
 				index = 0;
+				((Player) e.getPlayer()).updateInventory();
+			}
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onMove(InventoryMoveItemEvent e) {
+			if (e.getSource() == getInventory()) {
+				e.setCancelled(true);
+			}
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onDrag(InventoryDragEvent e) {
+			if (!(e.getWhoClicked() instanceof Player))
+				return;
+			if (e.getView().getTopInventory().getSize() < size)
+				return;
+			if (getInventory() != e.getInventory())
+				return;
+			if (e.getInventory() == getInventory()) {
+				e.setResult(Event.Result.DENY);
 			}
 		}
 
@@ -652,6 +672,14 @@ public final class PaginatedBuilder {
 
 			if (e.getClickedInventory() == e.getInventory()) {
 				Player p = (Player) e.getWhoClicked();
+
+				switch (e.getAction()) {
+					case HOTBAR_MOVE_AND_READD:
+					case HOTBAR_SWAP:
+					case MOVE_TO_OTHER_INVENTORY:
+						e.setResult(Event.Result.DENY);
+						break;
+				}
 
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();

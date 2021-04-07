@@ -1,23 +1,18 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class Message {
 
-	private Plugin plugin;
 	private Logger logger = Logger.getLogger("Minecraft");
 	private String prefix;
 	private Player p;
 
 
 	public Message(Plugin plugin) {
-		this.plugin = plugin;
 		this.logger = plugin.getLogger();
 	}
 
@@ -81,17 +76,9 @@ public class Message {
 	public Message send(String text) {
 		String result;
 		if (prefix == null || prefix.isEmpty()) {
-			if (Bukkit.getVersion().contains("1.16")) {
-				result = new ColoredString(text, ColoredString.ColorType.HEX).toString();
-			} else {
-				result = new ColoredString(text, ColoredString.ColorType.MC).toString();
-			}
+			result = StringUtils.translate(text);
 		} else {
-			if (Bukkit.getVersion().contains("1.16")) {
-				result = new ColoredString(prefix + " " + text, ColoredString.ColorType.HEX).toString();
-			} else {
-				result = new ColoredString(prefix + " " + text, ColoredString.ColorType.MC).toString();
-			}
+			result = StringUtils.translate(prefix + " " + text);
 		}
 		p.sendMessage(result);
 		return this;

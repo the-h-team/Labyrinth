@@ -56,7 +56,7 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Check's if the parent file location exists and creates if it doesn't
 	 * <p>
-	 * This method isn't necessary as its handled automatically with {@link SharedBuilder#create(Plugin, int, String, int)}
+	 * This method isn't necessary as its handled automatically with {@link SharedBuilder#create(Plugin, String, String, int)}
 	 *
 	 * @return The same menu w/ parent file location creation.
 	 */
@@ -364,7 +364,18 @@ public abstract class SharedMenu implements Listener {
 
 	public enum Option {
 
-		CANCEL_LOWER, CANCEL_UPPER, CANCEL_HOTBAR
+		/**
+		 * Tell's the menu that lower inventory clicks need to be cancelled.
+		 */
+		CANCEL_LOWER,
+		/**
+		 * Tell's the menu that the upper inventory clicks need to be cancelled.
+		 */
+		CANCEL_UPPER,
+		/**
+		 * Tell's the menu that the hot-bar swap transactions need to be cancelled.
+		 */
+		CANCEL_HOTBAR
 
 	}
 

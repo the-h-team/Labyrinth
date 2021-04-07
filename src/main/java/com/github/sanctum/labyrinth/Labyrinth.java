@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
@@ -43,14 +44,14 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			DataContainer.querySaved();
 			success = true;
 		} catch (NullPointerException e) {
-			getLogger().info("- Process failed. No directory found to process.");
+			getLogger().info("- Process ignored. No directory found to process.");
 			getLogger().info("- Store a new instance of data for query to take effect on enable.");
 			getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 			success = false;
 		}
 		if (success) {
 			if (DataContainer.get().length == 0) {
-				getLogger().info("- Process failed. No data found to process.");
+				getLogger().info("- Process ignored. No data found to process.");
 			}
 			getLogger().info("- Query success! All found meta cached. (" + DataContainer.get().length + ")");
 		} else {
@@ -70,7 +71,13 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			assert meta != null;
 			meta.setOwningPlayer(p);
 			item.setItemMeta(meta);
-			new SkullItem(p.getUniqueId().toString(), item);
+
+			// for some reason this is the ONLY way we can make sure the data loaded in live use matches content wise due to mojang skin updating.
+			// initial use updates the item then we grab the updated item and map THAT.
+			// flawless item scanning.
+			Inventory fake = Bukkit.createInventory(null, 36);
+			fake.setItem(0, item);
+			new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
 		});
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
 	}
