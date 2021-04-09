@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.melion.rgbchat.api.RGBApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -11,7 +11,6 @@ public class ColoredString {
 
 	private final ColorType chosen;
 	private final String text;
-	private final String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
 
 	public ColoredString(String text, ColorType type) {
 		this.text = text;
@@ -35,7 +34,7 @@ public class ColoredString {
 				r = "Cannot convert raw component to String";
 				break;
 			case HEX:
-				r = translateHexString(text);
+				r = ChatColor.translateAlternateColorCodes('&', RGBApi.INSTANCE.toColoredMessage(text));
 				break;
 		}
 		return r;
@@ -47,56 +46,11 @@ public class ColoredString {
 	 * @return Returns a string of text embedded as a Component
 	 */
 	public TextComponent toComponent() {
-		return Bukkit.getVersion().contains("1.16") ? translateHexComponent(text) : new TextComponent(StringUtils.translate(text));
-	}
-
-	private String translateHexString(String text) {
-		String[] texts = text.split(String.format(WITH_DELIMITER, "&"));
-
-		StringBuilder finalText = new StringBuilder();
-
-		for (int i = 0; i < texts.length; i++) {
-			if (texts[i].equalsIgnoreCase("&")) {
-				//get the next string
-				i++;
-				if (texts[i].charAt(0) == '#') {
-					finalText.append(net.md_5.bungee.api.ChatColor.of(texts[i].substring(0, 7))).append(texts[i].substring(7));
-				} else {
-					finalText.append(net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&', "&" + texts[i]));
-				}
-			} else {
-				finalText.append(texts[i]);
-			}
-		}
-
-		return finalText.toString();
+		return Bukkit.getVersion().contains("1.16") ? translateHexComponent(text) : new TextComponent(StringUtils.use(text).translate());
 	}
 
 	private TextComponent translateHexComponent(String text) {
-
-		String[] texts = text.split(String.format(WITH_DELIMITER, "&"));
-
-		ComponentBuilder builder = new ComponentBuilder();
-
-		for (int i = 0; i < texts.length; i++) {
-			TextComponent subComponent = new TextComponent();
-			if (texts[i].equalsIgnoreCase("&")) {
-				//get the next string
-				i++;
-				if (texts[i].charAt(0) == '#') {
-					subComponent.setText(texts[i].substring(7));
-					subComponent.setColor(net.md_5.bungee.api.ChatColor.of(texts[i].substring(0, 7)));
-					builder.append(subComponent);
-				} else {
-					builder.append(translateHexString("&" + texts[i]));
-				}
-			} else {
-				builder.append(texts[i]);
-			}
-		}
-
-		return new TextComponent(builder.create());
-
+		return new TextComponent(TextComponent.fromLegacyText(RGBApi.INSTANCE.toColoredMessage(text)));
 	}
 
 

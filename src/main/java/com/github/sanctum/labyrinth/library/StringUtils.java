@@ -62,6 +62,16 @@ public class StringUtils {
 	}
 
 	/**
+	 * Simply set placeholder's to the given context from the provided source. Nothing more.
+	 *
+	 * @param source The player to target.
+	 * @return The translated non-colored placeholder set string.
+	 */
+	public String papi(OfflinePlayer source) {
+		return PlaceholderAPI.setPlaceholders(source, this.context);
+	}
+
+	/**
 	 * Apply the same logic as {@link StringUtils#translate()} but also utilize set placeholders for a
 	 * target player.
 	 *

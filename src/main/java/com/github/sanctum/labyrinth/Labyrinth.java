@@ -58,27 +58,27 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			getLogger().info("- Query failed! (SEE ABOVE FOR INFO)");
 		}
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+		Schedule.async(() -> {
+			final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+			final Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			Arrays.stream(Bukkit.getOfflinePlayers()).forEach(p -> {
+				ItemStack item = new ItemStack(type, 1);
+				if (!isNew) {
+					item.setDurability((short) 3);
+				}
+				SkullMeta meta = (SkullMeta) item.getItemMeta();
+				assert meta != null;
+				meta.setOwningPlayer(p);
+				item.setItemMeta(meta);
 
-		final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-		final Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-		Arrays.stream(Bukkit.getOfflinePlayers()).forEach(p -> {
-			ItemStack item = new ItemStack(type, 1);
-
-			if (!isNew) {
-				item.setDurability((short) 3);
-			}
-			SkullMeta meta = (SkullMeta) item.getItemMeta();
-			assert meta != null;
-			meta.setOwningPlayer(p);
-			item.setItemMeta(meta);
-
-			// for some reason this is the ONLY way we can make sure the data loaded in live use matches content wise due to mojang skin updating.
-			// initial use updates the item then we grab the updated item and map THAT.
-			// flawless item scanning.
-			Inventory fake = Bukkit.createInventory(null, 36);
-			fake.setItem(0, item);
-			new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
-		});
+				// for some reason this is the ONLY way we can make sure the data loaded in live use matches content wise due to mojang skin updating.
+				// initial use updates the item then we grab the updated item and map THAT.
+				// flawless item scanning.
+				Inventory fake = Bukkit.createInventory(null, 36);
+				fake.setItem(0, item);
+				new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
+			});
+		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
 	}
 

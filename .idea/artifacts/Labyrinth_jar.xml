@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Labyrinth_jar</output-path>
     <root id="archive" name="Labyrinth.jar">
       <element id="module-output" name="Labyrinth" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/ms5984/MenuMan/1.0-SNAPSHOT/MenuMan-1.0-SNAPSHOT.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/src/main/resources/rgb-chat.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
