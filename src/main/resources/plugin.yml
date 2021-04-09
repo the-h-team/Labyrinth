@@ -4,5 +4,5 @@ main: com.github.sanctum.labyrinth.Labyrinth
 prefix: Labyrinth
 api-version: 1.13
 loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops , Clans, ClansPro]
-authors: [ Hempfest, Modify, Illuminatiiiiii, ms5984 ]
+authors: [ Hempfest, Modify, ms5984, F1b3r ]
 description: The core library for hempfest plugins.

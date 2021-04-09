@@ -50,7 +50,7 @@ public class ColoredString {
 	}
 
 	private TextComponent translateHexComponent(String text) {
-		return new TextComponent(TextComponent.fromLegacyText(RGBApi.INSTANCE.toColoredMessage(text)));
+		return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', RGBApi.INSTANCE.toColoredMessage(text))));
 	}
 
 
