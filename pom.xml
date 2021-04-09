@@ -55,6 +55,7 @@
                                     <artifact>com.github.MilkBowl:VaultAPI</artifact>
                                     <includes>
                                         <include>net/milkbowl/vault/economy/Economy**</include>
+                                        <include>net/milkbowl/vault/permission/Permission**</include>
                                         <include>META-INF/**</include>
                                     </includes>
                                     <excludes>
