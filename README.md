@@ -5,7 +5,7 @@ It is an easy access spigot development library that assists you in areas that m
 
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 ### Importing with maven
-```POM
+```xml
 	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
@@ -19,7 +19,7 @@ It is an easy access spigot development library that assists you in areas that m
 	</dependency>
 ```
 ### Importing with gradle
-```POM
+```xml
 	allprojects {
 		repositories {
 			...
