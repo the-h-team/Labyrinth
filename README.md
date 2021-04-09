@@ -44,7 +44,7 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
-  - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#1-string-formatting)
+  - [String Utility](https://github.com/the-h-team/Labyrinth/blob/2c8f1ac9bd9d764badc28d758a2cd4b995972e25/src/main/java/com/github/sanctum/labyrinth/library/StringUtils.java#L28)
   - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
   - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#3-list-pagination)
   - [Automatic Command Pickup]()
