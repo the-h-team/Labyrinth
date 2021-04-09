@@ -19,7 +19,7 @@ It is an easy access spigot development library that assists you in areas that m
 	</dependency>
 ```
 ### Importing with gradle
-```xml
+```gradle
 	allprojects {
 		repositories {
 			...
