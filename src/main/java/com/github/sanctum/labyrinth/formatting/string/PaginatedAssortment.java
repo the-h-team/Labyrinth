@@ -117,7 +117,6 @@ public class PaginatedAssortment {
 		} else {
 			totalPageCount = (targetList.size() / linesPerPage) + 1;
 		}
-
 		if (page <= totalPageCount) {
 			p.sendMessage(new ColoredString(listTitle.replace("{PAGE}", page + "").replace("{TOTAL}", totalPageCount + ""), ColoredString.ColorType.MC).toString());
 			if (bordersPerPage >= 2) {
