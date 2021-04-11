@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ public class PaginatedAssortment {
 	private MapType type;
 
 	private int linesPerPage;
+	private int bordersPerPage = 1;
 	private String navigateCommand;
 	private Player p;
 
@@ -60,6 +62,11 @@ public class PaginatedAssortment {
 
 	public PaginatedAssortment setLinesPerPage(int linesPerPage) {
 		this.linesPerPage = linesPerPage;
+		return this;
+	}
+
+	public PaginatedAssortment setBordersPerPage(int bordersPerPage) {
+		this.bordersPerPage = bordersPerPage;
 		return this;
 	}
 
@@ -113,7 +120,9 @@ public class PaginatedAssortment {
 
 		if (page <= totalPageCount) {
 			p.sendMessage(new ColoredString(listTitle.replace("{PAGE}", page + "").replace("{TOTAL}", totalPageCount + ""), ColoredString.ColorType.MC).toString());
-
+			if (bordersPerPage >= 2) {
+				p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+			}
 			if (targetList.isEmpty()) {
 				p.sendMessage(new ColoredString("&fThe list is empty!", ColoredString.ColorType.MC).toString());
 			} else {
@@ -138,24 +147,39 @@ public class PaginatedAssortment {
 						}
 					}
 				}
-				int point;
-				point = page + 1;
+				int point = page + 1;
 				if (page >= 1) {
-					int last;
-					last = point - 1;
-					point = point + 1;
+					int last = point - 1;
+					point++;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 					if (page < (totalPageCount - 1)) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
+						BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+						BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
 					}
 					if (page == (totalPageCount - 1)) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
+						BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+						BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cYou are on the last page.");
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
 					}
 				}
 				if (page == 0) {
-					point = page + 1 + 1;
-					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-					p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
+					if ((page + 1) == totalPageCount) {
+						p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+						BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+						BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cThere is only one page.");
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
+					} else {
+						point = page + 2;
+						p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+						BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+						BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
+					}
 				}
 			}
 		} else {
@@ -168,6 +192,9 @@ public class PaginatedAssortment {
 	 */
 	public void exportFancy(int page) {
 		p.sendMessage(new ColoredString(listTitle, ColoredString.ColorType.MC).toString());
+		if (bordersPerPage >= 2) {
+			p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+		}
 		int totalPageCount = 1;
 		if ((targetList.size() % linesPerPage) == 0) {
 			if (targetList.size() > 0) {
@@ -195,24 +222,39 @@ public class PaginatedAssortment {
 						}
 					}
 				}
-				int point;
-				point = page + 1;
+				int point = page + 1;
 				if (page >= 1) {
-					int last;
-					last = point - 1;
-					point = point + 1;
+					int last = point - 1;
+					point++;
 					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 					if (page < (totalPageCount - 1)) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK&7]", "&7 : [", "&b&oNEXT&7]", "&b&oClick to go &d&oback a page", "&b&oClick to goto the &5&onext page", navigateCommand + " " + last, navigateCommand + " " + point));
+						BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+						BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
 					}
 					if (page == (totalPageCount - 1)) {
-						p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&c&oBACK", "&7]", "&b&oClick to go &d&oback a page", navigateCommand + " " + last));
+						BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+						BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cYou are on the last page.");
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
 					}
 				}
 				if (page == 0) {
-					point = page + 1 + 1;
-					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-					p.spigot().sendMessage(TextLib.getInstance().textRunnable("&7Navigate &b&o&m--&b> &7[", "&b&oNEXT", "&7]", "&b&oClick to goto the &5&onext page", navigateCommand + " " + point));
+					if ((page + 1) == totalPageCount) {
+						p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+						BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+						BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cThere is only one page.");
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
+					} else {
+						point = page + 2;
+						p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+						BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+						BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+						BaseComponent[] send = new BaseComponent[]{all, attach};
+						p.spigot().sendMessage(send);
+					}
 				}
 			}
 		} else {
@@ -234,6 +276,9 @@ public class PaginatedAssortment {
 				HashMap<String, Double> tempMap = new HashMap<>(targetMapDouble);
 
 				p.sendMessage(new ColoredString(listTitle, ColoredString.ColorType.MC).toString());
+				if (bordersPerPage >= 2) {
+					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+				}
 				int totalPageCount = 1;
 				if ((tempMap.size() % o) == 0) {
 					if (tempMap.size() > 0) {
@@ -268,7 +313,7 @@ public class PaginatedAssortment {
 								i1++;
 
 
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
+								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), nextTop, k, pageExact), String.format(commandToRun.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), nextTop)));
 
 							}
 							tempMap.remove(nextTop);
@@ -278,15 +323,37 @@ public class PaginatedAssortment {
 						}
 						int point = page + 1;
 						if (page >= 1) {
-							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 							int last = point - 1;
-							point = point + 1;
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
+							point++;
+							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+							if (page < (totalPageCount - 1)) {
+								BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+								BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
+							if (page == (totalPageCount - 1)) {
+								BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+								BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cYou are on the last page.");
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
 						}
 						if (page == 0) {
-							point = page + 2;
-							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
+							if ((page + 1) == totalPageCount) {
+								p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+								BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+								BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cThere is only one page.");
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							} else {
+								point = page + 2;
+								p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+								BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+								BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
 						}
 					}
 					// end line
@@ -299,6 +366,9 @@ public class PaginatedAssortment {
 				HashMap<String, Long> tempMap = new HashMap<>(targetMap);
 
 				p.sendMessage(new ColoredString(listTitle, ColoredString.ColorType.MC).toString());
+				if (bordersPerPage >= 2) {
+					p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+				}
 				int totalPageCount = 1;
 				if ((tempMap.size() % o) == 0) {
 					if (tempMap.size() > 0) {
@@ -332,8 +402,7 @@ public class PaginatedAssortment {
 							k++;
 							if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
 								i1++;
-								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText, k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage, nextTop, k, pageExact), String.format(commandToRun, nextTop)));
-
+								p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverText.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), k, nextTop, format(String.valueOf(nextTopAmount))), String.format(hoverTextMessage.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), nextTop, k, pageExact), String.format(commandToRun.replace("{PLACEMENT}", k + "").replace("{ENTRY}", nextTop).replace("{AMOUNT}", format(String.valueOf(nextTopAmount)) + "").replace("{PAGE}", pageExact + ""), nextTop)));
 
 							}
 							tempMap.remove(nextTop);
@@ -343,15 +412,37 @@ public class PaginatedAssortment {
 						}
 						int point = page + 1;
 						if (page >= 1) {
-							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 							int last = point - 1;
-							point = point + 1;
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7] : &7[", "&c&lCLICK&7]", "&b&oClick this to goto the &5&onext page.", "&b&oClick this to go &d&oback a page.", navigateCommand + " " + point, navigateCommand + " " + last));
+							point++;
+							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+							if (page < (totalPageCount - 1)) {
+								BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+								BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
+							if (page == (totalPageCount - 1)) {
+								BaseComponent all = TextLib.getInstance().textRunnable("&7Navigate ", "&3&l«", "&aGo back a page.", navigateCommand + " " + last);
+								BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cYou are on the last page.");
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
 						}
 						if (page == 0) {
-							point = page + 2;
-							p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable("&b&oNavigate &7[", "&3&lCLICK", "&7]", "&b&oClick this to goto the &5&onext page.", navigateCommand + " " + point));
+							if ((page + 1) == totalPageCount) {
+								p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+								BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+								BaseComponent attach = TextLib.getInstance().textHoverable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3»", "&cThere is only one page.");
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							} else {
+								point = page + 2;
+								p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
+								BaseComponent all = TextLib.getInstance().textHoverable("&7Navigate ", "&3«", "&cYou are on the first page.");
+								BaseComponent attach = TextLib.getInstance().textRunnable(" &r" + (page + 1) + "&7/&r" + totalPageCount, " &3&l»", "&aClick to go forward a page.", navigateCommand + " " + point);
+								BaseComponent[] send = new BaseComponent[]{all, attach};
+								p.spigot().sendMessage(send);
+							}
 						}
 					}
 					// end line
