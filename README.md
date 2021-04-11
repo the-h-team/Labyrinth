@@ -5,7 +5,7 @@ It is an easy access spigot development library that assists you in areas that m
 
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 ### Importing with maven
-```
+```xml
 	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
@@ -15,11 +15,11 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.3.3</version>
+	    <version>1.4.5</version>
 	</dependency>
 ```
 ### Importing with gradle
-```
+```gradle
 	allprojects {
 		repositories {
 			...
@@ -28,7 +28,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.3.3'
+	        implementation 'com.github.the-h-team:Labyrinth:1.4.5'
 	}
 ```
 
@@ -44,14 +44,30 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
-  - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#1-string-formatting)
+  - [String Utility](https://github.com/the-h-team/Labyrinth/blob/2c8f1ac9bd9d764badc28d758a2cd4b995972e25/src/main/java/com/github/sanctum/labyrinth/library/StringUtils.java#L28)
   - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
   - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#3-list-pagination)
-  - [Automatic registration]()
+  - [Automatic Command Pickup]()
   - [Base64 Serialization]()
-  - [Labyrinth PDC Uses]()
-  - [Custom GUI w/ MenuMan](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
+  - [Persistent Data Container]()
+  - [Singular GUI](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
   - [Applicable Data]()
+  - [Economy Interface Wrapper]()
+  - [Centered Caridnal Directions]()
+  - [EntityType Matcher]()
+  - [Material Matcher]()
+  - [Item Recipe Builder]()
+  - [Player/Console Message formatter]()
+  - [Player Skull Finder]()
+  - [Tab Completion Builder]()
+  - [Paginated GUI]()
+  - [Colored Component Builder]()
+  - [File Manager]()
+  - [Automatic Listener Pickup]()
+  - [Shareable/Interactable GUI]()
+  - [Cooldown Interface]()
+  - [Custom ID Generation]()
+  - [Unique ID Object]()
   - [Task Scheduling]()
 
 ---
@@ -63,5 +79,8 @@ A spigot development tool that makes certain tasks much easier.
 *Ships with shaded, unedited LGPLv3 components:*
 - *from **VaultAPI** by [Morgan Humes](https://github.com/MilkBowl/) (aka MilkBowl); sources for these components can be found [here](https://github.com/MilkBowl/VaultAPI/).*
 - *from **Enterprise** by [Sanctum](https://github.com/the-h-team/); sources for included components can be found [here](https://github.com/the-h-team/Enterprise).*
+
+*Compiled + not-shaded & used MIT components:*
+- *from **RGBApi** by [F1b3r](https://github.com/F1b3rDEV); sources for the used components can be found [here](https://github.com/F1b3rDEV/minecraft-spigot-rgb-chat-support).*
 
 *You may inspect the [pom.xml](./pom.xml) for further detail on the shading process.*
