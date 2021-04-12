@@ -53,7 +53,7 @@ _API Table of Contents_:
   - [Singular GUI](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
   - [Applicable Data]()
   - [Economy Interface Wrapper]()
-  - [Centered Caridnal Directions]()
+  - [Centered Cardinal Directions]()
   - [EntityType Matcher]()
   - [Material Matcher]()
   - [Item Recipe Builder]()
@@ -80,7 +80,7 @@ A spigot development tool that makes certain tasks much easier.
 - *from **VaultAPI** by [Morgan Humes](https://github.com/MilkBowl/) (aka MilkBowl); sources for these components can be found [here](https://github.com/MilkBowl/VaultAPI/).*
 - *from **Enterprise** by [Sanctum](https://github.com/the-h-team/); sources for included components can be found [here](https://github.com/the-h-team/Enterprise).*
 
-*Compiled + not-shaded & used MIT components:*
-- *from **RGBApi** by [F1b3r](https://github.com/F1b3rDEV); sources for the used components can be found [here](https://github.com/F1b3rDEV/minecraft-spigot-rgb-chat-support).*
+*MIT-derived components:*
+- *Java port of **RGBApi** by [F1b3r](https://github.com/F1b3rDEV); original Kotlin sources can be found [here](https://github.com/F1b3rDEV/minecraft-spigot-rgb-chat-support).*
 
 *You may inspect the [pom.xml](./pom.xml) for further detail on the shading process.*

@@ -34,7 +34,7 @@ public class ColoredString {
 				r = "Cannot convert raw component to String";
 				break;
 			case HEX:
-				r = ChatColor.translateAlternateColorCodes('&', RGBApi.INSTANCE.toColoredMessage(text));
+				r = ChatColor.translateAlternateColorCodes('&', RGBApi.toColoredMessage(text));
 				break;
 		}
 		return r;
@@ -50,7 +50,7 @@ public class ColoredString {
 	}
 
 	private TextComponent translateHexComponent(String text) {
-		return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', RGBApi.INSTANCE.toColoredMessage(text))));
+		return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', RGBApi.toColoredMessage(text))));
 	}
 
 

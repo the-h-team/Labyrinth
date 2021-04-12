@@ -121,13 +121,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.F1b3rDEV</groupId>
-            <artifactId>minecraft-spigot-rgb-chat-support</artifactId>
-            <version>1.0.5</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/rgb-chat.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
