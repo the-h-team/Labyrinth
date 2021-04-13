@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import com.github.sanctum.labyrinth.formatting.string.GradientColor;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +31,13 @@ public class StringUtils {
 	}
 
 	/**
-	 * Check if the provided regex contains (using case insensitive context) a target regex.
+	 * Check if the provided context contains (using case insensitive options) a target regex.
 	 *
 	 * @param regex The target regex to check for.
 	 * @return true if the provided regex contains a case insensitive match from the target regex.
 	 */
 	public boolean containsIgnoreCase(CharSequence regex) {
-		return Pattern.compile(Pattern.quote(this.context), Pattern.CASE_INSENSITIVE).matcher(regex).find();
+		return Pattern.compile(Pattern.quote(regex.toString()), Pattern.CASE_INSENSITIVE).matcher(this.context).find();
 	}
 
 	/**
@@ -50,6 +51,18 @@ public class StringUtils {
 	 */
 	public String generateID(int size) {
 		return new RandomID(size, this.context).generate();
+	}
+
+	/**
+	 * Form a custom gradient to wrap the provided context with.
+	 * Then decide whether or not to translate it or get the raw joined string back.
+	 *
+	 * @param from The starting Hex code.
+	 * @param to   The ending Hex code.
+	 * @return A custom color gradient using the provided context.
+	 */
+	public GradientColor gradient(CharSequence from, CharSequence to) {
+		return new GradientColor(this.context, from, to);
 	}
 
 	/**
@@ -68,7 +81,10 @@ public class StringUtils {
 	 * @return The translated non-colored placeholder set string.
 	 */
 	public String papi(OfflinePlayer source) {
-		return PlaceholderAPI.setPlaceholders(source, this.context);
+		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+			return PlaceholderAPI.setPlaceholders(source, this.context);
+		}
+		return "{PAPI-MISSING}:" + this.context;
 	}
 
 	/**

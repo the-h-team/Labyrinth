@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.command;
 
-import com.google.common.collect.Sets;
 import com.github.sanctum.labyrinth.Labyrinth;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -13,13 +13,12 @@ import java.util.jar.JarFile;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CommandBuilder {
 
-	Plugin plugin;
+	private final Plugin plugin;
 
 	public CommandBuilder(Plugin instance) {
 		this.plugin = instance;
@@ -28,6 +27,7 @@ public class CommandBuilder {
 	/**
 	 * Look for any compatible object types representative of Command within a
 	 * desired package location and automatically register each of them individually if possible.
+	 *
 	 * @param packageName The location to query.
 	 */
 	public void compileFields(String packageName) {

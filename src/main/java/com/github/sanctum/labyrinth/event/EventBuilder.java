@@ -1,9 +1,8 @@
 package com.github.sanctum.labyrinth.event;
 
-import com.google.common.collect.Sets;
 import com.github.sanctum.labyrinth.Labyrinth;
+import com.google.common.collect.Sets;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.util.Collections;
@@ -11,15 +10,13 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class EventBuilder {
 
-	Plugin plugin;
+	private final Plugin plugin;
 
 	public EventBuilder(Plugin instance) {
 		this.plugin = instance;

@@ -3,6 +3,6 @@ version: 1.4.5
 main: com.github.sanctum.labyrinth.Labyrinth
 prefix: Labyrinth
 api-version: 1.13
-loadbefore: [ hEssentials, hEssentialsChat, GoldEconomy, hEssentialShops , Clans, ClansPro]
+loadbefore: [ myEssentials, hEssentials, VanillaShop, RetroConomy , Clans, ClansPro ]
 authors: [ Hempfest, Modify, ms5984, F1b3r ]
-description: The core library for hempfest plugins.
+description: The core library for large sanctum projects.

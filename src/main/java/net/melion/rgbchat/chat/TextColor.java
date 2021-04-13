@@ -47,4 +47,16 @@ public final class TextColor {
         this.green = hexColor >> 8 & 0xFF;
         this.blue = hexColor & 0xFF;
     }
+
+    public int getBlue() {
+        return blue;
+    }
+
+    public int getGreen() {
+        return green;
+    }
+
+    public int getRed() {
+        return red;
+    }
 }

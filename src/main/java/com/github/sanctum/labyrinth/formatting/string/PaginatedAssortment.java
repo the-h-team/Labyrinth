@@ -215,9 +215,9 @@ public class PaginatedAssortment {
 					if ((((page * linesPerPage) + i + 1) == k) && (k != ((page * linesPerPage) + linesPerPage + 1))) {
 						i++;
 						if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverText, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(hoverTextMessage, PlaceholderAPI.setBracketPlaceholders(p, entry)), String.format(commandToRun, PlaceholderAPI.setBracketPlaceholders(p, entry))));
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText.replace("{ENTRY}", PlaceholderAPI.setPlaceholders(p, entry)), PlaceholderAPI.setPlaceholders(p, entry)), String.format(hoverText.replace("{ENTRY}", PlaceholderAPI.setPlaceholders(p, entry)), PlaceholderAPI.setPlaceholders(p, entry)), String.format(hoverTextMessage.replace("{ENTRY}", PlaceholderAPI.setPlaceholders(p, entry)), PlaceholderAPI.setPlaceholders(p, entry)), String.format(commandToRun.replace("{ENTRY}", PlaceholderAPI.setPlaceholders(p, entry)), PlaceholderAPI.setPlaceholders(p, entry))));
 						} else {
-							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText, entry), String.format(hoverText, entry), String.format(hoverTextMessage, entry), String.format(commandToRun, entry)));
+							p.spigot().sendMessage(TextLib.getInstance().textRunnable(String.format(normalText.replace("{ENTRY}", entry), entry), String.format(hoverText.replace("{ENTRY}", entry), entry), String.format(hoverTextMessage.replace("{ENTRY}", entry), entry), String.format(commandToRun.replace("{ENTRY}", entry), entry)));
 						}
 					}
 				}
