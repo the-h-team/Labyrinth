@@ -65,7 +65,7 @@ _API Table of Contents_:
   - [File Manager]()
   - [Automatic Listener Pickup]()
   - [Shareable/Interactable GUI]()
-  - [Cooldown Interface]()
+  - [Cooldown Interface](https://github.com/the-h-team/Labyrinth/wiki/Cooldowns)
   - [Custom ID Generation]()
   - [Unique ID Object]()
   - [Task Scheduling]()
