@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,7 +13,7 @@ public abstract class UniformedComponents<T> {
 
 	public abstract List<T> sort();
 
-	public abstract List<T> sort(Comparable<? super T> comparable);
+	public abstract List<T> sort(Comparator<? super T> comparable);
 
 	public abstract Collection<T> collect();
 
