@@ -31,6 +31,27 @@
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest:AnvilGUI:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_10_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_11_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_12_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_13_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_13_R2:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_14_4_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_14_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_15_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_16_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_16_R2:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_16_R3:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_16_R5:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_7_R4:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_8_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_8_R2:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_8_R3:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_9_R1:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-1_9_R2:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.Hempfest.AnvilGUI:anvilgui-abstraction:1.5.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.the-h-team:Enterprise:1.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.jetbrains:annotations:20.1.0" level="project" />
   </component>

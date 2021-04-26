@@ -127,6 +127,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.Hempfest</groupId>
+            <artifactId>AnvilGUI</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
             <version>1.5</version>

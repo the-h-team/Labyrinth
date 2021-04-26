@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -25,7 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Labyrinth extends JavaPlugin implements Listener {
+public final class Labyrinth extends JavaPlugin {
 
 	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	private static Labyrinth instance;
@@ -80,6 +79,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
+
 	}
 
 	@Override
