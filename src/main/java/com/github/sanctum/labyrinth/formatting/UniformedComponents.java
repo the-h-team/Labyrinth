@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public abstract class UniformedComponents<T> {
+public abstract class UniformedComponents<T> implements Serializable {
+
+	private static final long serialVersionUID = 380726810757536184L;
 
 	public abstract List<T> list();
 
