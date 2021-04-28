@@ -35,6 +35,15 @@ public class PaginatedClick {
 	}
 
 	/**
+	 * Get the current page.
+	 *
+	 * @return The page the player is currently viewing.
+	 */
+	public int getPage() {
+		return builder.page;
+	}
+
+	/**
 	 * Get the player.
 	 *
 	 * @return The player involved in the operation.

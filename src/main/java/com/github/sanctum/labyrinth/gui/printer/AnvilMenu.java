@@ -16,45 +16,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- * An anvil gui, used for gathering a user's input
+ * The final output of an {@link AnvilBuilder}
  *
- * @author Wesley Smith
- * @since 1.0
+ * @author Hempfest
  */
 public class AnvilMenu {
 
-    /**
-     * The player who has the GUI open
-     */
-    private final Player holder;
-
-    /**
-     * The {@link VersionWrapper} for this server
-     */
+    private Player holder;
     private final VersionWrapper nms;
-
     private final String title;
-
-    /**
-     * The container id of the inventory, used for NMS methods
-     */
-    private int containerId;
-    /**
-     * The inventory that is used on the Bukkit side of things
-     */
-    private Inventory inventory;
-    /**
-     * The listener holder class
-     */
     private final AnvilListener listener;
-
+    private int containerId;
+    private Inventory inventory;
     protected ItemBuilder LEFT_ITEM;
-
     protected ItemBuilder RIGHT_ITEM;
-
-    /**
-     * Represents the state of the inventory being open
-     */
+    protected AnvilCloseEvent event;
     private boolean visible;
 
 
@@ -67,7 +43,39 @@ public class AnvilMenu {
         this.nms = new VersionMatcher().match();
     }
 
+    public AnvilMenu(String title, ItemBuilder left, ItemBuilder right) {
+        this.LEFT_ITEM = left;
+        this.title = title;
+        this.RIGHT_ITEM = right;
+        this.listener = new AnvilListener();
+        this.nms = new VersionMatcher().match();
+    }
+
+    /**
+     * Set who is going to be viewing this inventory.
+     *
+     * @param player The viewer of the gui.
+     * @return The same AnvilMenu.
+     */
+    public AnvilMenu setViewer(Player player) {
+        this.holder = player;
+        return this;
+    }
+
+    public AnvilMenu applyClosingLogic(AnvilCloseEvent event) {
+        this.event = event;
+        return this;
+    }
+
+    /**
+     * Open the menu for the provided player.
+     */
     public void open() {
+
+        if (this.holder == null) {
+            throw new IllegalStateException("No craft player was found to source the menu to.");
+        }
+
         nms.handleInventoryCloseEvent(holder);
         nms.setActiveContainerDefault(holder);
 
@@ -77,10 +85,10 @@ public class AnvilMenu {
 
         inventory = nms.toBukkitInventory(container);
 
-        inventory.setItem(Slot.INPUT_LEFT, LEFT_ITEM.item);
+        inventory.setItem(Slot.INPUT_LEFT.get(), LEFT_ITEM.item);
 
         if (RIGHT_ITEM != null) {
-            inventory.setItem(Slot.INPUT_RIGHT, RIGHT_ITEM.item);
+            inventory.setItem(Slot.INPUT_RIGHT.get(), RIGHT_ITEM.item);
         }
 
         containerId = nms.getNextContainerId(holder, container);
@@ -95,7 +103,8 @@ public class AnvilMenu {
     /**
      * Closes the inventory if it's open.
      *
-     * @throws IllegalArgumentException If the inventory isn't open
+     * @param sendClosePacket If the inventory is a natural event based close.
+     * @throws IllegalArgumentException If the inventory isn't visible
      */
     public void closeInventory(boolean sendClosePacket) {
         if (!visible)
@@ -110,31 +119,62 @@ public class AnvilMenu {
         HandlerList.unregisterAll(listener);
     }
 
+    /**
+     * Returns the inventory for this anvil menu.
+     *
+     * @return The inventory for this menu.
+     */
     public Inventory getInventory() {
         return inventory;
     }
 
+    /**
+     * Get the title of this menu.
+     *
+     * @return The menu title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Gets the {@link Listener} for this menu.
+     *
+     * @return The listener for this menu.
+     */
     public AnvilListener getListener() {
         return listener;
     }
 
+    /**
+     * @return The left item builder.
+     */
     public ItemBuilder getLeft() {
         return LEFT_ITEM;
     }
 
+    /**
+     * @return The right item builder.
+     */
     public ItemBuilder getRight() {
         return RIGHT_ITEM;
     }
 
+    /**
+     * Check if the menu is open for anyone.
+     *
+     * @return false if the menu isnt currently open
+     */
     public boolean isVisible() {
         return visible;
     }
 
-    public Player getHolder() {
+    /**
+     * Get whos viewing the menu.
+     *
+     * @return Get the viewer of the inventory.
+     */
+    public Player getViewer() {
         return holder;
     }
 
@@ -148,7 +188,7 @@ public class AnvilMenu {
             if (e.getInventory().equals(inventory)) {
                 e.setCancelled(true);
                 final Player clicker = (Player) e.getWhoClicked();
-                if (e.getRawSlot() == Slot.OUTPUT) {
+                if (e.getRawSlot() == Slot.OUTPUT.get()) {
                     final ItemStack clicked = inventory.getItem(e.getRawSlot());
                     if (clicked == null || clicked.getType() == Material.AIR) return;
                     if (getLeft() != null && getLeft().click != null) {
@@ -170,9 +210,17 @@ public class AnvilMenu {
 
         @EventHandler
         public void onInventoryClose(InventoryCloseEvent e) {
+
+            if (!(e.getPlayer() instanceof Player))
+                return;
+
             if (e.getInventory().equals(inventory)) {
-                if (visible)
+                if (visible) {
+                    if (event != null) {
+                        event.execute((Player) e.getPlayer(), e.getView(), AnvilMenu.this);
+                    }
                     closeInventory(true);
+                }
                 e.getInventory().clear();
             }
         }
@@ -180,24 +228,21 @@ public class AnvilMenu {
 
 
     /**
-     * Class wrapping the magic constants of slot numbers in an anvil GUI
+     * Encapsulates {@link Integer} data needed to provide slot values to the {@link AnvilMenu} GUI.
      */
-    public static class Slot {
+    public enum Slot {
 
-        /**
-         * The slot on the far left, where the first input is inserted. An {@link ItemStack} is always inserted
-         * here to be renamed
-         */
-        public static final int INPUT_LEFT = 0;
-        /**
-         * Not used, but in a real anvil you are able to put the second item you want to combine here
-         */
-        public static final int INPUT_RIGHT = 1;
-        /**
-         * The output slot, where an item is put when two items are combined from {@link #INPUT_LEFT} and
-         * {@link #INPUT_RIGHT} or {@link #INPUT_LEFT} is renamed
-         */
-        public static final int OUTPUT = 2;
+        INPUT_LEFT(0), INPUT_RIGHT(1), OUTPUT(2);
+
+        private final int slot;
+
+        Slot(int slot) {
+            this.slot = slot;
+        }
+
+        public int get() {
+            return slot;
+        }
 
     }
 

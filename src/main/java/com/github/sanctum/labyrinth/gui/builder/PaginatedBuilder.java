@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -34,7 +34,7 @@ public final class PaginatedBuilder {
 
 	protected Inventory inv;
 	protected final Plugin plugin;
-	protected int amountPer;
+	protected int amountPer = 28;
 	protected int index;
 	protected int page;
 	protected int size;
@@ -186,8 +186,8 @@ public final class PaginatedBuilder {
 	 *
 	 * @return An spare element builder.
 	 */
-	public SpareElement newItem() {
-		return new SpareElement(this);
+	public SpareElements addElements() {
+		return new SpareElements(this);
 	}
 
 	/**
@@ -280,26 +280,30 @@ public final class PaginatedBuilder {
 						item = new ItemStack(Material.valueOf("SKULL_ITEM"));
 					}
 
-					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
-					Bukkit.getPluginManager().callEvent(event);
+					if (inventoryProcess != null) {
+						ProcessElement element = new ProcessElement(this, item, members.get(index));
+						inventoryProcess.accept(element);
 
-					Schedule.sync(() -> {
-						inv.addItem(event.getItem());
-						if (!contents.contains(event.getItem())) {
-							contents.add(event.getItem());
-						}
-						if (fill != null) {
+						Schedule.sync(() -> {
+							inv.addItem(element.getItem());
 							Schedule.sync(() -> {
-								for (int l = 0; l < size; l++) {
-									if (inv.getItem(l) == null) {
-										inv.setItem(l, fill);
-									}
+								if (!contents.contains(element.getItem())) {
+									contents.add(element.getItem());
 								}
 							}).debug().wait(1);
-						}
-					}).debug().run();
+						}).debug().run();
+					}
 				}
 			}
+		}
+		if (fill != null) {
+			Schedule.sync(() -> {
+				for (int l = 0; l < size; l++) {
+					if (inv.getItem(l) == null) {
+						inv.setItem(l, fill);
+					}
+				}
+			}).debug().wait(1);
 		}
 		ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
 		ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
@@ -411,28 +415,30 @@ public final class PaginatedBuilder {
 						item = new ItemStack(Material.valueOf("SKULL_ITEM"));
 					}
 
-					SyncMenuItemPreProcessEvent event = new SyncMenuItemPreProcessEvent(this, members.get(index), item);
-					Bukkit.getPluginManager().callEvent(event);
+					if (inventoryProcess != null) {
+						ProcessElement element = new ProcessElement(this, item, members.get(index));
+						inventoryProcess.accept(element);
 
-					Schedule.sync(() -> {
-						inv.addItem(event.getItem());
 						Schedule.sync(() -> {
-							if (!contents.contains(event.getItem())) {
-								contents.add(event.getItem());
-							}
-						}).debug().wait(1);
-						if (fill != null) {
+							inv.addItem(element.getItem());
 							Schedule.sync(() -> {
-								for (int l = 0; l < size; l++) {
-									if (inv.getItem(l) == null) {
-										inv.setItem(l, fill);
-									}
+								if (!contents.contains(element.getItem())) {
+									contents.add(element.getItem());
 								}
 							}).debug().wait(1);
-						}
-					}).debug().run();
+						}).debug().run();
+					}
 				}
 			}
+		}
+		if (fill != null) {
+			Schedule.sync(() -> {
+				for (int l = 0; l < size; l++) {
+					if (inv.getItem(l) == null) {
+						inv.setItem(l, fill);
+					}
+				}
+			}).debug().wait(1);
 		}
 		ItemStack left = navLeft.keySet().stream().findFirst().orElse(null);
 		ItemStack right = navRight.keySet().stream().findFirst().orElse(null);
@@ -459,8 +465,50 @@ public final class PaginatedBuilder {
 	/**
 	 * Customize a page-back navigation key for the menu.
 	 *
-	 * @param item The item to be used to page-back with.
-	 * @param slot The slot the item will reside permanently.
+	 * @param item  The item to be used to page-back with.
+	 * @param slot  The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder setNavigationLeft(Supplier<ItemStack> item, int slot, InventoryClick click) {
+		this.navLeft.putIfAbsent(item.get(), slot);
+		this.actions.putIfAbsent(item.get(), click);
+		return this;
+	}
+
+	/**
+	 * Customize a page-forward navigation key for the menu.
+	 *
+	 * @param item  The item to be used to page-forward with.
+	 * @param slot  The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder setNavigationRight(Supplier<ItemStack> item, int slot, InventoryClick click) {
+		this.navRight.putIfAbsent(item.get(), slot);
+		this.actions.putIfAbsent(item.get(), click);
+		return this;
+	}
+
+	/**
+	 * Customize a page-exit navigation key for the menu.
+	 *
+	 * @param item  The item to be used to page-exit with.
+	 * @param slot  The slot the item will reside permanently.
+	 * @param click The inventory click action for the item.
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder setNavigationBack(Supplier<ItemStack> item, int slot, InventoryClick click) {
+		this.navBack.putIfAbsent(item.get(), slot);
+		this.actions.putIfAbsent(item.get(), click);
+		return this;
+	}
+
+	/**
+	 * Customize a page-back navigation key for the menu.
+	 *
+	 * @param item  The item to be used to page-back with.
+	 * @param slot  The slot the item will reside permanently.
 	 * @param click The inventory click action for the item.
 	 * @return The same menu builder.
 	 */
@@ -473,8 +521,8 @@ public final class PaginatedBuilder {
 	/**
 	 * Customize a page-forward navigation key for the menu.
 	 *
-	 * @param item The item to be used to page-forward with.
-	 * @param slot The slot the item will reside permanently.
+	 * @param item  The item to be used to page-forward with.
+	 * @param slot  The slot the item will reside permanently.
 	 * @param click The inventory click action for the item.
 	 * @return The same menu builder.
 	 */
@@ -487,8 +535,8 @@ public final class PaginatedBuilder {
 	/**
 	 * Customize a page-exit navigation key for the menu.
 	 *
-	 * @param item The item to be used to page-exit with.
-	 * @param slot The slot the item will reside permanently.
+	 * @param item  The item to be used to page-exit with.
+	 * @param slot  The slot the item will reside permanently.
 	 * @param click The inventory click action for the item.
 	 * @return The same menu builder.
 	 */
@@ -606,17 +654,6 @@ public final class PaginatedBuilder {
 				return false;
 			}
 			return false;
-		}
-
-		@EventHandler(priority = EventPriority.NORMAL)
-		public void onProcess(SyncMenuItemPreProcessEvent e) throws IllegalMenuStateException {
-			if (!e.getId().equals(getId()))
-				return;
-			if (inventoryProcess == null) {
-				throw new IllegalMenuStateException("No inventory processing procedure was found for menu '" + ChatColor.stripColor(title) + "'");
-			} else {
-				inventoryProcess.processEvent(new ProcessElement(e));
-			}
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)

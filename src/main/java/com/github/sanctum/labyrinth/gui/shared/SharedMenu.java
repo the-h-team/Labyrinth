@@ -130,6 +130,19 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
+	 * Remove a configured option from this menu's cache.
+	 *
+	 * @param option The option to remove.
+	 * @return false if an element that cant be removed gets hit.
+	 */
+	public final synchronized boolean removeOption(final @NotNull Option... option) {
+		for (Option o : option) {
+			return removeOption(o);
+		}
+		return false;
+	}
+
+	/**
 	 * Add a configured option to this menu's cache.
 	 *
 	 * @param option The option to add.
@@ -139,6 +152,19 @@ public abstract class SharedMenu implements Listener {
 		if (!MENU_OPTIONS.contains(option)) {
 			MENU_OPTIONS.add(option);
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Add a configured option to this menu's cache.
+	 *
+	 * @param option The option to add.
+	 * @return false if an element that cant be added gets used.
+	 */
+	public final synchronized boolean addOption(final @NotNull Option... option) {
+		for (Option o : option) {
+			return addOption(o);
 		}
 		return false;
 	}
@@ -209,7 +235,7 @@ public abstract class SharedMenu implements Listener {
 	 * Unregister the listener's for this menu.
 	 */
 	public final synchronized void unregister() {
-		HandlerList.unregisterAll(LISTENER_MAP.get(plugin));
+		HandlerList.unregisterAll(LISTENER_MAP.get(getId()));
 	}
 
 	/**
