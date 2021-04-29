@@ -18,7 +18,6 @@ import org.bukkit.Bukkit;
 public class DataContainer extends DataStream implements Serializable {
 
 	private static final Map<HUID, DataStream> metaDataContainer = new HashMap<>();
-	private static final long serialVersionUID = 284089877248492054L;
 
 	private final String metaId;
 
