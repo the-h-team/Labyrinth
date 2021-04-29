@@ -727,12 +727,12 @@ public final class PaginatedBuilder {
 						return;
 					}
 					if (contents.stream().anyMatch(i -> i.isSimilar(item) || metaMatches(i, item))) {
-						actions.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
+						actions.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
 						e.setCancelled(true);
 						return;
 					}
 					if (navBack.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
+						actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
 						e.setCancelled(true);
 					}
 					if (navLeft.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
@@ -744,7 +744,7 @@ public final class PaginatedBuilder {
 							if (!event1.isCancelled()) {
 								page -= 1;
 							}
-							actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
+							actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
 						}
 						e.setCancelled(true);
 					}
@@ -754,7 +754,7 @@ public final class PaginatedBuilder {
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
 								page += 1;
-								actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item));
+								actions.get(item).clickEvent(new PaginatedClick(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
 							}
 						} else {
 							p.sendMessage(alreadyLastPage);

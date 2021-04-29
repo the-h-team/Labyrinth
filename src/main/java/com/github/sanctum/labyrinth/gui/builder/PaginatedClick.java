@@ -18,11 +18,20 @@ public class PaginatedClick {
 
 	private final PaginatedBuilder builder;
 
-	protected PaginatedClick(PaginatedBuilder builder, Player p, InventoryView view, ItemStack item) {
+	private final boolean isLeftClick;
+
+	private final boolean isRightClick;
+
+	private final boolean isShiftClick;
+
+	protected PaginatedClick(PaginatedBuilder builder, Player p, InventoryView view, ItemStack item, boolean isLeft, boolean isRight, boolean isShift) {
 		this.builder = builder;
 		this.p = p;
 		this.view = view;
 		this.clickedItem = item;
+		this.isLeftClick = isLeft;
+		this.isRightClick = isRight;
+		this.isShiftClick = isShift;
 	}
 
 	/**
@@ -67,5 +76,32 @@ public class PaginatedClick {
 	 */
 	public InventoryView getView() {
 		return view;
+	}
+
+	/**
+	 * Check if the click was a left mouse button click.
+	 *
+	 * @return false if the click wasn't a left mouse button.
+	 */
+	public boolean isLeftClick() {
+		return isLeftClick;
+	}
+
+	/**
+	 * Check if the click was a shift button click.
+	 *
+	 * @return false if the click wasn't a shift button click.
+	 */
+	public boolean isShiftClick() {
+		return isShiftClick;
+	}
+
+	/**
+	 * Check if the click was a right mouse button click.
+	 *
+	 * @return false if the click wasn't a right mouse button.
+	 */
+	public boolean isRightClick() {
+		return isRightClick;
 	}
 }
