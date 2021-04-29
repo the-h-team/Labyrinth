@@ -5,6 +5,8 @@ import java.io.Serializable;
 
 public abstract class DataStream implements Serializable {
 
+	private static final long serialVersionUID = -5132123038980309392L;
+
 	public abstract HUID getId();
 
 	public abstract String value();

@@ -119,17 +119,11 @@ public class StringUtils {
 	 *
 	 * @param list The list to append the provided context to.
 	 * @return The formatted origin list.
+	 * @deprecated replaced by new {@link ListUtils} class.
 	 */
+	@Deprecated
 	public List<String> join(List<String> list) {
-		List<String> array = new ArrayList<>();
-		for (int i = 0; i < list.size(); i++) {
-			if (i != list.size() - 1) {
-				array.add(list.get(i) + this.context);
-			} else {
-				array.add(list.get(i));
-			}
-		}
-		return array;
+		return ListUtils.use(list).append(string -> string + this.context);
 	}
 
 

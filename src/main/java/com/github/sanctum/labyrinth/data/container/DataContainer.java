@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 public class DataContainer extends DataStream implements Serializable {
 
 	private static final Map<HUID, DataStream> metaDataContainer = new HashMap<>();
+	private static final long serialVersionUID = 284089877248492054L;
 
 	private final String metaId;
 
@@ -38,6 +39,16 @@ public class DataContainer extends DataStream implements Serializable {
 		this.metaId = metaId;
 		instance = this;
 		huid = HUID.randomID();
+	}
+
+	/**
+	 * Start construction on a new data stream.
+	 *
+	 * @param metaId The unique id for this persistent container. ONLY [_-] chars allowed.
+	 * @return An {@link DataStream} builder.
+	 */
+	public static DataContainer build(String metaId) {
+		return new DataContainer(metaId);
 	}
 
 	@Override
@@ -124,6 +135,28 @@ public class DataContainer extends DataStream implements Serializable {
 		} catch (NullPointerException ignored) {
 		}
 		return result;
+	}
+
+	/**
+	 * Load an instance of the same meta data but allocate new values to it.
+	 *
+	 * @param huid    The id to load from cache
+	 * @param persist if temp result null persist into hard storage?
+	 * @return Gets a data stream builder retaining the values of the old container.
+	 * @throws IllegalAccessException If the stream is persistent and access to it was denied or non-existent.
+	 */
+	public static DataContainer reload(HUID huid, boolean persist) throws IllegalAccessException {
+		DataStream stream = loadInstance(huid, persist);
+		if (stream != null) {
+			DataContainer c = (DataContainer) stream;
+			DataContainer move = build(c.metaId);
+			move.values.addAll(c.values);
+			deleteInstance(c.getId());
+			move.storeTemp();
+			move.saveMeta();
+			return move;
+		}
+		throw new IllegalAccessException("Access to this data stream was denied or the parent location is non-existent.");
 	}
 
 	/**
