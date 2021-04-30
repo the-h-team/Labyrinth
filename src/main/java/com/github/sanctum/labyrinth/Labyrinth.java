@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
@@ -79,7 +80,7 @@ public final class Labyrinth extends JavaPlugin {
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
-
+		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 	}
 
 	@Override
