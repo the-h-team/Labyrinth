@@ -188,22 +188,24 @@ public class AnvilMenu {
             if (e.getInventory().equals(inventory)) {
                 e.setCancelled(true);
                 final Player clicker = (Player) e.getWhoClicked();
-                if (e.getRawSlot() == Slot.OUTPUT.get()) {
+                if (e.getRawSlot() == Slot.OUTPUT.get() || e.getRawSlot() == Slot.OUTPUT.get()) {
                     final ItemStack clicked = inventory.getItem(e.getRawSlot());
                     if (clicked == null || clicked.getType() == Material.AIR) return;
                     if (getLeft() != null && getLeft().click != null) {
-                        if (getRight() != null && getRight().click != null) {
-                            if (clicked.getType() == getRight().item.getType()) {
-                                final ItemMeta meta = clicked.getItemMeta();
-                                getRight().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
-                                return;
-                            }
-                        }
                         if (clicked.getType() == getLeft().item.getType()) {
                             final ItemMeta meta = clicked.getItemMeta();
                             getLeft().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
                         }
                     } else closeInventory(false);
+                } else {
+                    final ItemStack clicked = inventory.getItem(e.getRawSlot());
+                    if (clicked == null || clicked.getType() == Material.AIR) return;
+                    if (getRight() != null && getRight().click != null) {
+                        if (clicked.getType() == getRight().item.getType()) {
+                            final ItemMeta meta = clicked.getItemMeta();
+                            getRight().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
+                        }
+                    }
                 }
             }
         }
