@@ -13,9 +13,14 @@ public class GradientColor implements CustomColor {
 
 	private final CharSequence end;
 
-	private final String context;
+	private String context;
 
 	private String name;
+
+	public GradientColor(CharSequence start, CharSequence end) {
+		this.start = start;
+		this.end = end;
+	}
 
 	public GradientColor(String context, CharSequence start, CharSequence end) {
 		this.context = context;
@@ -36,8 +41,10 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * @param name
-	 * @return
+	 * Provide a name for this color.
+	 *
+	 * @param name The name of the color.
+	 * @return The same gradient color object.
 	 */
 	public GradientColor name(String name) {
 		this.name = name;
@@ -45,7 +52,18 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * @return
+	 * Provide context to wrap.
+	 *
+	 * @param context The context to wrap.
+	 * @return The same gradient color object.
+	 */
+	public GradientColor context(String context) {
+		this.context = context;
+		return this;
+	}
+
+	/**
+	 * @return The name of the color
 	 */
 	@Override
 	public String name() {
@@ -53,7 +71,9 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * @return
+	 * Gets the un-translated formatted context.
+	 *
+	 * @return The gradient formatted context un-translated.
 	 */
 	@Override
 	public String join() {
@@ -61,7 +81,9 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * @return
+	 * Translate the colorized context.
+	 *
+	 * @return The translated gradient formatted context as a base component array.
 	 */
 	@Override
 	public BaseComponent[] build() {
@@ -69,7 +91,9 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * @return
+	 * Translate the colorized context.
+	 *
+	 * @return The translated gradient formatted context.
 	 */
 	@Override
 	public String translate() {

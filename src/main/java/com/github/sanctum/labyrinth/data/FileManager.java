@@ -74,8 +74,36 @@ public class FileManager {
             OutputStream out = new FileOutputStream(file);
             byte[] buf = new byte[1024];
             int len;
-            while((len=in.read(buf))>0){
-                out.write(buf,0,len);
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.close();
+            in.close();
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("File is a directory!", e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to write to file! See log:", e);
+        }
+    }
+
+    /**
+     * Copy an InputStream directly to a given File.
+     * <p>
+     * Useful for placing resources retrieved from a JavaPlugin
+     * implementation at custom locations.
+     *
+     * @param in      an InputStream, likely a plugin resource
+     * @param manager the manager to locate to.
+     * @throws IllegalArgumentException if the file describes a directory
+     * @throws IllegalStateException    if write is unsuccessful
+     */
+    public static void copy(InputStream in, FileManager manager) {
+        try {
+            OutputStream out = new FileOutputStream(manager.getFile());
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
             }
             out.close();
             in.close();

@@ -32,6 +32,7 @@ public class AnvilMenu {
     protected ItemBuilder RIGHT_ITEM;
     protected AnvilCloseEvent event;
     private boolean visible;
+    private boolean empty;
 
 
     public AnvilMenu(Player holder, String title, ItemBuilder left, ItemBuilder right) {
@@ -62,6 +63,22 @@ public class AnvilMenu {
         return this;
     }
 
+    /**
+     * Apply normal running logic for this anvil (Behaves like a normal anvil).
+     *
+     * @return The same AnvilMenu.
+     */
+    public AnvilMenu isEmpty() {
+        this.empty = true;
+        return this;
+    }
+
+    /**
+     * Apply running logic to the closing event of this menu.
+     *
+     * @param event The expression to run
+     * @return The same AnvilMenu.
+     */
     public AnvilMenu applyClosingLogic(AnvilCloseEvent event) {
         this.event = event;
         return this;
@@ -186,7 +203,9 @@ public class AnvilMenu {
         @EventHandler
         public void onInventoryClick(InventoryClickEvent e) {
             if (e.getInventory().equals(inventory)) {
-                e.setCancelled(true);
+                if (!empty) {
+                    e.setCancelled(true);
+                }
                 final Player clicker = (Player) e.getWhoClicked();
                 if (e.getRawSlot() == Slot.OUTPUT.get() || e.getRawSlot() == Slot.OUTPUT.get()) {
                     final ItemStack clicked = inventory.getItem(e.getRawSlot());

@@ -12,14 +12,16 @@ public enum DefaultColor implements CustomColor {
 
 	protected final CharSequence start;
 	protected final CharSequence end;
+	protected String context;
 
 	DefaultColor(CharSequence start, CharSequence end) {
 		this.start = start;
 		this.end = end;
 	}
 
-	public GradientColor gradient(String context) {
-		return new GradientColor(context, name(), this.start, this.end);
+	public DefaultColor wrap(String context) {
+		this.context = context;
+		return this;
 	}
 
 	@Override

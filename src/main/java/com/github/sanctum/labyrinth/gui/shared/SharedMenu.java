@@ -32,15 +32,15 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class SharedMenu implements Listener {
 
-	private final Plugin plugin;
-	private final String id;
-	private final HUID huid;
-	private static final Map<String, SharedMenu> MENU_MAP = new HashMap<>();
-	private static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
-	private static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
-	private static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
-	private final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
-	private final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
+	protected final Plugin plugin;
+	protected final String id;
+	protected final HUID huid;
+	protected static final Map<String, SharedMenu> MENU_MAP = new HashMap<>();
+	protected static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
+	protected static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
+	protected static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
+	protected final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
+	protected final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
 
 	protected SharedMenu(Plugin plugin, String id) {
 		this.plugin = plugin;

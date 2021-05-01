@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.GradientColor;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import java.util.ArrayList;
@@ -61,7 +62,19 @@ public class StringUtils {
 	 * @param to   The ending Hex code.
 	 * @return A custom color gradient using the provided context.
 	 */
-	public GradientColor gradient(CharSequence from, CharSequence to) {
+	public CustomColor gradient(CharSequence from, CharSequence to) {
+		return new GradientColor(this.context, from, to);
+	}
+
+	/**
+	 * Form a custom gradient to wrap the provided context with.
+	 * Then decide whether or not to translate it or get the raw joined string back.
+	 *
+	 * @param from The starting Hex code.
+	 * @param to   The ending Hex code.
+	 * @return A custom color gradient using the provided context.
+	 */
+	public GradientColor modifyableGradient(CharSequence from, CharSequence to) {
 		return new GradientColor(this.context, from, to);
 	}
 
