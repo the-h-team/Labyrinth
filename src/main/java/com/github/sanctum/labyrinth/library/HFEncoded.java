@@ -3,12 +3,11 @@ package com.github.sanctum.labyrinth.library;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Base64;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
-public class HFEncoded implements Serializable {
+public class HFEncoded {
 
 	private Object obj;
 

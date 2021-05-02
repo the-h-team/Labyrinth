@@ -2,10 +2,13 @@ package com.github.sanctum.labyrinth.gui.builder;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.Plugin;
 
 /**
  * A fully built Paginated Menu object. Fully interfaced with custom specified logic
@@ -49,6 +52,26 @@ public final class PaginatedMenu {
 	}
 
 	/**
+	 * Update the collection used within the menu and open it for a specified player.
+	 *
+	 * @param collection The string collection to update with.
+	 */
+	public void recollect(Player p, Collection<String> collection) {
+		builder.collection = new LinkedList<>(collection);
+		open(p);
+	}
+
+	/**
+	 * Update the collection used within the menu and open it for a specified player.
+	 *
+	 * @param collection The string collection to update with.
+	 */
+	public void recollect(Player p, int page, Collection<String> collection) {
+		builder.collection = new LinkedList<>(collection);
+		open(p, page);
+	}
+
+	/**
 	 * Clear cache, remove un-used handlers.
 	 */
 	public void unregister() {
@@ -62,6 +85,41 @@ public final class PaginatedMenu {
 	 */
 	public UUID getId() {
 		return builder.getId();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Inventory getInventory() {
+		return builder.getInventory();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getCollection() {
+		return builder.getCollection();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getMaxPages() {
+		return builder.getMaxPages();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public PaginatedBuilder.PaginatedListener getListener() {
+		return builder.getListener();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Plugin getPlugin() {
+		return builder.getPlugin();
 	}
 
 }

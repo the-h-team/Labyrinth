@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -42,7 +43,7 @@ public final class PaginatedBuilder {
 	protected String title;
 	protected String alreadyFirstPage;
 	protected String alreadyLastPage;
-	protected LinkedList<String> collection;
+	protected List<String> collection;
 	protected ItemStack border;
 	protected ItemStack fill;
 	protected InventoryClose closeAction;
@@ -81,6 +82,17 @@ public final class PaginatedBuilder {
 	 */
 	public PaginatedBuilder setTitle(String title) {
 		this.title = title.replace("{PAGE}", "" + page);
+		return this;
+	}
+
+	/**
+	 * Store a specified collection to be converted to customized elements
+	 *
+	 * @param collection The collection of strings to use
+	 * @return The same menu builder.
+	 */
+	public PaginatedBuilder collect(List<String> collection) {
+		this.collection = collection;
 		return this;
 	}
 
@@ -265,7 +277,7 @@ public final class PaginatedBuilder {
 		if (collection == null) {
 			collection = new LinkedList<>();
 		}
-		LinkedList<String> members = collection;
+		List<String> members = collection;
 		if (!members.isEmpty()) {
 			for (int i = 0; i < amountPer; i++) {
 				index = amountPer * page + i;
@@ -400,7 +412,7 @@ public final class PaginatedBuilder {
 		if (collection == null) {
 			collection = new LinkedList<>();
 		}
-		LinkedList<String> members = collection;
+		List<String> members = collection;
 		if (!members.isEmpty()) {
 			for (int i = 0; i < amountPer; i++) {
 				index = amountPer * page + i;
@@ -614,7 +626,7 @@ public final class PaginatedBuilder {
 	 *
 	 * @return The string collection used in the GUI.
 	 */
-	public LinkedList<String> getCollection() {
+	public List<String> getCollection() {
 		return collection;
 	}
 

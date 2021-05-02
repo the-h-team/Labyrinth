@@ -75,6 +75,15 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
+	 * Get the actual saved id of this menu.
+	 *
+	 * @return The meta-id of this menu instance.
+	 */
+	public @NotNull String getPath() {
+		return this.id;
+	}
+
+	/**
 	 * Get the name of the menu.
 	 *
 	 * @return The menu's title.
@@ -359,6 +368,16 @@ public abstract class SharedMenu implements Listener {
 			}
 		}).repeat(0, 600);
 		return PLAYER_MAP.computeIfAbsent(target.getUniqueId(), uid -> target.getInventory());
+	}
+
+	/**
+	 * Look for a match of the provided menu id.
+	 *
+	 * @param id The menu id to look for.
+	 * @return true if the provided id belongs to a cached menu instance.
+	 */
+	public static synchronized boolean exists(String id) {
+		return MENU_MAP.containsKey(id);
 	}
 
 	/**
