@@ -2,10 +2,9 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.component.NewComponent;
 import com.github.sanctum.labyrinth.formatting.component.OldComponent;
+import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Content;
@@ -17,13 +16,42 @@ import org.bukkit.entity.Player;
 public abstract class TextLib {
 	private static TextLib instance = null;
 
-	private TextLib() { }
+	private TextLib() {
+	}
+
+	/**
+	 * Attach code reference information to a specified component click event.
+	 *
+	 * @param component The text component to attach runnable information to.
+	 * @return A wrapped text component with applicable data.
+	 */
+	public WrappedComponent wrap(TextComponent component) {
+		return new WrappedComponent(component);
+	}
+
+	/**
+	 * Write hover meta logic to an existing {@link TextComponent}
+	 *
+	 * @param source    The player to format placeholders from.
+	 * @param component The original component to use.
+	 * @param messages  The hover messages to add to the component.
+	 * @return A hover formatted text component.
+	 */
+	public TextComponent format(Player source, TextComponent component, String... messages) {
+		List<Content> array = new ArrayList<>();
+		for (String msg : messages) {
+			array.add(new Text(StringUtils.use(msg).translate(source) + "\n"));
+		}
+		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, array));
+		return component;
+	}
 
 	/**
 	 * Meta: {Hoverable}
-	 *
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
 	 * ( AsyncChatEvent -> player -> 'NH' )
+	 *
 	 * @return The compiled TextComponent object.
 	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage);
@@ -162,23 +190,6 @@ public abstract class TextLib {
 	 * @return The compiled TextComponent object.
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3);
-
-	/**
-	 * Write hover meta logic to an existing {@link TextComponent}
-	 *
-	 * @param source The player to format placeholders from.
-	 * @param component The original component to use.
-	 * @param messages The hover messages to add to the component.
-	 * @return A hover formatted text component.
-	 */
-	public static TextComponent formatHoverMeta(Player source, TextComponent component, String... messages) {
-		List<Content> array = new ArrayList<>();
-		for (String msg : messages) {
-			array.add(new Text(StringUtils.translate(source, msg) + "\n"));
-		}
-		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, array));
-		return component;
-	}
 
 	public static TextLib getInstance() {
 		if (instance == null) {

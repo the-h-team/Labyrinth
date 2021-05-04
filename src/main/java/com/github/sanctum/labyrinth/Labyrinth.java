@@ -5,12 +5,14 @@ import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
+import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
 import java.util.Arrays;
@@ -18,6 +20,9 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -25,9 +30,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Labyrinth extends JavaPlugin {
+public final class Labyrinth extends JavaPlugin implements Listener {
 
 	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
+	public static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
 	private static Labyrinth instance;
 
 	@Override
@@ -37,6 +43,7 @@ public final class Labyrinth extends JavaPlugin {
 		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
 		getLogger().info("- Registered factory implementation, " + provision.getImplementation());
 		boolean success;
+		getServer().getPluginManager().registerEvents(this, this);
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth (C) 2021, Open-source spigot development tool.");
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
@@ -85,6 +92,7 @@ public final class Labyrinth extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+
 		SkullItem.getLog().clear();
 		if (Item.getCache().size() > 0) {
 			for (Item i : Item.getCache()) {
@@ -92,6 +100,16 @@ public final class Labyrinth extends JavaPlugin {
 			}
 		}
 
+	}
+
+	@EventHandler
+	public void onCommandNote(PlayerCommandPreprocessEvent e) {
+		for (WrappedComponent component : COMPONENTS) {
+			if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
+				Schedule.sync(() -> component.action().apply()).run();
+				e.setCancelled(true);
+			}
+		}
 	}
 
 	public static Plugin getInstance() {
