@@ -7,18 +7,16 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 public class NewComponent {
 	
 	private static String color(String text) {
-		return StringUtils.translate(text);
+		return StringUtils.use(text).translate();
 	}
 
 	private static String color(OfflinePlayer source, String text) {
-		return StringUtils.translate(source, text);
+		return StringUtils.use(text).translate(source);
 	}
 	
 	public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {

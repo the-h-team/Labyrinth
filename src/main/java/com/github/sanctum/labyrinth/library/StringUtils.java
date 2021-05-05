@@ -12,6 +12,9 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+/**
+ * Encapsulate string data to modify.
+ */
 public class StringUtils {
 
 	private final String context;

@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.formatting.component.OldComponent;
 import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Content;
@@ -27,6 +28,17 @@ public abstract class TextLib {
 	 */
 	public WrappedComponent wrap(TextComponent component) {
 		return new WrappedComponent(component);
+	}
+
+	/**
+	 * Run a specific action in the event of clicking the provided component.
+	 *
+	 * @param action    The code to run when this component is clicked.
+	 * @param component The component to justify action to.
+	 * @return The newly action wrapped component.
+	 */
+	public TextComponent execute(Applicable action, TextComponent component) {
+		return wrap(component).accept(action).toReal();
 	}
 
 	/**
@@ -187,15 +199,26 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * Compiles a color translated text component where N = normal, and H = hoverable
 	 * ( AsyncChatEvent -> player -> 'HHH' )
+	 *
 	 * @return The compiled TextComponent object.
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3);
+
+	/**
+	 * Encapsulate an already instantiated {@link TextLib} instance
+	 *
+	 * @param library The operations to run whilst using the text library.
+	 */
+	public static void consume(Consumer<TextLib> library) {
+		library.accept(getInstance());
+	}
 
 	public static TextLib getInstance() {
 		if (instance == null) {
 			if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
 				instance = new TextLib() {
 					final NewComponent textNew = new NewComponent();
+
 					@Override
 					public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
 						return textNew.textHoverable(normalText, hoverText, hoverTextMessage);

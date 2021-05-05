@@ -1,11 +1,15 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
+import com.github.sanctum.labyrinth.library.MathUtils;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Encapsulate a list of objects to be sorted and paginated.
+ *
+ * @param <T> The object type representative of this pagination operation.
+ */
 public class PaginatedList<T> {
 	private final List<T> typeList;
 	private Comparator<? super T> comparable;
@@ -18,38 +22,82 @@ public class PaginatedList<T> {
 		this.typeList = list;
 	}
 
-	protected double format(double amount) {
-		BigDecimal b1 = new BigDecimal(amount);
-		MathContext m = new MathContext(2);
-		BigDecimal b2 = b1.round(m);
-		return b2.doubleValue();
+	/**
+	 * Format/trim a given amount to a specific length format.
+	 *
+	 * @param amount    The amount to format.
+	 * @param precision The math precision to stop the decimal placing at.
+	 * @return The newly formatted double.
+	 */
+	public double format(Number amount, int precision) {
+		return MathUtils.use(amount).format(precision);
 	}
 
+	/**
+	 * Setup a comparator for this list's sorting procedure.
+	 *
+	 * @param comparable The comparing operation to run for the given object type.
+	 * @return The same paginated list procedure.
+	 */
 	public PaginatedList<T> compare(Comparator<? super T> comparable) {
 		this.comparable = comparable;
 		return this;
 	}
 
+	/**
+	 * Provided the page number, total page count, object in queue & current paginated list instance,
+	 * decorate any possible actions to take while iterating through the entries.
+	 *
+	 * @param decoration The primary execution to be ran for every entry given.
+	 * @return The same paginated list procedure.
+	 */
 	public PaginatedList<T> decorate(ComponentDecoration<T> decoration) {
 		this.decoration = decoration;
 		return this;
 	}
 
+	/**
+	 * Specify an amount of entries to be display per page.
+	 * Lower entry counts will result in larger page counts.
+	 *
+	 * @param linesPerPage The amount of entries per page to display.
+	 * @return The same paginated list procedure.
+	 */
 	public PaginatedList<T> limit(int linesPerPage) {
 		this.linesPerPage = linesPerPage;
 		return this;
 	}
 
+	/**
+	 * Provided the page number and total page count, provide a starting
+	 * sequence for the pagination.
+	 *
+	 * @param compliment The starting execution to be ran one time.
+	 * @return The same paginated list procedure.
+	 */
 	public PaginatedList<T> start(StartingCompliment<T> compliment) {
 		this.start = compliment;
 		return this;
 	}
 
+	/**
+	 * Provided the page number and total page count, provide a finishing
+	 * sequence for the pagination.
+	 *
+	 * @param compliment The finishing execution to be ran one time.
+	 * @return The same paginated list procedure.
+	 */
 	public PaginatedList<T> finish(FinishingCompliment<T> compliment) {
 		this.finish = compliment;
 		return this;
 	}
 
+	/**
+	 * Run all prior sorting arrangements and sequence operations for a specified page.
+	 *
+	 * @param pageNum The page to to collect.
+	 * @return A list of collected objects from the sorting procedure.
+	 */
 	public List<T> get(int pageNum) {
 		LinkedList<T> list = new LinkedList<>();
 		int page = pageNum;
@@ -57,7 +105,6 @@ public class PaginatedList<T> {
 		int o = linesPerPage;
 
 		List<T> tempList = new LinkedList<>(this.typeList);
-
 		int totalPageCount = 1;
 		if ((tempList.size() % o) == 0) {
 			if (tempList.size() > 0) {
@@ -68,8 +115,6 @@ public class PaginatedList<T> {
 		}
 
 		if (page <= totalPageCount) {
-			// begin line
-
 
 			if (this.start != null) {
 				this.start.apply(pageNum, totalPageCount);
@@ -78,7 +123,9 @@ public class PaginatedList<T> {
 			if (!tempList.isEmpty()) {
 				int i1 = 0, k = 0;
 				page--;
-				tempList.sort(this.comparable);
+				if (this.comparable != null) {
+					tempList.sort(this.comparable);
+				}
 				LinkedList<T> sorted_list = new LinkedList<>(tempList);
 
 				for (T value : sorted_list) {
@@ -86,14 +133,12 @@ public class PaginatedList<T> {
 					k++;
 					if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
 						i1++;
-
 						if (decoration != null) {
-							decoration.apply(value, pageNum, totalPageCount, k);
+							decoration.apply(this, value, pageNum, totalPageCount, k);
 							list.add(value);
 						}
 					}
 					tempList.remove(value);
-
 				}
 				if (this.finish != null) {
 					this.finish.apply(pageNum, totalPageCount);
