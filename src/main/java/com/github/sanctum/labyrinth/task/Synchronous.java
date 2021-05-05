@@ -113,9 +113,6 @@ public class Synchronous {
 					cancelTask();
 					Labyrinth.getInstance().getLogger().severe(e::getMessage);
 				}
-				if (Labyrinth.STOPPING) {
-					cancelTask();
-				}
 			}
 		};
 	}

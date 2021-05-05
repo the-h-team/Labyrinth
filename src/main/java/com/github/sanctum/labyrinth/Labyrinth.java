@@ -35,7 +35,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	public static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
 	private static Labyrinth instance;
-	public static boolean STOPPING;
 
 	@Override
 	public void onEnable() {
@@ -93,7 +92,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		STOPPING = true;
+		getServer().getScheduler().cancelTasks(this);
 		SkullItem.getLog().clear();
 		if (Item.getCache().size() > 0) {
 			for (Item i : Item.getCache()) {

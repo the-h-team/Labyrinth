@@ -110,9 +110,6 @@ public class Asynchronous {
 					this.cancel();
 					Labyrinth.getInstance().getLogger().severe(e.getMessage());
 				}
-				if (Labyrinth.STOPPING) {
-					this.cancel();
-				}
 			}
 		};
 	}
