@@ -79,12 +79,11 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				meta.setOwningPlayer(p);
 				item.setItemMeta(meta);
 
-				// for some reason this is the ONLY way we can make sure the data loaded in live use matches content wise due to mojang skin updating.
-				// initial use updates the item then we grab the updated item and map THAT.
-				// flawless item scanning.
-				Inventory fake = Bukkit.createInventory(null, 36);
-				fake.setItem(0, item);
-				new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
+				run(() -> {
+					Inventory fake = Bukkit.createInventory(null, 36);
+					fake.setItem(0, item);
+					new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
+				}).run();
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
