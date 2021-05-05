@@ -33,7 +33,7 @@ public class MathUtils {
 	 * @return The newly formatted double.
 	 */
 	public double format(int precision) {
-		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.UNNECESSARY);
+		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.HALF_EVEN);
 		return b1.doubleValue();
 	}
 
