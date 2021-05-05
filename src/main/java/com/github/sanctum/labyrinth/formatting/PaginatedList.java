@@ -3,41 +3,26 @@ package com.github.sanctum.labyrinth.formatting;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class PaginatedList<T> {
-
-	private Map<T, Double> doubleMap;
-	private Map<T, Long> longMap;
-	private Type type;
+	private final List<T> typeList;
 	private Comparator<? super T> comparable;
 	private ComponentCompliment start;
 	private ComponentCompliment finish;
 	private ComponentDecoration<T> decoration;
 	private int linesPerPage;
 
+	public PaginatedList(List<T> list) {
+		this.typeList = list;
+	}
 
 	protected double format(double amount) {
 		BigDecimal b1 = new BigDecimal(amount);
 		MathContext m = new MathContext(2);
 		BigDecimal b2 = b1.round(m);
 		return b2.doubleValue();
-	}
-
-	public PaginatedList<T> forDouble(Map<T, Double> mapToSort) {
-		this.doubleMap = mapToSort;
-		this.type = Type.DOUBLE;
-		return this;
-	}
-
-	public PaginatedList<T> forLong(Map<T, Long> mapToSort) {
-		this.longMap = mapToSort;
-		this.type = Type.LONG;
-		return this;
 	}
 
 	public PaginatedList<T> compare(Comparator<? super T> comparable) {
@@ -71,115 +56,52 @@ public class PaginatedList<T> {
 
 		int o = linesPerPage;
 
-		if (this.type == Type.DOUBLE) {
-			// Double procedure
-			HashMap<T, Double> tempMap = new HashMap<>(doubleMap);
+		List<T> tempList = new LinkedList<>(this.typeList);
 
-			int totalPageCount = 1;
-			if ((tempMap.size() % o) == 0) {
-				if (tempMap.size() > 0) {
-					totalPageCount = tempMap.size() / o;
-				}
-			} else {
-				totalPageCount = (tempMap.size() / o) + 1;
-			}
-			T nextTop = null;
-			double nextTopAmount = 0.0;
-
-			if (page <= totalPageCount) {
-				// begin line
-
-
-				if (this.start != null) {
-					this.start.apply(pageNum, totalPageCount);
-				}
-
-				if (!tempMap.isEmpty()) {
-					int i1 = 0, k = 0;
-					page--;
-					TreeMap<T, Double> sorted_map = new TreeMap<>(this.comparable);
-					sorted_map.putAll(tempMap);
-
-					for (Map.Entry<T, Double> map : sorted_map.entrySet()) {
-						if (map.getValue() > nextTopAmount) {
-							nextTop = map.getKey();
-							nextTopAmount = map.getValue();
-						}
-
-						k++;
-						if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
-							i1++;
-
-							if (decoration != null) {
-								decoration.apply(map.getKey(), pageNum, totalPageCount, k, format(map.getValue()), 0L);
-								list.add(nextTop);
-							}
-						}
-						tempMap.remove(nextTop);
-
-					}
-					if (this.finish != null) {
-						this.finish.apply(pageNum, totalPageCount);
-					}
-				}
-				// end line
+		int totalPageCount = 1;
+		if ((tempList.size() % o) == 0) {
+			if (tempList.size() > 0) {
+				totalPageCount = tempList.size() / o;
 			}
 		} else {
-			HashMap<T, Long> tempMap = new HashMap<>(longMap);
+			totalPageCount = (tempList.size() / o) + 1;
+		}
 
-			int totalPageCount = 1;
-			if ((tempMap.size() % o) == 0) {
-				if (tempMap.size() > 0) {
-					totalPageCount = tempMap.size() / o;
-				}
-			} else {
-				totalPageCount = (tempMap.size() / o) + 1;
+		if (page <= totalPageCount) {
+			// begin line
+
+
+			if (this.start != null) {
+				this.start.apply(pageNum, totalPageCount);
 			}
-			T nextTop = null;
-			long nextTopAmount = 0L;
 
-			if (page <= totalPageCount) {
+			if (!tempList.isEmpty()) {
+				int i1 = 0, k = 0;
+				page--;
+				tempList.sort(this.comparable);
+				LinkedList<T> sorted_list = new LinkedList<>(tempList);
 
-				if (this.start != null) {
-					this.start.apply(pageNum, totalPageCount);
-				}
+				for (T value : sorted_list) {
 
-				if (!tempMap.isEmpty()) {
-					int i1 = 0, k = 0;
-					page--;
-					TreeMap<T, Long> sorted_map = new TreeMap<>(this.comparable);
-					sorted_map.putAll(tempMap);
+					k++;
+					if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
+						i1++;
 
-					for (Map.Entry<T, Long> map : sorted_map.entrySet()) {
-						if (map.getValue() > nextTopAmount) {
-							nextTop = map.getKey();
-							nextTopAmount = map.getValue();
+						if (decoration != null) {
+							decoration.apply(value, pageNum, totalPageCount, k);
+							list.add(value);
 						}
-
-						k++;
-						if ((((page * o) + i1 + 1) == k) && (k != ((page * o) + o + 1))) {
-							i1++;
-
-							if (decoration != null) {
-								decoration.apply(map.getKey(), pageNum, totalPageCount, k, 0.0, map.getValue());
-								list.add(nextTop);
-							}
-						}
-						tempMap.remove(nextTop);
-
 					}
-					if (this.finish != null) {
-						this.finish.apply(pageNum, totalPageCount);
-					}
+					tempList.remove(value);
+
 				}
-				// end line
+				if (this.finish != null) {
+					this.finish.apply(pageNum, totalPageCount);
+				}
 			}
+			// end line
 		}
 		return list;
-	}
-
-	public enum Type {
-		DOUBLE, LONG
 	}
 
 }
