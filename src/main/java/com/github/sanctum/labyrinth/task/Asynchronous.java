@@ -25,6 +25,10 @@ public class Asynchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
+				if (Labyrinth.STOPPING) {
+					this.cancel();
+					return;
+				}
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));

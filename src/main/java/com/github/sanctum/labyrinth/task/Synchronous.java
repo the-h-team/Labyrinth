@@ -27,6 +27,10 @@ public class Synchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
+				if (Labyrinth.STOPPING) {
+					cancelTask();
+					return;
+				}
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
