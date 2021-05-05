@@ -111,13 +111,11 @@ public class PaginatedList<T> {
 							i1++;
 
 							if (decoration != null) {
-								decoration.apply(nextTop, pageNum, totalPageCount, k, format(nextTopAmount), 0L);
+								decoration.apply(map.getKey(), pageNum, totalPageCount, k, format(map.getValue()), 0L);
 								list.add(nextTop);
 							}
 						}
 						tempMap.remove(nextTop);
-						nextTop = null;
-						nextTopAmount = 0.0;
 
 					}
 					if (this.finish != null) {
@@ -163,13 +161,11 @@ public class PaginatedList<T> {
 							i1++;
 
 							if (decoration != null) {
-								decoration.apply(nextTop, pageNum, totalPageCount, k, 0.0, nextTopAmount);
+								decoration.apply(map.getKey(), pageNum, totalPageCount, k, 0.0, map.getValue());
 								list.add(nextTop);
 							}
 						}
 						tempMap.remove(nextTop);
-						nextTop = null;
-						nextTopAmount = 0L;
 
 					}
 					if (this.finish != null) {
