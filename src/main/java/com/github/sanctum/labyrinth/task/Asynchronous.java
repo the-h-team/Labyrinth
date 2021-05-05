@@ -25,6 +25,9 @@ public class Asynchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
+				if (!Labyrinth.TASKS.contains(getTaskId())) {
+					Labyrinth.TASKS.add(getTaskId());
+				}
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
