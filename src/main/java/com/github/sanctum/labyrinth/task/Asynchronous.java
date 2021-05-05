@@ -25,10 +25,6 @@ public class Asynchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
-				if (Labyrinth.STOPPING) {
-					this.cancel();
-					return;
-				}
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
@@ -113,6 +109,9 @@ public class Asynchronous {
 					}
 					this.cancel();
 					Labyrinth.getInstance().getLogger().severe(e.getMessage());
+				}
+				if (Labyrinth.STOPPING) {
+					this.cancel();
 				}
 			}
 		};

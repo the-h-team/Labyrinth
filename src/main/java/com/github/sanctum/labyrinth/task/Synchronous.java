@@ -27,10 +27,6 @@ public class Synchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
-				if (Labyrinth.STOPPING) {
-					cancelTask();
-					return;
-				}
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
@@ -116,6 +112,9 @@ public class Synchronous {
 					}
 					cancelTask();
 					Labyrinth.getInstance().getLogger().severe(e::getMessage);
+				}
+				if (Labyrinth.STOPPING) {
+					cancelTask();
 				}
 			}
 		};
