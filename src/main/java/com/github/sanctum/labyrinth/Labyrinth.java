@@ -23,7 +23,6 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
@@ -78,12 +77,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				assert meta != null;
 				meta.setOwningPlayer(p);
 				item.setItemMeta(meta);
-
-				run(() -> {
-					Inventory fake = Bukkit.createInventory(null, 36);
-					fake.setItem(0, item);
-					new SkullItem(p.getUniqueId().toString(), fake.getItem(0));
-				}).run();
+				new SkullItem(p.getUniqueId().toString(), item);
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
