@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -33,10 +33,8 @@ public class MathUtils {
 	 * @return The newly formatted double.
 	 */
 	public double format(int precision) {
-		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue());
-		MathContext m = new MathContext(precision);
-		BigDecimal b2 = b1.round(m);
-		return b2.doubleValue();
+		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.HALF_UP);
+		return b1.doubleValue();
 	}
 
 	/**
