@@ -87,7 +87,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
-		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
+		run(() -> CommandUtils.initialize(Labyrinth.this)).run();
 	}
 
 	@Override
@@ -106,7 +106,8 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	public void onCommandNote(PlayerCommandPreprocessEvent e) {
 		for (WrappedComponent component : COMPONENTS) {
 			if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
-				Schedule.sync(() -> component.action().apply()).run();
+				run(() -> component.action().apply()).run();
+				run(component::remove).waitReal(200);
 				e.setCancelled(true);
 			}
 		}
