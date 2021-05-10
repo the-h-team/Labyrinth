@@ -5,6 +5,8 @@ import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
+import com.github.sanctum.labyrinth.event.CuboidController;
+import com.github.sanctum.labyrinth.event.EventBuilder;
 import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
@@ -82,6 +84,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
 		run(() -> CommandUtils.initialize(Labyrinth.this)).run();
+		EventBuilder.register(new CuboidController());
 	}
 
 	@Override

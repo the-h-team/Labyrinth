@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.logging.Logger;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -101,6 +103,17 @@ public class Message {
 	 */
 	public Message build(BaseComponent... components) {
 		p.spigot().sendMessage(components);
+		return this;
+	}
+
+	/**
+	 * Send an action bar message to the player.
+	 *
+	 * @param text The message to display.
+	 * @return The same message object.
+	 */
+	public Message action(String text) {
+		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ColoredString(text, ColoredString.ColorType.HEX).toComponent());
 		return this;
 	}
 
