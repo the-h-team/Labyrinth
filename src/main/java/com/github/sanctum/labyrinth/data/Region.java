@@ -541,6 +541,11 @@ public abstract class Region implements Cuboid, Cloneable {
 			super(point1, point2, id);
 		}
 
+		public Standard forPlugin(Plugin plugin) {
+			super.setPlugin(plugin);
+			return this;
+		}
+
 	}
 
 	public static class Spawn extends Region {
@@ -580,6 +585,11 @@ public abstract class Region implements Cuboid, Cloneable {
 				}
 			}
 			return list;
+		}
+
+		public Spawn forPlugin(Plugin plugin) {
+			super.setPlugin(plugin);
+			return this;
 		}
 
 		@Override
