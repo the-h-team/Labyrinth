@@ -1,8 +1,10 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.data.AdvancedHook;
+import com.github.sanctum.labyrinth.data.BoundaryAction;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
+import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.event.CuboidController;
@@ -11,6 +13,8 @@ import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
+import com.github.sanctum.labyrinth.library.Cuboid;
+import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
@@ -19,9 +23,14 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -85,6 +94,69 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
 		run(() -> CommandUtils.initialize(Labyrinth.this)).run();
 		EventBuilder.register(new CuboidController());
+
+		Schedule.sync(() -> Bukkit.getOnlinePlayers().forEach(p -> {
+
+			if (Cuboid.Selection.contains(p)) {
+
+				Cuboid.Selection selection = Cuboid.Selection.source(p);
+
+				if (selection.getPos1() != null && selection.getPos2() == null) {
+					Cuboid.Boundary cube = new Region.Boundary(selection.getPos1().getBlockX(), selection.getPos1().getBlockX(), selection.getPos1().getBlockY(), selection.getPos1().getBlockY(), selection.getPos1().getBlockZ(), selection.getPos1().getBlockZ()).target(p);
+					cube.deploy(action -> action.getPlayer().spawnParticle(org.bukkit.Particle.REDSTONE, action.getX(), action.getY(), action.getZ(), 1, new Particle.DustOptions(Cuboid.Boundary.Particle.GREEN.toColor(), 2)));
+				}
+				if (selection.getPos2() != null && selection.getPos1() == null) {
+					Cuboid.Boundary cube = new Region.Boundary(selection.getPos2().getBlockX(), selection.getPos2().getBlockX(), selection.getPos2().getBlockY(), selection.getPos2().getBlockY(), selection.getPos2().getBlockZ(), selection.getPos2().getBlockZ()).target(p);
+					cube.deploy(action -> action.getPlayer().spawnParticle(org.bukkit.Particle.REDSTONE, action.getX(), action.getY(), action.getZ(), 1, new Particle.DustOptions(Cuboid.Boundary.Particle.GREEN.toColor(), 2)));
+				}
+				if (selection.getPos1() != null && selection.getPos2() != null) {
+					Cuboid.Boundary cube = new Region.Boundary(Math.max(selection.getPos1().getBlockX(), selection.getPos2().getBlockX()) + 0.5, Math.min(selection.getPos1().getBlockX(), selection.getPos2().getBlockX()) + 0.5, Math.max(selection.getPos1().getBlockY(), selection.getPos2().getBlockY()) + 0.5, Math.min(selection.getPos1().getBlockY(), selection.getPos2().getBlockY()) + 0.5, Math.max(selection.getPos1().getBlockZ(), selection.getPos2().getBlockZ()) + 0.5, Math.min(selection.getPos1().getBlockZ(), selection.getPos2().getBlockZ()) + 0.5).target(p);
+					cube.deploy(BoundaryAction::box);
+				}
+			}
+
+		})).repeatReal(0, 5);
+
+		if (Region.DATA.exists()) {
+			if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
+				for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
+					Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
+
+					if (o.getWorld() == null) {
+						throw new IllegalStateException("World is null??");
+					}
+
+					Location t = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos2");
+					Location s = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".start");
+					HUID d = HUID.fromString(id);
+					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
+					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
+					Region.Spawn spawn = new Region.Spawn(o, t, d);
+					spawn.setLocation(s);
+					spawn.setOwner(owner);
+					spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+					spawn.addFlag(flags.toArray(new Region.Flag[0]));
+					spawn.load();
+				}
+			}
+			if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
+				for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
+					Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
+					Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
+					HUID d = HUID.fromString(id);
+					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
+					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.region." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
+					Region region = new Region.Standard(o, t, d);
+					region.setOwner(owner);
+					region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+					region.addFlag(flags.toArray(new Region.Flag[0]));
+					region.load();
+				}
+			}
+		}
+
 	}
 
 	@Override
