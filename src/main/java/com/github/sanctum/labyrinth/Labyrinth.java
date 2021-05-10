@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -44,7 +45,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	public static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
-	public static final LinkedList<Integer> TASKS = new LinkedList<>();
+	public static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
 	private static Labyrinth instance;
 
 	@Override
@@ -172,7 +173,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				spawn.remove();
 			}
 		}).wait(3);
-
 	}
 
 	@Override

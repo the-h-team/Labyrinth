@@ -35,6 +35,7 @@ public class Asynchronous {
 						if (apply != null) {
 							apply.apply();
 						}
+						Labyrinth.TASKS.remove(getTaskId());
 						return;
 					}
 					if (cancel == null) {
@@ -66,6 +67,7 @@ public class Asynchronous {
 						if (apply != null) {
 							apply.apply();
 						}
+						Labyrinth.TASKS.remove(getTaskId());
 					} else {
 						int count = Integer.parseInt(cancel);
 						count--;
@@ -99,6 +101,7 @@ public class Asynchronous {
 							if (apply != null) {
 								apply.apply();
 							}
+							Labyrinth.TASKS.remove(getTaskId());
 						} else {
 							if (debug) {
 								Labyrinth.getInstance().getLogger().info("Closing task, max usage counter achieved.");
