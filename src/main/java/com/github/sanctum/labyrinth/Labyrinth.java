@@ -132,9 +132,10 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
 					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
-					Region.Spawn spawn = new Region.Spawn(o, t, d);
+					Region.Spawning spawn = new Region.Spawning(o, t, d);
 					spawn.setLocation(s);
 					spawn.setOwner(owner);
+					run(() -> spawn.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).wait(2);
 					spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 					spawn.addFlag(flags.toArray(new Region.Flag[0]));
 					spawn.load();
@@ -145,17 +146,32 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 					Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
 					Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
 					HUID d = HUID.fromString(id);
-					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
+					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
 					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.region." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
-					Region region = new Region.Standard(o, t, d);
+					Region.Loading region = new Region.Loading(o, t, d);
 					region.setOwner(owner);
+					run(() -> region.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).wait(2);
 					region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 					region.addFlag(flags.toArray(new Region.Flag[0]));
 					region.load();
 				}
 			}
 		}
+
+		run(() -> {
+			for (Region.Loading load : Region.loading().list()) {
+				Region.Standard result = new Region.Standard(load);
+				result.load();
+				load.remove();
+			}
+
+			for (Region.Spawning spawn : Region.spawning().list()) {
+				Region.Spawn result = new Region.Spawn(spawn);
+				result.load();
+				spawn.remove();
+			}
+		}).wait(3);
 
 	}
 

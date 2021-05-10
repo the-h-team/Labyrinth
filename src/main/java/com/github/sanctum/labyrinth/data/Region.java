@@ -21,12 +21,18 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class Region implements Cuboid, Cloneable {
 
 	public static final FileManager DATA = FileList.search(Labyrinth.getInstance()).find("Regions", "");
 
 	private static final List<Region> RECORD = new LinkedList<>();
+
+	private static final List<Region.Loading> LOADING = new LinkedList<>();
+
+	private static final List<Region.Spawning> SPAWNING = new LinkedList<>();
 
 	private final int xMin;
 	private final int xMax;
@@ -39,11 +45,12 @@ public abstract class Region implements Cuboid, Cloneable {
 	private UUID owner;
 	private String name;
 	protected final Collection<Flag> FLAGS;
-
+	private Plugin plugin;
 	private final List<UUID> members;
 
 	protected Region(Region cuboid) {
 		this(cuboid.xMin, cuboid.xMax, cuboid.yMin, cuboid.yMax, cuboid.zMin, cuboid.zMax, cuboid.world, cuboid.id);
+		setPlugin(cuboid.plugin);
 		setOwner(cuboid.owner);
 		setName(cuboid.getName());
 		addFlag(cuboid.FLAGS.toArray(new Flag[0]));
@@ -69,6 +76,15 @@ public abstract class Region implements Cuboid, Cloneable {
 		this.id = id;
 		this.FLAGS = new HashSet<>();
 		this.members = new LinkedList<>();
+		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
+	}
+
+	protected void setPlugin(Plugin plugin) {
+		this.plugin = plugin;
+	}
+
+	public Plugin getPlugin() {
+		return this.plugin;
 	}
 
 	public HUID getId() {
@@ -303,6 +319,7 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	public void save() throws IOException {
 		if (this.getStartingPoint() != null && this.getEndingPoint() != null) {
+			DATA.getConfig().set("Markers.region." + getId().toString() + ".plugin", this.getPlugin().getName());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos1", this.getStartingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos2", this.getEndingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
@@ -320,6 +337,14 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	public static UniformedComponents<Region> cache() {
 		return UniformedComponents.accept(RECORD);
+	}
+
+	public static UniformedComponents<Region.Loading> loading() {
+		return UniformedComponents.accept(LOADING);
+	}
+
+	public static UniformedComponents<Region.Spawning> spawning() {
+		return UniformedComponents.accept(SPAWNING);
 	}
 
 	public static Optional<Spawn> spawn() {
@@ -406,9 +431,105 @@ public abstract class Region implements Cuboid, Cloneable {
 		}
 	}
 
+	public static class Spawning extends Region {
+
+		private Location loc;
+
+		protected Spawning(Region cuboid) {
+			super(cuboid);
+		}
+
+		public Spawning(Location point1, Location point2) {
+			super(point1, point2);
+		}
+
+		public Spawning(Location point1, Location point2, HUID id) {
+			super(point1, point2, id);
+		}
+
+		public void setPlugin(Plugin plugin) {
+			super.setPlugin(plugin);
+		}
+
+		@Override
+		public boolean remove() {
+			return SPAWNING.remove(this);
+		}
+
+		@Override
+		public boolean load() {
+			return SPAWNING.add(this);
+		}
+
+		public Location location() {
+			return loc;
+		}
+
+		public void setLocation(Location loc) {
+			this.loc = loc;
+		}
+
+		public List<Spawning> getArea() {
+			List<Spawning> list = new LinkedList<>();
+			for (Region.Spawning c : SPAWNING) {
+				for (Iterator<Block> it = getBlocksWithin(); it.hasNext(); ) {
+					Block b = it.next();
+					if (c.contains(b.getLocation())) {
+						list.add(c);
+					}
+				}
+			}
+			return list;
+		}
+
+		@Override
+		public void save() throws IOException {
+			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+				DATA.saveConfig();
+			} else
+				throw new IOException("One or more locations were found null during the saving process.");
+		}
+	}
+
+	public static class Loading extends Region {
+
+		protected Loading(Region cuboid) {
+			super(cuboid);
+		}
+
+		public Loading(Location point1, Location point2) {
+			super(point1, point2);
+		}
+
+		public Loading(Location point1, Location point2, HUID id) {
+			super(point1, point2, id);
+		}
+
+		public void setPlugin(Plugin plugin) {
+			super.setPlugin(plugin);
+		}
+
+		@Override
+		public boolean remove() {
+			return LOADING.remove(this);
+		}
+
+		@Override
+		public boolean load() {
+			return LOADING.add(this);
+		}
+	}
+
 	public static class Standard extends Region {
 
-		protected Standard(Region cuboid) {
+		public Standard(Region cuboid) {
 			super(cuboid);
 		}
 
@@ -426,7 +547,7 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		private Location loc;
 
-		public Spawn(Region cuboid) {
+		public Spawn(Region.Spawning cuboid) {
 			super(cuboid);
 		}
 
@@ -464,6 +585,7 @@ public abstract class Region implements Cuboid, Cloneable {
 		@Override
 		public void save() throws IOException {
 			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
