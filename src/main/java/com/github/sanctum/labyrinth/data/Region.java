@@ -111,6 +111,7 @@ public abstract class Region implements Cuboid, Cloneable {
 				Block b = it.next();
 				if (c.contains(b.getLocation())) {
 					list.add(c);
+					break;
 				}
 			}
 		}
@@ -476,6 +477,7 @@ public abstract class Region implements Cuboid, Cloneable {
 					Block b = it.next();
 					if (c.contains(b.getLocation())) {
 						list.add(c);
+						break;
 					}
 				}
 			}
@@ -580,6 +582,7 @@ public abstract class Region implements Cuboid, Cloneable {
 						Block b = it.next();
 						if (c.contains(b.getLocation())) {
 							list.add((Spawn) c);
+							break;
 						}
 					}
 				}

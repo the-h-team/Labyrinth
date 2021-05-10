@@ -169,6 +169,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 			for (Region.Spawning spawn : Region.spawning().list()) {
 				Region.Spawn result = new Region.Spawn(spawn);
+				result.setLocation(spawn.location());
 				result.load();
 				spawn.remove();
 			}
