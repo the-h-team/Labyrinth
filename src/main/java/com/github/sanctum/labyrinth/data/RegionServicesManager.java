@@ -4,18 +4,17 @@ import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.LinkedList;
-import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 
 public final class RegionServicesManager {
 
-	private final LinkedList<Cuboid.Flag> FLAGS = new LinkedList<>();
-
 	private final LinkedList<RegionService> SERVICES = new LinkedList<>();
 
-	public List<Cuboid.Flag> getFlags() {
-		return FLAGS;
+	private final Cuboid.FlagManager flagManager;
+
+	{
+		this.flagManager = new Cuboid.FlagManager();
 	}
 
 	public static RegionServicesManager getInstance() {
@@ -23,7 +22,7 @@ public final class RegionServicesManager {
 	}
 
 	public boolean isRegistered(Cuboid.Flag flag) {
-		return this.FLAGS.stream().anyMatch(f -> f.getId().equals(flag.getId()));
+		return getFlagManager().getFlags().stream().anyMatch(f -> f.getId().equals(flag.getId()));
 	}
 
 	public boolean unregister(Cuboid.Flag flag) {
@@ -34,12 +33,12 @@ public final class RegionServicesManager {
 				}
 			});
 		}
-		return FLAGS.removeIf(f -> f.getId().equals(flag.getId()));
+		return getFlagManager().getFlags().removeIf(f -> f.getId().equals(flag.getId()));
 	}
 
 	public boolean register(Cuboid.Flag flag) {
-		if (FLAGS.stream().noneMatch(f -> f.getId().equals(flag.getId()))) {
-			FLAGS.add(flag);
+		if (getFlagManager().getFlags().stream().noneMatch(f -> f.getId().equals(flag.getId()))) {
+			getFlagManager().getFlags().add(flag);
 			return true;
 		}
 		return false;
@@ -47,7 +46,7 @@ public final class RegionServicesManager {
 
 	public boolean load(Cuboid.Flag flag) {
 		Bukkit.getPluginManager().registerEvents(flag, Labyrinth.getInstance());
-		return SERVICES.add(flag) && FLAGS.add(flag);
+		return SERVICES.add(flag) && getFlagManager().getFlags().add(flag);
 	}
 
 	public boolean load(RegionService service) {
@@ -60,4 +59,7 @@ public final class RegionServicesManager {
 		return SERVICES.remove(service);
 	}
 
+	public Cuboid.FlagManager getFlagManager() {
+		return flagManager;
+	}
 }

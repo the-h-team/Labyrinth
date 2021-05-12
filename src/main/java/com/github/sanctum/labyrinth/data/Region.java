@@ -77,7 +77,9 @@ public abstract class Region implements Cuboid, Cloneable {
 		this.FLAGS = new LinkedList<>();
 		this.MEMBERS = new LinkedList<>();
 		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
-		addFlag(RegionFlag.BREAK, RegionFlag.BUILD, RegionFlag.PVP);
+		addFlag(RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.BREAK),
+				RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.BUILD),
+				RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.PVP));
 	}
 
 	protected void setPlugin(Plugin plugin) {
@@ -254,6 +256,9 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	public boolean addFlag(Flag flag) {
 		if (!hasFlag(flag) && RegionServicesManager.getInstance().isRegistered(flag)) {
+			return this.FLAGS.add(flag.clone());
+		}
+		if (!hasFlag(flag) && !RegionServicesManager.getInstance().isRegistered(flag) && RegionServicesManager.getInstance().getFlagManager().getDefault().stream().anyMatch(f -> f.getId().equals(flag.getId()))) {
 			return this.FLAGS.add(flag.clone());
 		}
 		return false;
