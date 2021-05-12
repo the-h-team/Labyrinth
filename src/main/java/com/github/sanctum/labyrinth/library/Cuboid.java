@@ -8,6 +8,7 @@ import com.github.sanctum.labyrinth.data.RegionService;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -188,19 +189,20 @@ public interface Cuboid {
 
 	abstract class Flag implements RegionService, Cloneable {
 
-		private final Plugin plugin;
+		private final String host;
 		private boolean allowed;
 		private final String id;
 		private final String message;
 
 
 		public Flag(Flag flag) {
-			this(flag.getHost(), flag.getId(), flag.getMessage());
+			this(flag.getHost().getName(), flag.getId(), flag.getMessage());
 			setAllowed(flag.allowed);
 		}
 
-		public Flag(Plugin plugin, String id, String message) {
-			this.plugin = plugin;
+		public Flag(String host, String id, String message) {
+			Bukkit.getLogger().severe("Registered new flag " + id + " under host; " + host);
+			this.host = host;
 			this.id = id;
 			this.message = message;
 			this.allowed = true;
@@ -221,7 +223,7 @@ public interface Cuboid {
 		}
 
 		public final boolean isValid() {
-			return (this.plugin != null && this.plugin.isEnabled());
+			return (getHost() != null && getHost().isEnabled());
 		}
 
 		public String getMessage() {
@@ -233,7 +235,7 @@ public interface Cuboid {
 		}
 
 		public Plugin getHost() {
-			return this.plugin;
+			return Bukkit.getPluginManager().getPlugin(this.host);
 		}
 
 	}

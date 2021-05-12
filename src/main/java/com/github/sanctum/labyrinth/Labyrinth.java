@@ -123,6 +123,9 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		})).repeatReal(0, 5);
 
 		if (Region.DATA.exists()) {
+			RegionServicesManager.getInstance().register(RegionFlag.BREAK);
+			//RegionServicesManager.getInstance().load(RegionFlag.BUILD);
+			//RegionServicesManager.getInstance().load(RegionFlag.PVP);
 			if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
 				for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
 					Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
@@ -186,9 +189,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				spawn.remove();
 			}
 		}).wait(3);
-		RegionServicesManager.getInstance().load(RegionFlag.BREAK);
-		RegionServicesManager.getInstance().load(RegionFlag.BUILD);
-		RegionServicesManager.getInstance().load(RegionFlag.PVP);
 	}
 
 	@Override

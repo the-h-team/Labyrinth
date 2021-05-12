@@ -12,12 +12,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.plugin.Plugin;
 
 public class RegionFlag extends Cuboid.Flag {
 
 
-	public static Cuboid.Flag BUILD = new RegionFlag(Labyrinth.getInstance(), "build", "&4You can't do this here!") {
+	public static final Cuboid.Flag BUILD = new Cuboid.Flag(Labyrinth.getInstance().getName(), "build", "&4You can't do this here!") {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {
@@ -42,7 +41,7 @@ public class RegionFlag extends Cuboid.Flag {
 
 	};
 
-	public static Cuboid.Flag BREAK = new RegionFlag(Labyrinth.getInstance(), "break", "&4You can't do this here!") {
+	public static final Cuboid.Flag BREAK = new Cuboid.Flag(Labyrinth.getInstance().getName(), "break", "&4You can't do this here!") {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockBreakEvent e) {
@@ -59,16 +58,21 @@ public class RegionFlag extends Cuboid.Flag {
 						if (!f.isAllowed()) {
 							Message.form(e.getPlayer()).send(getMessage());
 							e.setCancelled(true);
+						} else {
+							e.getPlayer().sendMessage(":D");
 						}
+					} else {
+						e.getPlayer().sendMessage(":D s");
 					}
+				} else {
+					e.getPlayer().sendMessage(":D");
 				}
-
 			}
 		}
 
 	};
 
-	public static Cuboid.Flag PVP = new RegionFlag(Labyrinth.getInstance(), "pvp", "&4You can't do this here!") {
+	public static final Cuboid.Flag PVP = new Cuboid.Flag(Labyrinth.getInstance().getName(), "pvp", "&4You can't do this here!") {
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onPlayerHit(EntityDamageByEntityEvent event) {
@@ -147,7 +151,7 @@ public class RegionFlag extends Cuboid.Flag {
 		super(flag);
 	}
 
-	public RegionFlag(Plugin plugin, String id, String message) {
+	public RegionFlag(String plugin, String id, String message) {
 		super(plugin, id, message);
 	}
 
