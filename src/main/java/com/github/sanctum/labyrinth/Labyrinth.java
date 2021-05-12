@@ -132,14 +132,16 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 					HUID d = HUID.fromString(id);
 					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
 					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
-					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
+					//List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
 					Region.Spawning spawn = new Region.Spawning(o, t, d);
 					spawn.setLocation(s);
 					spawn.setOwner(owner);
 					run(() -> spawn.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).wait(2);
 					spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
-					spawn.addFlag(flags.toArray(new Region.Flag[0]));
-					spawn.load();
+					//spawn.addFlag(flags.toArray(new Region.Flag[0]));
+					if (!spawn.load()) {
+						getLogger().warning("- A region under the name '" + spawn.getId() + "' has failed to load properly.");
+					}
 				}
 			}
 			if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
@@ -149,13 +151,15 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 					HUID d = HUID.fromString(id);
 					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
 					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
-					List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.region." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
+					//List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.region." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
 					Region.Loading region = new Region.Loading(o, t, d);
 					region.setOwner(owner);
 					run(() -> region.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).wait(2);
 					region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
-					region.addFlag(flags.toArray(new Region.Flag[0]));
-					region.load();
+					//region.addFlag(flags.toArray(new Region.Flag[0]));
+					if (!region.load()) {
+						getLogger().warning("- A region under the name '" + region.getId() + "' has failed to load properly.");
+					}
 				}
 			}
 		}
@@ -163,14 +167,18 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		run(() -> {
 			for (Region.Loading load : Region.loading().list()) {
 				Region.Standard result = new Region.Standard(load);
-				result.load();
+				if (!result.load()) {
+					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");
+				}
 				load.remove();
 			}
 
 			for (Region.Spawning spawn : Region.spawning().list()) {
 				Region.Spawn result = new Region.Spawn(spawn);
 				result.setLocation(spawn.location());
-				result.load();
+				if (!result.load()) {
+					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");
+				}
 				spawn.remove();
 			}
 		}).wait(3);

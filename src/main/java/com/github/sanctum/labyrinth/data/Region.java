@@ -6,8 +6,6 @@ import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +24,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class Region implements Cuboid, Cloneable {
 
-	public static final FileManager DATA = FileList.search(Labyrinth.getInstance()).find("Regions", "");
+	public static final FileManager DATA = FileList.search(Labyrinth.getInstance()).find("Regions", "Persistent");
+
+	public static final FileManager OPTIONS = FileList.search(Labyrinth.getInstance()).find("Regions", "Persistent");
 
 	private static final List<Region> RECORD = new LinkedList<>();
 
@@ -44,9 +44,9 @@ public abstract class Region implements Cuboid, Cloneable {
 	private final HUID id;
 	private UUID owner;
 	private String name;
-	protected final Collection<Flag> FLAGS;
 	private Plugin plugin;
-	private final List<UUID> members;
+	protected final List<Flag> FLAGS;
+	private final List<UUID> MEMBERS;
 
 	protected Region(Region cuboid) {
 		this(cuboid.xMin, cuboid.xMax, cuboid.yMin, cuboid.yMax, cuboid.zMin, cuboid.zMax, cuboid.world, cuboid.id);
@@ -54,7 +54,7 @@ public abstract class Region implements Cuboid, Cloneable {
 		setOwner(cuboid.owner);
 		setName(cuboid.getName());
 		addFlag(cuboid.FLAGS.toArray(new Flag[0]));
-		addMember(cuboid.members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+		addMember(cuboid.MEMBERS.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 	}
 
 	protected Region(final Location point1, final Location point2) {
@@ -74,9 +74,10 @@ public abstract class Region implements Cuboid, Cloneable {
 		this.zMax = zmax;
 		this.world = world;
 		this.id = id;
-		this.FLAGS = new HashSet<>();
-		this.members = new LinkedList<>();
+		this.FLAGS = new LinkedList<>();
+		this.MEMBERS = new LinkedList<>();
 		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
+		addFlag(Flag.BREAK, Flag.BUILD);
 	}
 
 	protected void setPlugin(Plugin plugin) {
@@ -109,7 +110,7 @@ public abstract class Region implements Cuboid, Cloneable {
 		for (Region c : cache().list()) {
 			for (Iterator<Block> it = getBlocksWithin(); it.hasNext(); ) {
 				Block b = it.next();
-				if (c.contains(b.getLocation())) {
+				if (c.contains(b.getLocation()) && !c.getId().equals(getId())) {
 					list.add(c);
 					break;
 				}
@@ -228,7 +229,11 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	public List<OfflinePlayer> getMembers() {
-		return UniformedComponents.accept(members).map(Bukkit::getOfflinePlayer).collect(Collectors.toList());
+		return UniformedComponents.accept(MEMBERS).map(Bukkit::getOfflinePlayer).collect(Collectors.toList());
+	}
+
+	public List<Flag> getFlags() {
+		return UniformedComponents.accept(FLAGS).sort();
 	}
 
 	public boolean isMember(OfflinePlayer p) {
@@ -236,8 +241,8 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	public boolean addFlag(Flag flag) {
-		if (!this.FLAGS.contains(flag)) {
-			return this.FLAGS.add(flag);
+		if (this.FLAGS.stream().noneMatch(f -> f.getId().equals(flag.getId()))) {
+			return this.FLAGS.add(flag.clone());
 		}
 		return false;
 	}
@@ -255,7 +260,7 @@ public abstract class Region implements Cuboid, Cloneable {
 		if (isMember(p)) {
 			return false;
 		}
-		return members.add(p.getUniqueId());
+		return MEMBERS.add(p.getUniqueId());
 	}
 
 	public boolean addMember(OfflinePlayer... p) {
@@ -271,7 +276,7 @@ public abstract class Region implements Cuboid, Cloneable {
 		if (!isMember(p)) {
 			return false;
 		}
-		return members.remove(p.getUniqueId());
+		return MEMBERS.remove(p.getUniqueId());
 	}
 
 	public boolean removeFlag(Flag flag) {
@@ -320,12 +325,15 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	public void save() throws IOException {
 		if (this.getStartingPoint() != null && this.getEndingPoint() != null) {
+			if (!this.getName().equals(getId().toString())) {
+				DATA.getConfig().set("Markers.region." + getId().toString() + ".name", this.getName());
+			}
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".plugin", this.getPlugin().getName());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos1", this.getStartingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos2", this.getEndingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".members", members.stream().map(UUID::toString).collect(Collectors.toList()));
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+			DATA.getConfig().set("Markers.region." + getId().toString() + ".members", MEMBERS.stream().map(UUID::toString).collect(Collectors.toList()));
+			//DATA.getConfig().set("Markers.region." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
 			DATA.saveConfig();
 		} else
 			throw new IOException("One or more locations were found null during the saving process.");
@@ -358,22 +366,13 @@ public abstract class Region implements Cuboid, Cloneable {
 		return Optional.empty();
 	}
 
-	public static boolean match(Location location) {
+	public static Optional<Region> match(Location location) {
 		for (Region c : cache().list()) {
 			if (c.contains(location)) {
-				return true;
+				return Optional.of(c);
 			}
 		}
-		return false;
-	}
-
-	public static Region get(Location location) {
-		for (Region c : cache().list()) {
-			if (c.contains(location)) {
-				return c;
-			}
-		}
-		return null;
+		return Optional.empty();
 	}
 
 	public static class Resident {
@@ -408,9 +407,7 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public Optional<Region> getRegion() {
 			if (getPlayer().isOnline()) {
-				if (Region.match(getPlayer().getPlayer().getLocation())) {
-					return Optional.ofNullable(Region.get(getPlayer().getPlayer().getLocation()));
-				}
+				return Region.match(getPlayer().getPlayer().getLocation());
 			}
 			return Optional.empty();
 		}
@@ -487,13 +484,16 @@ public abstract class Region implements Cuboid, Cloneable {
 		@Override
 		public void save() throws IOException {
 			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
+				if (!this.getName().equals(getId().toString())) {
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".name", this.getName());
+				}
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+				//DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
 				DATA.saveConfig();
 			} else
 				throw new IOException("One or more locations were found null during the saving process.");
@@ -598,33 +598,19 @@ public abstract class Region implements Cuboid, Cloneable {
 		@Override
 		public void save() throws IOException {
 			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
+				if (!this.getName().equals(getId().toString())) {
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".name", this.getName());
+				}
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+				//DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
 				DATA.saveConfig();
 			} else
 				throw new IOException("One or more locations were found null during the saving process.");
-		}
-
-	}
-
-	public enum Flag {
-		BUILDING, PVP, JOIN_MSG, LEAVE_MSG;
-
-		public Object factor() {
-			switch (this) {
-				case PVP:
-				case BUILDING:
-					return true;
-				case JOIN_MSG:
-				case LEAVE_MSG:
-				default:
-					throw new IllegalStateException();
-			}
 		}
 
 	}

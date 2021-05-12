@@ -1,17 +1,28 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.BoundaryAction;
 import com.github.sanctum.labyrinth.data.BoundaryAssembly;
 import com.github.sanctum.labyrinth.data.Region;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 public interface Cuboid {
@@ -183,6 +194,149 @@ public interface Cuboid {
 
 	}
 
+	class Flag implements Listener, Cloneable {
+
+		public static Flag BUILD = new Flag(Labyrinth.getInstance(), "build", "&4You can't do this here!") {
+
+			{
+				input(this);
+			}
+
+			@EventHandler(priority = EventPriority.HIGHEST)
+			public void onBuild(BlockPlaceEvent e) {
+
+				Optional<Region> r = Region.Resident.get(e.getPlayer()).getRegion();
+
+				if (r.isPresent()) {
+
+					Region region = r.get();
+
+					Optional<Flag> flag = region.getFlags().stream().filter(f -> f.id.equals(getId())).findFirst();
+
+					if (flag.isPresent()) {
+						Flag f = flag.get();
+						if (f.isValid()) {
+							if (!f.isAllowed()) {
+								Message.form(e.getPlayer()).send(getMessage());
+								e.setCancelled(true);
+							}
+						}
+					}
+
+				}
+			}
+
+		};
+
+		public static Flag BREAK = new Flag(Labyrinth.getInstance(), "break", "&4You can't do this here!") {
+
+			{
+				input(this);
+			}
+
+			@EventHandler(priority = EventPriority.HIGHEST)
+			public void onBuild(BlockBreakEvent e) {
+
+				Optional<Region> r = Region.Resident.get(e.getPlayer()).getRegion();
+
+				if (r.isPresent()) {
+
+					Region region = r.get();
+
+					Optional<Flag> flag = region.getFlags().stream().filter(f -> f.id.equals(getId())).findFirst();
+
+					if (flag.isPresent()) {
+						Flag f = flag.get();
+						if (f.isValid()) {
+							if (!f.isAllowed()) {
+								Message.form(e.getPlayer()).send(getMessage());
+								e.setCancelled(true);
+							}
+						}
+					}
+
+				}
+			}
+
+		};
+
+		private final Plugin plugin;
+		private boolean allowed;
+		private final String id;
+		private final String message;
+		private Listener listener;
+
+		protected Flag(Flag flag) {
+			this(flag.getHost(), flag.getId(), flag.getMessage());
+			setAllowed(flag.allowed);
+			input(flag.listener);
+		}
+
+		protected Flag(Plugin plugin, String id, String message) {
+			this.plugin = plugin;
+			this.id = id;
+			this.message = message;
+			setAllowed(true);
+		}
+
+		@Override
+		public Flag clone() {
+			return new Flag(this);
+		}
+
+		public final void setAllowed(boolean allowed) {
+			if (allowed) {
+				if (!isRegistered()) {
+					Bukkit.getPluginManager().registerEvents(getController(), getHost());
+				}
+			} else {
+				if (isRegistered()) {
+					HandlerList.unregisterAll(getController());
+				}
+			}
+			// here we will also set the config value for this flag and save it to the public flag file.
+			this.allowed = allowed;
+		}
+
+		public final boolean isRegistered() {
+			for (HandlerList hl : HandlerList.getHandlerLists()) {
+				if (Arrays.stream(hl.getRegisteredListeners()).anyMatch(l -> l.getListener().equals(getController()))) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public final boolean isAllowed() {
+			return this.allowed && isRegistered();
+		}
+
+		public final boolean isValid() {
+			return (this.plugin != null && this.plugin.isEnabled()) && !this.id.contains(" ") && this.id.contains("-");
+		}
+
+		public String getMessage() {
+			return StringUtils.use(this.message).translate();
+		}
+
+		public String getId() {
+			return this.id;
+		}
+
+		public Plugin getHost() {
+			return this.plugin;
+		}
+
+		public final void input(Listener controller) {
+			this.listener = controller;
+		}
+
+		protected final Listener getController() {
+			return listener;
+		}
+
+	}
+
 	class Boundary {
 
 		private final double xMax;
@@ -227,6 +381,8 @@ public interface Cuboid {
 			}
 
 			public Color toColor(int hex) {
+				if (this != CUSTOM)
+					throw new IllegalStateException("Invalid particle color usage. Expected 'CUSTOM'");
 				return Color.fromRGB(hex);
 			}
 

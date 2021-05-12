@@ -56,7 +56,7 @@ public class CuboidController implements Listener {
 	public Synchronous spawnListener(Player p) {
 		Region.Resident r = Region.Resident.get(p);
 		return Schedule.sync(() -> {
-			if (!Region.match(p.getLocation())) {
+			if (!r.getRegion().isPresent()) {
 				if (!r.isPastSpawn()) {
 					r.setPastSpawn(true);
 					Message.form(p).send("&4&oYou can now build and are free to claim land. Be careful of locals..");
@@ -65,8 +65,9 @@ public class CuboidController implements Listener {
 					r.setSpawnTagged(false);
 					Message.form(p).send("&c&oYou are no longer spawn protected.");
 				}
+				return;
 			}
-			if (Region.get(p.getLocation()) instanceof Region.Spawn) {
+			if (r.getRegion().get() instanceof Region.Spawn) {
 				if (r.isPastSpawn()) {
 					r.setPastSpawn(false);
 					Message.form(p).send("&c&oYou are now within spawn area.. building and claiming prohibited.");
@@ -161,8 +162,10 @@ public class CuboidController implements Listener {
 
 			Message msg = Message.form(p);
 
-			if (Region.match(target.getLocation())) {
-				Region region = Region.get(target.getLocation());
+			Region.Resident r = Region.Resident.get(target);
+
+			if (r.getRegion().isPresent()) {
+				Region region = r.getRegion().get();
 
 				if (region instanceof Region.Spawn) {
 
@@ -195,8 +198,10 @@ public class CuboidController implements Listener {
 
 			Message msg = Message.form(p);
 
-			if (Region.match(target.getLocation())) {
-				Region region = Region.get(target.getLocation());
+			Region.Resident r = Region.Resident.get(target);
+
+			if (r.getRegion().isPresent()) {
+				Region region = r.getRegion().get();
 
 				if (region instanceof Region.Spawn) {
 
