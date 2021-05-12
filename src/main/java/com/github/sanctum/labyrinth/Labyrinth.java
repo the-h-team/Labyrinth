@@ -5,6 +5,8 @@ import com.github.sanctum.labyrinth.data.BoundaryAction;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.Region;
+import com.github.sanctum.labyrinth.data.RegionFlag;
+import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.event.CuboidController;
@@ -46,6 +48,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
 	public static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
 	public static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
+	private final RegionServicesManager servicesManager = new RegionServicesManager();
 	private static Labyrinth instance;
 
 	@Override
@@ -53,6 +56,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		instance = this;
 		EconomyProvision provision = new DefaultProvision();
 		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
+		Bukkit.getServicesManager().register(RegionServicesManager.class, servicesManager, this, ServicePriority.Normal);
 		getLogger().info("- Registered factory implementation, " + provision.getImplementation());
 		boolean success;
 		getServer().getPluginManager().registerEvents(this, this);
@@ -182,6 +186,9 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				spawn.remove();
 			}
 		}).wait(3);
+		RegionServicesManager.getInstance().load(RegionFlag.BREAK);
+		RegionServicesManager.getInstance().load(RegionFlag.BUILD);
+		RegionServicesManager.getInstance().load(RegionFlag.PVP);
 	}
 
 	@Override
