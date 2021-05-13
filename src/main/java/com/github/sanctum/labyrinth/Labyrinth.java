@@ -121,7 +121,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				}
 			}
 
-		})).repeatReal(0, 5);
+		})).repeatReal(2, 15);
 
 		run(() -> {
 			RegionServicesManager manager = RegionServicesManager.getInstance();

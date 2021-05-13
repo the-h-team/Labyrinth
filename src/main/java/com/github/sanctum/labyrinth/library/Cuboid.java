@@ -275,7 +275,7 @@ public interface Cuboid {
 								Cuboid.Flag f = region.getFlag(BREAK.getId()).get();
 								if (f.isValid()) {
 									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) || !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 											Message.form(e.getPlayer()).send(BREAK.getMessage());
 											e.setCancelled(true);
 										}
@@ -300,7 +300,7 @@ public interface Cuboid {
 								Cuboid.Flag f = region.getFlag(BUILD.getId()).get();
 								if (f.isValid()) {
 									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) || !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 											Message.form(e.getPlayer()).send(BUILD.getMessage());
 											e.setCancelled(true);
 										}
@@ -328,7 +328,7 @@ public interface Cuboid {
 								Cuboid.Flag f = region.getFlag(PVP.getId()).get();
 								if (f.isValid()) {
 									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) || !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 											msg.send(PVP.getMessage());
 											e.setCancelled(true);
 										}
