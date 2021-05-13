@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.data.BoundaryAction;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.Region;
+import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
@@ -22,6 +23,7 @@ import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -121,56 +123,80 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 		})).repeatReal(0, 5);
 
-
-		if (Region.DATA.exists()) {
+		run(() -> {
 			RegionServicesManager manager = RegionServicesManager.getInstance();
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.BREAK));
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.BUILD));
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.PVP));
-			if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
-				for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
-					Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
+			if (Region.DATA.exists()) {
+				if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
+					for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
+						Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
 
-					if (o.getWorld() == null) {
-						throw new IllegalStateException("World is null??");
+						if (o.getWorld() == null) {
+							throw new IllegalStateException("World is null??");
+						}
+
+						Location t = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos2");
+						Location s = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".start");
+						HUID d = HUID.fromString(id);
+						UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
+						List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+						List<Region.Flag> flags = new ArrayList<>();
+						if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn." + id + ".flags")) {
+							for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.spawn." + id + ".flags").getKeys(false)) {
+								Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
+								if (f != null) {
+									RegionFlag copy = new RegionFlag(f);
+									copy.setMessage(Region.DATA.getConfig().getString("Markers.spawn." + id + ".flags." + flag + ".message"));
+									copy.setAllowed(Region.DATA.getConfig().getBoolean("Markers.spawn." + id + ".flags." + flag + ".allowed"));
+									flags.add(copy);
+								}
+							}
+						}
+						Region.Spawning spawn = new Region.Spawning(o, t, d);
+						spawn.setLocation(s);
+						spawn.setOwner(owner);
+						run(() -> spawn.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).run();
+						spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+						spawn.addFlag(flags.toArray(new Region.Flag[0]));
+						if (!spawn.load()) {
+							getLogger().warning("- A region under the name '" + spawn.getId() + "' has failed to load properly.");
+						}
 					}
-
-					Location t = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos2");
-					Location s = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".start");
-					HUID d = HUID.fromString(id);
-					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
-					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
-					//List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
-					Region.Spawning spawn = new Region.Spawning(o, t, d);
-					spawn.setLocation(s);
-					spawn.setOwner(owner);
-					run(() -> spawn.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).wait(2);
-					spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
-					//spawn.addFlag(flags.toArray(new Region.Flag[0]));
-					if (!spawn.load()) {
-						getLogger().warning("- A region under the name '" + spawn.getId() + "' has failed to load properly.");
+				}
+				if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
+					for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
+						Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
+						Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
+						HUID d = HUID.fromString(id);
+						UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
+						List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+						List<Region.Flag> flags = new ArrayList<>();
+						if (Region.DATA.getConfig().isConfigurationSection("Markers.region." + id + ".flags")) {
+							for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.region." + id + ".flags").getKeys(false)) {
+								Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
+								if (f != null) {
+									RegionFlag copy = new RegionFlag(f);
+									copy.setMessage(Region.DATA.getConfig().getString("Markers.region." + id + ".flags." + flag + ".message"));
+									copy.setAllowed(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".flags." + flag + ".allowed"));
+									flags.add(copy);
+								}
+							}
+						}
+						Region.Loading region = new Region.Loading(o, t, d);
+						region.setOwner(owner);
+						run(() -> region.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).run();
+						region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+						region.addFlag(flags.toArray(new Region.Flag[0]));
+						if (!region.load()) {
+							getLogger().warning("- A region under the name '" + region.getId() + "' has failed to load properly.");
+						}
 					}
 				}
 			}
-			if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
-				for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
-					Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
-					Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
-					HUID d = HUID.fromString(id);
-					UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
-					List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
-					//List<Region.Flag> flags = Region.DATA.getConfig().getStringList("Markers.region." + id + ".flags").stream().map(Region.Flag::valueOf).collect(Collectors.toList());
-					Region.Loading region = new Region.Loading(o, t, d);
-					region.setOwner(owner);
-					run(() -> region.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).wait(2);
-					region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
-					//region.addFlag(flags.toArray(new Region.Flag[0]));
-					if (!region.load()) {
-						getLogger().warning("- A region under the name '" + region.getId() + "' has failed to load properly.");
-					}
-				}
-			}
-		}
+		}).wait(2);
+
 		run(() -> {
 			for (Region.Loading load : Region.loading().list()) {
 				Region.Standard result = new Region.Standard(load);
@@ -188,7 +214,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				}
 				spawn.remove();
 			}
-		}).wait(3);
+		}).wait(5);
 	}
 
 	@Override

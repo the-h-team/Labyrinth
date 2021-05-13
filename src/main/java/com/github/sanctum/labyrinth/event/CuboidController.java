@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -14,6 +15,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -36,6 +39,28 @@ public class CuboidController implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBuild(BlockPlaceEvent e) {
+		if (Region.match(e.getBlock().getLocation()).isPresent()) {
+			RegionBuildEvent event = new RegionBuildEvent(e.getPlayer(), Region.match(e.getBlock().getLocation()).get(), e.getBlock());
+			Bukkit.getPluginManager().callEvent(event);
+			if (event.isCancelled()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBuild(BlockBreakEvent e) {
+		if (Region.match(e.getBlock().getLocation()).isPresent()) {
+			RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), Region.match(e.getBlock().getLocation()).get(), e.getBlock());
+			Bukkit.getPluginManager().callEvent(event);
+			if (event.isCancelled()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onFirstJoin(PlayerJoinEvent event) {
 		Region.Resident r = Region.Resident.get(event.getPlayer());
@@ -50,10 +75,10 @@ public class CuboidController implements Listener {
 		} else {
 			r.setSpawnTagged(false);
 		}
-		spawnListener(event.getPlayer()).repeatReal(5, 18);
+		moveListener(event.getPlayer()).repeatReal(5, 18);
 	}
 
-	public Synchronous spawnListener(Player p) {
+	public Synchronous moveListener(Player p) {
 		Region.Resident r = Region.Resident.get(p);
 		return Schedule.sync(() -> {
 			if (!r.getRegion().isPresent()) {
@@ -86,7 +111,7 @@ public class CuboidController implements Listener {
 		}).debug().cancelAfter(p);
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityTarget(EntityTargetLivingEntityEvent e) {
 		if (e.getTarget() instanceof Player) {
 			Player target = (Player) e.getTarget();
@@ -167,6 +192,14 @@ public class CuboidController implements Listener {
 			if (r.getRegion().isPresent()) {
 				Region region = r.getRegion().get();
 
+				RegionPVPEvent e = new RegionPVPEvent(p, target, region);
+				Bukkit.getPluginManager().callEvent(e);
+
+				if (e.isCancelled()) {
+					event.setCancelled(true);
+					return;
+				}
+
 				if (region instanceof Region.Spawn) {
 
 					Region.Spawn spawn = (Region.Spawn) region;
@@ -202,6 +235,14 @@ public class CuboidController implements Listener {
 
 			if (r.getRegion().isPresent()) {
 				Region region = r.getRegion().get();
+
+				RegionPVPEvent e = new RegionPVPEvent(p, target, region);
+				Bukkit.getPluginManager().callEvent(e);
+
+				if (e.isCancelled()) {
+					event.setCancelled(true);
+					return;
+				}
 
 				if (region instanceof Region.Spawn) {
 

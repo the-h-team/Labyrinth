@@ -2,7 +2,6 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.util.function.Consumer;
 import org.bukkit.plugin.Plugin;
 
 public class RegionFlag extends Cuboid.Flag {
@@ -24,13 +23,6 @@ public class RegionFlag extends Cuboid.Flag {
 
 		public Builder label(String id) {
 			this.id = id;
-			return this;
-		}
-
-		public Builder envelope(Consumer<RegionService> serviceConsumer) {
-			serviceConsumer.accept(new RegionService() {
-
-			});
 			return this;
 		}
 
@@ -58,6 +50,11 @@ public class RegionFlag extends Cuboid.Flag {
 
 	public RegionFlag(Plugin plugin, String id, String message) {
 		super(plugin, id, message);
+	}
+
+	public RegionFlag setMessage(String message) {
+		this.message = message;
+		return this;
 	}
 
 }

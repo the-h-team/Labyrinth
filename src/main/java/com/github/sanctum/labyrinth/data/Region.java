@@ -77,9 +77,6 @@ public abstract class Region implements Cuboid, Cloneable {
 		this.FLAGS = new LinkedList<>();
 		this.MEMBERS = new LinkedList<>();
 		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
-		addFlag(RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.BREAK),
-				RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.BUILD),
-				RegionServicesManager.getInstance().getFlagManager().getDefault(FlagManager.FlagType.PVP));
 	}
 
 	protected void setPlugin(Plugin plugin) {
@@ -297,7 +294,7 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	public boolean removeFlag(Flag flag) {
-		return this.FLAGS.remove(flag);
+		return this.FLAGS.removeIf(f -> f.getId().equals(flag.getId()));
 	}
 
 	public boolean removeFlag(Flag... flag) {
@@ -350,7 +347,11 @@ public abstract class Region implements Cuboid, Cloneable {
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos2", this.getEndingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".members", MEMBERS.stream().map(UUID::toString).collect(Collectors.toList()));
-			//DATA.getConfig().set("Markers.region." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+			for (Flag f : getFlags()) {
+				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
+				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
+				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
+			}
 			DATA.saveConfig();
 		} else
 			throw new IOException("One or more locations were found null during the saving process.");
@@ -420,6 +421,10 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public OfflinePlayer getPlayer() {
 			return p;
+		}
+
+		public Player getOnline() {
+			return getPlayer().getPlayer();
 		}
 
 		public Optional<Region> getRegion() {
@@ -510,7 +515,11 @@ public abstract class Region implements Cuboid, Cloneable {
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				//DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+				for (Flag f : getFlags()) {
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
+				}
 				DATA.saveConfig();
 			} else
 				throw new IOException("One or more locations were found null during the saving process.");
@@ -550,14 +559,23 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public Standard(Region cuboid) {
 			super(cuboid);
+			if (cuboid.getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Standard(Location point1, Location point2) {
 			super(point1, point2);
+			if (getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Standard(Location point1, Location point2, HUID id) {
 			super(point1, point2, id);
+			if (getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Standard forPlugin(Plugin plugin) {
@@ -573,14 +591,23 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public Spawn(Region.Spawning cuboid) {
 			super(cuboid);
+			if (cuboid.getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Spawn(Location point1, Location point2) {
 			super(point1, point2);
+			if (getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Spawn(Location point1, Location point2, HUID id) {
 			super(point1, point2, id);
+			if (getFlags().isEmpty()) {
+				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
+			}
 		}
 
 		public Location location() {
@@ -624,7 +651,11 @@ public abstract class Region implements Cuboid, Cloneable {
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				//DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags", FLAGS.stream().map(Enum::name).collect(Collectors.toList()));
+				for (Flag f : getFlags()) {
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
+					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
+				}
 				DATA.saveConfig();
 			} else
 				throw new IOException("One or more locations were found null during the saving process.");

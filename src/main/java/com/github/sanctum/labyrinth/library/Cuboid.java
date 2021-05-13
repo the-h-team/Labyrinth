@@ -6,23 +6,21 @@ import com.github.sanctum.labyrinth.data.BoundaryAssembly;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionService;
-import com.github.sanctum.labyrinth.data.RegionServicesManager;
+import com.github.sanctum.labyrinth.event.RegionBuildEvent;
+import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
+import com.github.sanctum.labyrinth.event.RegionPVPEvent;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import org.bukkit.Bukkit;
+import java.util.stream.Collectors;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -201,16 +199,17 @@ public interface Cuboid {
 		private final Plugin plugin;
 		private boolean allowed;
 		private final String id;
-		private final String message;
-
+		protected String message;
 
 		public Flag(Flag flag) {
-			this(flag.getHost(), flag.getId(), flag.getMessage());
-			setAllowed(flag.allowed);
+			this.plugin = flag.getHost();
+			this.id = flag.getId();
+			this.message = flag.getMessage();
+			this.allowed = flag.allowed;
 		}
 
 		public Flag(Plugin plugin, String id, String message) {
-			Bukkit.getLogger().severe("Registered new flag " + id + " under host; " + plugin);
+			plugin.getLogger().warning("- New flag " + '"' + id + '"' + " registered for public Labyrinth use.");
 			this.plugin = plugin;
 			this.id = id;
 			this.message = message;
@@ -232,7 +231,7 @@ public interface Cuboid {
 		}
 
 		public final boolean isDefault() {
-			return !RegionServicesManager.getInstance().isRegistered(this) && RegionServicesManager.getInstance().getFlagManager().getDefault().stream().anyMatch(f -> f.getId().equals(getId()));
+			return getHost().getName().equals("Labyrinth");
 		}
 
 		public final boolean isValid() {
@@ -255,7 +254,6 @@ public interface Cuboid {
 
 	class FlagManager {
 
-		private final LinkedList<Cuboid.Flag> FLAGS = new LinkedList<>();
 		private final LinkedList<Cuboid.Flag> CUSTOM = new LinkedList<>();
 
 		private final Cuboid.Flag BREAK;
@@ -268,25 +266,21 @@ public interface Cuboid {
 					.label("break")
 					.receive("&4You cant do this!")
 					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.HIGHEST)
-						public void onBuild(BlockBreakEvent e) {
+						@EventHandler(priority = EventPriority.NORMAL)
+						public void onBuild(RegionDestroyEvent e) {
 
-							Optional<Region> r = Region.match(e.getBlock().getLocation());
-							if (r.isPresent()) {
+							Region region = e.getRegion();
 
-								Region region = r.get();
-
-								if (region.hasFlag(BREAK)) {
-									Cuboid.Flag f = region.getFlag(BREAK.getId()).get();
-									if (f.isValid()) {
-										if (!f.isAllowed()) {
-											Message.form(e.getPlayer()).send(BREAK.getMessage());
-											e.setCancelled(true);
-										}
+							if (region.hasFlag(BREAK)) {
+								Cuboid.Flag f = region.getFlag(BREAK.getId()).get();
+								if (f.isValid()) {
+									if (!f.isAllowed()) {
+										Message.form(e.getPlayer()).send(BREAK.getMessage());
+										e.setCancelled(true);
 									}
 								}
-
 							}
+
 						}
 					})
 					.finish();
@@ -295,25 +289,21 @@ public interface Cuboid {
 					.label("build")
 					.receive("&4You cant do this!")
 					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.HIGHEST)
-						public void onBuild(BlockPlaceEvent e) {
+						@EventHandler(priority = EventPriority.NORMAL)
+						public void onBuild(RegionBuildEvent e) {
 
-							Optional<Region> r = Region.match(e.getBlock().getLocation());
-							if (r.isPresent()) {
+							Region region = e.getRegion();
 
-								Region region = r.get();
-
-								if (region.hasFlag(BUILD)) {
-									Cuboid.Flag f = region.getFlag(BUILD.getId()).get();
-									if (f.isValid()) {
-										if (!f.isAllowed()) {
-											Message.form(e.getPlayer()).send(BUILD.getMessage());
-											e.setCancelled(true);
-										}
+							if (region.hasFlag(BUILD)) {
+								Cuboid.Flag f = region.getFlag(BUILD.getId()).get();
+								if (f.isValid()) {
+									if (!f.isAllowed()) {
+										Message.form(e.getPlayer()).send(BUILD.getMessage());
+										e.setCancelled(true);
 									}
 								}
-
 							}
+
 						}
 					})
 					.finish();
@@ -322,60 +312,24 @@ public interface Cuboid {
 					.label("pvp")
 					.receive("&4You cant fight people here.")
 					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-						public void onPlayerHit(EntityDamageByEntityEvent event) {
+						@EventHandler(priority = EventPriority.NORMAL)
+						public void onPvP(RegionPVPEvent e) {
+							Player p = e.getPlayer();
 
+							Message msg = Message.form(p);
 
-							if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
-								Player target = (Player) event.getEntity();
-								Player p = (Player) event.getDamager();
+							Region region = e.getRegion();
 
-								Message msg = Message.form(p);
-
-								Region.Resident r = Region.Resident.get(target);
-
-								if (r.getRegion().isPresent()) {
-									Region region = r.getRegion().get();
-
-									if (region.hasFlag(PVP)) {
-										Cuboid.Flag f = region.getFlag(PVP.getId()).get();
-										if (f.isValid()) {
-											if (!f.isAllowed()) {
-												msg.send(PVP.getMessage());
-												event.setCancelled(true);
-											}
-										}
+							if (region.hasFlag(PVP)) {
+								Cuboid.Flag f = region.getFlag(PVP.getId()).get();
+								if (f.isValid()) {
+									if (!f.isAllowed()) {
+										msg.send(PVP.getMessage());
+										e.setCancelled(true);
 									}
-
-								}
-
-							}
-
-							if (event.getEntity() instanceof Player && event.getDamager() instanceof Projectile && (
-									(Projectile) event.getDamager()).getShooter() instanceof Player) {
-								Projectile pr = (Projectile) event.getDamager();
-								Player p = (Player) pr.getShooter();
-								Player target = (Player) event.getEntity();
-
-								Message msg = Message.form(p);
-
-								Region.Resident r = Region.Resident.get(target);
-
-								if (r.getRegion().isPresent()) {
-									Region region = r.getRegion().get();
-
-									if (region.hasFlag(PVP)) {
-										Cuboid.Flag f = region.getFlag(PVP.getId()).get();
-										if (f.isValid()) {
-											if (!f.isAllowed()) {
-												msg.send(PVP.getMessage());
-												event.setCancelled(true);
-											}
-										}
-									}
-
 								}
 							}
+
 						}
 					})
 					.finish();
@@ -399,8 +353,12 @@ public interface Cuboid {
 			PVP, BREAK, BUILD
 		}
 
-		public LinkedList<Cuboid.Flag> getDefault() {
-			return FLAGS;
+		public List<Cuboid.Flag> getDefault() {
+			return CUSTOM.stream().filter(f -> f.getHost().getName().equals(Labyrinth.getInstance().getName())).collect(Collectors.toList());
+		}
+
+		public Optional<Cuboid.Flag> getFlag(String id) {
+			return CUSTOM.stream().filter(f -> f.getId().equals(id)).findFirst();
 		}
 
 		public LinkedList<Cuboid.Flag> getFlags() {
