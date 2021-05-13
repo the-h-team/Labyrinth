@@ -20,23 +20,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class CuboidController implements Listener {
-
-	@EventHandler
-	public void onRespawn(PlayerRespawnEvent event) {
-		if (event.getPlayer().getBedSpawnLocation() == null) {
-			if (Region.spawn().isPresent()) {
-				Region.Resident r = Region.Resident.get(event.getPlayer());
-				Message msg = Message.form(event.getPlayer());
-				event.setRespawnLocation(Region.spawn().get().location());
-				r.setSpawnTagged(true);
-				r.setPastSpawn(false);
-				msg.send("&aWelcome to spawn! Try not to die again..");
-			}
-		}
-	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBuild(BlockPlaceEvent e) {
