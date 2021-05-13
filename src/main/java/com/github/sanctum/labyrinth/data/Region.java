@@ -44,6 +44,7 @@ public abstract class Region implements Cuboid, Cloneable {
 	private final HUID id;
 	private UUID owner;
 	private String name;
+	private boolean passthrough;
 	private Plugin plugin;
 	protected final List<Flag> FLAGS;
 	private final List<UUID> MEMBERS;
@@ -261,6 +262,14 @@ public abstract class Region implements Cuboid, Cloneable {
 		return false;
 	}
 
+	public boolean isPassthrough() {
+		return passthrough;
+	}
+
+	public void setPassthrough(boolean passthrough) {
+		this.passthrough = passthrough;
+	}
+
 	public boolean addFlag(Flag... flag) {
 		for (Flag f : flag) {
 			if (!addFlag(f)) {
@@ -345,6 +354,7 @@ public abstract class Region implements Cuboid, Cloneable {
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".plugin", this.getPlugin().getName());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos1", this.getStartingPoint());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos2", this.getEndingPoint());
+			DATA.getConfig().set("Markers.region." + getId().toString() + ".pass", this.isPassthrough());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 			DATA.getConfig().set("Markers.region." + getId().toString() + ".members", MEMBERS.stream().map(UUID::toString).collect(Collectors.toList()));
 			for (Flag f : getFlags()) {
@@ -513,6 +523,7 @@ public abstract class Region implements Cuboid, Cloneable {
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pass", this.isPassthrough());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
 				for (Flag f : getFlags()) {
@@ -649,6 +660,7 @@ public abstract class Region implements Cuboid, Cloneable {
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
+				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pass", this.isPassthrough());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
 				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
 				for (Flag f : getFlags()) {
