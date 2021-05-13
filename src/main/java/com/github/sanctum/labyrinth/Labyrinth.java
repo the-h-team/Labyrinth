@@ -240,7 +240,10 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		for (WrappedComponent component : COMPONENTS) {
 			if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
 				run(() -> component.action().apply()).run();
-				run(component::remove).waitReal(200);
+				if (!component.isMarked()) {
+					component.setMarked(true);
+					run(component::remove).waitReal(200);
+				}
 				e.setCancelled(true);
 			}
 		}

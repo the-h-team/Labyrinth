@@ -16,6 +16,8 @@ public class WrappedComponent {
 
 	private final HUID commandSerial;
 
+	private boolean marked;
+
 	private Applicable action;
 
 	public WrappedComponent(TextComponent component) {
@@ -34,6 +36,15 @@ public class WrappedComponent {
 	public WrappedComponent accept(Applicable action) {
 		this.action = action;
 		return this;
+	}
+
+	public WrappedComponent setMarked(boolean marked) {
+		this.marked = marked;
+		return this;
+	}
+
+	public boolean isMarked() {
+		return marked;
 	}
 
 	/**
