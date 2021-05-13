@@ -154,6 +154,9 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						spawn.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.spawn." + id + ".pass"));
 						spawn.setLocation(s);
 						spawn.setOwner(owner);
+						if (Region.DATA.getConfig().getString("Markers.spawn." + id + ".name") != null) {
+							spawn.setName(Region.DATA.getConfig().getString("Markers.spawn." + id + ".name"));
+						}
 						run(() -> spawn.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).run();
 						spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 						spawn.addFlag(flags.toArray(new Region.Flag[0]));
@@ -183,6 +186,9 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						}
 						Region.Loading region = new Region.Loading(o, t, d);
 						region.setOwner(owner);
+						if (Region.DATA.getConfig().getString("Markers.region." + id + ".name") != null) {
+							region.setName(Region.DATA.getConfig().getString("Markers.region." + id + ".name"));
+						}
 						region.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".pass"));
 						run(() -> region.setPlugin(getServer().getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).run();
 						region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
