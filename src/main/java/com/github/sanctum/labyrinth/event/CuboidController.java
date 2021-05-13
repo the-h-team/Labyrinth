@@ -4,7 +4,6 @@ import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.task.Synchronous;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Monster;
@@ -75,40 +74,6 @@ public class CuboidController implements Listener {
 		} else {
 			r.setSpawnTagged(false);
 		}
-		moveListener(event.getPlayer()).repeatReal(5, 18);
-	}
-
-	public Synchronous moveListener(Player p) {
-		Region.Resident r = Region.Resident.get(p);
-		return Schedule.sync(() -> {
-			if (!r.getRegion().isPresent()) {
-				if (!r.isPastSpawn()) {
-					r.setPastSpawn(true);
-					Message.form(p).send("&4&oYou can now build and are free to claim land. Be careful of locals..");
-				}
-				if (r.isSpawnTagged()) {
-					r.setSpawnTagged(false);
-					Message.form(p).send("&c&oYou are no longer spawn protected.");
-				}
-				return;
-			}
-			if (r.getRegion().get() instanceof Region.Spawn) {
-				if (r.isPastSpawn()) {
-					r.setPastSpawn(false);
-					Message.form(p).send("&c&oYou are now within spawn area.. building and claiming prohibited.");
-				}
-				if (r.isSpawnTagged()) {
-					Message.form(p).action("&7Spawn Protection: &aOn");
-				} else {
-					Message.form(p).action("&7Spawn Protection: &cNone");
-				}
-			} else {
-				if (r.isSpawnTagged()) {
-					r.setSpawnTagged(false);
-					Message.form(p).send("&c&oYou are no longer spawn protected.");
-				}
-			}
-		}).debug().cancelAfter(p);
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
