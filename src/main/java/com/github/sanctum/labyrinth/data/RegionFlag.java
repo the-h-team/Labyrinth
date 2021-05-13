@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.library.Cuboid;
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.function.Consumer;
 import org.bukkit.plugin.Plugin;
 
@@ -44,7 +45,7 @@ public class RegionFlag extends Cuboid.Flag {
 		}
 
 		public Cuboid.Flag finish() {
-			RegionServicesManager.getInstance().load(service);
+			Schedule.sync(() -> RegionServicesManager.getInstance().load(service)).wait(1);
 			return new RegionFlag(this.plugin, this.id, this.message);
 		}
 

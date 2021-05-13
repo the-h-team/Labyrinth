@@ -16,7 +16,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -277,7 +276,7 @@ public interface Cuboid {
 
 								Region region = r.get();
 
-								if (region.hasFlag(BREAK.getId())) {
+								if (region.hasFlag(BREAK)) {
 									Cuboid.Flag f = region.getFlag(BREAK.getId()).get();
 									if (f.isValid()) {
 										if (!f.isAllowed()) {
@@ -304,7 +303,7 @@ public interface Cuboid {
 
 								Region region = r.get();
 
-								if (region.hasFlag(BUILD.getId())) {
+								if (region.hasFlag(BUILD)) {
 									Cuboid.Flag f = region.getFlag(BUILD.getId()).get();
 									if (f.isValid()) {
 										if (!f.isAllowed()) {
@@ -323,9 +322,10 @@ public interface Cuboid {
 					.label("pvp")
 					.receive("&4You cant fight people here.")
 					.envelope(new RegionService() {
-
 						@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 						public void onPlayerHit(EntityDamageByEntityEvent event) {
+
+
 							if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
 								Player target = (Player) event.getEntity();
 								Player p = (Player) event.getDamager();
@@ -337,7 +337,7 @@ public interface Cuboid {
 								if (r.getRegion().isPresent()) {
 									Region region = r.getRegion().get();
 
-									if (region.hasFlag(PVP.getId())) {
+									if (region.hasFlag(PVP)) {
 										Cuboid.Flag f = region.getFlag(PVP.getId()).get();
 										if (f.isValid()) {
 											if (!f.isAllowed()) {
@@ -364,7 +364,7 @@ public interface Cuboid {
 								if (r.getRegion().isPresent()) {
 									Region region = r.getRegion().get();
 
-									if (region.hasFlag(PVP.getId())) {
+									if (region.hasFlag(PVP)) {
 										Cuboid.Flag f = region.getFlag(PVP.getId()).get();
 										if (f.isValid()) {
 											if (!f.isAllowed()) {
@@ -376,24 +376,7 @@ public interface Cuboid {
 
 								}
 							}
-
-
-							if (event.getEntity() instanceof Player && event.getDamager() instanceof Monster) {
-								Player target = (Player) event.getEntity();
-								if (Region.Resident.get(target).isSpawnTagged()) {
-									event.setCancelled(true);
-								}
-							}
-
-							if (event.getEntity() instanceof Player && event.getDamager() instanceof Projectile && (
-									(Projectile) event.getDamager()).getShooter() instanceof Monster) {
-								Player target = (Player) event.getEntity();
-								if (Region.Resident.get(target).isSpawnTagged()) {
-									event.setCancelled(true);
-								}
-							}
 						}
-
 					})
 					.finish();
 
@@ -416,11 +399,11 @@ public interface Cuboid {
 			PVP, BREAK, BUILD
 		}
 
-		public LinkedList<Flag> getDefault() {
+		public LinkedList<Cuboid.Flag> getDefault() {
 			return FLAGS;
 		}
 
-		public LinkedList<Flag> getFlags() {
+		public LinkedList<Cuboid.Flag> getFlags() {
 			return CUSTOM;
 		}
 

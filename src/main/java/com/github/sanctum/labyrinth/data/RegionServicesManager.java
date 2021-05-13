@@ -13,7 +13,7 @@ public final class RegionServicesManager {
 
 	private final Cuboid.FlagManager flagManager;
 
-	{
+	public RegionServicesManager() {
 		this.flagManager = new Cuboid.FlagManager();
 	}
 
