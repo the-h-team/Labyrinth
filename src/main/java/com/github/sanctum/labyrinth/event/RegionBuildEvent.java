@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.data.Region;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 public class RegionBuildEvent extends RegionInteractEvent {
 
@@ -17,7 +18,7 @@ public class RegionBuildEvent extends RegionInteractEvent {
 	}
 
 	@Override
-	public HandlerList getHandlers() {
+	public @NotNull HandlerList getHandlers() {
 		return handlers;
 	}
 

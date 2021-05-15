@@ -10,6 +10,7 @@ import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.event.CuboidController;
+import com.github.sanctum.labyrinth.event.CuboidSelectionEvent;
 import com.github.sanctum.labyrinth.event.EventBuilder;
 import com.github.sanctum.labyrinth.formatting.string.WrappedComponent;
 import com.github.sanctum.labyrinth.library.Applicable;
@@ -106,6 +107,9 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			if (Cuboid.Selection.contains(p)) {
 
 				Cuboid.Selection selection = Cuboid.Selection.source(p);
+
+				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+				getServer().getPluginManager().callEvent(event);
 
 				if (selection.getPos1() != null && selection.getPos2() == null) {
 					Cuboid.Boundary cube = new Region.Boundary(selection.getPos1().getBlockX(), selection.getPos1().getBlockX(), selection.getPos1().getBlockY(), selection.getPos1().getBlockY(), selection.getPos1().getBlockZ(), selection.getPos1().getBlockZ()).target(p);

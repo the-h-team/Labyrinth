@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.event;
 import com.github.sanctum.labyrinth.data.Region;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 public class RegionTraverseEvent extends Event {
 
@@ -15,7 +16,7 @@ public class RegionTraverseEvent extends Event {
 	}
 
 	@Override
-	public HandlerList getHandlers() {
+	public @NotNull HandlerList getHandlers() {
 		return handlers;
 	}
 

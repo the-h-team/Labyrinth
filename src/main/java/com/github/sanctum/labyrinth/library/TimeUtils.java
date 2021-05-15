@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
 
@@ -35,9 +36,26 @@ public class TimeUtils {
 	}
 
 	/**
+	 * Unlike the other is{Unit}Passed methods this method will ensure that the return value is
+	 * based entirely off the fact that the provided date is within x amount of time of the given
+	 * time unit threshold.
+	 * <p>
+	 * Alternatively you can use {@link TimeWatch#hasElapsed(TimeUnit, long)} from the {@link TimeWatch} object
+	 * which is internally used for this method.
+	 *
+	 * @param date      The starting date to provide.
+	 * @param time      The amount of time to check has passed
+	 * @param threshold The time unit threshold to check
+	 * @return true if the allotted amount of time has since passed.
+	 */
+	public static boolean timeElapsed(long date, long time, TimeUnit threshold) {
+		return TimeWatch.start(date).hasElapsed(threshold, time);
+	}
+
+	/**
 	 * Check if x amount of seconds has passed since a starting date.
 	 *
-	 * @param date The starting point date
+	 * @param date    The starting point date
 	 * @param seconds The amount of time to check has passed in seconds
 	 * @return If the amount of time has passed this = true
 	 */

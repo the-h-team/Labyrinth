@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.library.MathUtils;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +14,8 @@ import java.util.List;
 public class PaginatedList<T> {
 	private final List<T> typeList;
 	private Comparator<? super T> comparable;
-	private ComponentCompliment start;
-	private ComponentCompliment finish;
+	private ComponentCompliment<T> start;
+	private ComponentCompliment<T> finish;
 	private ComponentDecoration<T> decoration;
 	private int linesPerPage;
 
@@ -104,7 +105,7 @@ public class PaginatedList<T> {
 
 		int o = linesPerPage;
 
-		List<T> tempList = new LinkedList<>(this.typeList);
+		List<T> tempList = new LinkedList<>(new LinkedHashSet<>(this.typeList));
 		int totalPageCount = 1;
 		if ((tempList.size() % o) == 0) {
 			if (tempList.size() > 0) {
@@ -117,7 +118,7 @@ public class PaginatedList<T> {
 		if (page <= totalPageCount) {
 
 			if (this.start != null) {
-				this.start.apply(pageNum, totalPageCount);
+				this.start.apply(this, pageNum, totalPageCount);
 			}
 
 			if (!tempList.isEmpty()) {
@@ -141,7 +142,7 @@ public class PaginatedList<T> {
 					tempList.remove(value);
 				}
 				if (this.finish != null) {
-					this.finish.apply(pageNum, totalPageCount);
+					this.finish.apply(this, pageNum, totalPageCount);
 				}
 			}
 			// end line

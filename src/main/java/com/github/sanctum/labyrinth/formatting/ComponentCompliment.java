@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
-public interface ComponentCompliment {
+public interface ComponentCompliment<T> {
 
-	void apply(int page, int max);
+	void apply(PaginatedList<T> pagination, int page, int max);
 
 }

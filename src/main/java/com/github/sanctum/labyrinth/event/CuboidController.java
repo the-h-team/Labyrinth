@@ -75,6 +75,15 @@ public class CuboidController implements Listener {
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+
+			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
+				RegionInteractEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
+				Bukkit.getPluginManager().callEvent(event);
+				if (event.isCancelled()) {
+					e.setCancelled(true);
+				}
+			}
+
 			if (e.getItem() == null)
 				return;
 
@@ -101,6 +110,15 @@ public class CuboidController implements Listener {
 			}
 		}
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+
+			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
+				RegionInteractEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
+				Bukkit.getPluginManager().callEvent(event);
+				if (event.isCancelled()) {
+					e.setCancelled(true);
+				}
+			}
+
 			if (e.getItem() == null)
 				return;
 

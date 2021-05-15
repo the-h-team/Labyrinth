@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class RegionPVPEvent extends RegionInteractEvent {
 
@@ -18,7 +19,7 @@ public class RegionPVPEvent extends RegionInteractEvent {
 	}
 
 	@Override
-	public HandlerList getHandlers() {
+	public @NotNull HandlerList getHandlers() {
 		return handlers;
 	}
 
