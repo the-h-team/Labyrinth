@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulate a list of objects to be sorted and paginated.
@@ -12,7 +14,7 @@ import java.util.List;
  * @param <T> The object type representative of this pagination operation.
  */
 public class PaginatedList<T> {
-	private final List<T> typeList;
+	private List<T> typeList;
 	private Comparator<? super T> comparable;
 	private ComponentCompliment<T> start;
 	private ComponentCompliment<T> finish;
@@ -90,6 +92,17 @@ public class PaginatedList<T> {
 	 */
 	public PaginatedList<T> finish(FinishingCompliment<T> compliment) {
 		this.finish = compliment;
+		return this;
+	}
+
+	/**
+	 * Separate un-wanted elements from the list.
+	 *
+	 * @param predicate The check to succeed before adding each element.
+	 * @return The same paginated list procedure.
+	 */
+	public PaginatedList<T> filter(Predicate<? super T> predicate) {
+		this.typeList = typeList.stream().filter(predicate).collect(Collectors.toList());
 		return this;
 	}
 
