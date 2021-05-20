@@ -244,7 +244,10 @@ public class SkullItem {
 		 * @return The specified custom head if not null
 		 */
 		public static ItemStack provide(String headValue) {
-			ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			assert type != null;
+			ItemStack skull = new ItemStack(type);
 			UUID hashAsId = new UUID(headValue.hashCode(), headValue.hashCode());
 			return Bukkit.getUnsafe().modifyItemStack(skull,
 					"{SkullOwner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + headValue + "\"}]}}}"

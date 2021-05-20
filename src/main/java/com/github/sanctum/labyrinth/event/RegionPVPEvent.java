@@ -14,7 +14,7 @@ public class RegionPVPEvent extends RegionInteractEvent {
 	private final Player target;
 
 	public RegionPVPEvent(Player player, Player target, Region region) {
-		super(Type.BUILD, player, region);
+		super(Type.PVP, player, region);
 		this.target = target;
 	}
 

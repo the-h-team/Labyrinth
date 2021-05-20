@@ -66,7 +66,7 @@ public class CuboidController implements Listener {
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 
 			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
-				RegionInteractEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
+				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
 				Bukkit.getPluginManager().callEvent(event);
 				if (event.isCancelled()) {
 					e.setCancelled(true);
@@ -74,6 +74,9 @@ public class CuboidController implements Listener {
 			}
 
 			if (e.getItem() == null)
+				return;
+
+			if (e.getItem().getType() != Material.PAPER)
 				return;
 
 			if (!e.getPlayer().hasPermission("labyrinth.selection"))
@@ -87,7 +90,7 @@ public class CuboidController implements Listener {
 
 				selection.setPos1(e.getClickedBlock().getLocation());
 
-				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+				CuboidCreationEvent event = new CuboidCreationEvent(selection);
 				Bukkit.getPluginManager().callEvent(event);
 
 			}
@@ -95,7 +98,7 @@ public class CuboidController implements Listener {
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 
 			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
-				RegionInteractEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
+				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
 				Bukkit.getPluginManager().callEvent(event);
 				if (event.isCancelled()) {
 					e.setCancelled(true);
@@ -116,7 +119,7 @@ public class CuboidController implements Listener {
 
 				selection.setPos2(e.getClickedBlock().getLocation());
 
-				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+				CuboidCreationEvent event = new CuboidCreationEvent(selection);
 				Bukkit.getPluginManager().callEvent(event);
 			}
 		}

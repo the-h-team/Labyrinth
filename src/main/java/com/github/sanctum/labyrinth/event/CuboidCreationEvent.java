@@ -4,11 +4,11 @@ import com.github.sanctum.labyrinth.library.Cuboid;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class CuboidSelectionEvent extends CuboidSelectEvent {
+public class CuboidCreationEvent extends CuboidSelectEvent {
 
 	private static final HandlerList handlers = new HandlerList();
 
-	public CuboidSelectionEvent(Cuboid.Selection selection) {
+	public CuboidCreationEvent(Cuboid.Selection selection) {
 		super(selection);
 	}
 

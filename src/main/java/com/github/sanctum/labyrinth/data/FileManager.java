@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -198,6 +199,19 @@ public class FileManager {
             this.fc = YamlConfiguration.loadConfiguration(file);
         }
         return this.fc;
+    }
+
+    /**
+     * Performs operations on this FileManager's config instance,
+     * returning an object of any desired type. Accepts a lambda,
+     * allowing for clean and compile-time-type-safe data retrieval and
+     * mapping.
+     *
+     * @param function Retrieve an object of arbitrary type from the configuration.
+     * @return The desired return value to be read.
+     */
+    synchronized public <R> R readValue(Function<FileConfiguration, R> function) {
+        return function.apply(getConfig());
     }
 
     /**
