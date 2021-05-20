@@ -17,7 +17,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -47,6 +46,7 @@ public class CuboidController implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onFirstJoin(PlayerJoinEvent event) {
+
 		Region.Resident r = Region.Resident.get(event.getPlayer());
 		if (!event.getPlayer().hasPlayedBefore()) {
 			Schedule.sync(() -> {
@@ -58,17 +58,6 @@ public class CuboidController implements Listener {
 			}).wait(2);
 		} else {
 			r.setSpawnTagged(false);
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onEntityTarget(EntityTargetLivingEntityEvent e) {
-		if (e.getTarget() instanceof Player) {
-			Player target = (Player) e.getTarget();
-			Region.Resident r = Region.Resident.get(target);
-			if (r.isSpawnTagged()) {
-				e.setCancelled(true);
-			}
 		}
 	}
 
@@ -92,21 +81,15 @@ public class CuboidController implements Listener {
 
 			if (e.getItem().getType() == Material.WOODEN_AXE) {
 				Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
-				Message msg = Message.form(e.getPlayer());
 				if (e.useInteractedBlock() != Event.Result.DENY) {
 					e.setUseInteractedBlock(Event.Result.DENY);
 				}
 
-				if (e.getPlayer().isSneaking()) {
-					selection.setPos2(null);
-					selection.setPos1(null);
-					msg.send("&3You have cleared your cuboid selection.");
-					return;
-				}
-
 				selection.setPos1(e.getClickedBlock().getLocation());
 
-				msg.send("&aYou have set position 1 for a new cuboid.");
+				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+				Bukkit.getPluginManager().callEvent(event);
+
 			}
 		}
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -127,23 +110,15 @@ public class CuboidController implements Listener {
 
 			if (e.getItem().getType() == Material.WOODEN_AXE) {
 				Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
-				Message msg = Message.form(e.getPlayer());
 				if (e.useInteractedBlock() != Event.Result.DENY) {
 					e.setUseInteractedBlock(Event.Result.DENY);
 				}
 
-				if (e.getPlayer().isSneaking()) {
-					selection.setPos2(null);
-					selection.setPos1(null);
-					msg.send("&3You have cleared your cuboid selection.");
-					return;
-				}
-
 				selection.setPos2(e.getClickedBlock().getLocation());
 
-				msg.send("&aYou have set position 2 for a new cuboid.");
+				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+				Bukkit.getPluginManager().callEvent(event);
 			}
-
 		}
 	}
 

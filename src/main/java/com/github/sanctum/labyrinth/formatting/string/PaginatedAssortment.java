@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.formatting.string;
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.formatting.SortedDoubleMap;
 import com.github.sanctum.labyrinth.formatting.SortedLongMap;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TextLib;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -122,7 +123,7 @@ public class PaginatedAssortment {
 			totalPageCount = (targetList.size() / linesPerPage) + 1;
 		}
 		if (page <= totalPageCount) {
-			p.sendMessage(new ColoredString(listTitle.replace("{PAGE}", page + "").replace("{TOTAL}", totalPageCount + ""), ColoredString.ColorType.MC).toString());
+			p.sendMessage(StringUtils.use(listTitle.replace("{PAGE}", page + "").replace("{TOTAL}", totalPageCount + "")).translate());
 			if (bordersPerPage >= 2) {
 				p.sendMessage(new ColoredString(listBorder, ColoredString.ColorType.MC).toString());
 			}

@@ -172,16 +172,10 @@ public interface Cuboid {
 
 		public void setPos1(Location pos1) {
 			this.pos1 = pos1;
-
-			if (pos1 != null)
-				Message.form(wizard).send("&aFirst position selected @ X:" + pos1.getX() + " Z:" + pos1.getZ());
 		}
 
 		public void setPos2(Location pos2) {
 			this.pos2 = pos2;
-
-			if (pos2 != null)
-				Message.form(wizard).send("&aSecond position selected @ X:" + pos2.getX() + " Z:" + pos2.getZ());
 		}
 
 		public Region toRegion() {

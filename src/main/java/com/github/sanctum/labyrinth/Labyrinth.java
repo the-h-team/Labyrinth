@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.data.AdvancedHook;
-import com.github.sanctum.labyrinth.data.BoundaryAction;
 import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.Region;
@@ -35,7 +34,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -111,18 +109,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
 				getServer().getPluginManager().callEvent(event);
 
-				if (selection.getPos1() != null && selection.getPos2() == null) {
-					Cuboid.Boundary cube = new Region.Boundary(selection.getPos1().getBlockX(), selection.getPos1().getBlockX(), selection.getPos1().getBlockY(), selection.getPos1().getBlockY(), selection.getPos1().getBlockZ(), selection.getPos1().getBlockZ()).target(p);
-					cube.deploy(action -> action.getPlayer().spawnParticle(org.bukkit.Particle.REDSTONE, action.getX(), action.getY(), action.getZ(), 1, new Particle.DustOptions(Cuboid.Boundary.Particle.GREEN.toColor(), 2)));
-				}
-				if (selection.getPos2() != null && selection.getPos1() == null) {
-					Cuboid.Boundary cube = new Region.Boundary(selection.getPos2().getBlockX(), selection.getPos2().getBlockX(), selection.getPos2().getBlockY(), selection.getPos2().getBlockY(), selection.getPos2().getBlockZ(), selection.getPos2().getBlockZ()).target(p);
-					cube.deploy(action -> action.getPlayer().spawnParticle(org.bukkit.Particle.REDSTONE, action.getX(), action.getY(), action.getZ(), 1, new Particle.DustOptions(Cuboid.Boundary.Particle.GREEN.toColor(), 2)));
-				}
-				if (selection.getPos1() != null && selection.getPos2() != null) {
-					Cuboid.Boundary cube = new Region.Boundary(Math.max(selection.getPos1().getBlockX(), selection.getPos2().getBlockX()) + 0.5, Math.min(selection.getPos1().getBlockX(), selection.getPos2().getBlockX()) + 0.5, Math.max(selection.getPos1().getBlockY(), selection.getPos2().getBlockY()) + 0.5, Math.min(selection.getPos1().getBlockY(), selection.getPos2().getBlockY()) + 0.5, Math.max(selection.getPos1().getBlockZ(), selection.getPos2().getBlockZ()) + 0.5, Math.min(selection.getPos1().getBlockZ(), selection.getPos2().getBlockZ()) + 0.5).target(p);
-					cube.deploy(BoundaryAction::box);
-				}
 			}
 
 		})).repeatReal(2, 15);
