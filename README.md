@@ -15,7 +15,7 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.4.5</version>
+	    <version>1.5.2_R1</version>
 	</dependency>
 ```
 ### Importing with gradle
@@ -28,7 +28,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.4.5'
+	        implementation 'com.github.the-h-team:Labyrinth:1.5.2_R1'
 	}
 ```
 
@@ -44,9 +44,9 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
-  - [String Utility](https://github.com/the-h-team/Labyrinth/blob/2c8f1ac9bd9d764badc28d758a2cd4b995972e25/src/main/java/com/github/sanctum/labyrinth/library/StringUtils.java#L28)
+  - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive)
   - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
-  - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/String-work.-Feel-the-magic.#3-list-pagination)
+  - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/PaginatedList-Example)
   - [Automatic Command Pickup]()
   - [Base64 Serialization]()
   - [Persistent Data Container]()
@@ -62,6 +62,8 @@ _API Table of Contents_:
   - [Tab Completion Builder]()
   - [Paginated GUI]()
   - [Colored Component Builder]()
+  - [Custom Color Generation/Interfacing]()
+  - [Cuboid Generation/Interfacing]()
   - [File Manager]()
   - [Automatic Listener Pickup]()
   - [Shareable/Interactable GUI]()
