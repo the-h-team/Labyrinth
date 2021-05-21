@@ -94,6 +94,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				meta.setOwningPlayer(p);
 				item.setItemMeta(meta);
 				new SkullItem(p.getUniqueId().toString(), item);
+				SkullItem.Head.search(p);
 			});
 		}).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);

@@ -380,7 +380,7 @@ public class Item implements Serializable {
 		}
 
 		public Edit(ItemStack i) {
-			this.ITEM = i;
+			this.ITEM = new ItemStack(i);
 		}
 
 		public Edit(Material mat) {

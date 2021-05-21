@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.gui.menuman;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
-import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -347,27 +346,20 @@ public final class PaginatedBuilder<T> {
 					if (MENU_PROCESS != null) {
 						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
 						MENU_PROCESS.accept(element);
-
-						Schedule.sync(() -> {
-							INVENTORY.addItem(element.getItem());
-							Schedule.sync(() -> {
-								if (!PROCESS_LIST.contains(element.getItem())) {
-									PROCESS_LIST.add(element.getItem());
-								}
-							}).debug().wait(1);
-						}).debug().run();
+						INVENTORY.addItem(element.getItem());
+						if (!PROCESS_LIST.contains(element.getItem())) {
+							PROCESS_LIST.add(element.getItem());
+						}
 					}
 				}
 			}
 		}
 		if (FILLER_ITEM != null) {
-			Schedule.sync(() -> {
-				for (int l = 0; l < SIZE; l++) {
-					if (INVENTORY.getItem(l) == null) {
-						INVENTORY.setItem(l, FILLER_ITEM);
-					}
+			for (int l = 0; l < SIZE; l++) {
+				if (INVENTORY.getItem(l) == null) {
+					INVENTORY.setItem(l, FILLER_ITEM);
 				}
-			}).debug().wait(1);
+			}
 		}
 		ItemStack left = NAVIGATION_LEFT.keySet().stream().findFirst().orElse(null);
 		ItemStack right = NAVIGATION_RIGHT.keySet().stream().findFirst().orElse(null);
@@ -471,27 +463,20 @@ public final class PaginatedBuilder<T> {
 					if (MENU_PROCESS != null) {
 						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
 						MENU_PROCESS.accept(element);
-
-						Schedule.sync(() -> {
-							INVENTORY.addItem(element.getItem());
-							Schedule.sync(() -> {
-								if (!PROCESS_LIST.contains(element.getItem())) {
-									PROCESS_LIST.add(element.getItem());
-								}
-							}).debug().wait(1);
-						}).debug().run();
+						INVENTORY.addItem(element.getItem());
+						if (!PROCESS_LIST.contains(element.getItem())) {
+							PROCESS_LIST.add(element.getItem());
+						}
 					}
 				}
 			}
 		}
 		if (FILLER_ITEM != null) {
-			Schedule.sync(() -> {
-				for (int l = 0; l < SIZE; l++) {
-					if (INVENTORY.getItem(l) == null) {
-						INVENTORY.setItem(l, FILLER_ITEM);
-					}
+			for (int l = 0; l < SIZE; l++) {
+				if (INVENTORY.getItem(l) == null) {
+					INVENTORY.setItem(l, FILLER_ITEM);
 				}
-			}).debug().wait(1);
+			}
 		}
 		ItemStack left = NAVIGATION_LEFT.keySet().stream().findFirst().orElse(null);
 		ItemStack right = NAVIGATION_RIGHT.keySet().stream().findFirst().orElse(null);
@@ -771,22 +756,21 @@ public final class PaginatedBuilder<T> {
 						break;
 				}
 
+				e.setCancelled(true);
+
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
 					SyncMenuClickItemEvent<T> event = new SyncMenuClickItemEvent<>(PaginatedBuilder.this, p, e.getView(), item);
 					Bukkit.getPluginManager().callEvent(event);
 					if (event.isCancelled()) {
-						e.setCancelled(true);
+						e.setCancelled(false);
 						return;
 					}
 					if (PROCESS_LIST.stream().anyMatch(i -> i.isSimilar(item) || metaMatches(i, item))) {
 						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
-						e.setCancelled(true);
-						return;
 					}
 					if (NAVIGATION_BACK.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
-						e.setCancelled(true);
 					}
 					if (NAVIGATION_LEFT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						if (PAGE == 0) {
@@ -799,7 +783,6 @@ public final class PaginatedBuilder<T> {
 							}
 							ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
 						}
-						e.setCancelled(true);
 					}
 					if (NAVIGATION_RIGHT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						if (!((INDEX + 1) >= COLLECTION.size())) {
@@ -812,10 +795,6 @@ public final class PaginatedBuilder<T> {
 						} else {
 							p.sendMessage(LAST_PAGE_MESSAGE);
 						}
-						e.setCancelled(true);
-					}
-					if (e.getCurrentItem().equals(BORDER_ITEM) || item.equals(FILLER_ITEM)) {
-						e.setCancelled(true);
 					}
 				}
 			}
