@@ -44,6 +44,7 @@ It is an easy access spigot development library that assists you in areas that m
 
 _API Table of Contents_:
 --
+--
   - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive)
   - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
   - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/PaginatedList-Example)
@@ -60,7 +61,7 @@ _API Table of Contents_:
   - [Player/Console Message formatter]()
   - [Player Skull Finder]()
   - [Tab Completion Builder]()
-  - [Paginated GUI]()
+  - [Paginated GUI](https://github.com/the-h-team/Labyrinth/wiki/Paginated-GUI)
   - [Colored Component Builder]()
   - [Custom Color Generation/Interfacing]()
   - [Cuboid Generation/Interfacing]()
