@@ -50,7 +50,7 @@ _API Table of Contents_:
   - [Automatic Command Pickup]()
   - [Base64 Serialization]()
   - [Persistent Data Container]()
-  - [Singular GUI](https://github.com/the-h-team/Labyrinth/wiki/MenuMan-GUI-Tutorial)
+  - [Singular GUI](https://github.com/the-h-team/Labyrinth/wiki/Singular-GUI)
   - [Applicable Data]()
   - [Economy Interface Wrapper]()
   - [Centered Cardinal Directions]()
@@ -68,8 +68,7 @@ _API Table of Contents_:
   - [Automatic Listener Pickup]()
   - [Shareable/Interactable GUI]()
   - [Cooldown Interface](https://github.com/the-h-team/Labyrinth/wiki/Cooldowns)
-  - [Custom ID Generation]()
-  - [Unique ID Object]()
+  - [Custom ID Generation](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive#2-regex-matching)
   - [Task Scheduling](https://github.com/the-h-team/Labyrinth/wiki/Task-Scheduling)
 ---
 ###### Labyrinth
