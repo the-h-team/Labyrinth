@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.gui.builder;
+package com.github.sanctum.labyrinth.gui.menuman;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,15 +8,15 @@ import org.bukkit.inventory.meta.ItemMeta;
  * An object designed to provide quick and easy filler to the remaining slots
  * of your paginated GUI.
  */
-public class BorderElement {
+public class PaginatedBorderElement<T> {
 
-	private final PaginatedBuilder builder;
+	private final PaginatedBuilder<T> builder;
 
 	private ItemStack materialB;
 
 	private ItemStack materialF;
 
-	protected BorderElement(PaginatedBuilder builder) {
+	protected PaginatedBorderElement(PaginatedBuilder<T> builder) {
 		this.builder = builder;
 	}
 
@@ -26,7 +26,7 @@ public class BorderElement {
 	 * @param material The material to stylize with
 	 * @return A border element.
 	 */
-	public BorderElement setBorderType(Material material) {
+	public PaginatedBorderElement<T> setBorderType(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(" ");
@@ -41,7 +41,7 @@ public class BorderElement {
 	 * @param material The material to stylize with.
 	 * @return A border element.
 	 */
-	public BorderElement setFillType(Material material) {
+	public PaginatedBorderElement<T> setFillType(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(" ");
@@ -56,7 +56,7 @@ public class BorderElement {
 	 * @param material The specific ItemStack to stylize with.
 	 * @return A border element.
 	 */
-	public BorderElement setBorderType(ItemStack material) {
+	public PaginatedBorderElement<T> setBorderType(ItemStack material) {
 		this.materialB = material;
 		return this;
 	}
@@ -67,21 +67,21 @@ public class BorderElement {
 	 * @param material The specific ItemStack to stylize with.
 	 * @return A border element.
 	 */
-	public BorderElement setFillType(ItemStack material) {
+	public PaginatedBorderElement<T> setFillType(ItemStack material) {
 		this.materialF = material;
 		return this;
 	}
 
 	/**
-	 * Complete the changes to the border element and convert back to a {@link PaginatedBuilder}
+	 * Complete the changes to the border element and convert back to a {@link com.github.sanctum.labyrinth.gui.builder.PaginatedBuilder}
 	 *
 	 * @return The previous paginated builder with the newly applied values.
 	 */
-	public PaginatedBuilder fill() {
+	public PaginatedBuilder<T> build() {
 		if (this.materialF != null) {
-			builder.fill = this.materialF;
+			builder.FILLER_ITEM = this.materialF;
 		}
-		builder.border = this.materialB;
+		builder.BORDER_ITEM = this.materialB;
 		return builder;
 	}
 

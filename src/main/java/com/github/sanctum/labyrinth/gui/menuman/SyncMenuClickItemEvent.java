@@ -1,7 +1,6 @@
-package com.github.sanctum.labyrinth.gui.builder;
+package com.github.sanctum.labyrinth.gui.menuman;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -9,13 +8,12 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An event that is triggered upon the instance of a player successfully switching pages in a menu.
  */
-public class SyncMenuClickItemEvent extends Event implements Cancellable {
+public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
 
@@ -23,13 +21,13 @@ public class SyncMenuClickItemEvent extends Event implements Cancellable {
 
 	private final InventoryView view;
 
-	private final PaginatedBuilder builder;
+	private final PaginatedBuilder<T> builder;
 
 	private final Player whoClicked;
 
 	private boolean cancelled;
 
-	public SyncMenuClickItemEvent(PaginatedBuilder builder, Player whoClicked, InventoryView view, ItemStack item) {
+	public SyncMenuClickItemEvent(PaginatedBuilder<T> builder, Player whoClicked, InventoryView view, ItemStack item) {
 		this.builder = builder;
 		this.whoClicked = whoClicked;
 		this.view = view;
@@ -37,7 +35,7 @@ public class SyncMenuClickItemEvent extends Event implements Cancellable {
 	}
 
 	@Override
-	public HandlerList getHandlers() {
+	public @NotNull HandlerList getHandlers() {
 		return handlers;
 	}
 
@@ -85,8 +83,8 @@ public class SyncMenuClickItemEvent extends Event implements Cancellable {
 	 * Re-open the current page the player is on.
 	 */
 	public void refresh() {
-		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
-		whoClicked.openInventory(builder.adjust(builder.page).getInventory());
+		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		whoClicked.openInventory(builder.adjust(builder.PAGE).getInventory());
 	}
 
 	/**
@@ -94,7 +92,7 @@ public class SyncMenuClickItemEvent extends Event implements Cancellable {
 	 */
 	public void close() {
 		whoClicked.closeInventory();
-		HandlerList.unregisterAll(builder.listener);
+		HandlerList.unregisterAll(builder.CONTROLLER);
 	}
 
 	@Override

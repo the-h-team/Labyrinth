@@ -19,10 +19,21 @@
 package com.github.sanctum.labyrinth.gui.menuman;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -30,11 +41,9 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A class representing a created Menu.
@@ -156,6 +165,117 @@ public final class Menu {
                 .collect(Collectors.toSet());
     }
 
+    public static class Paginated<T> {
+
+        private final PaginatedBuilder<T> builder;
+
+        protected Paginated(PaginatedBuilder<T> builder) {
+            this.builder = builder;
+        }
+
+        /**
+         * Open the menu for a specified player
+         *
+         * @param p The player to open the menu for.
+         */
+        public void open(Player p) {
+            builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            p.openInventory(builder.adjust().getInventory());
+        }
+
+        /**
+         * Open the menu @ a specified page for a specified player
+         *
+         * @param p    The player to open the menu for.
+         * @param page The page to open the menu @.
+         */
+        public void open(Player p, int page) {
+            builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            p.openInventory(builder.adjust(page).getInventory());
+        }
+
+        /**
+         * Update the collection used within the menu.
+         *
+         * @param collection The string collection to update with.
+         */
+        public void recollect(Collection<T> collection) {
+            builder.COLLECTION = new LinkedList<>(collection);
+        }
+
+        /**
+         * Update the collection used within the menu and open it for a specified player.
+         *
+         * @param collection The string collection to update with.
+         */
+        public void recollect(Player p, Collection<T> collection) {
+            builder.COLLECTION = new LinkedList<>(collection);
+            open(p);
+        }
+
+        /**
+         * Update the collection used within the menu and open it for a specified player.
+         *
+         * @param collection The string collection to update with.
+         */
+        public void recollect(Player p, int page, Collection<T> collection) {
+            builder.COLLECTION = new LinkedList<>(collection);
+            open(p, page);
+        }
+
+        /**
+         * Clear cache, remove un-used handlers.
+         */
+        public void unregister() {
+            HandlerList.unregisterAll(builder.getController());
+        }
+
+        /**
+         * Get the unique ID of the menu object.
+         *
+         * @return The menu objects unique ID.
+         */
+        public UUID getId() {
+            return builder.getId();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public Inventory getInventory() {
+            return builder.getInventory();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public List<T> getCollection() {
+            return builder.getCollection();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public int getMaxPages() {
+            return builder.getMaxPages();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public PaginatedBuilder<T>.PaginatedListener getListener() {
+            return builder.getController();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public Plugin getPlugin() {
+            return builder.getPlugin();
+        }
+
+    }
+
     /**
      * Registered listener which passes Inventory event
      * information to the menu's actions.
@@ -163,7 +283,8 @@ public final class Menu {
     protected class ClickListener implements Listener {
         private BukkitRunnable pendingDelete;
 
-        private ClickListener() {}
+        private ClickListener() {
+        }
 
         /**
          * Process InventoryClickEvent and encapsulate to send

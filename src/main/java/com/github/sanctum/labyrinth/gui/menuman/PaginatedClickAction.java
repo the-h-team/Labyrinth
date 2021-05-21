@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.gui.builder;
+package com.github.sanctum.labyrinth.gui.menuman;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 /**
  * An operation that decides what happens when an item is clicked on.
  */
-public class PaginatedClick {
+public class PaginatedClickAction<T> {
 
 	private final InventoryView view;
 
@@ -16,7 +16,7 @@ public class PaginatedClick {
 
 	private final ItemStack clickedItem;
 
-	private final PaginatedBuilder builder;
+	private final PaginatedBuilder<T> builder;
 
 	private final boolean isLeftClick;
 
@@ -24,7 +24,7 @@ public class PaginatedClick {
 
 	private final boolean isShiftClick;
 
-	protected PaginatedClick(PaginatedBuilder builder, Player p, InventoryView view, ItemStack item, boolean isLeft, boolean isRight, boolean isShift) {
+	protected PaginatedClickAction(PaginatedBuilder<T> builder, Player p, InventoryView view, ItemStack item, boolean isLeft, boolean isRight, boolean isShift) {
 		this.builder = builder;
 		this.p = p;
 		this.view = view;
@@ -49,7 +49,7 @@ public class PaginatedClick {
 	 * @return The page the player is currently viewing.
 	 */
 	public int getPage() {
-		return builder.page;
+		return builder.PAGE;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class PaginatedClick {
 	 * *RECOMMENDED*: Used to update the items displayed.
 	 */
 	public void sync() {
-		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust().getInventory());
 	}
 

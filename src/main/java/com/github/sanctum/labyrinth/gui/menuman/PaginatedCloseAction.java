@@ -1,25 +1,23 @@
-package com.github.sanctum.labyrinth.gui.builder;
+package com.github.sanctum.labyrinth.gui.menuman;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * An operation that decides what happens when a menu is closed.
  */
-public class PaginatedClose {
+public class PaginatedCloseAction<T> {
 
 	private final InventoryView view;
 
 	private final Player p;
 
-	private final PaginatedBuilder builder;
+	private final PaginatedBuilder<T> builder;
 
-	protected PaginatedClose(PaginatedBuilder builder, Player p, InventoryView view) {
+	protected PaginatedCloseAction(PaginatedBuilder<T> builder, Player p, InventoryView view) {
 		this.builder = builder;
 		this.p = p;
 		this.view = view;
@@ -38,9 +36,8 @@ public class PaginatedClose {
 	 * Clear cache, remove un-used handlers.
 	 */
 	public void clear() {
-		InventoryClickEvent.getHandlerList().unregister(builder.getListener());
-		InventoryCloseEvent.getHandlerList().unregister(builder.getListener());
-		SyncMenuItemPreProcessEvent.getHandlerList().unregister(builder.getListener());
+		InventoryClickEvent.getHandlerList().unregister(builder.getController());
+		InventoryCloseEvent.getHandlerList().unregister(builder.getController());
 	}
 
 	/**
@@ -49,8 +46,8 @@ public class PaginatedClose {
 	 * Re-opens the GUI back to the same page the player was in.
 	 */
 	public void cancel() {
-		builder.inv = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
-		p.openInventory(builder.adjust(builder.page).getInventory());
+		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		p.openInventory(builder.adjust(builder.PAGE).getInventory());
 	}
 
 	/**
