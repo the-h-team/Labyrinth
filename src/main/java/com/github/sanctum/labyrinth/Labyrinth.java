@@ -18,7 +18,6 @@ import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
@@ -32,13 +31,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -81,22 +77,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			getLogger().info("- Query failed! (SEE ABOVE FOR INFO)");
 		}
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-		Schedule.async(() -> {
-			final boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			final Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-			Arrays.stream(Bukkit.getOfflinePlayers()).forEach(p -> {
-				ItemStack item = new ItemStack(type, 1);
-				if (!isNew) {
-					item.setDurability((short) 3);
-				}
-				SkullMeta meta = (SkullMeta) item.getItemMeta();
-				assert meta != null;
-				meta.setOwningPlayer(p);
-				item.setItemMeta(meta);
-				new SkullItem(p.getUniqueId().toString(), item);
-				SkullItem.Head.search(p);
-			});
-		}).run();
+		Schedule.async(() -> Arrays.stream(Bukkit.getOfflinePlayers()).forEach(SkullItem.Head::search)).run();
 		run(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
 		run(() -> CommandUtils.initialize(Labyrinth.this)).run();
 		EventBuilder.register(new CuboidController());
