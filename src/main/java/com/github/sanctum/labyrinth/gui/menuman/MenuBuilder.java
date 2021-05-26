@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Fluid interface menu builder
@@ -209,6 +210,18 @@ public final class MenuBuilder {
     }
 
     /**
+     * Add a previously-styled ItemStack directly to the menu via Supplier.
+     * <p>
+     * This is useful if you're used to creating your own custom items.
+     *
+     * @param supplier supplier of item to add
+     * @return a new ElementBuilder to customize the element
+     */
+    public ElementBuilder addElement(@NotNull Supplier<ItemStack> supplier) {
+        return new ElementBuilder(this, new MenuElement(supplier.get()));
+    }
+
+    /**
      * Add an ItemStack to the menu of specified display name and lore.
      * <p>
      * Recommended if you are not used to altering ItemMetas.
@@ -234,13 +247,23 @@ public final class MenuBuilder {
     }
 
     /**
+     * Fill the remaining slots of the menu with an ItemStack via Supplier.
+     *
+     * @param supplier supplier of item to add
+     * @return a new FillerBuilder to customize the element
+     */
+    public FillerBuilder setFiller(@NotNull Supplier<ItemStack> supplier) {
+        return new FillerBuilder(this, new MenuElement(supplier.get()));
+    }
+
+    /**
      * Fill the remaining slots of the menu with an ItemStack
      * of specified display name and lore.
      *
      * @param item item to add
      * @param text display name of item
      * @param lore optional lore to add as varargs
-     * @return a new ElementBuilder to customize the element
+     * @return a new FillerBuilder to customize the element
      */
     public FillerBuilder setFiller(ItemStack item, String text, String... lore) {
         return new FillerBuilder(this, new MenuElement(item, text, lore));
