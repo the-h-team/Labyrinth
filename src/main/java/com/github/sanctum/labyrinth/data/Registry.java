@@ -91,13 +91,21 @@ public class Registry<T> {
 	public RegistryData<T> operate(Consumer<T> operation) {
 		Set<Class<T>> classes = Sets.newHashSet();
 		JarFile jarFile = this.FILE;
+
+		if (this.PLUGIN != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		for (JarEntry jarEntry : Collections.list(jarFile.entries())) {
 			String className = jarEntry.getName().replace("/", ".");
-
-			final String substring = className.substring(0, className.length() - 6);
 			if (this.PACKAGE != null) {
 
 				if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
 					Class<?> clazz = null;
 					try {
 						clazz = Class.forName(substring);
@@ -112,6 +120,7 @@ public class Registry<T> {
 			} else {
 
 				if (className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
 					Class<?> clazz = null;
 					try {
 						clazz = Class.forName(substring);
