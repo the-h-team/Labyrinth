@@ -31,7 +31,9 @@ public final class Items {
      * @param type The type of item to make
      * @param name The display name of the item.
      * @return The requested named item.
+     * @deprecated Use {@link Item.Edit(Material)} instead.
      */
+    @Deprecated
     public static ItemStack getItem(Material type, String name) {
         ItemStack i = new ItemStack(type);
         ItemMeta meta = i.getItemMeta();

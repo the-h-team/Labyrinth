@@ -157,6 +157,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 							}
 						}
 						Region.Loading region = new Region.Loading(o, t, d);
+						region.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".pass"));
 						region.setOwner(owner);
 						if (Region.DATA.getConfig().getString("Markers.region." + id + ".name") != null) {
 							region.setName(Region.DATA.getConfig().getString("Markers.region." + id + ".name"));
@@ -176,6 +177,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		run(() -> {
 			for (Region.Loading load : Region.loading().list()) {
 				Region.Standard result = new Region.Standard(load);
+				result.setPassthrough(load.isPassthrough());
 				if (!result.load()) {
 					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");
 				}
@@ -184,6 +186,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 			for (Region.Spawning spawn : Region.spawning().list()) {
 				Region.Spawn result = new Region.Spawn(spawn);
+				result.setPassthrough(spawn.isPassthrough());
 				result.setLocation(spawn.location());
 				if (!result.load()) {
 					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");

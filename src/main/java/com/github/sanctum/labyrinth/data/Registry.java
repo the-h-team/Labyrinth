@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.bukkit.plugin.Plugin;
@@ -27,6 +28,7 @@ import org.bukkit.plugin.Plugin;
 public class Registry<T> {
 
 	private final Class<T> CLASS;
+	private Predicate<? super String> FILTER;
 	private Plugin PLUGIN = null;
 	private JarFile FILE;
 	private String PACKAGE;
@@ -56,6 +58,19 @@ public class Registry<T> {
 	public Registry<T> source(Plugin plugin) throws IOException {
 		this.PLUGIN = plugin;
 		this.FILE = new JarFile(URLDecoder.decode(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+		return this;
+	}
+
+	/**
+	 * Filter your search for locations targeted.
+	 * <p>
+	 * Alternative to {@link Registry#pick(String)}
+	 *
+	 * @param predicate The information to rely on before targeting a search.
+	 * @return The same registry instance.
+	 */
+	public Registry<T> filter(Predicate<? super String> predicate) {
+		this.FILTER = predicate;
 		return this;
 	}
 
@@ -98,6 +113,62 @@ public class Registry<T> {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+
+		List<JarEntry> entries = Collections.list(jarFile.entries());
+
+		if (this.FILTER != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.FILTER.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+
+				}
+			});
 		}
 
 		for (JarEntry jarEntry : Collections.list(jarFile.entries())) {

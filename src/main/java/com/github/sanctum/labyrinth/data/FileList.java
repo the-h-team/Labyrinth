@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +39,55 @@ public class FileList {
 			}
 		}
 		return list != null ? list : new FileList(plugin);
+	}
+
+	/**
+	 * Get the list of all cached file managers for a specified plugin.
+	 *
+	 * @param plugin The plugin to retrieve file management for.
+	 * @return A list of file managers if the plugin is cached otherwise an empty list.
+	 */
+	public static List<FileManager> getFiles(Plugin plugin) {
+		return CACHE.entrySet().stream().filter(e -> e.getKey().getName().equals(plugin.getName())).map(Map.Entry::getValue).findFirst().orElse(new ArrayList<>());
+	}
+
+	/**
+	 * Get the plugin attached to the search.
+	 *
+	 * @return The plugin attached to this file search.
+	 */
+	public Plugin getPlugin() {
+		return plugin;
+	}
+
+	/**
+	 * Copy a file of any type from this listings plugin.
+	 *
+	 * @param fileName     The name of the file following the file type.
+	 * @param fileMangager The filemanager instance to copy to.
+	 */
+	public void copy(String fileName, FileManager fileMangager) {
+		FileManager.copy(this.plugin.getResource(fileName), fileMangager);
+	}
+
+	/**
+	 * Copy a yml file from this listings plugin to a manager of specification.
+	 *
+	 * @param fileName     The file name only.
+	 * @param fileMangager The filemanager instance to copy to.
+	 */
+	public void copyYML(String fileName, FileManager fileMangager) {
+		FileManager.copy(this.plugin.getResource(fileName + ".yml"), fileMangager);
+	}
+
+	/**
+	 * Copy a yml file from this listings plugin to a file of specification.
+	 *
+	 * @param fileName The file name only.
+	 * @param file     The file instance to copy to.
+	 */
+	public void copyYML(String fileName, File file) {
+		FileManager.copy(this.plugin.getResource(fileName + ".yml"), file);
 	}
 
 	/**

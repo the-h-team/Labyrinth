@@ -3,9 +3,11 @@ package com.github.sanctum.labyrinth.library;
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.event.ItemRecipeProcessEvent;
 import com.github.sanctum.labyrinth.event.ItemStackProcessEvent;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,7 +93,7 @@ public class Item implements Serializable {
 	public Item buildStack() {
 		ItemStack item = new ItemStack(mat);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(StringUtils.translate(name));
+		meta.setDisplayName(StringUtils.use(name).translate());
 		item.setItemMeta(meta);
 		ItemStackProcessEvent event = new ItemStackProcessEvent(name, item);
 		Bukkit.getPluginManager().callEvent(event);
@@ -101,7 +103,7 @@ public class Item implements Serializable {
 
 	public Item attachLore(List<String> lore) {
 		ItemMeta meta = item.getItemMeta();
-		meta.setLore(lore.stream().map(StringUtils::translate).collect(Collectors.toList()));
+		meta.setLore(lore.stream().map(s -> StringUtils.use(s).translate()).collect(Collectors.toList()));
 		item.setItemMeta(meta);
 		return this;
 	}
@@ -113,7 +115,6 @@ public class Item implements Serializable {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	public Item shapeRecipe(String... shape) {
 		ShapedRecipe recipe = new ShapedRecipe(key, item);
 		List<String> list = Arrays.asList(shape);
@@ -370,6 +371,15 @@ public class Item implements Serializable {
 		private Map<Enchantment, Integer> ENCHANTS;
 		private String TITLE;
 
+		public Edit(Collection<ItemStack> items) {
+			this.LISTED = true;
+			List<ItemStack> temp = new LinkedList<>();
+			for (ItemStack it : items) {
+				temp.add(new ItemStack(it));
+			}
+			this.LIST = temp;
+		}
+
 		public Edit(ItemStack... i) {
 			this.LISTED = true;
 			List<ItemStack> temp = new LinkedList<>();
@@ -380,15 +390,39 @@ public class Item implements Serializable {
 		}
 
 		public Edit(ItemStack i) {
+			Preconditions.checkArgument(i != null, "ItemStack cannot be null");
 			this.ITEM = new ItemStack(i);
 		}
 
 		public Edit(Material mat) {
+			if (mat == null) mat = Material.PAPER;
 			this.ITEM = new ItemStack(mat);
 		}
 
 		public Edit setTitle(String text) {
 			this.TITLE = text;
+			return this;
+		}
+
+		public Edit setAmount(int amount) {
+			if (LISTED) {
+				for (ItemStack i : LIST) {
+					i.setAmount(amount);
+				}
+			} else {
+				this.ITEM.setAmount(amount);
+			}
+			return this;
+		}
+
+		public Edit setType(Material type) {
+			if (LISTED) {
+				for (ItemStack i : LIST) {
+					i.setType(type);
+				}
+			} else {
+				this.ITEM.setType(type);
+			}
 			return this;
 		}
 
@@ -596,11 +630,11 @@ public class Item implements Serializable {
 
 	public static class CustomFirework {
 
-		private final Firework FIREWORK;
+		private final Location LOCATION;
 		private FireworkEffect.Builder EFFECTS;
 
 		protected CustomFirework(@NotNull Location location) {
-			this.FIREWORK = (Firework) location.getWorld().spawnEntity(location, Entities.getEntity("firework"));
+			this.LOCATION = location;
 		}
 
 		public static CustomFirework from(Location location) {
@@ -614,15 +648,25 @@ public class Item implements Serializable {
 			return this;
 		}
 
+		public Firework build() {
+			Firework f = (Firework) LOCATION.getWorld().spawnEntity(LOCATION, Entities.getEntity("firework"));
+			FireworkMeta meta = f.getFireworkMeta();
+			if (this.EFFECTS != null) {
+				meta.addEffect(this.EFFECTS.build());
+			}
+			f.setFireworkMeta(meta);
+			return f;
+		}
 
 		public Firework build(Consumer<FireworkMeta> operation) {
-			FireworkMeta meta = this.FIREWORK.getFireworkMeta();
+			Firework f = (Firework) LOCATION.getWorld().spawnEntity(LOCATION, Entities.getEntity("firework"));
+			FireworkMeta meta = f.getFireworkMeta();
 			operation.accept(meta);
 			if (this.EFFECTS != null) {
 				meta.addEffect(this.EFFECTS.build());
 			}
-			this.FIREWORK.setFireworkMeta(meta);
-			return this.FIREWORK;
+			f.setFireworkMeta(meta);
+			return f;
 		}
 
 

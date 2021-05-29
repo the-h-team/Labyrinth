@@ -61,7 +61,7 @@ public class TimeWatch {
 			case MINUTES:
 				return TimeUnit.SECONDS.toMinutes(interval(Instant.now()).getSeconds()) <= time;
 			case SECONDS:
-				return interval(Instant.now()).getSeconds() <= time;
+				return TimeUnit.SECONDS.toSeconds(interval(Instant.now()).getSeconds()) <= time;
 		}
 		return false;
 	}

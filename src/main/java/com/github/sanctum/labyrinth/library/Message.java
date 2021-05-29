@@ -78,9 +78,9 @@ public class Message {
 	public Message send(String text) {
 		String result;
 		if (prefix == null || prefix.isEmpty()) {
-			result = StringUtils.translate(text);
+			result = StringUtils.use(text).translate();
 		} else {
-			result = StringUtils.translate(prefix + " " + text);
+			result = StringUtils.use(prefix + " " + text).translate();
 		}
 		p.sendMessage(result);
 		return this;
