@@ -16,22 +16,33 @@ public class VaultPlayer {
 
 	private static final List<VaultPlayer> CACHE = new LinkedList<>();
 
+	protected static Permission PERMS;
+
 	private final OfflinePlayer player;
 
+	static {
+		PERMS = Bukkit.getServicesManager().load(Permission.class);
+	}
+
 	protected VaultPlayer(OfflinePlayer player) {
-		Preconditions.checkArgument(Bukkit.getServicesManager().load(Permission.class) != null, "No vault permission implementation found.");
+		String test = PERMS.getPrimaryGroup("world", player);
+		Bukkit.getLogger().severe("- " + player.getName() + ": " + test);
+		Preconditions.checkArgument(PERMS != null, "No vault permission implementation found.");
 		this.player = player;
-		CACHE.add(this);
 	}
 
 	public static VaultPlayer wrap(OfflinePlayer player) {
-		return CACHE.stream().filter(p -> p.player.getName().equals(player.getName())).findFirst().orElse(new VaultPlayer(player));
+		VaultPlayer play = CACHE.stream().filter(p -> p.player.getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+		if (play != null) {
+			return play;
+		}
+		VaultPlayer pl = new VaultPlayer(player);
+		CACHE.add(pl);
+		return pl;
 	}
 
-	protected static Permission PERMS = Bukkit.getServicesManager().load(Permission.class);
-
 	public Group getGroup(String world) {
-		return new Group(PERMS.getPrimaryGroup(world, this.player), world);
+		return new Group(PERMS.getPrimaryGroup(world, player), world);
 	}
 
 	public Group[] getGroups(String world) {

@@ -18,11 +18,11 @@ public class Group {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public World getWorld() {
-		return Bukkit.getWorld(world);
+		return Bukkit.getWorld(this.world);
 	}
 
 	public boolean has(Permission permission) {
