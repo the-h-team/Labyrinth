@@ -25,8 +25,6 @@ public class VaultPlayer {
 	}
 
 	protected VaultPlayer(OfflinePlayer player) {
-		String test = PERMS.getPrimaryGroup("world", player);
-		Bukkit.getLogger().severe("- " + player.getName() + ": " + test);
 		Preconditions.checkArgument(PERMS != null, "No vault permission implementation found.");
 		this.player = player;
 	}
