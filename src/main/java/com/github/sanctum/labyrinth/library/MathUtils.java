@@ -47,4 +47,15 @@ public class MathUtils {
 		return NumberFormat.getNumberInstance(locale).format(format(2));
 	}
 
+	/**
+	 * Format the number with a specified language.
+	 *
+	 * @param locale    The language to format to.
+	 * @param precision The math context precision to apply.
+	 * @return The formatted amount as a string. (Number compliant)
+	 */
+	public String format(Locale locale, int precision) {
+		return NumberFormat.getNumberInstance(locale).format(format(precision));
+	}
+
 }

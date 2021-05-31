@@ -18,6 +18,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -767,10 +768,10 @@ public final class PaginatedBuilder<T> {
 						return;
 					}
 					if (PROCESS_LIST.stream().anyMatch(i -> i.isSimilar(item) || metaMatches(i, item))) {
-						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
+						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
 					if (NAVIGATION_BACK.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
+						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
 					if (NAVIGATION_LEFT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						if (PAGE == 0) {
@@ -781,7 +782,7 @@ public final class PaginatedBuilder<T> {
 							if (!event1.isCancelled()) {
 								PAGE -= 1;
 							}
-							ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
+							ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 						}
 					}
 					if (NAVIGATION_RIGHT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
@@ -790,7 +791,7 @@ public final class PaginatedBuilder<T> {
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
 								PAGE += 1;
-								ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick()));
+								ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 							}
 						} else {
 							p.sendMessage(LAST_PAGE_MESSAGE);

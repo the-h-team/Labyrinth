@@ -42,6 +42,38 @@ public abstract class TextLib {
 	}
 
 	/**
+	 * Run a specific action in the event of clicking the provided component.
+	 *
+	 * @param action    The code to run when this component is clicked.
+	 * @param component The component to justify action to.
+	 * @return The newly action wrapped component.
+	 */
+	public TextComponent execute(Applicable action, Consumer<TextComponent> component) {
+		TextComponent comp = new TextComponent();
+		component.accept(comp);
+		return wrap(comp).accept(action).toReal();
+	}
+
+	/**
+	 * Write hover meta logic to an existing {@link TextComponent}
+	 *
+	 * @param source    The player to format placeholders from.
+	 * @param component The original component to use.
+	 * @param messages  The hover messages to add to the component.
+	 * @return A hover formatted text component.
+	 */
+	public TextComponent format(Player source, Consumer<TextComponent> component, String... messages) {
+		TextComponent comp = new TextComponent();
+		component.accept(comp);
+		List<Content> array = new ArrayList<>();
+		for (String msg : messages) {
+			array.add(new Text(StringUtils.use(msg).translate(source) + "\n"));
+		}
+		comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, array));
+		return comp;
+	}
+
+	/**
 	 * Write hover meta logic to an existing {@link TextComponent}
 	 *
 	 * @param source    The player to format placeholders from.

@@ -24,12 +24,15 @@ public class PaginatedClickAction<T> {
 
 	private final boolean isShiftClick;
 
-	protected PaginatedClickAction(PaginatedBuilder<T> builder, Player p, InventoryView view, ItemStack item, boolean isLeft, boolean isRight, boolean isShift) {
+	private final boolean isMiddleClick;
+
+	protected PaginatedClickAction(PaginatedBuilder<T> builder, Player p, InventoryView view, ItemStack item, boolean isLeft, boolean isRight, boolean isShift, boolean isMiddle) {
 		this.builder = builder;
 		this.p = p;
 		this.view = view;
 		this.clickedItem = item;
 		this.isLeftClick = isLeft;
+		this.isMiddleClick = isMiddle;
 		this.isRightClick = isRight;
 		this.isShiftClick = isShift;
 	}
@@ -94,6 +97,15 @@ public class PaginatedClickAction<T> {
 	 */
 	public boolean isShiftClick() {
 		return isShiftClick;
+	}
+
+	/**
+	 * Check if the click was with middle mouse button.
+	 *
+	 * @return false if the click wasnt a middle mouse button click.
+	 */
+	public boolean isMiddleClick() {
+		return isMiddleClick;
 	}
 
 	/**

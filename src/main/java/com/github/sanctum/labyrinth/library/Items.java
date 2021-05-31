@@ -26,6 +26,23 @@ public final class Items {
     }
 
     /**
+     * Query for a material by its name or alias, if instead a base 64 value is provided
+     * the value will attempt to be applied, the resulting {@link ItemStack}
+     * if any operations failed to run will be a basic {@link Material#PLAYER_HEAD}
+     *
+     * @param value The material alias or base64 value.
+     * @return An improvised item based on demand.
+     */
+    public static ItemStack improvise(String value) {
+        Material mat = Material.getMaterial(value);
+        if (mat != null) {
+            return new ItemStack(mat);
+        } else {
+            return SkullItem.Head.provide(value);
+        }
+    }
+
+    /**
      * Craft an item with a desired display name automatically color translated.
      *
      * @param type The type of item to make

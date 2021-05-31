@@ -262,6 +262,15 @@ public class Item implements Serializable {
 		}
 
 		/**
+		 * Customize an entire set of leather armor.
+		 *
+		 * @return A coloredArmor instance.
+		 */
+		public static ColoredArmor prepare() {
+			return new ColoredArmor(Piece.HEAD);
+		}
+
+		/**
 		 * Change the title of this armor piece.
 		 * <p>
 		 * (Automatically color translated)
@@ -324,6 +333,32 @@ public class Item implements Serializable {
 			}
 			this.LORE = list;
 			return this;
+		}
+
+		/**
+		 * Build an entire set of armor based off your options.
+		 *
+		 * @return The finished armor set fully customized.
+		 */
+		public ItemStack[] buildAll() {
+			List<ItemStack> i = new LinkedList<>(Arrays.asList(new ItemStack(Material.LEATHER_HELMET), new ItemStack(Material.LEATHER_CHESTPLATE), new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_BOOTS)));
+			for (ItemStack it : i) {
+				if (it.getItemMeta() instanceof LeatherArmorMeta) {
+					LeatherArmorMeta meta = (LeatherArmorMeta) it.getItemMeta();
+					if (this.COLOR != null) {
+						meta.setColor(this.COLOR);
+					}
+					if (this.LORE != null && !this.LORE.isEmpty()) {
+						meta.setLore(this.LORE);
+					}
+					if (this.TITLE != null) {
+						meta.setDisplayName(this.TITLE);
+					}
+					it.setItemMeta(meta);
+				} else
+					throw new IllegalStateException("An invalid item type was found present, yell at the devs!!");
+			}
+			return i.toArray(new ItemStack[0]);
 		}
 
 		/**
@@ -400,7 +435,7 @@ public class Item implements Serializable {
 		}
 
 		public Edit setTitle(String text) {
-			this.TITLE = text;
+			this.TITLE = StringUtils.use(text).translate();
 			return this;
 		}
 
@@ -539,7 +574,7 @@ public class Item implements Serializable {
 
 		public ItemStack build(Consumer<Damageable> damage) {
 			if (LISTED) {
-				return null;
+				return this.LIST.get(0);
 			}
 			ItemMeta meta = this.ITEM.getItemMeta();
 			damage.accept((Damageable) meta);
@@ -568,7 +603,7 @@ public class Item implements Serializable {
 
 		public ItemStack build(Consumer<Damageable> damage, Consumer<ItemMeta> options) {
 			if (LISTED) {
-				return null;
+				return this.LIST.get(0);
 			}
 			ItemMeta meta = this.ITEM.getItemMeta();
 			damage.accept((Damageable) meta);
@@ -598,7 +633,7 @@ public class Item implements Serializable {
 
 		public ItemStack build() {
 			if (LISTED) {
-				return null;
+				return this.LIST.get(0);
 			}
 			ItemMeta meta = this.ITEM.getItemMeta();
 

@@ -1,16 +1,16 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.formatting.SortedDoubleMap;
-import com.github.sanctum.labyrinth.formatting.SortedLongMap;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TextLib;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
@@ -301,11 +301,10 @@ public class PaginatedAssortment {
 					} else {
 						int i1 = 0, k = 0;
 						page--;
-						SortedDoubleMap comp = new SortedDoubleMap(tempMap);
-						TreeMap<String, Double> sorted_map = new TreeMap<>(comp);
-						sorted_map.putAll(tempMap);
+						TreeMap<String, Double> sorted_map = new TreeMap<>(tempMap);
+						LinkedHashSet<Map.Entry<String, Double>> m = sorted_map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toCollection(LinkedHashSet::new));
 
-						for (Map.Entry<String, Double> map : sorted_map.entrySet()) {
+						for (Map.Entry<String, Double> map : m) {
 							int pageExact = page + 1;
 							if (map.getValue() > nextTopAmount) {
 								nextTop = map.getKey();
@@ -391,11 +390,10 @@ public class PaginatedAssortment {
 					} else {
 						int i1 = 0, k = 0;
 						page--;
-						SortedLongMap comp = new SortedLongMap(tempMap);
-						TreeMap<String, Long> sorted_map = new TreeMap<>(comp);
-						sorted_map.putAll(tempMap);
+						TreeMap<String, Long> sorted_map = new TreeMap<>(tempMap);
+						LinkedHashSet<Map.Entry<String, Long>> m = sorted_map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toCollection(LinkedHashSet::new));
 
-						for (Map.Entry<String, Long> map : sorted_map.entrySet()) {
+						for (Map.Entry<String, Long> map : m) {
 							int pageExact = page + 1;
 							if (map.getValue() > nextTopAmount) {
 								nextTop = map.getKey();
@@ -455,24 +453,6 @@ public class PaginatedAssortment {
 				}
 			}
 		}, 2L);
-	}
-
-	/**
-	 * Returns the targetMap as sorted.
-	 */
-	public TreeMap<String, Long> longMapSorted() {
-		HashMap<String, Long> tempMap = new HashMap<>(targetMap);
-		SortedLongMap comp = new SortedLongMap(tempMap);
-		return new TreeMap<>(comp);
-	}
-
-	/**
-	 * Returns the targetMap as sorted.
-	 */
-	public TreeMap<String, Double> doubleMapSorted() {
-		HashMap<String, Double> tempMap = new HashMap<>(targetMapDouble);
-		SortedDoubleMap comp = new SortedDoubleMap(tempMap);
-		return new TreeMap<>(comp);
 	}
 
 	/**

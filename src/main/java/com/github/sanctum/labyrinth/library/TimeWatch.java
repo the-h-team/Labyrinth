@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeWatch {
 
-	private final Date time;
+	private final long time;
 
 	/**
 	 * Use a specified starting date in milliseconds.
@@ -23,7 +23,7 @@ public class TimeWatch {
 	}
 
 	protected TimeWatch(long milli) {
-		this.time = new Date(milli);
+		this.time = milli;
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class TimeWatch {
 	 * @return The date this time watch started.
 	 */
 	public Date getStart() {
-		return time;
+		return new Date(time);
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class TimeWatch {
 	 * @return A time duration interval.
 	 */
 	public Duration interval(Instant stop) {
-		return Duration.between(time.toInstant(), stop);
+		return Duration.between(getStart().toInstant(), stop);
 	}
 
 	/**
@@ -64,6 +64,55 @@ public class TimeWatch {
 				return TimeUnit.SECONDS.toSeconds(interval(Instant.now()).getSeconds()) <= time;
 		}
 		return false;
+	}
+
+	/**
+	 * Encapsulates stop-watch like data.
+	 */
+	public static class Recording {
+
+		private final long time;
+
+		protected Recording(long milli) {
+			this.time = milli;
+		}
+
+		/**
+		 * Subtract a time stamp from another manually to feed as a starting point.
+		 *
+		 * @param milli The already equated time stamp.
+		 * @return A stop watch record for this time stamp.
+		 */
+		public static Recording from(long milli) {
+			return new Recording(milli);
+		}
+
+		/**
+		 * Subtract the specified time stamp from the current time to feed as a starting point.
+		 *
+		 * @param milli The starting time stamp.
+		 * @return A stop watch record for this time stamp.
+		 */
+		public static Recording subtract(long milli) {
+			return new Recording(System.currentTimeMillis() - milli);
+		}
+
+		public long getSeconds() {
+			return time / 1000 % 60;
+		}
+
+		public long getMinutes() {
+			return getSeconds() % 60;
+		}
+
+		public long getHours() {
+			return time / (60 * 60 * 1000);
+		}
+
+		public long getDays() {
+			return time / (getHours() * 24);
+		}
+
 	}
 
 
