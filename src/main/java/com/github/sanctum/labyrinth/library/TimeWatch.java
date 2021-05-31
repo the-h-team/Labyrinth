@@ -102,7 +102,7 @@ public class TimeWatch {
 		}
 
 		public long getMinutes() {
-			return getSeconds() % 60;
+			return time / (60 * 1000) % 60;
 		}
 
 		public long getHours() {
@@ -110,7 +110,7 @@ public class TimeWatch {
 		}
 
 		public long getDays() {
-			return time / (getHours() * 24);
+			return time / (60 * 60 * 1000 * 24);
 		}
 
 	}
