@@ -1,8 +1,0 @@
-name: Labyrinth
-version: 1.5.5
-main: com.github.sanctum.labyrinth.Labyrinth
-prefix: Labyrinth
-api-version: 1.13
-loadbefore: [ myEssentials, hEssentials, VanillaShop, RetroConomy , Clans, ClansPro ]
-authors: [ Hempfest, Modify, ms5984, F1b3r ]
-description: The core library for large sanctum projects.

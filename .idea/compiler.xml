@@ -6,11 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Labyrinth" />
+        <module name="labyrinth-afk" />
+        <module name="labyrinth-plugin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="AFK" target="1.8" />
       <module name="Labyrinth" target="1.8" />
+      <module name="labyrinth-afk" target="1.8" />
+      <module name="labyrinth-plugin" target="1.8" />
+      <module name="labyrinth-region" target="1.8" />
+      <module name="Labyrinth-Region" target="1.8" />
+      <module name="labyrinth-region-loader" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

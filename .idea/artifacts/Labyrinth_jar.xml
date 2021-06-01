@@ -3,7 +3,18 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Labyrinth_jar</output-path>
     <root id="archive" name="Labyrinth.jar">
       <element id="module-output" name="Labyrinth" />
+      <element id="module-output" name="labyrinth-afk" />
+      <element id="module-output" name="labyrinth-plugin" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_16_R2/1.5.1/anvilgui-1_16_R2-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_14_R1/1.5.1/anvilgui-1_14_R1-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_16_R1/1.5.1/anvilgui-1_16_R1-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_16_R5/1.5.1/anvilgui-1_16_R5-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_16_R3/1.5.1/anvilgui-1_16_R3-1.5.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui/1.5.1/anvilgui-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_15_R1/1.5.1/anvilgui-1_15_R1-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/1.5.1/AnvilGUI-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-abstraction/1.5.1/anvilgui-abstraction-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/Hempfest/AnvilGUI/anvilgui-1_14_4_R1/1.5.1/anvilgui-1_14_4_R1-1.5.1.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

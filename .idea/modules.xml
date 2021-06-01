@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Labyrinth.iml" filepath="$PROJECT_DIR$/Labyrinth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" filepath="$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" />
     </modules>
   </component>
 </project>

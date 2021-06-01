@@ -1,0 +1,4 @@
+name: Labyrinth
+version: ${project.version}
+main: com.github.sanctum.labyrinth.Labyrinth
+api-version: 1.16

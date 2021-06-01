@@ -9,7 +9,16 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-afk/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-loader/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/labyrinth-region-loader/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-region/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_13" default="true" project-jdk-name="13" project-jdk-type="JavaSDK">
