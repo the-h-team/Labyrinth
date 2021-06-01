@@ -183,6 +183,7 @@ public class AFK {
 				throw new IllegalArgumentException("Plugin cannot be null!");
 
 			this.afk.handler = handler.get();
+			this.afk.holder = plugin;
 			Bukkit.getPluginManager().registerEvents(this.afk.handler, plugin);
 			return this;
 		}
@@ -205,6 +206,7 @@ public class AFK {
 				throw new IllegalArgumentException("Plugin cannot be null!");
 
 			this.afk.handler = handler;
+			this.afk.holder = plugin;
 			Bukkit.getPluginManager().registerEvents(this.afk.handler, plugin);
 			return this;
 		}
@@ -249,6 +251,7 @@ public class AFK {
 				}
 
 			}).cancelAfter(this.afk.getPlayer());
+			this.afk.task.repeatReal(0, 20);
 			return this.afk;
 		}
 
