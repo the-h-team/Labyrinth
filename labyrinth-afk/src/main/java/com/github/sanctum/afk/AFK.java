@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -81,6 +82,10 @@ public class AFK {
 		this.handler = null;
 	}
 
+	public void saturate() {
+		this.status = Status.ACTIVE;
+	}
+
 	public void cancel() {
 		unregister();
 		Schedule.sync(() -> HISTORY.removeIf(a -> a.getPlayer().equals(getPlayer()))).run();
@@ -111,22 +116,27 @@ public class AFK {
 		void execute(StatusChange e);
 
 		static Handler standard() {
-			return e -> {
-				Player p = e.getAfk().getPlayer();
-				switch (e.getStatus()) {
-					case AWAY:
-						Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is now AFK").translate());
-						p.setDisplayName(StringUtils.use("&7*AFK&r " + p.getDisplayName()).translate());
-						break;
-					case ACTIVE:
-						p.setDisplayName(p.getName());
-						Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is no longer AFK").translate());
-						break;
-					case REMOVABLE:
-						Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&owas kicked for being AFK too long.").translate());
-						p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
-						e.getAfk().cancel();
-						break;
+			return new AFK.Handler() {
+				@Override
+				@EventHandler
+				public void execute(AFK.StatusChange e) {
+					Player p = e.getAfk().getPlayer();
+					switch (e.getStatus()) {
+						case AWAY:
+							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is now AFK").translate());
+							p.setDisplayName(StringUtils.use("&7*AFK&r " + p.getDisplayName()).translate());
+							break;
+						case RETURNING:
+							p.setDisplayName(p.getName());
+							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is no longer AFK").translate());
+							e.getAfk().saturate();
+							break;
+						case REMOVABLE:
+							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&owas kicked for being AFK too long.").translate());
+							p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
+							e.getAfk().cancel();
+							break;
+					}
 				}
 			};
 		}
@@ -143,6 +153,10 @@ public class AFK {
 		 * The user has only recently been marked gone.
 		 */
 		AWAY,
+		/**
+		 * The user is coming back from being AFK.
+		 */
+		RETURNING,
 		/**
 		 * The user is safe to remove.
 		 */
@@ -243,15 +257,17 @@ public class AFK {
 							}
 						}
 					} else {
-						this.afk.location = null;
-						this.afk.status = Status.ACTIVE;
-						StatusChange event = new StatusChange(this.afk, this.afk.status);
-						Bukkit.getPluginManager().callEvent(event);
+						if (this.afk.status == Status.AWAY) {
+							this.afk.location = null;
+							this.afk.status = Status.RETURNING;
+							StatusChange event = new StatusChange(this.afk, this.afk.status);
+							Bukkit.getPluginManager().callEvent(event);
+						}
 					}
 				}
 
 			}).cancelAfter(this.afk.getPlayer());
-			this.afk.task.repeatReal(0, 20);
+			this.afk.task.repeatReal(0, 12);
 			return this.afk;
 		}
 
