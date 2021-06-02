@@ -4,6 +4,8 @@ import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Monster;
@@ -24,8 +26,9 @@ public class CuboidController implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBuild(BlockPlaceEvent e) {
-		if (Region.match(e.getBlock().getLocation()).isPresent()) {
-			RegionBuildEvent event = new RegionBuildEvent(e.getPlayer(), Region.match(e.getBlock().getLocation()).get(), e.getBlock());
+		Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
+		if (r.isPresent()) {
+			RegionBuildEvent event = new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock());
 			Bukkit.getPluginManager().callEvent(event);
 			if (event.isCancelled()) {
 				e.setCancelled(true);
@@ -35,8 +38,9 @@ public class CuboidController implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBuild(BlockBreakEvent e) {
-		if (Region.match(e.getBlock().getLocation()).isPresent()) {
-			RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), Region.match(e.getBlock().getLocation()).get(), e.getBlock());
+		Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
+		if (r.isPresent()) {
+			RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock());
 			Bukkit.getPluginManager().callEvent(event);
 			if (event.isCancelled()) {
 				e.setCancelled(true);
@@ -64,9 +68,9 @@ public class CuboidController implements Listener {
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-
-			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
-				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
+			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getClickedBlock().getLocation())).join();
+			if (r.isPresent()) {
+				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
 				Bukkit.getPluginManager().callEvent(event);
 				if (event.isCancelled()) {
 					e.setCancelled(true);
@@ -74,9 +78,6 @@ public class CuboidController implements Listener {
 			}
 
 			if (e.getItem() == null)
-				return;
-
-			if (e.getItem().getType() != Material.PAPER)
 				return;
 
 			if (!e.getPlayer().hasPermission("labyrinth.selection"))
@@ -96,9 +97,9 @@ public class CuboidController implements Listener {
 			}
 		}
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-
-			if (Region.match(e.getClickedBlock().getLocation()).isPresent()) {
-				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), Region.match(e.getClickedBlock().getLocation()).get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
+			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getClickedBlock().getLocation())).join();
+			if (r.isPresent()) {
+				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
 				Bukkit.getPluginManager().callEvent(event);
 				if (event.isCancelled()) {
 					e.setCancelled(true);

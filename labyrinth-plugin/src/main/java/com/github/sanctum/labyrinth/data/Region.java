@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -449,7 +450,7 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public Optional<Region> getRegion() {
 			if (getPlayer().isOnline()) {
-				return Region.match(getPlayer().getPlayer().getLocation());
+				return CompletableFuture.supplyAsync(() -> Region.match(getPlayer().getPlayer().getLocation())).join();
 			}
 			return Optional.empty();
 		}

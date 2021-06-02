@@ -17,6 +17,7 @@ public abstract class RegionInteractEvent extends PlayerEvent implements Cancell
 
 	public RegionInteractEvent(Type type, Player player, Region region) {
 		super(player);
+		this.player = player;
 		this.region = region;
 		this.type = type;
 	}

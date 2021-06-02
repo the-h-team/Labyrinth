@@ -187,18 +187,20 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 		}).waitReal(5);
 
-		run(() -> Bukkit.getOnlinePlayers().forEach(p -> {
+		Schedule.async(() -> Bukkit.getOnlinePlayers().forEach(p -> {
 
 			if (Cuboid.Selection.contains(p)) {
 
-				Cuboid.Selection selection = Cuboid.Selection.source(p);
+				final Cuboid.Selection selection = Cuboid.Selection.source(p);
 
-				CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
-				getServer().getPluginManager().callEvent(event);
+				Schedule.sync(() -> {
+					CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
+					getServer().getPluginManager().callEvent(event);
+				}).run();
 
 			}
 
-		})).repeatReal(5, 15);
+		})).repeat(5, 15);
 
 	}
 

@@ -16,6 +16,7 @@ public abstract class CuboidSelectEvent extends PlayerEvent {
 
 	public CuboidSelectEvent(Cuboid.Selection selection) {
 		super(selection.getPlayer());
+		this.player = selection.getPlayer();
 		this.selection = selection;
 	}
 
