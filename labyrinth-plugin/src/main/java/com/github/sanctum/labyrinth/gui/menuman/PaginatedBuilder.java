@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -347,7 +348,7 @@ public final class PaginatedBuilder<T> {
 					if (MENU_PROCESS != null) {
 						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
 						MENU_PROCESS.accept(element);
-						INVENTORY.addItem(element.getItem());
+						CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
 						if (!PROCESS_LIST.contains(element.getItem())) {
 							PROCESS_LIST.add(element.getItem());
 						}
@@ -464,7 +465,7 @@ public final class PaginatedBuilder<T> {
 					if (MENU_PROCESS != null) {
 						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
 						MENU_PROCESS.accept(element);
-						INVENTORY.addItem(element.getItem());
+						CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
 						if (!PROCESS_LIST.contains(element.getItem())) {
 							PROCESS_LIST.add(element.getItem());
 						}
