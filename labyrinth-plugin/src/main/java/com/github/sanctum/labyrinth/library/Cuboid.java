@@ -294,8 +294,10 @@ public interface Cuboid {
 								Flag f = region.getFlag(BUILD.getId()).get();
 								if (f.isValid()) {
 									if (!f.isAllowed()) {
-										Message.form(e.getPlayer()).send(BUILD.getMessage());
-										e.setCancelled(true);
+										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+											Message.form(e.getPlayer()).send(BUILD.getMessage());
+											e.setCancelled(true);
+										}
 									}
 								}
 							}
