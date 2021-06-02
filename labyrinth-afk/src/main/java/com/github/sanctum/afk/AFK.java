@@ -28,8 +28,6 @@ public class AFK {
 
 	private Position location;
 
-	private Plugin holder;
-
 	private Synchronous task;
 
 	private long time = 0L;
@@ -93,8 +91,8 @@ public class AFK {
 		return location;
 	}
 
-	public Plugin getHolder() {
-		return holder;
+	public Status getStatus() {
+		return status;
 	}
 
 	public Player getPlayer() {
