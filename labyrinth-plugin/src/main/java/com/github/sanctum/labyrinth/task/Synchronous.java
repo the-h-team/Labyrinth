@@ -123,6 +123,10 @@ public class Synchronous {
 		};
 	}
 
+	public boolean isRunning() {
+		return !this.runnable.isCancelled();
+	}
+
 	public void cancelTask() {
 		if (!this.runnable.isCancelled()) {
 			runnable.cancel();

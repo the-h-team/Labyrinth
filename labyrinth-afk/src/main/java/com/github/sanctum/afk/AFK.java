@@ -7,12 +7,10 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -21,7 +19,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
 
 public class AFK {
@@ -38,7 +35,7 @@ public class AFK {
 
 	private Status status = Status.ACTIVE;
 
-	private Handler handler;
+	private static Handler handler;
 
 	private final Player player;
 
@@ -56,9 +53,9 @@ public class AFK {
 			return Optional.ofNullable(from(player));
 		} else {
 			try {
-				return Optional.of(Initializer.initialize(player)
-						.handle(Labyrinth.getInstance(), Handler::standard)
-						.stage(a -> TimeUnit.SECONDS.toMinutes(a.getWatch().interval(Instant.now()).getSeconds()) >= away, b -> TimeUnit.SECONDS.toMinutes(b.getWatch().interval(Instant.now()).getSeconds()) >= kick));
+				Initializer.next()
+						.handle(Labyrinth.getInstance(), Handler::standard);
+				return Optional.of(new AFK(player).stage(a -> TimeUnit.SECONDS.toMinutes(a.getWatch().interval(Instant.now()).getSeconds()) >= away, b -> TimeUnit.SECONDS.toMinutes(b.getWatch().interval(Instant.now()).getSeconds()) >= kick));
 			} catch (InstantiationException ex) {
 				return Optional.empty();
 			}
@@ -74,12 +71,53 @@ public class AFK {
 		return null;
 	}
 
-	public void unregister() {
-		List<Listener> list = HandlerList.getRegisteredListeners(getHolder()).stream().filter(r -> r.getListener().equals(this.handler)).map(RegisteredListener::getListener).collect(Collectors.toList());
-		for (Listener l : list) {
-			HandlerList.unregisterAll(l);
-		}
-		this.handler = null;
+	/**
+	 * Setup the pre-requisites to be met each stage of listening.
+	 *
+	 * @param away The trigger for changing the status to {@link Status#AWAY}
+	 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
+	 * @return The initialized & cached object reference
+	 * @throws InstantiationException If some how the task is already scheduled.
+	 */
+	public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) throws InstantiationException {
+
+		if (this.task != null)
+			throw new InstantiationException("A scheduled query operation is already under effect!");
+
+		this.task = Schedule.sync(() -> {
+			if (this.time == 0) {
+				this.time = System.currentTimeMillis();
+				this.location = new Position(this.getPlayer().getLocation().getBlockX(), this.getPlayer().getLocation().getBlockY(), this.getPlayer().getLocation().getBlockZ(), this.getPlayer().getLocation().getYaw(), this.getPlayer().getLocation().getPitch());
+			} else {
+				if (Position.matches(this.getLocation(), this.getPlayer().getLocation())) {
+					if (away.accept(this)) {
+						if (this.status == Status.ACTIVE) {
+							this.status = Status.AWAY;
+							StatusChange event = new StatusChange(this, Status.AWAY);
+							Bukkit.getPluginManager().callEvent(event);
+						}
+						if (kick.accept(this)) {
+							this.status = Status.REMOVABLE;
+							StatusChange event = new StatusChange(this, Status.REMOVABLE);
+							Bukkit.getPluginManager().callEvent(event);
+						}
+					}
+				} else {
+					if (this.status == Status.AWAY) {
+						this.location = null;
+						this.time = 0;
+						this.status = Status.RETURNING;
+						StatusChange event = new StatusChange(this, Status.RETURNING);
+						Bukkit.getPluginManager().callEvent(event);
+					} else {
+						this.time = 0;
+					}
+				}
+			}
+
+		}).cancelAfter(getPlayer());
+		this.task.repeatReal(0, 12);
+		return this;
 	}
 
 	public void saturate() {
@@ -87,7 +125,6 @@ public class AFK {
 	}
 
 	public void cancel() {
-		unregister();
 		Schedule.sync(() -> HISTORY.removeIf(a -> a.getPlayer().equals(getPlayer()))).run();
 	}
 
@@ -169,14 +206,11 @@ public class AFK {
 	 */
 	public static class Initializer {
 
-		private final AFK afk;
-
-		protected Initializer(Player instance) {
-			this.afk = new AFK(instance);
+		protected Initializer() {
 		}
 
-		public static Initializer initialize(Player player) {
-			return new Initializer(player);
+		public static Initializer next() {
+			return new Initializer();
 		}
 
 		/**
@@ -190,15 +224,16 @@ public class AFK {
 		 * @throws IllegalArgumentException If the plugin is null.
 		 */
 		public Initializer handle(Plugin plugin, Supplier<Handler> handler) throws InstantiationException, IllegalArgumentException {
-			if (this.afk.handler != null)
+			if (AFK.handler != null)
 				throw new InstantiationException("Handler is already registered. Cannot override current installation");
 
 			if (plugin == null)
 				throw new IllegalArgumentException("Plugin cannot be null!");
 
-			this.afk.handler = handler.get();
-			this.afk.holder = plugin;
-			Bukkit.getPluginManager().registerEvents(this.afk.handler, plugin);
+			if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
+				AFK.handler = handler.get();
+				Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+			}
 			return this;
 		}
 
@@ -213,62 +248,17 @@ public class AFK {
 		 * @throws IllegalArgumentException If the plugin is null.
 		 */
 		public Initializer handle(Plugin plugin, Handler handler) throws InstantiationException, IllegalArgumentException {
-			if (this.afk.handler != null)
+			if (AFK.handler != null)
 				throw new InstantiationException("Handler is already registered. Cannot override current installation");
 
 			if (plugin == null)
 				throw new IllegalArgumentException("Plugin cannot be null!");
 
-			this.afk.handler = handler;
-			this.afk.holder = plugin;
-			Bukkit.getPluginManager().registerEvents(this.afk.handler, plugin);
+			if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
+				AFK.handler = handler;
+				Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+			}
 			return this;
-		}
-
-		/**
-		 * Setup the pre-requisites to be met each stage of listening.
-		 *
-		 * @param away The trigger for changing the status to {@link Status#AWAY}
-		 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
-		 * @return The initialized & cached object reference
-		 * @throws InstantiationException If some how the task is already scheduled.
-		 */
-		public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) throws InstantiationException {
-
-			if (this.afk.task != null)
-				throw new InstantiationException("A scheduled query operation is already under effect!");
-
-			this.afk.task = Schedule.sync(() -> {
-				if (this.afk.location == null) {
-					this.afk.time = System.currentTimeMillis();
-					this.afk.location = new Position(this.afk.getPlayer().getLocation().getBlockX(), this.afk.getPlayer().getLocation().getBlockY(), this.afk.getPlayer().getLocation().getBlockZ(), this.afk.getPlayer().getLocation().getYaw(), this.afk.getPlayer().getLocation().getPitch());
-				} else {
-					if (Position.matches(this.afk.getLocation(), this.afk.getPlayer().getLocation())) {
-						if (away.accept(this.afk)) {
-							if (this.afk.status == Status.ACTIVE) {
-								this.afk.status = Status.AWAY;
-								StatusChange event = new StatusChange(this.afk, this.afk.status);
-								Bukkit.getPluginManager().callEvent(event);
-							}
-							if (kick.accept(this.afk)) {
-								this.afk.status = Status.REMOVABLE;
-								StatusChange event = new StatusChange(this.afk, this.afk.status);
-								Bukkit.getPluginManager().callEvent(event);
-							}
-						}
-					} else {
-						if (this.afk.status == Status.AWAY) {
-							this.afk.location = null;
-							this.afk.status = Status.RETURNING;
-							StatusChange event = new StatusChange(this.afk, this.afk.status);
-							Bukkit.getPluginManager().callEvent(event);
-						}
-					}
-				}
-
-			}).cancelAfter(this.afk.getPlayer());
-			this.afk.task.repeatReal(0, 12);
-			return this.afk;
 		}
 
 	}
