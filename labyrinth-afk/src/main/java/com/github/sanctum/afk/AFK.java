@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 public class AFK {
@@ -52,13 +53,9 @@ public class AFK {
 		if (found(player)) {
 			return Optional.ofNullable(from(player));
 		} else {
-			try {
-				Initializer.next()
-						.handle(Labyrinth.getInstance(), Handler::standard);
-				return Optional.of(new AFK(player).stage(a -> TimeUnit.SECONDS.toMinutes(a.getWatch().interval(Instant.now()).getSeconds()) >= away, b -> TimeUnit.SECONDS.toMinutes(b.getWatch().interval(Instant.now()).getSeconds()) >= kick));
-			} catch (InstantiationException ex) {
-				return Optional.empty();
-			}
+			return Optional.of(Initializer.next(player)
+					.handle(Labyrinth.getInstance(), Handler::standard)
+					.stage(a -> TimeUnit.SECONDS.toMinutes(a.getWatch().interval(Instant.now()).getSeconds()) >= away, b -> TimeUnit.SECONDS.toMinutes(b.getWatch().interval(Instant.now()).getSeconds()) >= kick));
 		}
 	}
 
@@ -71,53 +68,8 @@ public class AFK {
 		return null;
 	}
 
-	/**
-	 * Setup the pre-requisites to be met each stage of listening.
-	 *
-	 * @param away The trigger for changing the status to {@link Status#AWAY}
-	 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
-	 * @return The initialized & cached object reference
-	 * @throws InstantiationException If some how the task is already scheduled.
-	 */
-	public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) throws InstantiationException {
-
-		if (this.task != null)
-			throw new InstantiationException("A scheduled query operation is already under effect!");
-
-		this.task = Schedule.sync(() -> {
-			if (this.time == 0) {
-				this.time = System.currentTimeMillis();
-				this.location = new Position(this.getPlayer().getLocation().getBlockX(), this.getPlayer().getLocation().getBlockY(), this.getPlayer().getLocation().getBlockZ(), this.getPlayer().getLocation().getYaw(), this.getPlayer().getLocation().getPitch());
-			} else {
-				if (Position.matches(this.getLocation(), this.getPlayer().getLocation())) {
-					if (away.accept(this)) {
-						if (this.status == Status.ACTIVE) {
-							this.status = Status.AWAY;
-							StatusChange event = new StatusChange(this, Status.AWAY);
-							Bukkit.getPluginManager().callEvent(event);
-						}
-						if (kick.accept(this)) {
-							this.status = Status.REMOVABLE;
-							StatusChange event = new StatusChange(this, Status.REMOVABLE);
-							Bukkit.getPluginManager().callEvent(event);
-						}
-					}
-				} else {
-					if (this.status == Status.AWAY) {
-						this.location = null;
-						this.time = 0;
-						this.status = Status.RETURNING;
-						StatusChange event = new StatusChange(this, Status.RETURNING);
-						Bukkit.getPluginManager().callEvent(event);
-					} else {
-						this.time = 0;
-					}
-				}
-			}
-
-		}).cancelAfter(getPlayer());
-		this.task.repeatReal(0, 12);
-		return this;
+	public static Handler getHandler() {
+		return handler;
 	}
 
 	public void saturate() {
@@ -151,6 +103,10 @@ public class AFK {
 	public interface Handler extends Listener {
 
 		void execute(StatusChange e);
+
+		default Plugin getPlugin() {
+			return JavaPlugin.getProvidingPlugin(getClass());
+		}
 
 		static Handler standard() {
 			return new AFK.Handler() {
@@ -206,11 +162,14 @@ public class AFK {
 	 */
 	public static class Initializer {
 
-		protected Initializer() {
+		private final Player player;
+
+		protected Initializer(Player player) {
+			this.player = player;
 		}
 
-		public static Initializer next() {
-			return new Initializer();
+		public static Initializer next(Player player) {
+			return new Initializer(player);
 		}
 
 		/**
@@ -220,19 +179,17 @@ public class AFK {
 		 *
 		 * @param handler The handler to use for message broadcasting logic.
 		 * @return The same afk initialization builder.
-		 * @throws InstantiationException   If the event handler is already registered.
-		 * @throws IllegalArgumentException If the plugin is null.
 		 */
-		public Initializer handle(Plugin plugin, Supplier<Handler> handler) throws InstantiationException, IllegalArgumentException {
-			if (AFK.handler != null)
-				throw new InstantiationException("Handler is already registered. Cannot override current installation");
+		public Initializer handle(Plugin plugin, Supplier<Handler> handler) {
+			if (AFK.handler == null) {
 
-			if (plugin == null)
-				throw new IllegalArgumentException("Plugin cannot be null!");
+				if (plugin == null)
+					throw new IllegalArgumentException("Plugin cannot be null!");
 
-			if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
-				AFK.handler = handler.get();
-				Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+				if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
+					AFK.handler = handler.get();
+					Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+				}
 			}
 			return this;
 		}
@@ -244,21 +201,65 @@ public class AFK {
 		 *
 		 * @param handler The handler to use for message broadcasting logic.
 		 * @return The same afk initialization builder.
-		 * @throws InstantiationException   If the event handler is already registered.
-		 * @throws IllegalArgumentException If the plugin is null.
 		 */
-		public Initializer handle(Plugin plugin, Handler handler) throws InstantiationException, IllegalArgumentException {
-			if (AFK.handler != null)
-				throw new InstantiationException("Handler is already registered. Cannot override current installation");
+		public Initializer handle(Plugin plugin, Handler handler) {
+			if (AFK.handler == null) {
 
-			if (plugin == null)
-				throw new IllegalArgumentException("Plugin cannot be null!");
+				if (plugin == null)
+					throw new IllegalArgumentException("Plugin cannot be null!");
 
-			if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
-				AFK.handler = handler;
-				Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+				if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
+					AFK.handler = handler;
+					Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
+				}
 			}
 			return this;
+		}
+
+		/**
+		 * Setup the pre-requisites to be met each stage of listening.
+		 *
+		 * @param away The trigger for changing the status to {@link Status#AWAY}
+		 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
+		 * @return The initialized & cached object reference
+		 */
+		public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) {
+			final AFK afk = new AFK(this.player);
+
+			afk.task = Schedule.sync(() -> {
+				if (afk.time == 0) {
+					afk.time = System.currentTimeMillis();
+					afk.location = new Position(afk.getPlayer().getLocation().getBlockX(), afk.getPlayer().getLocation().getBlockY(), afk.getPlayer().getLocation().getBlockZ(), afk.getPlayer().getLocation().getYaw(), afk.getPlayer().getLocation().getPitch());
+				} else {
+					if (Position.matches(afk.getLocation(), afk.getPlayer().getLocation())) {
+						if (away.accept(afk)) {
+							if (afk.status == Status.ACTIVE) {
+								afk.status = Status.AWAY;
+								StatusChange event = new StatusChange(afk, Status.AWAY);
+								Bukkit.getPluginManager().callEvent(event);
+							}
+							if (kick.accept(afk)) {
+								afk.status = Status.REMOVABLE;
+								StatusChange event = new StatusChange(afk, Status.REMOVABLE);
+								Bukkit.getPluginManager().callEvent(event);
+							}
+						}
+					} else {
+						if (afk.status == Status.AWAY) {
+							afk.location = null;
+							afk.time = 0;
+							afk.status = Status.RETURNING;
+							StatusChange event = new StatusChange(afk, Status.RETURNING);
+							Bukkit.getPluginManager().callEvent(event);
+						} else {
+							afk.time = 0;
+						}
+					}
+				}
+
+			}).cancelAfter(afk.getPlayer());
+			afk.task.repeatReal(0, 12);
+			return afk;
 		}
 
 	}
