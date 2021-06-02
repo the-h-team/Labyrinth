@@ -74,6 +74,7 @@ public class AFK {
 
 	public void saturate() {
 		this.status = Status.ACTIVE;
+		this.time = System.currentTimeMillis();
 	}
 
 	public void cancel() {
