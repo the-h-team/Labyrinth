@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.gui.menuman;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
+import com.github.sanctum.labyrinth.task.Asynchronous;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,6 +38,8 @@ public final class PaginatedBuilder<T> {
 
 	protected Inventory INVENTORY;
 	protected Plugin PLUGIN;
+	protected Map<Player, Asynchronous> TASK = new HashMap<>();
+	protected boolean LIVE;
 	protected int LIMIT = 28;
 	protected int INDEX;
 	protected int PAGE;
@@ -146,6 +149,11 @@ public final class PaginatedBuilder<T> {
 	 */
 	public PaginatedBuilder<T> setTitle(String title) {
 		this.TITLE = title.replace("{PAGE}", "" + PAGE);
+		return this;
+	}
+
+	public PaginatedBuilder<T> isLive() {
+		this.LIVE = true;
 		return this;
 	}
 
@@ -703,12 +711,19 @@ public final class PaginatedBuilder<T> {
 			if (e.getView().getTopInventory().getSize() < SIZE)
 				return;
 			if (getInventory() == e.getInventory()) {
+
+				Player p = (Player) e.getPlayer();
+
+				if (TASK.containsKey(p)) {
+					TASK.get(p).cancelTask();
+					TASK.remove(p);
+				}
 				if (MENU_CLOSE != null) {
-					MENU_CLOSE.closeEvent(new PaginatedCloseAction<>(PaginatedBuilder.this, (Player) e.getPlayer(), e.getView()));
+					MENU_CLOSE.closeEvent(new PaginatedCloseAction<>(PaginatedBuilder.this, p, e.getView()));
 				}
 				PAGE = 0;
 				INDEX = 0;
-				((Player) e.getPlayer()).updateInventory();
+				p.updateInventory();
 			}
 		}
 

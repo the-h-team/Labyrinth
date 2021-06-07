@@ -19,6 +19,7 @@
 package com.github.sanctum.labyrinth.gui.menuman;
 
 import com.github.sanctum.labyrinth.gui.InventoryRows;
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -180,6 +181,15 @@ public final class Menu {
          */
         public void open(Player p) {
             builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            if (builder.LIVE) {
+
+                if (builder.TASK.containsKey(p)) {
+                    builder.TASK.get(p).cancelTask();
+                }
+
+                builder.TASK.put(p, Schedule.async(() -> Schedule.sync(builder::adjust).run()));
+                builder.TASK.get(p).repeat(1, 5);
+            }
             p.openInventory(builder.adjust().getInventory());
         }
 
@@ -191,7 +201,49 @@ public final class Menu {
          */
         public void open(Player p, int page) {
             builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            if (builder.LIVE) {
+
+                if (builder.TASK.containsKey(p)) {
+                    builder.TASK.get(p).cancelTask();
+                }
+
+                builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> builder.adjust(Math.min(page, builder.getMaxPages()))).run()));
+                builder.TASK.get(p).repeat(1, 5);
+            }
             p.openInventory(builder.adjust(page).getInventory());
+        }
+
+        public void liven(Player p, int delay, int period) {
+            builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            if (builder.LIVE) {
+
+                if (builder.TASK.containsKey(p)) {
+                    builder.TASK.get(p).cancelTask();
+                }
+
+                builder.TASK.put(p, Schedule.async(() -> Schedule.sync(builder::adjust).run()));
+                builder.TASK.get(p).repeat(delay, period);
+            }
+            p.openInventory(builder.adjust().getInventory());
+        }
+
+        public void liven(Player p, int page, int delay, int period) {
+            builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+            if (builder.LIVE) {
+
+                if (builder.TASK.containsKey(p)) {
+                    builder.TASK.get(p).cancelTask();
+                }
+
+                builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> builder.adjust(Math.min(page, builder.getMaxPages()))).run()));
+                builder.TASK.get(p).repeat(delay, period);
+            }
+            p.openInventory(builder.adjust().getInventory());
+        }
+
+        public Menu.Paginated<T> liven() {
+            builder.LIVE = true;
+            return this;
         }
 
         /**

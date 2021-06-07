@@ -25,6 +25,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 public class LiveInventory implements Listener {
@@ -35,6 +36,8 @@ public class LiveInventory implements Listener {
 	private int DELAY = 1;
 	private int PERIOD = 4;
 	private boolean REVERT;
+	private ItemStack BORDER_ITEM;
+	private ItemStack FILLER_ITEM;
 	private Plugin PLUGIN;
 
 	private Consumer<InventorySlide.Element.Update> UPDATE;
@@ -45,11 +48,13 @@ public class LiveInventory implements Listener {
 	private final Map<Player, Listener> LISTENER;
 	private final Map<Player, Integer> POSITION;
 	private final Map<Player, Inventory> INV;
+	private final Map<ItemStack, Integer> EXTRAS;
 	private final Map<Integer, InventorySlide.Element.Action> ACTIONS;
 	private final Map<Player, Asynchronous> TASKS;
 	private final Map<Player, Boolean> REVERSING;
 
 	public LiveInventory() {
+		this.EXTRAS = new HashMap<>();
 		this.LISTENER = new HashMap<>();
 		this.VIEW_TIME = new HashMap<>();
 		this.INV = new HashMap<>();
@@ -78,6 +83,16 @@ public class LiveInventory implements Listener {
 		return this;
 	}
 
+	public LiveInventory fill(ItemStack item) {
+		this.FILLER_ITEM = new ItemStack(item);
+		return this;
+	}
+
+	public LiveInventory border(ItemStack item) {
+		this.BORDER_ITEM = new ItemStack(item);
+		return this;
+	}
+
 	public LiveInventory layer(int slides) {
 		for (int i = 0; i < slides; i++) {
 			InventorySlide slide = new InventorySlide().fill(slides);
@@ -88,6 +103,12 @@ public class LiveInventory implements Listener {
 				}
 			}
 		}
+		return this;
+	}
+
+	public LiveInventory add(ItemStack item, int slot, InventorySlide.Element.Action action) {
+		this.EXTRAS.put(item, slot);
+		this.ACTIONS.put(slot, action);
 		return this;
 	}
 
@@ -199,6 +220,87 @@ public class LiveInventory implements Listener {
 				}
 				Schedule.sync(() -> this.INV.get(p).setItem(object.getSlot(), event.getItem())).run();
 			}
+
+			Schedule.sync(() -> {
+
+				if (this.BORDER_ITEM != null) {
+					switch (this.ROWS.getSlotCount()) {
+						case 27:
+							int f;
+							for (f = 0; f < 10; f++) {
+								if (getInventory(p).getItem(f) == null)
+									getInventory(p).setItem(f, this.BORDER_ITEM);
+							}
+							getInventory(p).setItem(17, this.BORDER_ITEM);
+							for (f = 18; f < 27; f++) {
+								if (getInventory(p).getItem(f) == null)
+									getInventory(p).setItem(f, this.BORDER_ITEM);
+							}
+							break;
+						case 36:
+							int h;
+							for (h = 0; h < 10; h++) {
+								if (getInventory(p).getItem(h) == null)
+									getInventory(p).setItem(h, this.BORDER_ITEM);
+							}
+							getInventory(p).setItem(17, this.BORDER_ITEM);
+							getInventory(p).setItem(18, this.BORDER_ITEM);
+							getInventory(p).setItem(26, this.BORDER_ITEM);
+							for (h = 27; h < 36; h++) {
+								if (getInventory(p).getItem(h) == null)
+									getInventory(p).setItem(h, this.BORDER_ITEM);
+							}
+							break;
+						case 45:
+							int o;
+							for (o = 0; o < 10; o++) {
+								if (getInventory(p).getItem(o) == null)
+									getInventory(p).setItem(o, this.BORDER_ITEM);
+							}
+							getInventory(p).setItem(17, this.BORDER_ITEM);
+							getInventory(p).setItem(18, this.BORDER_ITEM);
+							getInventory(p).setItem(26, this.BORDER_ITEM);
+							getInventory(p).setItem(27, this.BORDER_ITEM);
+							getInventory(p).setItem(35, this.BORDER_ITEM);
+							getInventory(p).setItem(36, this.BORDER_ITEM);
+							for (o = 36; o < 45; o++) {
+								if (getInventory(p).getItem(o) == null)
+									getInventory(p).setItem(o, this.BORDER_ITEM);
+							}
+							break;
+						case 54:
+							int j;
+							for (j = 0; j < 10; j++) {
+								if (getInventory(p).getItem(j) == null)
+									getInventory(p).setItem(j, this.BORDER_ITEM);
+							}
+							getInventory(p).setItem(17, this.BORDER_ITEM);
+							getInventory(p).setItem(18, this.BORDER_ITEM);
+							getInventory(p).setItem(26, this.BORDER_ITEM);
+							getInventory(p).setItem(27, this.BORDER_ITEM);
+							getInventory(p).setItem(35, this.BORDER_ITEM);
+							getInventory(p).setItem(36, this.BORDER_ITEM);
+							for (j = 44; j < 54; j++) {
+								if (getInventory(p).getItem(j) == null)
+									getInventory(p).setItem(j, this.BORDER_ITEM);
+							}
+							break;
+					}
+				}
+
+				for (Map.Entry<ItemStack, Integer> entry : this.EXTRAS.entrySet()) {
+					getInventory(p).setItem(entry.getValue(), entry.getKey());
+				}
+
+				if (this.FILLER_ITEM != null) {
+					for (int l = 0; l < this.ROWS.getSlotCount(); l++) {
+						if (getInventory(p).getItem(l) == null) {
+							getInventory(p).setItem(l, this.FILLER_ITEM);
+						}
+					}
+				}
+
+			}).run();
 
 		}).debug().cancelAfter(task -> {
 
