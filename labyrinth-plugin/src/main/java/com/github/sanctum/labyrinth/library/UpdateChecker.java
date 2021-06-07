@@ -108,36 +108,7 @@ public abstract class UpdateChecker {
 	}
 
 	public boolean hasUpdate() {
-		try {
-			String latest = getLatest();
-			String version = PLUGIN.getDescription().getVersion();
-			String[] version_split = version.split("\\.");
-			String[] new_version_split = latest.split("\\.");
-			int current_1 = Integer.parseInt(version_split[0]);
-			int current_2 = Integer.parseInt(version_split[1]);
-			int current_3 = Integer.parseInt(version_split[2]);
-			int latest_1 = Integer.parseInt(new_version_split[0]);
-			int latest_2 = Integer.parseInt(new_version_split[1]);
-			int latest_3 = Integer.parseInt(new_version_split[2]);
-			if (latest_1 > current_1) {
-				return true;
-			}
-			if (latest_1 == current_1 && latest_2 == current_2) {
-				if (latest_3 == current_3) {
-					return false;
-				}
-				return latest_3 > current_3;
-			}
-			if (latest_1 == current_1 && latest_2 > current_2) {
-				if (latest_3 > current_3) {
-					return true;
-				}
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
-			return false;
-		}
+		return hasUpdate(UpdateChecker.STANDARD);
 	}
 
 }

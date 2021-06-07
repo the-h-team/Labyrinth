@@ -22,8 +22,22 @@ public class TimeWatch {
 		return new TimeWatch(milli);
 	}
 
+	/**
+	 * Use a specified starting date in milliseconds.
+	 *
+	 * @param date The starting date.
+	 * @return A new time watch object.
+	 */
+	public static TimeWatch start(Date date) {
+		return new TimeWatch(date);
+	}
+
 	protected TimeWatch(long milli) {
 		this.time = milli;
+	}
+
+	protected TimeWatch(Date date) {
+		this.time = date.getTime();
 	}
 
 	/**
@@ -52,7 +66,7 @@ public class TimeWatch {
 	 * @param time      The time to use for time conversions
 	 * @return true if x amount of time within y time threshold as since elapsed.
 	 */
-	public boolean hasElapsed(TimeUnit threshold, long time) {
+	public boolean isBetween(TimeUnit threshold, long time) {
 		switch (threshold) {
 			case DAYS:
 				return TimeUnit.SECONDS.toDays(interval(Instant.now()).getSeconds()) <= time;

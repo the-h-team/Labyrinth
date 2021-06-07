@@ -30,4 +30,5 @@ public enum InventoryRows {
 	public int getSlotCount() {
 		return slotCount;
 	}
+
 }

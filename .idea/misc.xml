@@ -12,6 +12,7 @@
         <option value="$PROJECT_DIR$/labyrinth-afk/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-plugin/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-loader/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-gui/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

@@ -112,6 +112,7 @@ public class Asynchronous {
 				} catch (Exception e) {
 					if (debug) {
 						Labyrinth.getInstance().getLogger().severe("Closing task, an exception occurred and was stopped. ");
+						e.printStackTrace();
 					}
 					this.cancel();
 					Labyrinth.getInstance().getLogger().severe(e.getMessage());

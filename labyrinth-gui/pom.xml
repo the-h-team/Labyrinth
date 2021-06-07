@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Labyrinth-AFK</artifactId>
+    <artifactId>Labyrinth-GUI</artifactId>
     <version>1.0.0</version>
 
     <!--TODO: determine licensing (likely MIT)-->
@@ -27,5 +27,4 @@
             <version>1.5.5</version>
         </dependency>
     </dependencies>
-
 </project>

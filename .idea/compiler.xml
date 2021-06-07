@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="labyrinth-gui" />
         <module name="labyrinth-afk" />
         <module name="labyrinth-plugin" />
       </profile>
@@ -14,6 +15,7 @@
       <module name="AFK" target="1.8" />
       <module name="Labyrinth" target="1.8" />
       <module name="labyrinth-afk" target="1.8" />
+      <module name="labyrinth-gui" target="1.8" />
       <module name="labyrinth-plugin" target="1.8" />
       <module name="labyrinth-region" target="1.8" />
       <module name="Labyrinth-Region" target="1.8" />
