@@ -473,6 +473,7 @@ public final class PaginatedBuilder<T> {
 					if (MENU_PROCESS != null) {
 						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
 						MENU_PROCESS.accept(element);
+
 						CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
 						if (!PROCESS_LIST.contains(element.getItem())) {
 							PROCESS_LIST.add(element.getItem());

@@ -72,6 +72,10 @@ public class PaginatedClickAction<T> {
 		p.openInventory(builder.adjust().getInventory());
 	}
 
+	public void update() {
+		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+	}
+
 	/**
 	 * Get the inventory view from the operation.
 	 *
@@ -116,4 +120,5 @@ public class PaginatedClickAction<T> {
 	public boolean isRightClick() {
 		return isRightClick;
 	}
+
 }
