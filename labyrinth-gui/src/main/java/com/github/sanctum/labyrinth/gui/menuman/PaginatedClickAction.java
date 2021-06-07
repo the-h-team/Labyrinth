@@ -73,19 +73,23 @@ public class PaginatedClickAction<T> {
 		p.openInventory(builder.adjust().getInventory());
 	}
 
-	public void sync(int page, int delay, int period) {
+	public void sync(int delay, int period) {
 		this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-		if (this.builder.LIVE) {
 
+		if (this.builder.LIVE) {
+			this.builder.INVENTORY.setMaxStackSize(1);
 			if (this.builder.TASK.containsKey(p)) {
 				this.builder.TASK.get(p).cancelTask();
 			}
 
-			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> this.builder.adjust(Math.min(page, this.builder.getMaxPages()))).run()));
+			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
+				this.builder.INVENTORY.clear();
+				this.builder.adjust();
+			}).run()));
 			this.builder.TASK.get(p).repeat(delay, period);
 			Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
 		} else {
-			p.openInventory(this.builder.adjust(Math.min(page, this.builder.getMaxPages())).getInventory());
+			p.openInventory(this.builder.adjust().getInventory());
 		}
 	}
 

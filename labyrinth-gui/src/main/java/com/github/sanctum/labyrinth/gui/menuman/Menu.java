@@ -181,15 +181,17 @@ public final class Menu {
          */
         public void open(Player p) {
             this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-            this.builder.INVENTORY.setMaxStackSize(1);
             if (this.builder.LIVE) {
-
+                this.builder.INVENTORY.setMaxStackSize(1);
                 if (this.builder.TASK.containsKey(p)) {
                     this.builder.TASK.get(p).cancelTask();
                 }
 
                 this.builder.TASK.put(p, Schedule.async(() -> {
-                    Schedule.sync(this.builder::adjust).run();
+                    Schedule.sync(() -> {
+                        this.builder.INVENTORY.clear();
+                        this.builder.adjust();
+                    }).run();
                 }));
                 this.builder.TASK.get(p).repeat(1, 5);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(2);
@@ -228,7 +230,12 @@ public final class Menu {
                     this.builder.TASK.get(p).cancelTask();
                 }
 
-                Schedule.sync(this.builder::adjust).run();
+                this.builder.TASK.put(p, Schedule.async(() -> {
+                    Schedule.sync(() -> {
+                        this.builder.INVENTORY.clear();
+                        this.builder.adjust();
+                    }).run();
+                }));
                 this.builder.TASK.get(p).repeat(delay, period);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
             } else {
