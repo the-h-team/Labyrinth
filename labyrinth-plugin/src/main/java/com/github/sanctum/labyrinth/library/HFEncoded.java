@@ -16,7 +16,7 @@ public class HFEncoded {
 	/**
 	 * Convert the entire object into a string while retaining all of its values.
 	 *
-	 * <p>WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
+	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified obejcts
 	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
 	 *
 	 * @param obj The Java Serializable implemented object to convert.
@@ -29,7 +29,7 @@ public class HFEncoded {
 	 * Convert a serialized object from its string form back into an object of desired type
 	 * while retaining all originally saved values.
 	 *
-	 * <p>WARNING: Making changes to objects then attempting to load/reuse older un-modified obejcts
+	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified obejcts
 	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
 	 *
 	 * @param objSerial The serialized object string to convert.

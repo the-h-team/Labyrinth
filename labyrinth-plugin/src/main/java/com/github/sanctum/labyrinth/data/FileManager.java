@@ -195,7 +195,7 @@ public class FileManager {
                 this.fc = result;
                 return result;
             }
-            // load configuration from file
+            // attach configuration from file
             this.fc = YamlConfiguration.loadConfiguration(file);
         }
         return this.fc;

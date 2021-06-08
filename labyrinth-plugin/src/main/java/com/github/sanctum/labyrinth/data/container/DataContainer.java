@@ -129,7 +129,7 @@ public class DataContainer extends DataStream implements Serializable {
 	/**
 	 * Load an instance of meta data from cache
 	 *
-	 * @param huid    The id to load from cache
+	 * @param huid    The id to attach from cache
 	 * @param persist if temp result null persist into hard storage?
 	 * @return Gets a cached data instance.
 	 */

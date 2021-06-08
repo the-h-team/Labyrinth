@@ -10,7 +10,7 @@ public class PersistentData {
 	/**
 	 * Load an instance of the same meta data but allocate new values to it.
 	 *
-	 * @param huid    The id to load from cache
+	 * @param huid    The id to attach from cache
 	 * @param persist if temp result null persist into hard storage?
 	 * @return Gets a data stream builder retaining the values of the old container.
 	 * @throws IllegalAccessException If the stream is persistent and access to it was denied or non-existent.

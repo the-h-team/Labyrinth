@@ -48,9 +48,9 @@ public class PaginatedClickAction<T> {
 	}
 
 	/**
-	 * Get the current page.
+	 * Get the page to be navigated to next whether forward of backward.
 	 *
-	 * @return The page the player is currently viewing.
+	 * @return The page the player is going next.
 	 */
 	public int getPage() {
 		return builder.PAGE;
@@ -66,11 +66,19 @@ public class PaginatedClickAction<T> {
 	}
 
 	/**
-	 * *RECOMMENDED*: Used to update the items displayed.
+	 * If your inventory isn't live updating use this to switch pages when players click the navigation buttons.
 	 */
 	public void sync() {
 		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust().getInventory());
+	}
+
+	/**
+	 * If your inventory isn't live updating use this to switch pages when players click the navigation buttons.
+	 */
+	public void sync(int page) {
+		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		p.openInventory(builder.adjust(page).getInventory());
 	}
 
 	public void sync(int delay, int period) {
@@ -85,6 +93,26 @@ public class PaginatedClickAction<T> {
 			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
 				this.builder.INVENTORY.clear();
 				this.builder.adjust();
+			}).run()));
+			this.builder.TASK.get(p).repeat(delay, period);
+			Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
+		} else {
+			p.openInventory(this.builder.adjust().getInventory());
+		}
+	}
+
+	public void sync(int page, int delay, int period) {
+		this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+
+		if (this.builder.LIVE) {
+			this.builder.INVENTORY.setMaxStackSize(1);
+			if (this.builder.TASK.containsKey(p)) {
+				this.builder.TASK.get(p).cancelTask();
+			}
+
+			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
+				this.builder.INVENTORY.clear();
+				this.builder.adjust(page);
 			}).run()));
 			this.builder.TASK.get(p).repeat(delay, period);
 			Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);

@@ -214,7 +214,10 @@ public final class Menu {
                     this.builder.TASK.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> this.builder.adjust(Math.min(page, this.builder.getMaxPages()))).run()));
+                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
+                    this.builder.INVENTORY.clear();
+                    this.builder.adjust(page);
+                }).run()));
                 this.builder.TASK.get(p).repeat(1, 5);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(2);
             } else {
@@ -251,7 +254,10 @@ public final class Menu {
                     this.builder.TASK.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> this.builder.adjust(Math.min(page, this.builder.getMaxPages()))).run()));
+                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
+                    this.builder.INVENTORY.clear();
+                    this.builder.adjust(page);
+                }).run()));
                 this.builder.TASK.get(p).repeat(delay, period);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
             } else {

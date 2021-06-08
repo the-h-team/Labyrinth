@@ -250,7 +250,7 @@ public class Registry<T> {
 		}
 
 		/**
-		 * Provide a class loader instance to inject class files into.
+		 * Provide a class loader instance to load class files into.
 		 *
 		 * @param loader The class loader to use.
 		 * @return The same registry file being loaded.

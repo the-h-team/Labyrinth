@@ -7,7 +7,9 @@ import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
+import com.github.sanctum.labyrinth.data.container.DataComponent;
 import com.github.sanctum.labyrinth.data.container.DataContainer;
+import com.github.sanctum.labyrinth.data.container.DataParser;
 import com.github.sanctum.labyrinth.event.CuboidController;
 import com.github.sanctum.labyrinth.event.CuboidSelectionEvent;
 import com.github.sanctum.labyrinth.event.EventBuilder;
@@ -31,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -122,7 +125,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 						spawn.addFlag(flags.toArray(new Region.Flag[0]));
 						if (!spawn.load()) {
-							getLogger().warning("- A region under the name '" + spawn.getId() + "' has failed to load properly.");
+							getLogger().warning("- A region under the name '" + spawn.getId() + "' has failed to attach properly.");
 						}
 					}
 				}
@@ -156,7 +159,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 						region.addFlag(flags.toArray(new Region.Flag[0]));
 						if (!region.load()) {
-							getLogger().warning("- A region under the name '" + region.getId() + "' has failed to load properly.");
+							getLogger().warning("- A region under the name '" + region.getId() + "' has failed to attach properly.");
 						}
 					}
 				}
@@ -170,7 +173,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				Region.Standard result = new Region.Standard(load);
 				result.setPassthrough(load.isPassthrough());
 				if (!result.load()) {
-					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");
+					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to attach properly.");
 				}
 				load.remove();
 			}
@@ -180,7 +183,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				result.setPassthrough(spawn.isPassthrough());
 				result.setLocation(spawn.location());
 				if (!result.load()) {
-					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to load properly.");
+					getLogger().warning("- A pre-loaded region under the name '" + result.getId() + "' has failed to attach properly.");
 				}
 				spawn.remove();
 			}
@@ -201,11 +204,19 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			}
 
 		})).repeat(5, 15);
-
 	}
 
 	@Override
 	public void onDisable() {
+
+		for (DataComponent<?> component : DataParser.getDataComponents()) {
+			for (String key : component.keySet()) {
+				if (!component.exists(key)) {
+					component.save(key);
+				}
+			}
+		}
+
 		for (int id : TASKS) {
 			getServer().getScheduler().cancelTask(id);
 		}
@@ -234,6 +245,10 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 				e.setCancelled(true);
 			}
 		}
+	}
+
+	public static <V> DataComponent<V> getPersistentData(Class<V> path, NamespacedKey key) {
+		return DataParser.test(path, key);
 	}
 
 	public static Plugin getInstance() {

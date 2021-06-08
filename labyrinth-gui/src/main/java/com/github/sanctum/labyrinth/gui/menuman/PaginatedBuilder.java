@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.gui.menuman;
 
+import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.gui.InventoryRows;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import java.util.Arrays;
@@ -41,9 +42,9 @@ public final class PaginatedBuilder<T> {
 	protected Map<Player, Asynchronous> TASK = new HashMap<>();
 	protected boolean LIVE;
 	protected int LIMIT = 28;
-	protected int INDEX;
-	protected int PAGE;
-	protected int SIZE;
+	protected int INDEX = 1;
+	protected int PAGE = 1;
+	protected int SIZE = 54;
 	protected final UUID ID;
 	protected String TITLE;
 	protected String FIRST_PAGE_MESSAGE;
@@ -347,22 +348,27 @@ public final class PaginatedBuilder<T> {
 			}
 		}
 		if (COLLECTION != null && !COLLECTION.isEmpty()) {
-			for (int i = 0; i < LIMIT; i++) {
-				INDEX = LIMIT * PAGE + i;
-				if (INDEX >= COLLECTION.size())
-					break;
-				if (COLLECTION.get(INDEX) != null) {
+			PaginatedList<T> list = new PaginatedList<>(this.COLLECTION)
+					.limit(LIMIT)
+					.decorate((pagination, object, page, max, placement) -> {
+						if (object != null) {
+							this.INDEX = placement;
+							if (MENU_PROCESS != null) {
+								if (INDEX < this.COLLECTION.size()) {
+									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
+									MENU_PROCESS.accept(element);
+									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
 
-					if (MENU_PROCESS != null) {
-						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
-						MENU_PROCESS.accept(element);
-						CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
-						if (!PROCESS_LIST.contains(element.getItem())) {
-							PROCESS_LIST.add(element.getItem());
+									if (!PROCESS_LIST.contains(element.getItem())) {
+										PROCESS_LIST.add(element.getItem());
+									}
+								}
+							}
 						}
-					}
-				}
-			}
+					});
+
+			list.get(this.PAGE);
+
 		}
 		if (FILLER_ITEM != null) {
 			for (int l = 0; l < SIZE; l++) {
@@ -464,23 +470,27 @@ public final class PaginatedBuilder<T> {
 			}
 		}
 		if (COLLECTION != null && !COLLECTION.isEmpty()) {
-			for (int i = 0; i < LIMIT; i++) {
-				INDEX = LIMIT * PAGE + i;
-				if (INDEX >= COLLECTION.size())
-					break;
-				if (COLLECTION.get(INDEX) != null) {
+			PaginatedList<T> list = new PaginatedList<>(this.COLLECTION)
+					.limit(LIMIT)
+					.decorate((pagination, object, page, max, placement) -> {
+						if (object != null) {
+							this.INDEX = placement;
+							if (MENU_PROCESS != null) {
+								if (INDEX < this.COLLECTION.size()) {
+									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
+									MENU_PROCESS.accept(element);
+									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
 
-					if (MENU_PROCESS != null) {
-						PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, COLLECTION.get(INDEX));
-						MENU_PROCESS.accept(element);
-
-						CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
-						if (!PROCESS_LIST.contains(element.getItem())) {
-							PROCESS_LIST.add(element.getItem());
+									if (!PROCESS_LIST.contains(element.getItem())) {
+										PROCESS_LIST.add(element.getItem());
+									}
+								}
+							}
 						}
-					}
-				}
-			}
+					});
+
+			list.get(this.PAGE);
+
 		}
 		if (FILLER_ITEM != null) {
 			for (int l = 0; l < SIZE; l++) {
@@ -791,7 +801,7 @@ public final class PaginatedBuilder<T> {
 						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
 					if (NAVIGATION_LEFT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (PAGE == 0) {
+						if (PAGE == 1) {
 							p.sendMessage(FIRST_PAGE_MESSAGE);
 						} else {
 							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, PAGE);
