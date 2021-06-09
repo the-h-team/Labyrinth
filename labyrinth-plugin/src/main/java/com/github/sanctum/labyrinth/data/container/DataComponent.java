@@ -11,29 +11,21 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.NamespacedKey;
 
-public class DataComponent<V> {
-
-	private final Class<V> TYPE;
+public class DataComponent {
 
 	private final NamespacedKey NAME;
 
-	private final Map<String, V> DATA;
+	private final Map<String, Object> DATA;
 
-	public DataComponent(Class<V> path, NamespacedKey key) {
+	public DataComponent(NamespacedKey key) {
 		this.NAME = key;
-		this.TYPE = path;
 		this.DATA = new HashMap<>();
 	}
 
-	public DataComponent<V> attach(String key, V value) {
-		this.DATA.put(key, value);
-		return this;
-	}
-
-	public synchronized boolean isLoaded(String key) {
+	public synchronized <R> boolean isLoaded(Class<R> type, String key) {
 		if (!this.DATA.containsKey(key)) {
 			if (exists(key)) {
-				return load(key);
+				return load(type, key);
 			}
 		}
 		return this.DATA.containsKey(key);
@@ -41,19 +33,19 @@ public class DataComponent<V> {
 
 	public synchronized boolean exists(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		return manager.getConfig().isString(key);
+		return manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key);
 	}
 
 	public synchronized void save(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		manager.getConfig().set(key, serialize(key));
+		manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
 		manager.saveConfig();
 	}
 
-	protected synchronized boolean load(String key) {
+	protected synchronized <R> boolean load(Class<R> type, String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(key)) {
-			this.DATA.put(key, deserialize(manager.getConfig().getString(key)));
+		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
+			this.DATA.put(key, deserialize(type, manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)));
 			return true;
 		}
 		return false;
@@ -61,40 +53,44 @@ public class DataComponent<V> {
 
 	public synchronized boolean delete(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(key)) {
-			manager.getConfig().set(key, null);
+		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
+			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
 			return true;
 		}
 		return false;
 	}
 
-	public V get(String key) {
-		return this.DATA.get(key);
+	public <R> R attach(String key, R value) {
+		this.DATA.put(key, value);
+		return value;
+	}
+
+	public <R> R get(Class<R> type, String key) {
+		if (!type.isAssignableFrom(this.DATA.get(key).getClass())) {
+			return null;
+		}
+		return (R) this.DATA.get(key);
 	}
 
 	public Set<String> keySet() {
 		return this.DATA.keySet();
 	}
 
-	public Collection<V> values() {
+	public Collection<Object> values() {
 		return this.DATA.values();
-	}
-
-	public Class<V> getPrimative() {
-		return TYPE;
 	}
 
 	public NamespacedKey getKey() {
 		return this.NAME;
 	}
 
-	public V deserialize(String value) {
+	public <R> R deserialize(Class<R> type, String value) {
 		try {
 			Object o = new HFEncoded(value).deserialized();
-			if (o.getClass().isAssignableFrom(this.TYPE)) {
-				return (V) o;
+			if (o.getClass().isAssignableFrom(type)) {
+				return (R) o;
 			} else {
-				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + this.TYPE.getSimpleName());
+				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();

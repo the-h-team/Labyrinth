@@ -6,22 +6,20 @@ import org.bukkit.NamespacedKey;
 
 public class DataParser {
 
-	private static final List<DataComponent<?>> COMPONENTS = new LinkedList<>();
+	private static final List<DataComponent> COMPONENTS = new LinkedList<>();
 
-	public static <V> DataComponent<V> test(Class<V> path, NamespacedKey key) {
-		for (DataComponent<?> component : COMPONENTS) {
-			if (component.getPrimative().isAssignableFrom(path)) {
-				if (component.getKey().equals(key)) {
-					return (DataComponent<V>) component;
-				}
+	public static DataComponent test(NamespacedKey key) {
+		for (DataComponent component : COMPONENTS) {
+			if (component.getKey().equals(key)) {
+				return component;
 			}
 		}
-		DataComponent<V> component = new DataComponent<>(path, key);
+		DataComponent component = new DataComponent(key);
 		COMPONENTS.add(component);
 		return component;
 	}
 
-	public static List<DataComponent<?>> getDataComponents() {
+	public static List<DataComponent> getDataComponents() {
 		return COMPONENTS;
 	}
 }

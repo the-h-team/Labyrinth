@@ -209,7 +209,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 
-		for (DataComponent<?> component : DataParser.getDataComponents()) {
+		for (DataComponent component : DataParser.getDataComponents()) {
 			for (String key : component.keySet()) {
 				if (!component.exists(key)) {
 					component.save(key);
@@ -247,8 +247,8 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		}
 	}
 
-	public static <V> DataComponent<V> getPersistentData(Class<V> path, NamespacedKey key) {
-		return DataParser.test(path, key);
+	public static DataComponent getPersistentData(NamespacedKey key) {
+		return DataParser.test(key);
 	}
 
 	public static Plugin getInstance() {
