@@ -90,6 +90,10 @@ public class DataComponent {
 		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
 			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
 			manager.saveConfig();
+			if (manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false).isEmpty()) {
+				manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey(), null);
+				manager.saveConfig();
+			}
 			return true;
 		}
 		return false;
