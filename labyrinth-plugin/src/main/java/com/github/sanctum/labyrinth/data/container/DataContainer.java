@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.Bukkit;
 
+@Deprecated
 public class DataContainer extends DataStream implements Serializable {
 
 	private static final Map<HUID, DataStream> metaDataContainer = new HashMap<>();

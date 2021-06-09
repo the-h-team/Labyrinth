@@ -8,6 +8,12 @@ public class DataParser {
 
 	private static final List<DataComponent> COMPONENTS = new LinkedList<>();
 
+	/**
+	 * Operate on a custom persistent data container using a specified name space.
+	 *
+	 * @param key The name space for this component.
+	 * @return The desired data container.
+	 */
 	public static DataComponent test(NamespacedKey key) {
 		for (DataComponent component : COMPONENTS) {
 			if (component.getKey().equals(key)) {
@@ -19,6 +25,9 @@ public class DataParser {
 		return component;
 	}
 
+	/**
+	 * @return All cached data containers.
+	 */
 	public static List<DataComponent> getDataComponents() {
 		return COMPONENTS;
 	}
