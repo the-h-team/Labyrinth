@@ -211,9 +211,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 		for (DataComponent component : DataParser.getDataComponents()) {
 			for (String key : component.keySet()) {
-				if (!component.exists(key)) {
-					component.save(key);
-				}
+				component.save(key);
 			}
 		}
 
