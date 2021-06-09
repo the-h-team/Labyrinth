@@ -22,7 +22,7 @@ public class HUID implements Serializable {
 		if (this == o) return true;
 		if (!(o instanceof HUID)) return false;
 		HUID huid = (HUID) o;
-		return hUID.equals(huid.hUID);
+		return huid.hUID.equalsIgnoreCase(hUID);
 	}
 
 	@Override
