@@ -89,6 +89,7 @@ public class DataComponent {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
 			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
+			manager.saveConfig();
 			return true;
 		}
 		return false;
@@ -117,6 +118,9 @@ public class DataComponent {
 	 * assignable from the same class type.
 	 */
 	public <R> R get(Class<R> type, String key) {
+		if (!this.DATA.containsKey(key)) {
+			return null;
+		}
 		if (!type.isAssignableFrom(this.DATA.get(key).getClass())) {
 			return null;
 		}
