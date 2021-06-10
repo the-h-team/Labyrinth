@@ -14,6 +14,15 @@ final class CommandImpl extends Command {
 	protected CommandImpl(CommandBuilder builder) {
 		super(builder.label);
 		this.builder = builder;
+		if (builder.description != null) {
+			setDescription(builder.description);
+		}
+		if (builder.usage != null) {
+			setUsage(builder.usage);
+		}
+		if (builder.permission != null) {
+			setPermission(builder.permission);
+		}
 	}
 
 	@Override
