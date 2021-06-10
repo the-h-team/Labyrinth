@@ -73,29 +73,6 @@ public class HFEncoded {
 	}
 
 	/**
-	 * The original stored object retaining all values converted to a string.
-	 *
-	 * @return Get's a serialized hash for this object with retained values.
-	 * inheritance of the java.io Serializable interface.
-	 * @deprecated Use of this method is not too different from the safe version other than
-	 * the fact that the exception thrown is ignored and in the event of so the {@link Object#toString()} method is called in its place.
-	 */
-	@Deprecated
-	public String serializeUnsafe() {
-		try {
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(output);
-			outputStream.writeObject(obj);
-			outputStream.flush();
-
-			byte[] serial = output.toByteArray();
-			return Base64.getEncoder().encodeToString(serial);
-		} catch (IOException e) {
-			return obj.toString();
-		}
-	}
-
-	/**
 	 * The original stored object retaining all values converted back to an object.
 	 *
 	 * <p>WARN: You will need to pass a type to the object upon use.</p>
@@ -114,25 +91,26 @@ public class HFEncoded {
 	}
 
 	/**
-	 * The original stored object retaining all values converted back to an object.
+	 * Deserialize an object of specified type from a string.
+	 * <p>
+	 * Primarily for misc use, deserialization is handled internally for normal object use from containers.
 	 *
-	 * <p>WARN: You will need to pass a type to the object upon use.</p>
-	 *
-	 * @return Get's an object back from a serialized string with all original values.
-	 * located properly.
-	 * @deprecated Use of this method isn't too different from the safe version other than
-	 * the fact that the exceptions are ignored and in place using the bare serialized string.
+	 * @param type The type this object represents.
+	 * @param <R>  The type this object represents
+	 * @return The deserialized object otherwise null.
 	 */
-	@Deprecated
-	public Object deserializedUnsafe() {
+	public <R> R deserialize(Class<R> type) {
 		try {
-			byte[] serial = Base64.getDecoder().decode(objSerial);
-			ByteArrayInputStream input = new ByteArrayInputStream(serial);
-			BukkitObjectInputStream inputStream = new BukkitObjectInputStream(input);
-			return inputStream.readObject();
+			Object o = deserialized();
+			if (o.getClass().isAssignableFrom(type)) {
+				return (R) o;
+			} else {
+				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
+			}
 		} catch (IOException | ClassNotFoundException e) {
-			return objSerial;
+			e.printStackTrace();
 		}
+		return null;
 	}
 
 }

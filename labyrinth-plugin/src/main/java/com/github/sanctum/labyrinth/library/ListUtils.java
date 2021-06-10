@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * @author Hempfest
+ */
 public class ListUtils<T> {
 
 	private final List<T> list;
@@ -62,4 +65,8 @@ public class ListUtils<T> {
 		return array;
 	}
 
+	@FunctionalInterface
+	public interface ListOperation<T> {
+		T append(T object);
+	}
 }

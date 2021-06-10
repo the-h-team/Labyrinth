@@ -1,13 +1,14 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.data.container.IsolatedClassLoader;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class Registry<T> {
 	 */
 	public Registry<T> source(Plugin plugin) throws IOException {
 		this.PLUGIN = plugin;
-		this.FILE = new JarFile(URLDecoder.decode(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+		this.FILE = new JarFile(URLDecoder.decode(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
 		return this;
 	}
 
@@ -109,7 +110,7 @@ public class Registry<T> {
 
 		if (this.PLUGIN != null) {
 			try {
-				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -171,7 +172,7 @@ public class Registry<T> {
 			});
 		}
 
-		for (JarEntry jarEntry : Collections.list(jarFile.entries())) {
+		for (JarEntry jarEntry : entries) {
 			String className = jarEntry.getName().replace("/", ".");
 			if (this.PACKAGE != null) {
 
@@ -220,12 +221,252 @@ public class Registry<T> {
 		return new RegistryData<>(additions, PLUGIN, PACKAGE);
 	}
 
+	public RegistryData<T> t(Consumer<T> operation) {
+		Set<Class<T>> classes = Sets.newHashSet();
+		JarFile jarFile = this.FILE;
+
+		if (this.PLUGIN != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		List<JarEntry> entries = Collections.list(jarFile.entries());
+
+		if (this.FILTER != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.FILTER.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+
+				}
+			});
+		}
+
+		for (JarEntry jarEntry : entries) {
+			String className = jarEntry.getName().replace("/", ".");
+			if (this.PACKAGE != null) {
+
+				if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			} else {
+
+				if (className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+
+			}
+		}
+		List<T> additions = new LinkedList<>();
+		for (Class<T> aClass : classes) {
+			try {
+				T a = aClass.getDeclaredConstructor().newInstance();
+				operation.accept(a);
+				additions.add(a);
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		return new RegistryData<>(additions, PLUGIN, PACKAGE);
+	}
+
+	public RegistryData<T> t(Consumer<T> operation, URLClassLoader test, boolean s) {
+		Set<Class<T>> classes = Sets.newHashSet();
+		JarFile jarFile = this.FILE;
+
+		if (this.PLUGIN != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		List<JarEntry> entries = Collections.list(jarFile.entries());
+
+		if (s) {
+			System.out.println(entries);
+		}
+
+		if (this.FILTER != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.FILTER.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(className, true, test);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(className, true, test);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(className, true, test);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+
+				}
+			});
+		}
+
+		for (JarEntry jarEntry : entries) {
+			String className = jarEntry.getName().replace("/", ".");
+			if (this.PACKAGE != null) {
+
+				if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(className, true, test);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			} else {
+
+				if (className.endsWith(".class")) {
+					final String substring = className.substring(0, className.length() - 6);
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(className, true, test);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+
+			}
+		}
+		List<T> additions = new LinkedList<>();
+		for (Class<T> aClass : classes) {
+			try {
+				T a = aClass.getDeclaredConstructor().newInstance();
+				operation.accept(a);
+				additions.add(a);
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		return new RegistryData<>(additions, PLUGIN, PACKAGE);
+	}
+
 	/**
 	 * This class is used explicitly for searching for inheritable class types of from a specified file location
 	 * loading them into cache using your plugins class loader and then running operations with the found elements.
 	 *
 	 * @param <T> The type of class to use for instantiation.
+	 * @deprecated As of Java9+ Reflective access to {@link ClassLoader#addUrl(URL)} is effectively blocked. An alternative is being blueprinted for this registry builder.
 	 */
+	@Deprecated
 	public static class File<T> {
 
 		private final Class<T> CLASS;
@@ -287,13 +528,11 @@ public class Registry<T> {
 		 *
 		 * @param operation The operation to run per element instantiated.
 		 * @return A new registry data instance with the remaining elements from the search.
-		 * @throws IOException               If an IO error occurred.
-		 * @throws NoSuchMethodException     if a matching method is not found.
-		 * @throws InvocationTargetException if the underlying method throws an exception
-		 * @throws IllegalAccessException    if this Method object is enforcing Java language access control and the underlying method is inaccessible.
+		 * @throws IOException If an IO error occurred.
 		 */
-		public RegistryData<T> operate(Consumer<T> operation) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		public RegistryData<T> operate(Consumer<T> operation) throws IOException {
 			FileManager check = FileList.search(this.PLUGIN).find("Test", this.DIRECTORY);
+			IsolatedClassLoader LOADER = new IsolatedClassLoader(this.LOADER);
 			java.io.File parent = check.getFile().getParentFile();
 			if (!parent.exists()) {
 				//noinspection ResultOfMethodCallIgnored
@@ -301,12 +540,8 @@ public class Registry<T> {
 			}
 			List<T> list = new LinkedList<>();
 			for (java.io.File f : parent.listFiles()) {
-				URLClassLoader classLoader = (URLClassLoader) this.LOADER;
-				Class<?> urlClassLoaderClass = URLClassLoader.class;
-				Method method = urlClassLoaderClass.getDeclaredMethod("addURL", URL.class);
-				method.setAccessible(true);
-				method.invoke(classLoader, f.toURI().toURL());
 				if (f.isFile()) {
+					LOADER.addURL(f.toURI().toURL());
 					if (this.PACKAGE != null) {
 						list.addAll(new Registry<T>(this.CLASS)
 								.source(f)

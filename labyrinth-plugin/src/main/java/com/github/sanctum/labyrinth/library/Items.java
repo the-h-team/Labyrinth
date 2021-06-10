@@ -6,6 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+/**
+ * @author Hempfest
+ */
 public final class Items {
 	private static final Map<String, Material> MATERIAL_ALIAS = new HashMap<>();
 

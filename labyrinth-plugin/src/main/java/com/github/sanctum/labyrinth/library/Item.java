@@ -40,6 +40,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Use of this direct builder {@link Item} demands instantiation/execution to be done ONLY on your
  * server's onEnable method.
+ *
+ * @author Hempfest
  */
 public class Item implements Serializable {
 

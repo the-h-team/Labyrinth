@@ -7,6 +7,8 @@ import java.util.Locale;
 
 /**
  * Encapsulate number data to modify.
+ *
+ * @author Hempfest
  */
 public class MathUtils {
 

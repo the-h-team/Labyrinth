@@ -27,8 +27,6 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	public static final FileManager DATA = FileList.search(Labyrinth.getInstance()).find("Regions", "Persistent");
 
-	public static final FileManager OPTIONS = FileList.search(Labyrinth.getInstance()).find("Regions", "Persistent");
-
 	private static final List<Region> RECORD = new LinkedList<>();
 
 	private static final List<Loading> LOADING = new LinkedList<>();

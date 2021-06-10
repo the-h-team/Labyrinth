@@ -3,6 +3,9 @@ package com.github.sanctum.labyrinth.library;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Hempfest
+ */
 public class TimeUtils {
 
 	/**

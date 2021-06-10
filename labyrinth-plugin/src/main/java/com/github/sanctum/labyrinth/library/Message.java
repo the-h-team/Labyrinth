@@ -4,17 +4,23 @@ import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * @author Hempfest
+ */
 public class Message {
 
 	private Logger logger = Logger.getLogger("Minecraft");
+	private Plugin plugin;
 	private String prefix;
 	private Player p;
 
 
 	public Message(Plugin plugin) {
+		this.plugin = plugin;
 		this.logger = plugin.getLogger();
 	}
 
@@ -84,6 +90,36 @@ public class Message {
 			result = StringUtils.use(prefix + " " + text).translate();
 		}
 		p.sendMessage(result);
+		return this;
+	}
+
+	/**
+	 * Broadcast a message publicly.
+	 *
+	 * @param text The context to broadcast.
+	 */
+	public Message broadcast(String text) {
+		if (plugin != null) {
+			if (this.prefix == null) {
+				this.prefix = "&7[&e" + plugin.getName() + "&7]&r";
+			}
+			Bukkit.broadcastMessage(StringUtils.use(prefix + " " + text).translate());
+		}
+		return this;
+	}
+
+	/**
+	 * Broadcast a message publicly to those with permission.
+	 *
+	 * @param text The context to broadcast.
+	 */
+	public Message broadcast(String text, String permission) {
+		if (plugin != null) {
+			if (this.prefix == null) {
+				this.prefix = "&7[&e" + plugin.getName() + "&7]&r";
+			}
+			Bukkit.broadcast(StringUtils.use(prefix + " " + text).translate(), permission);
+		}
 		return this;
 	}
 

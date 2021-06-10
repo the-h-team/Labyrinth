@@ -8,6 +8,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * @author Hempfest
+ */
 public abstract class UpdateChecker {
 
 	public static final int STANDARD = 3;

@@ -7,6 +7,9 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Hempfest
+ */
 public abstract class Cooldown {
 
 	private String format = "&e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";

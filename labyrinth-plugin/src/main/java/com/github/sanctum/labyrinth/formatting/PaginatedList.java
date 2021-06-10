@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * Encapsulate a list of objects to be sorted and paginated.
  *
  * @param <T> The object type representative of this pagination operation.
+ * @author Hempfest
  */
 public class PaginatedList<T> {
 	private List<T> typeList;

@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * An object that encapsulates tab completion data for live injection.
+ *
+ * @author [Hempfest, ms5984]
  */
 public class TabCompletionBuilder {
 

@@ -2,6 +2,8 @@ package com.github.sanctum.labyrinth.formatting;
 
 /**
  * Encapsulate quick completion results and feed them live to your command's tab completer.
+ *
+ * @author [Hempfest, ms5984]
  */
 public class TabCompletion {
 

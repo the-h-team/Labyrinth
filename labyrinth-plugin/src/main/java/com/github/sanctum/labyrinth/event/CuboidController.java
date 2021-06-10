@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth.event;
 
+import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Monster;
@@ -37,8 +39,8 @@ public class CuboidController implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBuild(BlockBreakEvent e) {
-		Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
+	public void onBuild(BlockBreakEvent e) throws ExecutionException, InterruptedException {
+		Optional<Region> r = Bukkit.getScheduler().callSyncMethod(Labyrinth.getInstance(), () -> Region.match(e.getBlock().getLocation())).get();
 		if (r.isPresent()) {
 			RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock());
 			Bukkit.getPluginManager().callEvent(event);
@@ -66,9 +68,9 @@ public class CuboidController implements Listener {
 	}
 
 	@EventHandler
-	public void onInteract(PlayerInteractEvent e) {
+	public void onInteract(PlayerInteractEvent e) throws ExecutionException, InterruptedException {
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getClickedBlock().getLocation())).join();
+			Optional<Region> r = Bukkit.getScheduler().callSyncMethod(Labyrinth.getInstance(), () -> Region.match(e.getClickedBlock().getLocation())).get();
 			if (r.isPresent()) {
 				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.LEFT);
 				Bukkit.getPluginManager().callEvent(event);
@@ -97,7 +99,7 @@ public class CuboidController implements Listener {
 			}
 		}
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getClickedBlock().getLocation())).join();
+			Optional<Region> r = Bukkit.getScheduler().callSyncMethod(Labyrinth.getInstance(), () -> Region.match(e.getClickedBlock().getLocation())).get();
 			if (r.isPresent()) {
 				RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getClickedBlock(), RegionInteractionEvent.ClickType.RIGHT);
 				Bukkit.getPluginManager().callEvent(event);

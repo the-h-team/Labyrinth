@@ -4,6 +4,9 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;
 
+/**
+ * @author Hempfest
+ */
 public enum DefaultColor implements CustomColor {
 
 	MANGO("#269947", "#e69f12"),

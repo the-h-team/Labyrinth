@@ -2,6 +2,8 @@ package com.github.sanctum.labyrinth.formatting.string;
 
 /**
  * Encapsulate a string and convert it into paragraph's using a specified regex pattern.
+ *
+ * @author Hempfest
  */
 public class Paragraph {
 

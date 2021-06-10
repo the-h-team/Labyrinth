@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.library.TextLib;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -10,7 +11,10 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.OfflinePlayer;
 
-public class OldComponent {
+/**
+ * @author Hempfest
+ */
+public class OldComponent extends TextLib {
 
 	private static String color(String text) {
 		return StringUtils.use(text).translate();
@@ -20,6 +24,7 @@ public class OldComponent {
 		return StringUtils.use(text).translate(source);
 	}
 
+	@Override
 	public TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -28,6 +33,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -38,6 +44,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -51,6 +58,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -60,6 +68,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -69,6 +78,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -80,6 +90,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
 		TextComponent text = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -95,6 +106,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover2 = new ColoredString(hoverText2, ColoredString.ColorType.MC_COMPONENT).toComponent();
@@ -110,6 +122,7 @@ public class OldComponent {
 		return hover;
 	}
 
+	@Override
 	public TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
@@ -121,6 +134,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverTextMessage) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
@@ -135,6 +149,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
@@ -158,6 +173,7 @@ public class OldComponent {
 	// SEND TEXT THE PLAYER CAN BE SUGGESTED TO EXECUTE COMMANDS WITH
 	//
 
+	@Override
 	public TextComponent textSuggestable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
@@ -175,6 +191,7 @@ public class OldComponent {
 	// SEND TEXT THE PLAYER CAN RUN COMMANDS WITH
 	//
 
+	@Override
 	public TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage, String commandName) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
@@ -188,6 +205,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		normalText2 = PlaceholderAPI.setPlaceholders(source, normalText2);
@@ -204,6 +222,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2) {
 		normalText = PlaceholderAPI.setPlaceholders(source, normalText);
 		normalText2 = PlaceholderAPI.setPlaceholders(source, normalText2);
@@ -227,6 +246,7 @@ public class OldComponent {
 		return text;
 	}
 
+	@Override
 	public TextComponent textRunnable(OfflinePlayer source, String hoverText, String hoverText2, String hoverTextBody3, String hoverTextMessage, String hoverText2Message, String hoverMessage3, String commandName, String commandName2, String commandName3) {
 		hoverText = PlaceholderAPI.setPlaceholders(source, hoverText);
 		hoverText2 = PlaceholderAPI.setPlaceholders(source, hoverText2);

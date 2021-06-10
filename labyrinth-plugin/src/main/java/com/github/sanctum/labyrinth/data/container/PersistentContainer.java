@@ -5,24 +5,27 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.bukkit.NamespacedKey;
 
 /**
  * Total safe encapsulation of serializable objects for persistent storage use.
  */
-public class DataComponent {
+public class PersistentContainer extends PersistentStream {
 
 	private final NamespacedKey NAME;
 
 	private final Map<String, Object> DATA;
 
-	protected DataComponent(NamespacedKey key) {
+	public PersistentContainer(NamespacedKey key) {
 		this.NAME = key;
 		this.DATA = new HashMap<>();
 	}
@@ -30,53 +33,26 @@ public class DataComponent {
 	/**
 	 * Check if a specified key value is present within the container.
 	 *
-	 * <p>If no value is found but a storage location is found, the value will
-	 * assist in both determining the final result of this method use
-	 * as-well as loading found but not cached values into the container.
-	 *
-	 * @param type The type this value is assignable from.
-	 * @param key  The key delimiter for this value.
-	 * @param <R>  The type this value is assignable from.
+	 * @param key The key delimiter for this value.
 	 * @return true if the specified key is found within the container.
 	 */
-	public synchronized <R> boolean isLoaded(Class<R> type, String key) {
+	@Override
+	public synchronized boolean exists(String key) {
 		if (!this.DATA.containsKey(key)) {
-			if (exists(key)) {
-				return load(type, key);
-			}
+			return found(key);
 		}
-		return this.DATA.containsKey(key);
+		return true;
 	}
 
 	/**
-	 * Check if a specified key value exists persistently.
+	 * Check if a specified key value found persistently.
 	 *
 	 * @param key The key delimiter for the desired value.
-	 * @return true if the desired value exists persistently within this container.
+	 * @return true if the desired value found persistently within this container.
 	 */
-	public synchronized boolean exists(String key) {
+	protected synchronized boolean found(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		return manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key);
-	}
-
-	/**
-	 * Save & override any existing traces of the specified key value.
-	 *
-	 * @param key The key delimiter for the desired value to save.
-	 */
-	public synchronized void save(String key) {
-		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
-		manager.saveConfig();
-	}
-
-	protected synchronized <R> boolean load(Class<R> type, String key) {
-		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
-			this.DATA.put(key, deserialize(type, manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)));
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -85,7 +61,9 @@ public class DataComponent {
 	 * @param key The key delimiter for the desired value to remove.
 	 * @return true if the persistence was successfully vanquished.
 	 */
+	@Override
 	public synchronized boolean delete(String key) {
+		this.DATA.remove(key);
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
 			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
@@ -97,6 +75,31 @@ public class DataComponent {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Save & override any existing traces of the specified key value.
+	 *
+	 * @param key The key delimiter for the desired value to save.
+	 */
+	public synchronized void save(String key) {
+		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
+		try {
+			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
+		} catch (NotSerializableException e) {
+			e.printStackTrace();
+		}
+		manager.saveConfig();
+	}
+
+	protected synchronized <R> R load(Class<R> type, String key) {
+		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
+		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
+			R value = deserialize(type, manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key));
+			this.DATA.put(key, value);
+			return (R) this.DATA.get(key);
+		}
+		return null;
 	}
 
 	/**
@@ -115,14 +118,22 @@ public class DataComponent {
 	/**
 	 * Get a specified value by class type & key delimiter.
 	 *
+	 * <p>If no value is found but a storage location is found, the value will
+	 * assist in both determining the final result of this method use
+	 * as-well as loading found but not cached values into the container.
+	 *
 	 * @param type The type this value is assignable from.
 	 * @param key  The key delimiter for this value.
 	 * @param <R>  The type this value represents.
 	 * @return The desired persistent value otherwise null if not found or not
 	 * assignable from the same class type.
 	 */
+	@Override
 	public <R> R get(Class<R> type, String key) {
 		if (!this.DATA.containsKey(key)) {
+			if (found(key)) {
+				return load(type, key);
+			}
 			return null;
 		}
 		if (!type.isAssignableFrom(this.DATA.get(key).getClass())) {
@@ -136,6 +147,7 @@ public class DataComponent {
 	 *
 	 * @return All cached object key's
 	 */
+	@Override
 	public Set<String> keySet() {
 		return this.DATA.keySet();
 	}
@@ -146,12 +158,10 @@ public class DataComponent {
 	 * @return All object key's period.
 	 */
 	public synchronized List<String> persistentKeySet() {
-		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		List<String> list = new LinkedList<>();
+		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		if (manager.getConfig().isConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey())) {
-			for (String s : manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false)) {
-				list.add(s);
-			}
+			list.addAll(manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false));
 		}
 		for (String cached : keySet()) {
 			if (!list.contains(cached)) {
@@ -168,6 +178,16 @@ public class DataComponent {
 	 */
 	public Collection<Object> values() {
 		return this.DATA.values();
+	}
+
+	/**
+	 * Get all cached objects within this container of a specified type.
+	 *
+	 * @return All values of interest.
+	 */
+	@Override
+	public <R> Collection<? extends R> values(Class<R> type) {
+		return this.DATA.values().stream().filter(o -> o.getClass().isAssignableFrom(type)).map(o -> (R) o).collect(Collectors.toList());
 	}
 
 	/**
@@ -190,17 +210,7 @@ public class DataComponent {
 	 * @return The deserialized object otherwise null.
 	 */
 	public <R> R deserialize(Class<R> type, String value) {
-		try {
-			Object o = new HFEncoded(value).deserialized();
-			if (o.getClass().isAssignableFrom(type)) {
-				return (R) o;
-			} else {
-				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
-			}
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return new HFEncoded(value).deserialize(type);
 	}
 
 	/**
@@ -208,8 +218,14 @@ public class DataComponent {
 	 *
 	 * @param key The key delimiter for the value.
 	 * @return The serialized string otherwise null if an issue occurred.
+	 * @throws NotSerializableException If the object attempting to be encrypted doesn't implement Serializable
 	 */
-	public String serialize(String key) {
+	public String serialize(String key) throws NotSerializableException {
+
+		if (!Serializable.class.isAssignableFrom(this.DATA.get(key).getClass())) {
+			throw new NotSerializableException("Object type " + this.DATA.get(key).getClass().getSimpleName() + " does not inherit properties from java.io.Serializable");
+		}
+
 		try {
 			return new HFEncoded(this.DATA.get(key)).serialize();
 		} catch (IOException e) {

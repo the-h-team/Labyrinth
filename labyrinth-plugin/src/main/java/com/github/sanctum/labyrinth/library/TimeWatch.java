@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Used for accurate time span inquisitions
+ *
+ * @author Hempfest
  */
 public class TimeWatch {
 

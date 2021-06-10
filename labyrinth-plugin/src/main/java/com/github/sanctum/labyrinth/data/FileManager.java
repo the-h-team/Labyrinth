@@ -148,11 +148,11 @@ public class FileManager {
     }
 
     /**
-     * Check if the backing file currently exists.
+     * Check if the backing file currently found.
      * <p>
      * Does interact whatsoever with the YamlConfiguration.
      *
-     * @return true if file exists
+     * @return true if file found
      */
     public boolean exists() {
         return file.exists() && parent.exists();

@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.data.BoundaryAction;
-import com.github.sanctum.labyrinth.data.BoundaryAssembly;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionService;
@@ -25,6 +23,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
+/**
+ * @author Hempfest
+ */
 public interface Cuboid {
 
 	String getName();
@@ -489,31 +490,31 @@ public interface Cuboid {
 			}
 		}
 
-		public void deploy(BoundaryAssembly assembly) {
+		public void deploy(Assembly assembly) {
 			if (assembly != null) {
 				for (double i = xMin; i < xMax + 1; i++) {
 					for (double j = zMin; j < zMax + 1; j++) {
-						assembly.accept(new BoundaryAction(p, i, yMax, j));
+						assembly.accept(new Action(p, i, yMax, j));
 					}
 				}
 				for (double i = xMin; i < xMax + 1; i++) {
 					for (double j = yMin; j < yMax + 1; j++) {
-						assembly.accept(new BoundaryAction(p, i, j, zMin));
+						assembly.accept(new Action(p, i, j, zMin));
 					}
 				}
 				for (double i = xMin; i < xMax + 1; i++) {
 					for (double j = yMin; j < yMax + 1; j++) {
-						assembly.accept(new BoundaryAction(p, i, j, zMax));
+						assembly.accept(new Action(p, i, j, zMax));
 					}
 				}
 				for (double i = zMin; i < zMax + 1; i++) {
 					for (double j = yMin; j < yMax + 1; j++) {
-						assembly.accept(new BoundaryAction(p, xMin, j, i));
+						assembly.accept(new Action(p, xMin, j, i));
 					}
 				}
 				for (double i = zMin; i < zMax + 1; i++) {
 					for (double j = yMin; j < yMax + 1; j++) {
-						assembly.accept(new BoundaryAction(p, xMax, j, i));
+						assembly.accept(new Action(p, xMax, j, i));
 					}
 				}
 			}
@@ -548,7 +549,7 @@ public interface Cuboid {
 			}
 		}
 
-		public void laser(BoundaryAssembly assembly, Location direction) {
+		public void laser(Assembly assembly, Location direction) {
 			if (assembly != null) {
 				Location origin = p.getEyeLocation();
 				Vector target = direction.toVector();
@@ -560,10 +561,58 @@ public interface Cuboid {
 						double x = location.getX();
 						double y = location.getY() + 0.5;
 						double z = location.getZ();
-						assembly.accept(new BoundaryAction(p, x, y, z));
+						assembly.accept(new Action(p, x, y, z));
 					}
 				}
 			}
+		}
+
+		public static class Action {
+
+			private final Player p;
+			private final double x;
+			private final double y;
+			private final double z;
+
+			public Action(Player p, double x, double y, double z) {
+				this.p = p;
+				this.x = x;
+				this.y = y;
+				this.z = z;
+			}
+
+			public double getX() {
+				return x;
+			}
+
+			public double getY() {
+				return y;
+			}
+
+			public double getZ() {
+				return z;
+			}
+
+			public Player getPlayer() {
+				return p;
+			}
+
+			public void box() {
+				p.spawnParticle(org.bukkit.Particle.REDSTONE, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
+				p.spawnParticle(org.bukkit.Particle.WATER_DROP, getX(), getY(), getZ(), 1);
+			}
+
+			public void walls() {
+				p.spawnParticle(org.bukkit.Particle.REDSTONE, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
+			}
+
+		}
+
+		@FunctionalInterface
+		public interface Assembly {
+
+			void accept(Action action);
+
 		}
 	}
 

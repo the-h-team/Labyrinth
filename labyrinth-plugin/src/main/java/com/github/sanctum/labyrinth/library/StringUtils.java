@@ -13,6 +13,8 @@ import org.bukkit.OfflinePlayer;
 
 /**
  * Encapsulate string data to modify.
+ *
+ * @author Hempfest
  */
 public class StringUtils {
 
@@ -34,10 +36,10 @@ public class StringUtils {
 	}
 
 	/**
-	 * Check if the provided context isLoaded (using case insensitive options) a target regex.
+	 * Check if the provided context exists (using case insensitive options) a target regex.
 	 *
 	 * @param regex The target regex to check for.
-	 * @return true if the provided regex isLoaded a case insensitive match from the target regex.
+	 * @return true if the provided regex exists a case insensitive match from the target regex.
 	 */
 	public boolean containsIgnoreCase(CharSequence regex) {
 		return Pattern.compile(Pattern.quote(regex.toString()), Pattern.CASE_INSENSITIVE).matcher(this.context).find();

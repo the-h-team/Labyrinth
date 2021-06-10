@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 
 /**
  * An object that specifies options for tab-completion.
+ *
+ * @author [Hempfest, ms5984]
  */
 public class TabCompletionFilter {
 

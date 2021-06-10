@@ -11,6 +11,8 @@ import org.bukkit.command.Command;
 
 /**
  * Encapsulate a player object and get the properties of the permissible inheritance.
+ *
+ * @author Hempfest
  */
 public class VaultPlayer {
 

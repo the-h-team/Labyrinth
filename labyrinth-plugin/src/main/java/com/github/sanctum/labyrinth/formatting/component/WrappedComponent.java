@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.formatting.string;
+package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.Applicable;

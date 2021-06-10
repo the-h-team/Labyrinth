@@ -7,6 +7,9 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.permissions.Permission;
 
+/**
+ * @author Hempfest
+ */
 public class Group {
 
 	private final String name;

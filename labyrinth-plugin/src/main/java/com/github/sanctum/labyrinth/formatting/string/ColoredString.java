@@ -6,6 +6,9 @@ import net.melion.rgbchat.api.RGBApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
+/**
+ * @author Hempfest
+ */
 public class ColoredString {
 
 
@@ -46,7 +49,7 @@ public class ColoredString {
 	 * @return Returns a string of text embedded as a Component
 	 */
 	public TextComponent toComponent() {
-		return Bukkit.getVersion().contains("1.16") ? translateHexComponent(text) : new TextComponent(StringUtils.use(text).translate());
+		return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17") ? translateHexComponent(text) : new TextComponent(StringUtils.use(text).translate());
 	}
 
 	private TextComponent translateHexComponent(String text) {

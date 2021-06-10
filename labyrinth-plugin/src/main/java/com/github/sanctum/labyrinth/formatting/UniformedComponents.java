@@ -9,6 +9,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * @author Hempfest
+ */
 public abstract class UniformedComponents<T> implements Serializable {
 
 	private static final long serialVersionUID = 380726810757536184L;

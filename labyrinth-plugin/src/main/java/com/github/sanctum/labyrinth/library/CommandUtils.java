@@ -12,9 +12,12 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Easily extract data from the server's internal command map.
+ *
+ * @author ms5984
  */
 public final class CommandUtils {
     private static CommandUtils instance;
+    private static CommandMap map;
     private final Map<String, Command> commandMappings;
 
     private CommandUtils(Labyrinth labyrinth) {
@@ -22,12 +25,13 @@ public final class CommandUtils {
             final Field commandMapField = labyrinth.getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             final CommandMap commandMap = (CommandMap) commandMapField.get(labyrinth.getServer());
+            map = commandMap;
             final Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
             knownCommandsField.setAccessible(true);
             //noinspection unchecked
             commandMappings = (Map<String, Command>) knownCommandsField.get(commandMap);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException("Unable to initialize CommandUtils!");
+            throw new IllegalStateException("Unable to start CommandUtils!");
         }
     }
 
@@ -38,6 +42,7 @@ public final class CommandUtils {
      * @return all registered command labels
      */
     public static Set<String> getServerCommandListing() {
+
         return Collections.unmodifiableSet(instance.commandMappings.keySet());
     }
 
@@ -49,6 +54,17 @@ public final class CommandUtils {
      */
     public static @Nullable Command getCommandByLabel(String name) {
         return instance.commandMappings.get(name);
+    }
+
+    public static void unregister(Command command) {
+        instance.commandMappings.remove(command.getName());
+        for (String alias : command.getAliases()) {
+            if (instance.commandMappings.containsKey(alias) && instance.commandMappings.get(alias).getAliases().contains(alias)) {
+                instance.commandMappings.remove(alias);
+            }
+
+        }
+        command.unregister(map);
     }
 
     public static void initialize(Labyrinth labyrinth) throws IllegalStateException {

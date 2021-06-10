@@ -54,7 +54,7 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
-	 * Check's if the parent file location exists and creates if it doesn't
+	 * Check's if the parent file location found and creates if it doesn't
 	 * <p>
 	 * This method isn't necessary as its handled automatically with {@link SharedBuilder#create(Plugin, String, String, int)}
 	 *
@@ -155,7 +155,7 @@ public abstract class SharedMenu implements Listener {
 	 * Add a configured option to this menu's cache.
 	 *
 	 * @param option The option to add.
-	 * @return false if the option already exists.
+	 * @return false if the option already found.
 	 */
 	public final synchronized boolean addOption(final @NotNull Option option) {
 		if (!MENU_OPTIONS.contains(option)) {

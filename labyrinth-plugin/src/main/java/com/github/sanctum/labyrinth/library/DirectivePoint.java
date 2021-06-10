@@ -6,6 +6,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+/**
+ * @author Hempfest
+ */
 public enum DirectivePoint {
 
 	North_East(225.0f, -0.0f),

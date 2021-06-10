@@ -6,6 +6,8 @@ import net.melion.rgbchat.chat.TextColor;
 
 /**
  * Encapsulate Hexadecimal gradient information and apply it to provided text.
+ *
+ * @author Hempfest
  */
 public class GradientColor implements CustomColor {
 

@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
+/**
+ * @author Hempfest
+ */
 public class RandomID {
 
     private int length;

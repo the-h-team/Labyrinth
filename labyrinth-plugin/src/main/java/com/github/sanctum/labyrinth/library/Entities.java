@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.entity.EntityType;
 
+/**
+ * @author Hempfest
+ */
 public final class Entities {
 	private static final Map<String, EntityType> TYPE_MAP = new HashMap<>();
 

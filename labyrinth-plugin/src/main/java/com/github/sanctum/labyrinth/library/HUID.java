@@ -2,11 +2,13 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
-import java.io.Serializable;
 import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
 
-public class HUID implements Serializable {
+/**
+ * @author Hempfest
+ */
+public class HUID {
 
 	private String hUID;
 

@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.formatting;
 
+/**
+ * @author Hempfest
+ */
 @FunctionalInterface
 public interface ComponentDecoration<T> {
 

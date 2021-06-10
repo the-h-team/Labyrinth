@@ -32,7 +32,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 /**
- * The primary object used to initialize a {@link Menu.Paginated} object.
+ * The primary object used to start a {@link Menu.Paginated} object.
  * Use this to customize everything from click,close events to element specifications.
  */
 public final class PaginatedBuilder<T> {
