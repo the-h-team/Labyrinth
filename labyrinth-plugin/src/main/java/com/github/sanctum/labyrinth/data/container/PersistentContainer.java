@@ -5,8 +5,6 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -84,11 +82,7 @@ public class PersistentContainer extends PersistentStream {
 	 */
 	public synchronized void save(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		try {
-			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
-		} catch (NotSerializableException e) {
-			e.printStackTrace();
-		}
+		manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
 		manager.saveConfig();
 	}
 
@@ -218,14 +212,8 @@ public class PersistentContainer extends PersistentStream {
 	 *
 	 * @param key The key delimiter for the value.
 	 * @return The serialized string otherwise null if an issue occurred.
-	 * @throws NotSerializableException If the object attempting to be encrypted doesn't implement Serializable
 	 */
-	public String serialize(String key) throws NotSerializableException {
-
-		if (!Serializable.class.isAssignableFrom(this.DATA.get(key).getClass())) {
-			throw new NotSerializableException("Object type " + this.DATA.get(key).getClass().getSimpleName() + " does not inherit properties from java.io.Serializable");
-		}
-
+	public String serialize(String key) {
 		try {
 			return new HFEncoded(this.DATA.get(key)).serialize();
 		} catch (IOException e) {

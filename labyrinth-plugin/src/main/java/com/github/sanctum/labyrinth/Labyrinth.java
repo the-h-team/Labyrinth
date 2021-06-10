@@ -59,7 +59,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		EconomyProvision provision = new DefaultProvision();
 		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
 
-		getLogger().info("- Registered factory implementation, " + provision.getImplementation());
+		getLogger().info("- Registered factory economy impl, " + provision.getImplementation());
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
