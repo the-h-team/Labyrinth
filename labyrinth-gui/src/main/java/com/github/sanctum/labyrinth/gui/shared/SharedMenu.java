@@ -60,7 +60,9 @@ public abstract class SharedMenu implements Listener {
 	 */
 	public final synchronized SharedMenu inject() {
 		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
-		container.attach(id, new ItemStack[getSize()]);
+		if (container.get(ItemStack[].class, id) == null) {
+			container.attach(id, new ItemStack[getSize()]);
+		}
 		return this;
 	}
 
