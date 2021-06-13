@@ -60,7 +60,7 @@ public abstract class SharedMenu implements Listener {
 	 */
 	public final synchronized SharedMenu inject() {
 		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
-		container.attach("menu-id", new ItemStack[getSize()]);
+		container.attach(id, new ItemStack[getSize()]);
 		return this;
 	}
 
@@ -199,7 +199,9 @@ public abstract class SharedMenu implements Listener {
 		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		ItemStack[] content = new ItemStack[getSize()];
 		ItemStack[] contentC = container.get(ItemStack[].class, id);
-		System.arraycopy(contentC, 0, content, 0, getSize());
+		if (contentC != null) {
+			System.arraycopy(contentC, 0, content, 0, getSize());
+		}
 		return content;
 	}
 
