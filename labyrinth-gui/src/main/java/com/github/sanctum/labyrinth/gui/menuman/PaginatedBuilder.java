@@ -354,7 +354,7 @@ public final class PaginatedBuilder<T> {
 						if (object != null) {
 							this.INDEX = placement;
 							if (MENU_PROCESS != null) {
-								if (INDEX < this.COLLECTION.size()) {
+								if (INDEX <= this.COLLECTION.size()) {
 									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
 									MENU_PROCESS.accept(element);
 									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
@@ -364,6 +364,8 @@ public final class PaginatedBuilder<T> {
 									}
 								}
 							}
+						} else {
+							this.PLUGIN.getLogger().warning("- +1 object failed to load in menu " + this.TITLE);
 						}
 					});
 
@@ -476,7 +478,7 @@ public final class PaginatedBuilder<T> {
 						if (object != null) {
 							this.INDEX = placement;
 							if (MENU_PROCESS != null) {
-								if (INDEX < this.COLLECTION.size()) {
+								if (INDEX <= this.COLLECTION.size()) {
 									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
 									MENU_PROCESS.accept(element);
 									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
@@ -486,6 +488,8 @@ public final class PaginatedBuilder<T> {
 									}
 								}
 							}
+						} else {
+							this.PLUGIN.getLogger().warning("- +1 object failed to load in menu " + this.TITLE);
 						}
 					});
 

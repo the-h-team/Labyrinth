@@ -16,6 +16,7 @@ import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,7 +80,12 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 		for (PersistentContainer component : CONTAINERS) {
 			for (String key : component.keySet()) {
-				component.save(key);
+				try {
+					component.save(key);
+				} catch (IOException e) {
+					getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
+					e.printStackTrace();
+				}
 			}
 		}
 

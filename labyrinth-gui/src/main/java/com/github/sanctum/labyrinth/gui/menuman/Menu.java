@@ -196,7 +196,7 @@ public final class Menu {
                 this.builder.TASK.get(p).repeat(1, 5);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(2);
             } else {
-                p.openInventory(this.builder.adjust().getInventory());
+                p.openInventory(this.builder.adjust(1).getInventory());
             }
         }
 
@@ -242,7 +242,7 @@ public final class Menu {
                 this.builder.TASK.get(p).repeat(delay, period);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
             } else {
-                p.openInventory(this.builder.adjust().getInventory());
+                p.openInventory(this.builder.adjust(1).getInventory());
             }
         }
 

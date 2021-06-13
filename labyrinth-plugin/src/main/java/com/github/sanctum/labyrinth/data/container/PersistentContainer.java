@@ -79,7 +79,7 @@ public class PersistentContainer extends PersistentData {
 	 *
 	 * @param key The key delimiter for the desired value to save.
 	 */
-	public synchronized void save(String key) {
+	public synchronized void save(String key) throws IOException {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
 		manager.saveConfig();
@@ -212,13 +212,8 @@ public class PersistentContainer extends PersistentData {
 	 * @param key The key delimiter for the value.
 	 * @return The serialized string otherwise null if an issue occurred.
 	 */
-	public String serialize(String key) {
-		try {
-			return new HFEncoded(this.DATA.get(key)).serialize();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public String serialize(String key) throws IOException {
+		return new HFEncoded(this.DATA.get(key)).serialize();
 	}
 
 
