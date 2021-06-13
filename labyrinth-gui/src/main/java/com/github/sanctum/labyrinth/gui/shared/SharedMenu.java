@@ -329,14 +329,16 @@ public abstract class SharedMenu implements Listener {
 	public static @NotNull
 	synchronized Inventory open(Player target) {
 		final UUID id = target.getUniqueId();
-		Schedule.async(() -> {
-		}).cancelAfter(task -> {
-			if (!Bukkit.getOfflinePlayer(id).isOnline()) {
-				PLAYER_MAP.remove(id);
-				task.cancel();
-			}
-		}).repeat(0, 600);
-		return PLAYER_MAP.computeIfAbsent(target.getUniqueId(), uid -> target.getInventory());
+		return PLAYER_MAP.computeIfAbsent(target.getUniqueId(), uid -> {
+			Schedule.async(() -> {
+			}).cancelAfter(task -> {
+				if (!Bukkit.getOfflinePlayer(id).isOnline()) {
+					PLAYER_MAP.remove(id);
+					task.cancel();
+				}
+			}).repeat(0, 600);
+			return target.getInventory();
+		});
 	}
 
 	/**

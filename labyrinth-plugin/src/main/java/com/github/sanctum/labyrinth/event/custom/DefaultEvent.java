@@ -29,7 +29,7 @@ public class DefaultEvent extends Vent {
 
 	@Override
 	public String getName() {
-		return null;
+		return "Un-labeled";
 	}
 
 	public static class Player extends DefaultEvent {
@@ -203,7 +203,7 @@ public class DefaultEvent extends Vent {
 		@EventHandler
 		public void onInteract(PlayerInteractEvent e) {
 
-			DefaultEvent.Interact i = new Call<>(Runtime.Synchronous, new DefaultEvent.Interact(e.getAction(), e.useInteractedBlock(), e.getClickedBlock(), e.getItem(), e.getPlayer())).run();
+			Interact i = new Call<>(Runtime.Synchronous, new Interact(e.getAction(), e.useInteractedBlock(), e.getClickedBlock(), e.getItem(), e.getPlayer())).run();
 
 			if (e.useInteractedBlock() != i.getResult()) {
 				e.setUseInteractedBlock(i.getResult());
@@ -218,7 +218,7 @@ public class DefaultEvent extends Vent {
 				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
 				org.bukkit.entity.Player p = (org.bukkit.entity.Player) event.getDamager();
 
-				DefaultEvent.PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new DefaultEvent.PlayerDamagePlayer(p, target, true)).run();
+				PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new PlayerDamagePlayer(p, target, true)).run();
 
 				if (e.isCancelled()) {
 					event.setCancelled(true);
@@ -232,7 +232,7 @@ public class DefaultEvent extends Vent {
 				org.bukkit.entity.Player p = (org.bukkit.entity.Player) pr.getShooter();
 				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
 
-				DefaultEvent.PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new DefaultEvent.PlayerDamagePlayer(p, target, false)).run();
+				PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new PlayerDamagePlayer(p, target, false)).run();
 
 				if (e.isCancelled()) {
 					event.setCancelled(true);

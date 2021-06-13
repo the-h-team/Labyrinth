@@ -209,7 +209,7 @@ public final class RegionServicesManager {
 
 				}
 
-			})).repeat(5, 15);
+			})).repeat(5, 2 * 20);
 
 			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
 
@@ -321,10 +321,9 @@ public final class RegionServicesManager {
 				Player p = event.getPlayer();
 				Player target = event.getVictim();
 
+				Message msg = Message.form(p);
+				Region.Resident r = Region.Resident.get(target);
 				if (event.isPhysical()) {
-					Message msg = Message.form(p);
-
-					Region.Resident r = Region.Resident.get(target);
 
 					if (r.getRegion().isPresent()) {
 						Region region = r.getRegion().get();
@@ -358,10 +357,6 @@ public final class RegionServicesManager {
 						}
 					}
 				} else {
-
-					Message msg = Message.form(p);
-
-					Region.Resident r = Region.Resident.get(target);
 
 					if (r.getRegion().isPresent()) {
 						Region region = r.getRegion().get();

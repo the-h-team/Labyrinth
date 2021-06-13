@@ -50,7 +50,16 @@ public class PersistentContainer extends PersistentData {
 	 */
 	protected synchronized boolean found(String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		return manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key);
+		boolean f = manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key);
+		if (f && !this.DATA.containsKey(key)) {
+			try {
+				Object o = new HFEncoded(manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)).deserialized();
+				this.DATA.put(key, o);
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		return f;
 	}
 
 	/**
