@@ -2,8 +2,6 @@ package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -15,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Load addon classes in Java 16+.
@@ -127,7 +126,7 @@ public class AddonLoader {
     }
     private List<Class<?>> injectJars(Map<URL, JarFile> jars) {
         if (jars.isEmpty()) return ImmutableList.of();
-        final AddonClassLoader addonClassLoader = new AddonClassLoader(jars.keySet().toArray(URL[]::new));
+        final AddonClassLoader addonClassLoader = new AddonClassLoader(jars.keySet().toArray(new URL[0]));
         jars.values().forEach(jarFile -> jarFile.stream()
                 .map(ZipEntry::getName)
                 .filter(entryName -> entryName.contains(".class") && !entryName.contains("$"))

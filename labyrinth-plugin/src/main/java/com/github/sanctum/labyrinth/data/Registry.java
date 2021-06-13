@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.Sets;
+import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * This class is used explicitly for searching for specific class types through an optionally given package
@@ -28,7 +29,6 @@ public class Registry<T> {
 	private final Class<T> CLASS;
 	private Predicate<? super String> FILTER;
 	private Plugin PLUGIN = null;
-	private JarFile FILE;
 	private String PACKAGE;
 
 	public Registry(Class<T> cl) {
@@ -51,36 +51,9 @@ public class Registry<T> {
 	 *
 	 * @param plugin The plugin to source the classes from.
 	 * @return The same registry instance.
-	 * @throws UnsupportedEncodingException If character encoding needs to be consulted, but named character encoding is not supported
 	 */
-	public Registry<T> source(Plugin plugin) throws IOException {
+	public Registry<T> source(Plugin plugin) {
 		this.PLUGIN = plugin;
-		this.FILE = new JarFile(URLDecoder.decode(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
-		return this;
-	}
-
-	/**
-	 * Filter your search for locations targeted.
-	 * <p>
-	 * Alternative to {@link Registry#pick(String)}
-	 *
-	 * @param predicate The information to rely on before targeting a search.
-	 * @return The same registry instance.
-	 */
-	public Registry<T> filter(Predicate<? super String> predicate) {
-		this.FILTER = predicate;
-		return this;
-	}
-
-	/**
-	 * Source a file for the main jar file directory.
-	 *
-	 * @param file The file to source the classes from.
-	 * @return The same registry instance.
-	 * @throws IOException If an IO error occurred.
-	 */
-	public Registry<T> source(java.io.File file) throws IOException {
-		this.FILE = new JarFile(file);
 		return this;
 	}
 
@@ -103,11 +76,10 @@ public class Registry<T> {
 	 */
 	public RegistryData<T> operate(Consumer<T> operation) {
 		Set<Class<T>> classes = Sets.newHashSet();
-		JarFile jarFile = this.FILE;
-
+		JarFile jarFile = null;
 		if (this.PLUGIN != null) {
 			try {
-				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), StandardCharsets.UTF_8));
+				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -164,7 +136,6 @@ public class Registry<T> {
 							}
 						}
 					}
-
 				}
 			});
 		}
@@ -181,5 +152,53 @@ public class Registry<T> {
 		}
 		return new RegistryData<>(additions, PLUGIN, PACKAGE);
 	}
+
+	public static class Loader<T> {
+
+		private final Class<T> type;
+
+		private Plugin plugin;
+
+		private String directory;
+
+		public Loader(Class<T> type) {
+			this.type = type;
+		}
+
+		public Loader<T> source(Plugin plugin) {
+			this.plugin = plugin;
+			return this;
+		}
+
+		public Loader<T> from(String directory) {
+			this.directory = directory;
+			return this;
+		}
+
+		public RegistryData<T> operate(Consumer<T> action) {
+
+			File file = FileList.search(this.plugin).find("Test", this.directory).getFile().getParentFile();
+
+			List<Class<?>> classes = AddonLoader.forPlugin(JavaPlugin.getProvidingPlugin(this.plugin.getClass()))
+					.loadFolder(file);
+
+			List<T> data = new LinkedList<>();
+
+			for (Class<?> cl : classes) {
+				if (this.type.isAssignableFrom(cl)) {
+					try {
+						T e = (T) cl.getDeclaredConstructor().newInstance();
+						action.accept(e);
+						data.add(e);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			return new RegistryData<>(data, this.plugin, this.directory);
+		}
+
+	}
+
 
 }
