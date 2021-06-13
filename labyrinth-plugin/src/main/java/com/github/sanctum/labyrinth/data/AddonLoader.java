@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -9,6 +10,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
@@ -35,6 +37,8 @@ public class AddonLoader {
     }
 
     final class AddonClassLoader extends URLClassLoader {
+        private final ImmutableList.Builder<Class<?>> loadedClasses = ImmutableList.builder();
+
         private AddonClassLoader(URL[] urls) {
             super(urls, javaPlugin.getClass().getClassLoader());
         }
@@ -54,6 +58,7 @@ public class AddonLoader {
             }
             getClassMap(javaPlugin).put(className, resolvedClass);
             javaPlugin.getLogger().finest(() -> "Loaded '" + className + "' successfully.");
+            loadedClasses.add(resolvedClass);
         }
     }
     private final JavaPlugin javaPlugin;
@@ -64,8 +69,9 @@ public class AddonLoader {
      * @param addonJar addon jar as a File object
      * @throws IllegalArgumentException if addonJar is not a .jar file
      * @throws IllegalStateException if unable to read from the JarFile
+     * @return list of loaded classes ready for processing
      */
-    public void loadFile(File addonJar) throws IllegalArgumentException, IllegalStateException {
+    public List<Class<?>> loadFile(File addonJar) throws IllegalArgumentException, IllegalStateException {
         if (addonJar.isDirectory()) throw new IllegalArgumentException("File must not be a directory");
         if (!addonJar.getName().endsWith(".jar")) throw new IllegalArgumentException("File must be a .jar");
         final JarFile jarFile;
@@ -74,8 +80,9 @@ public class AddonLoader {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        injectJars(ImmutableMap.of(getValidJarURL(addonJar).orElseThrow(IllegalStateException::new), jarFile));
+        final List<Class<?>> classList = injectJars(ImmutableMap.of(getValidJarURL(addonJar).orElseThrow(IllegalStateException::new), jarFile));
         javaPlugin.getLogger().info(() -> "Loaded addon file " + addonJar.getName() + "successfully.");
+        return classList;
     }
 
     /**
@@ -83,8 +90,9 @@ public class AddonLoader {
      *
      * @param folder addon folder as a File object
      * @throws IllegalArgumentException if folder is not a directory
+     * @return list of all loaded classes ready for processing
      */
-    public void loadFolder(File folder) throws IllegalArgumentException {
+    public List<Class<?>> loadFolder(File folder) throws IllegalArgumentException {
         if (!folder.isDirectory()) throw new IllegalArgumentException("File is not a folder!");
         javaPlugin.getLogger().info(() -> "Processing folder '" + folder.getName() + "'");
         final ImmutableMap.Builder<URL, JarFile> builder = ImmutableMap.builder();
@@ -100,7 +108,9 @@ public class AddonLoader {
                 builder.put(url, jarFile);
             });
         }
-        injectJars(builder.build());
+        final List<Class<?>> classes = injectJars(builder.build());
+        javaPlugin.getLogger().info(() -> "Loaded addon files from " + folder.getPath() + "successfully.");
+        return classes;
     }
     private Optional<URL> getValidJarURL(File file) {
         if (file.getName().endsWith(".jar")) {
@@ -115,8 +125,8 @@ public class AddonLoader {
         }
         return Optional.empty();
     }
-    private void injectJars(Map<URL, JarFile> jars) {
-        if (jars.isEmpty()) return;
+    private List<Class<?>> injectJars(Map<URL, JarFile> jars) {
+        if (jars.isEmpty()) return ImmutableList.of();
         final AddonClassLoader addonClassLoader = new AddonClassLoader(jars.keySet().toArray(URL[]::new));
         jars.values().forEach(jarFile -> jarFile.stream()
                 .map(ZipEntry::getName)
@@ -124,6 +134,7 @@ public class AddonLoader {
                 .map(classPath -> classPath.replace('/', '.'))
                 .map(className -> className.substring(0, className.length() - 6))
                 .forEach(addonClassLoader::injectClass));
+        return addonClassLoader.loadedClasses.build();
     }
 
     /**
