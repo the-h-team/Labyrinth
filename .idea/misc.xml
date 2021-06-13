@@ -17,6 +17,7 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/labyrinth-event/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-region-loader/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-region/pom.xml" />
       </set>

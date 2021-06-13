@@ -17,7 +17,7 @@ import org.bukkit.NamespacedKey;
 /**
  * Total safe encapsulation of serializable objects for persistent storage use.
  */
-public class PersistentContainer extends PersistentStream {
+public class PersistentContainer extends PersistentData {
 
 	private final NamespacedKey NAME;
 
@@ -59,7 +59,6 @@ public class PersistentContainer extends PersistentStream {
 	 * @param key The key delimiter for the desired value to remove.
 	 * @return true if the persistence was successfully vanquished.
 	 */
-	@Override
 	public synchronized boolean delete(String key) {
 		this.DATA.remove(key);
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");

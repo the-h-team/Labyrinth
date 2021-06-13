@@ -1,19 +1,33 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.event.CuboidCreationEvent;
 import com.github.sanctum.labyrinth.event.CuboidSelectionEvent;
+import com.github.sanctum.labyrinth.event.RegionBuildEvent;
+import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
+import com.github.sanctum.labyrinth.event.RegionInteractionEvent;
+import com.github.sanctum.labyrinth.event.RegionPVPEvent;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
+import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.Action;
 import org.bukkit.plugin.ServicePriority;
 
 public final class RegionServicesManager {
@@ -196,6 +210,193 @@ public final class RegionServicesManager {
 				}
 
 			})).repeat(5, 15);
+
+			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+
+				Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
+				if (r.isPresent()) {
+					RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock());
+					Bukkit.getPluginManager().callEvent(event);
+					if (event.isCancelled()) {
+						e.setCancelled(true);
+					}
+				}
+
+			}));
+
+			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.BlockPlace.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+
+				Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
+				if (r.isPresent()) {
+					RegionBuildEvent event = new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock());
+					Bukkit.getPluginManager().callEvent(event);
+					if (event.isCancelled()) {
+						e.setCancelled(true);
+					}
+				}
+
+			}));
+
+			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, "region-spawn", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+
+				Region.Resident r = Region.Resident.get(event.getPlayer());
+				if (!event.getPlayer().hasPlayedBefore()) {
+					Schedule.sync(() -> {
+						if (Region.spawn().isPresent()) {
+							event.getPlayer().teleport(Region.spawn().get().location());
+							r.setSpawnTagged(true);
+							r.setPastSpawn(false);
+						}
+					}).wait(2);
+				} else {
+					r.setSpawnTagged(false);
+				}
+
+			}));
+
+			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", instance, Vent.Priority.MEDIUM, (e, subscription) -> {
+
+				if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
+					if (r.isPresent()) {
+						RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT);
+						Bukkit.getPluginManager().callEvent(event);
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+						}
+					}
+
+					if (e.getItem() == null)
+						return;
+
+					if (!e.getPlayer().hasPermission("labyrinth.selection"))
+						return;
+
+					if (e.getItem().getType() == Material.WOODEN_AXE) {
+						Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
+						if (e.getResult() != Event.Result.DENY) {
+							e.setResult(Event.Result.DENY);
+						}
+
+						selection.setPos1(e.getBlock().get().getLocation());
+
+						CuboidCreationEvent event = new CuboidCreationEvent(selection);
+						Bukkit.getPluginManager().callEvent(event);
+
+					}
+				}
+				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
+					if (r.isPresent()) {
+						RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT);
+						Bukkit.getPluginManager().callEvent(event);
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+						}
+					}
+
+					if (e.getItem() == null)
+						return;
+
+					if (!e.getPlayer().hasPermission("labyrinth.selection"))
+						return;
+
+					if (e.getItem().getType() == Material.WOODEN_AXE) {
+						Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
+						if (e.getResult() != Event.Result.DENY) {
+							e.setResult(Event.Result.DENY);
+						}
+
+						selection.setPos2(e.getBlock().get().getLocation());
+
+						CuboidCreationEvent event = new CuboidCreationEvent(selection);
+						Bukkit.getPluginManager().callEvent(event);
+					}
+				}
+
+			}));
+
+			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.PlayerDamagePlayer.class, "region-pvp", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+
+				Player p = event.getPlayer();
+				Player target = event.getVictim();
+
+				if (event.isPhysical()) {
+					Message msg = Message.form(p);
+
+					Region.Resident r = Region.Resident.get(target);
+
+					if (r.getRegion().isPresent()) {
+						Region region = r.getRegion().get();
+
+						RegionPVPEvent e = new RegionPVPEvent(p, target, region);
+						Bukkit.getPluginManager().callEvent(e);
+
+						if (e.isCancelled()) {
+							event.setCancelled(true);
+							return;
+						}
+
+						if (region instanceof Region.Spawn) {
+
+							Region.Spawn spawn = (Region.Spawn) region;
+
+							Region.Resident o = Region.Resident.get(p);
+
+							Region.Resident t = Region.Resident.get(target);
+
+							if (t.isSpawnTagged()) {
+								event.setCancelled(true);
+								msg.send("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.");
+							}
+							if (o.isSpawnTagged()) {
+								if (!t.isSpawnTagged()) {
+									o.setSpawnTagged(false);
+									msg.send("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.");
+								}
+							}
+						}
+					}
+				} else {
+
+					Message msg = Message.form(p);
+
+					Region.Resident r = Region.Resident.get(target);
+
+					if (r.getRegion().isPresent()) {
+						Region region = r.getRegion().get();
+
+						RegionPVPEvent e = new RegionPVPEvent(p, target, region);
+						Bukkit.getPluginManager().callEvent(e);
+
+						if (e.isCancelled()) {
+							event.setCancelled(true);
+							return;
+						}
+
+						if (region instanceof Region.Spawn) {
+
+							Region.Resident o = Region.Resident.get(p);
+
+							Region.Resident t = Region.Resident.get(target);
+
+							if (t.isSpawnTagged()) {
+								event.setCancelled(true);
+								msg.send("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.");
+							}
+							if (o.isSpawnTagged()) {
+								if (t.isSpawnTagged()) {
+									o.setSpawnTagged(false);
+									msg.send("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.");
+								}
+							}
+						}
+					}
+
+				}
+
+			}));
+
 
 		}
 

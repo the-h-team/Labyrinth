@@ -5,10 +5,10 @@ import com.github.sanctum.labyrinth.data.DefaultProvision;
 import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
-import com.github.sanctum.labyrinth.data.container.DataContainer;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
-import com.github.sanctum.labyrinth.event.CuboidController;
 import com.github.sanctum.labyrinth.event.EasyListener;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -46,13 +46,16 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	public static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
 	private static final List<PersistentContainer> CONTAINERS = new LinkedList<>();
 	private static Labyrinth INSTANCE;
+	private VentMap eventMap;
 
 	@Override
 	public void onEnable() {
 
 		INSTANCE = this;
 
-		new EasyListener(CuboidController.class).call(this);
+		eventMap = new VentMap();
+
+		new EasyListener(DefaultEvent.Controller.class).call(this);
 
 		new EasyListener(ComponentListener.class).call(this);
 
@@ -63,12 +66,8 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-		try {
-			DataContainer.querySaved();
-		} catch (NullPointerException ignored) {
-		}
 		Schedule.async(() -> Arrays.stream(Bukkit.getOfflinePlayers()).forEach(SkullItem.Head::search)).run();
-		Schedule.sync(() -> new VaultHook(this)).applyAfter(() -> new AdvancedHook(this)).wait(2);
+		Schedule.sync(() -> new AdvancedHook(this)).applyAfter(() -> new VaultHook(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
 		RegionServicesManager.Initializer.start(this);
@@ -100,6 +99,10 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	}
 
+	public VentMap getEventMap() {
+		return eventMap;
+	}
+
 	/**
 	 * @return All data containers linked to the specified plugin.
 	 * <p>
@@ -118,7 +121,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	@NotNull
 	public static PersistentContainer getContainer(NamespacedKey key) {
 		for (PersistentContainer component : CONTAINERS) {
-			if (component.getKey().equals(key)) {
+			if (component.getKey().getNamespace().equals(key.getNamespace()) && component.getKey().getKey().equals(key.getKey())) {
 				return component;
 			}
 		}

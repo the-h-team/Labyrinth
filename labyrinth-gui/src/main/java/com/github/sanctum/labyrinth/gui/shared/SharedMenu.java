@@ -1,12 +1,9 @@
 package com.github.sanctum.labyrinth.gui.shared;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.data.container.DataContainer;
-import com.github.sanctum.labyrinth.data.container.DataStream;
-import com.github.sanctum.labyrinth.library.HFEncoded;
+import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +13,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -61,16 +59,8 @@ public abstract class SharedMenu implements Listener {
 	 * @return The same menu w/ parent file location creation.
 	 */
 	public final synchronized SharedMenu inject() {
-		try {
-			DataStream meta = DataContainer.loadInstance(DataContainer.getHuid(plugin.getName() + ":" + id), true);
-			if (meta == null) {
-				DataContainer container = new DataContainer(plugin.getName() + ":" + id);
-				container.setValue(new ItemStack[getSize()]);
-				container.storeTemp();
-				container.saveMeta();
-			}
-		} catch (NullPointerException ignored) {
-		}
+		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		container.attach("menu-id", new ItemStack[getSize()]);
 		return this;
 	}
 
@@ -206,23 +196,10 @@ public abstract class SharedMenu implements Listener {
 	 */
 	public final @NotNull
 	synchronized ItemStack[] getContents() {
+		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		ItemStack[] content = new ItemStack[getSize()];
-		try {
-			DataStream meta = DataContainer.loadInstance(DataContainer.getHuid(plugin.getName() + ":" + id), true);
-			if (meta != null) {
-				try {
-					ItemStack[] contentC = (ItemStack[]) new HFEncoded(meta.value()).deserialized();
-					System.arraycopy(contentC, 0, content, 0, getSize());
-				} catch (IOException | ClassNotFoundException ignored) {
-				}
-			}
-		} catch (NullPointerException e) {
-			DataContainer container = new DataContainer(plugin.getName() + ":" + id);
-			container.setValue(content);
-			container.storeTemp();
-			container.saveMeta();
-		}
-
+		ItemStack[] contentC = container.get(ItemStack[].class, id);
+		System.arraycopy(contentC, 0, content, 0, getSize());
 		return content;
 	}
 
@@ -261,10 +238,8 @@ public abstract class SharedMenu implements Listener {
 	 * Remove this menu from cache entirely including its meta.
 	 */
 	public final synchronized void remove() {
-		try {
-			DataContainer.deleteInstance(DataContainer.getHuid(plugin.getName() + ":" + id));
-		} catch (NullPointerException ignored) {
-		}
+		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		container.delete(id);
 		INVENTORY_MAP.remove(getId());
 		HandlerList.unregisterAll(LISTENER_MAP.get(this.huid));
 		LISTENER_MAP.remove(this.huid);
@@ -277,18 +252,8 @@ public abstract class SharedMenu implements Listener {
 	 * @param contents The item's to save.
 	 */
 	public final synchronized void save(ItemStack[] contents) {
-		try {
-			DataContainer.deleteInstance(DataContainer.getHuid(plugin.getName() + ":" + id));
-			DataContainer container = new DataContainer(plugin.getName() + ":" + id);
-			container.setValue(contents);
-			container.storeTemp();
-			container.saveMeta();
-		} catch (NullPointerException e) {
-			DataContainer container = new DataContainer(plugin.getName() + ":" + id);
-			container.setValue(contents);
-			container.storeTemp();
-			container.saveMeta();
-		}
+		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		container.attach(id, contents);
 	}
 
 	@EventHandler

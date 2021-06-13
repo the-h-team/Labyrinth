@@ -14,6 +14,7 @@
     <bytecodeTargetLevel>
       <module name="Labyrinth" target="11" />
       <module name="labyrinth-afk" target="11" />
+      <module name="labyrinth-event" target="11" />
       <module name="labyrinth-gui" target="11" />
       <module name="labyrinth-plugin" target="11" />
     </bytecodeTargetLevel>
