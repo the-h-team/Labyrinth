@@ -246,8 +246,6 @@ public abstract class Vent {
 
 					return CompletableFuture.supplyAsync(() -> {
 
-						event.setHost(plugin);
-
 						map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
