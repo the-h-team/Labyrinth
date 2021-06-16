@@ -80,7 +80,7 @@ public class AddonLoader {
             throw new IllegalStateException(e);
         }
         final List<Class<?>> classList = injectJars(ImmutableMap.of(getValidJarURL(addonJar).orElseThrow(IllegalStateException::new), jarFile));
-        javaPlugin.getLogger().info(() -> "Loaded addon file " + addonJar.getName() + "successfully.");
+        javaPlugin.getLogger().info(() -> "Loaded addon file " + addonJar.getName() + " successfully.");
         return classList;
     }
 
@@ -108,7 +108,7 @@ public class AddonLoader {
             });
         }
         final List<Class<?>> classes = injectJars(builder.build());
-        javaPlugin.getLogger().info(() -> "Loaded addon files from " + folder.getPath() + "successfully.");
+        javaPlugin.getLogger().info(() -> "Loaded addon files from " + folder.getPath() + " successfully.");
         return classes;
     }
     private Optional<URL> getValidJarURL(File file) {
