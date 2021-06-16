@@ -5,7 +5,6 @@ import com.github.sanctum.labyrinth.event.ItemRecipeProcessEvent;
 import com.github.sanctum.labyrinth.event.ItemStackProcessEvent;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,9 +42,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author Hempfest
  */
-public class Item implements Serializable {
-
-	private static final long serialVersionUID = 794224011026322910L;
+public class Item {
 
 	private static final LinkedList<Item> cache = new LinkedList<>();
 

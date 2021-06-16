@@ -189,7 +189,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	@Override
 	public <R> Collection<? extends R> values(Class<R> type) {
-		return this.DATA.values().stream().filter(o -> o.getClass().isAssignableFrom(type)).map(o -> (R) o).collect(Collectors.toList());
+		return this.DATA.values().stream().filter(o -> type.isAssignableFrom(o.getClass())).map(o -> (R) o).collect(Collectors.toList());
 	}
 
 	/**

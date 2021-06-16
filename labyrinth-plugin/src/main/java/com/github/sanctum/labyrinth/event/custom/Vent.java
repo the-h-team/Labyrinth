@@ -16,6 +16,8 @@ public abstract class Vent {
 
 	private boolean async;
 
+	private CancelState state = CancelState.ON;
+
 	private boolean cancelled;
 
 	protected Vent() {
@@ -30,6 +32,10 @@ public abstract class Vent {
 		this.async = isAsync;
 	}
 
+	protected final void setState(CancelState state) {
+		this.state = state;
+	}
+
 	protected final void setHost(Plugin plugin) {
 		if (this.plugin != null) throw new IllegalStateException("Plugin already initialized!");
 		this.plugin = plugin;
@@ -41,7 +47,12 @@ public abstract class Vent {
 		this.cancelled = cancelled;
 	}
 
+	protected CancelState getState() {
+		return state;
+	}
+
 	public boolean isCancelled() {
+		if (this.state == CancelState.OFF) return false;
 		return cancelled;
 	}
 
@@ -134,6 +145,10 @@ public abstract class Vent {
 		}
 	}
 
+	public enum CancelState {
+		ON, OFF
+	}
+
 	public enum Runtime {
 		Synchronous, Asynchronous
 	}
@@ -167,6 +182,11 @@ public abstract class Vent {
 
 		private final Runtime type;
 
+		public Call(T event) {
+			this.event = event;
+			this.type = Runtime.Synchronous;
+		}
+
 		public Call(Runtime type, T event) {
 			this.event = event;
 			this.type = type;
@@ -181,18 +201,28 @@ public abstract class Vent {
 				case Synchronous:
 					if (event.isAsynchronous()) throw new RuntimeException("This event can only be ran asynchronously");
 
-					event.setHost(plugin);
+					if (event.getHost() == null) {
+						event.setHost(plugin);
+					}
 
 					map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 						if (s.getEventType().isAssignableFrom(event.getType())) {
 							switch (s.getPriority()) {
 								case READ_ONLY:
+									((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+									break;
 								case LOW:
 								case MEDIUM:
 								case HIGH:
 								case HIGHEST:
-									((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+									if (event.getState() == CancelState.ON) {
+										if (!event.isCancelled()) {
+											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										}
+									} else {
+										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+									}
 									break;
 							}
 						}
@@ -207,18 +237,34 @@ public abstract class Vent {
 
 					return CompletableFuture.supplyAsync(() -> {
 
-						event.setHost(plugin);
+						if (event.getHost() == null) {
+							event.setHost(plugin);
+						}
 
 						map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
 									case READ_ONLY:
+										Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+										Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										break;
 									case LOW:
 									case MEDIUM:
 									case HIGH:
 									case HIGHEST:
-										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										if (event.getState() == CancelState.ON) {
+											if (!event.isCancelled()) {
+												Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+												Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+											}
+										} else {
+											Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+											Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										}
 										break;
 								}
 							}
@@ -242,7 +288,9 @@ public abstract class Vent {
 
 					if (!event.isAsynchronous()) throw new RuntimeException("This event can only be ran synchronously");
 
-					event.setHost(plugin);
+					if (event.getHost() == null) {
+						event.setHost(plugin);
+					}
 
 					return CompletableFuture.supplyAsync(() -> {
 
@@ -251,11 +299,19 @@ public abstract class Vent {
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
 									case READ_ONLY:
+										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										break;
 									case LOW:
 									case MEDIUM:
 									case HIGH:
 									case HIGHEST:
-										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										if (event.getState() == CancelState.ON) {
+											if (!event.isCancelled()) {
+												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+											}
+										} else {
+											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										}
 										break;
 								}
 							}

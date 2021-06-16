@@ -9,6 +9,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 /**
  * Encapsulate text component information and attach applicable data to it.
+ *
+ * @author Hempfest
  */
 public class WrappedComponent {
 

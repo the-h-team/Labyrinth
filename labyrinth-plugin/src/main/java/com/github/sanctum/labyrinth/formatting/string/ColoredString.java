@@ -15,6 +15,15 @@ public class ColoredString {
 	private final ColorType chosen;
 	private final String text;
 
+	public ColoredString(String text) {
+		this.text = text;
+		if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
+			this.chosen = ColorType.HEX;
+		} else {
+			this.chosen = ColorType.MC;
+		}
+	}
+
 	public ColoredString(String text, ColorType type) {
 		this.text = text;
 		this.chosen = type;

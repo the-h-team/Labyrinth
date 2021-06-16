@@ -88,7 +88,7 @@ public class StringUtils {
 	 * @return The translated "colored" string.
 	 */
 	public String translate() {
-		return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17") ? new ColoredString(this.context, ColoredString.ColorType.HEX).toString() : new ColoredString(this.context, ColoredString.ColorType.MC).toString();
+		return new ColoredString(this.context).toString();
 	}
 
 	/**

@@ -102,7 +102,7 @@ public class HFEncoded {
 	public <R> R deserialize(Class<R> type) {
 		try {
 			Object o = deserialized();
-			if (o.getClass().isAssignableFrom(type)) {
+			if (type.isAssignableFrom(o.getClass())) {
 				return (R) o;
 			} else {
 				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());

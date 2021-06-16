@@ -217,7 +217,7 @@ public interface Cuboid {
 		}
 
 		public final void setAllowed(boolean allowed) {
-			plugin.getLogger().warning("- Flag " + '"' + id + '"' + " stated of allowance changed to '" + String.valueOf(allowed).toUpperCase() + "'.");
+			plugin.getLogger().warning("- Flag " + '"' + id + '"' + " state of allowance changed to '" + String.valueOf(allowed).toUpperCase() + "'.");
 			this.allowed = allowed;
 		}
 

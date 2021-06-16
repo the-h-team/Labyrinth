@@ -66,6 +66,7 @@ public class NewComponent extends TextLib {
 		TextComponent text = new ColoredString(normalText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		TextComponent hover = new ColoredString(hoverText, ColoredString.ColorType.MC_COMPONENT).toComponent();
 		text.addExtra(hover);
+		hover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("")));
 		hover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new Text(color(hoverTextMessage)))));
 		hover.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + commandName));
 		return text;
