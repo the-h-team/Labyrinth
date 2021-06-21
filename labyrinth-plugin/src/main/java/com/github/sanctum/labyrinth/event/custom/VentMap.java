@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bukkit.plugin.Plugin;
 
 public final class VentMap {
 
@@ -26,6 +29,10 @@ public final class VentMap {
 				}
 			}
 		}
+	}
+
+	public List<Vent.Subscription<?>> getSubscriptions(Plugin plugin) {
+		return SUBSCRIPTIONS.stream().filter(s -> s.getUser().equals(plugin)).collect(Collectors.toList());
 	}
 
 	public <T extends Vent> Vent.Subscription<?> getSubscription(Class<T> eventType, String key) {

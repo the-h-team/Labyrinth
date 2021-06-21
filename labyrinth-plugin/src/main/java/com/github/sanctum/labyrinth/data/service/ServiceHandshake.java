@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.Registry;
+import java.io.File;
 import java.io.InputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -11,19 +11,32 @@ import org.bukkit.plugin.ServicePriority;
 public class ServiceHandshake {
 
 	public static void locate() {
-		FileManager fm = FileList.search(Labyrinth.getInstance()).find("Test", "Service");
 		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
 		InputStream stream = Labyrinth.getInstance().getResource(version + ".jar");
+
 		if (stream == null) {
 			Labyrinth.getInstance().getLogger().severe("===================================================================");
 			Labyrinth.getInstance().getLogger().severe("- Version service " + version + " not found. Consult labyrinth developers.");
 			Labyrinth.getInstance().getLogger().severe("===================================================================");
 			return;
 		}
-		FileManager.copy(stream, fm.getFile());
-		Labyrinth.getInstance().getLogger().info("===================================================================");
-		Labyrinth.getInstance().getLogger().info("- Version service " + version + " injected into directory.");
-		Labyrinth.getInstance().getLogger().info("===================================================================");
+
+		File file = new File("plugins/Labyrinth/Service/" + version + ".jar");
+
+		for (File f : file.getParentFile().listFiles()) {
+			if (f.isFile()) {
+				if (f.delete()) {
+					Labyrinth.getInstance().getLogger().info("- Deleting old version traces.");
+				}
+			}
+		}
+
+		if (!file.exists()) {
+			FileManager.copy(stream, file);
+			Labyrinth.getInstance().getLogger().info("===================================================================");
+			Labyrinth.getInstance().getLogger().info("- Compiling version " + version + ".");
+			Labyrinth.getInstance().getLogger().info("===================================================================");
+		}
 	}
 
 	public static void register() {
