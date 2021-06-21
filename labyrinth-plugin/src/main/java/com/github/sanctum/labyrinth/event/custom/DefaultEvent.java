@@ -170,7 +170,6 @@ public class DefaultEvent extends Vent {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {
-
 			BlockPlace b = new Call<>(Runtime.Synchronous, new BlockPlace(e.getPlayer(), e.getBlock())).run();
 
 			if (b.isCancelled()) {

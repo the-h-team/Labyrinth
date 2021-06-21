@@ -80,21 +80,20 @@ public class SkullItem {
 	 */
 	public void updateHead() {
 		boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-		for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-			ItemStack item = new ItemStack(type, 1);
+		OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(getHolder()));
+		Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+		ItemStack item = new ItemStack(type, 1);
 
-			if (!isNew) {
-				item.setDurability((short) 3);
-			}
+		if (!isNew) {
+			item.setDurability((short) 3);
+		}
 
-			SkullMeta meta = (SkullMeta) item.getItemMeta();
-			if (!meta.hasOwner()) {
-				meta.setOwningPlayer(p);
+		SkullMeta meta = (SkullMeta) item.getItemMeta();
+		if (!meta.hasOwner()) {
+			meta.setOwningPlayer(p);
 			}
 			item.setItemMeta(meta);
 			this.head = item;
-		}
 	}
 
 	/**

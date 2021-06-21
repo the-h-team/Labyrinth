@@ -6,7 +6,7 @@
 
     <groupId>com.github.sanctum</groupId>
     <artifactId>Labyrinth</artifactId>
-    <version>1.5.7</version>
+    <version>1.5.8</version>
     <modules>
         <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>
@@ -47,8 +47,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -142,12 +142,6 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.Hempfest</groupId>
-            <artifactId>AnvilGUI</artifactId>
-            <version>1.5.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

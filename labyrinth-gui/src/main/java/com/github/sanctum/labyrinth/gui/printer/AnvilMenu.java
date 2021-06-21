@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.gui.printer;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import net.wesjd.anvilgui.version.VersionMatcher;
-import net.wesjd.anvilgui.version.VersionWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class AnvilMenu {
 
     private Player holder;
-    private final VersionWrapper nms;
+   // private final VersionWrapper nms;
     private final String title;
     private final AnvilListener listener;
     private int containerId;
@@ -41,7 +39,7 @@ public class AnvilMenu {
         this.title = title;
         this.RIGHT_ITEM = right;
         this.listener = new AnvilListener();
-        this.nms = new VersionMatcher().match();
+        //this.nms = new VersionMatcher().match();
     }
 
     public AnvilMenu(String title, ItemBuilder left, ItemBuilder right) {
@@ -49,7 +47,7 @@ public class AnvilMenu {
         this.title = title;
         this.RIGHT_ITEM = right;
         this.listener = new AnvilListener();
-        this.nms = new VersionMatcher().match();
+        // this.nms = new VersionMatcher().match();
     }
 
     /**
@@ -93,14 +91,14 @@ public class AnvilMenu {
             throw new IllegalStateException("No craft player was found to source the menu to.");
         }
 
-        nms.handleInventoryCloseEvent(holder);
-        nms.setActiveContainerDefault(holder);
+        // nms.handleInventoryCloseEvent(holder);
+        // nms.setActiveContainerDefault(holder);
 
         Bukkit.getPluginManager().registerEvents(listener, Labyrinth.getInstance());
 
-        final Object container = nms.newContainerAnvil(holder, title);
+        // final Object container = nms.newContainerAnvil(holder, title);
 
-        inventory = nms.toBukkitInventory(container);
+        // inventory = nms.toBukkitInventory(container);
 
         inventory.setItem(Slot.INPUT_LEFT.get(), LEFT_ITEM.item);
 
@@ -108,11 +106,11 @@ public class AnvilMenu {
             inventory.setItem(Slot.INPUT_RIGHT.get(), RIGHT_ITEM.item);
         }
 
-        containerId = nms.getNextContainerId(holder, container);
-        nms.sendPacketOpenWindow(holder, containerId, title);
-        nms.setActiveContainer(holder, container);
-        nms.setActiveContainerId(container, containerId);
-        nms.addActiveContainerSlotListener(container, holder);
+        //containerId = nms.getNextContainerId(holder, container);
+        // nms.sendPacketOpenWindow(holder, containerId, title);
+        // nms.setActiveContainer(holder, container);
+        // nms.setActiveContainerId(container, containerId);
+        // nms.addActiveContainerSlotListener(container, holder);
 
         visible = true;
     }
@@ -129,11 +127,11 @@ public class AnvilMenu {
         visible = false;
 
         if (!sendClosePacket)
-            nms.handleInventoryCloseEvent(holder);
-        nms.setActiveContainerDefault(holder);
-        nms.sendPacketCloseWindow(holder, containerId);
+            // nms.handleInventoryCloseEvent(holder);
+            // nms.setActiveContainerDefault(holder);
+            // nms.sendPacketCloseWindow(holder, containerId);
 
-        HandlerList.unregisterAll(listener);
+            HandlerList.unregisterAll(listener);
     }
 
     /**
