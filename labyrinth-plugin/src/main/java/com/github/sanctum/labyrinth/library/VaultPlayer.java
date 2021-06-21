@@ -10,7 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 
 /**
- * Encapsulate a player object and get the properties of the permissible inheritance.
+ * Encapsulate a player object and getMechanics the properties of the permissible inheritance.
  *
  * @author Hempfest
  */

@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
+import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
@@ -43,7 +44,7 @@ import org.jetbrains.annotations.NotNull;
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * getServerVersion 2.1 of the License, or (at your option) any later getServerVersion.
  * <p>
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -89,6 +90,8 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
 		RegionServicesManager.Initializer.start(this);
+
+		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
 
 	}
 

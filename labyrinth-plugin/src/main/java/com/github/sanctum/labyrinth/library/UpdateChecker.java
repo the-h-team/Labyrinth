@@ -104,7 +104,7 @@ public abstract class UpdateChecker {
 				}
 				return false;
 			}
-			throw new IllegalStateException("Unknown version precision.");
+			throw new IllegalStateException("Unknown getServerVersion precision.");
 		} catch (Exception e) {
 			return false;
 		}

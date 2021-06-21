@@ -54,10 +54,14 @@ public class AnvilBuilder {
 	/**
 	 * Finish your builder and convert it into an Anvil GUI object ready for use.
 	 *
-	 * @return An anvil gui object ready for use.
+	 * @return An anvil gui object ready for use or null if a {@link com.github.sanctum.labyrinth.data.service.AnvilMechanics} service is not found.
 	 */
 	public AnvilMenu get() {
-		return new AnvilMenu(title, left, right);
+		try {
+			return new AnvilMenu(title, left, right);
+		} catch (InstantiationException e) {
+			return null;
+		}
 	}
 
 }

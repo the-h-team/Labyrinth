@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.data.loader;
+package com.github.sanctum.labyrinth.data.service;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -14,7 +14,7 @@ public interface AnvilMechanics {
 	/**
 	 * Gets the next available NMS container id for the player
 	 *
-	 * @param player    The player to get the next container id of
+	 * @param player    The player to getMechanics the next container id of
 	 * @param container The container that a new id is being generated for
 	 * @return The next available NMS container id
 	 */
@@ -78,7 +78,7 @@ public interface AnvilMechanics {
 	/**
 	 * Gets the {@link Inventory} wrapper of the supplied NMS container
 	 *
-	 * @param container The NMS container to get the {@link Inventory} of
+	 * @param container The NMS container to getMechanics the {@link Inventory} of
 	 * @return The inventory of the NMS container
 	 */
 	Inventory toBukkitInventory(Object container);
@@ -86,7 +86,7 @@ public interface AnvilMechanics {
 	/**
 	 * Creates a new ContainerAnvil
 	 *
-	 * @param player The player to get the container of
+	 * @param player The player to getMechanics the container of
 	 * @param title  The title of the anvil inventory
 	 * @return The Container instance
 	 */
