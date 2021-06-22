@@ -817,7 +817,7 @@ public final class PaginatedBuilder<T> {
 						}
 					}
 					if (NAVIGATION_RIGHT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (!((INDEX + 1) >= COLLECTION.size())) {
+						if (!((INDEX + 1) >= COLLECTION.size() + 1)) {
 							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, PAGE);
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
