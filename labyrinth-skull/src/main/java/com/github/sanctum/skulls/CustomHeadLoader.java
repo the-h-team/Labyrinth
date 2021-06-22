@@ -37,6 +37,13 @@ public final class CustomHeadLoader {
 		this.additions = new HashMap<>();
 	}
 
+	/**
+	 * Search through a specific section in your config for the heads.
+	 *
+	 * @param section The standard node {@link org.bukkit.configuration.Configuration} section from your file to use.
+	 *                Example: <strong>ConfigHeader.My_heads</strong>
+	 * @return The same head loader instance with attempted values.
+	 */
 	public CustomHeadLoader look(String section) {
 		if (manager.isConfigurationSection(section)) {
 			for (String id : manager.getConfigurationSection(section).getKeys(false)) {
@@ -77,6 +84,9 @@ public final class CustomHeadLoader {
 		return this;
 	}
 
+	/**
+	 * @return Optionally pre-load all player related requests. (Handled internally)
+	 */
 	public CustomHeadLoader load() {
 		this.loaded = true;
 		for (Map.Entry<HeadText, OnlineHeadSearch> entry : this.que.entrySet()) {
@@ -90,6 +100,9 @@ public final class CustomHeadLoader {
 		return this;
 	}
 
+	/**
+	 * Complete the requirements to load the desired head database into cache.
+	 */
 	public void complete() {
 		if (!getHeads().isEmpty()) {
 			CustomHead.Manager.load(this);
@@ -109,7 +122,7 @@ public final class CustomHeadLoader {
 
 	/**
 	 * Apply Base64 data for a custom skin value.
-	 * <p>
+	 *
 	 * *NOTE: Not cached.
 	 *
 	 * @param headValue The target head value to apply to a skull item.

@@ -44,7 +44,15 @@ final class CommandImpl extends Command {
 			}
 		} else {
 			if (builder.playerResultingExecutor != null) {
-				return builder.playerResultingExecutor.run((Player) sender, commandLabel, args);
+				if (builder.permission != null) {
+					if (testPermission(sender)) {
+						return builder.playerResultingExecutor.run((Player) sender, commandLabel, args);
+					} else {
+						return true;
+					}
+				} else {
+					return builder.playerResultingExecutor.run((Player) sender, commandLabel, args);
+				}
 			}
 			return true;
 		}

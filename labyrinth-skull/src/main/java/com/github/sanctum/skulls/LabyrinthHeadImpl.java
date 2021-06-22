@@ -26,17 +26,17 @@ final class LabyrinthHeadImpl extends CustomHead {
 	}
 
 	@Override
-	@NotNull ItemStack get() {
+	public @NotNull ItemStack get() {
 		return this.item;
 	}
 
 	@Override
-	@NotNull String name() {
+	public @NotNull String name() {
 		return this.name;
 	}
 
 	@Override
-	@NotNull String category() {
+	public @NotNull String category() {
 		return this.category;
 	}
 }

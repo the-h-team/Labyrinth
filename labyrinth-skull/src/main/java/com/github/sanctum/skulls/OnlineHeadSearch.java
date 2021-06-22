@@ -13,13 +13,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Encapsulate data and search online for results.
+ * Encapsulate player data and search online for skin results.
  */
 public class OnlineHeadSearch {
 
-	private String name = null;
-	private String id = null;
-	private String value = null;
+	protected String name = null;
+	protected String id = null;
+	protected String value = null;
 
 	public OnlineHeadSearch(String name) {
 		this.name = name;
