@@ -15,7 +15,7 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.5.8</version>
+	    <version>1.5.9</version>
 	</dependency>
 <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
@@ -56,7 +56,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.5.8'
+	        implementation 'com.github.the-h-team:Labyrinth:1.5.9'
 	}
 ```
 
