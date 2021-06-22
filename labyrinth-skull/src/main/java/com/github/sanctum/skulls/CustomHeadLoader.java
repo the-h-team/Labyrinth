@@ -40,14 +40,14 @@ public final class CustomHeadLoader {
 	public CustomHeadLoader look(String section) {
 		if (manager.isConfigurationSection(section)) {
 			for (String id : manager.getConfigurationSection(section).getKeys(false)) {
-				boolean custom = manager.getBoolean(section + ".custom");
+				boolean custom = manager.getBoolean(section + "." + id + ".custom");
 				if (custom) {
-					String name = manager.getString(section + ".name");
-					String category = manager.getString(section + ".category");
+					String name = manager.getString(section + "." + id + ".name");
+					String category = manager.getString(section + "." + id + ".category");
 					String value = null;
 
-					if (manager.isString(section + ".value")) {
-						value = manager.getString(section + ".value");
+					if (manager.isString(section + "." + id + ".value")) {
+						value = manager.getString(section + "." + id + ".value");
 					}
 
 					if (value != null) {
@@ -58,9 +58,9 @@ public final class CustomHeadLoader {
 
 
 				} else {
-					String name = manager.getString(section + ".name");
-					String category = manager.getString(section + ".category");
-					String user = manager.getString(section + ".user");
+					String name = manager.getString(section + "." + id + ".name");
+					String category = manager.getString(section + "." + id + ".category");
+					String user = manager.getString(section + "." + id + ".user");
 
 					boolean isID = user.contains("-");
 
