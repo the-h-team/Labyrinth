@@ -15,8 +15,36 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.5.8</version>
+	    <version>1.5.9</version>
 	</dependency>
+<!-- Used specifically for loading/retrieving custom skull items. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-Skull</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-GUI</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically for base library functions. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-Plugin</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically for AFK implementations. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-AFK</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 ```
 ### Importing with gradle
 ```gradle
@@ -28,18 +56,19 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.5.8'
+	        implementation 'com.github.the-h-team:Labyrinth:1.5.9'
 	}
 ```
 
 ## What are its key points?
-+ Easy collection pagination
-+ Automatic command and listener registration
-+ Time and string utilities for color translation & more (Random unique/custom ID's, Sorted maps)
++ Easy collection management w/ pagination
++ Automatic class registry tools
++ External Jar loading
++ Time/Command/String/Math/List Utilities
 + Custom object Persistent Data Container using Base64 serialization
-+ Easy access to said serialization above using object constructors for string/object conversion.
++ Command Building
 + Easy common library access to amazing plugins like (Vault & PlaceholderAPI)
-& More!
+& Much More!
 
 
 _API Table of Contents_:
