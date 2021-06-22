@@ -61,13 +61,14 @@ It is an easy access spigot development library that assists you in areas that m
 ```
 
 ## What are its key points?
-+ Easy collection pagination
-+ Automatic command and listener registration
-+ Time and string utilities for color translation & more (Random unique/custom ID's, Sorted maps)
++ Easy collection management w/ pagination
++ Automatic class registry tools
++ External Jar loading
++ Time/Command/String/Math/List Utilities
 + Custom object Persistent Data Container using Base64 serialization
-+ Easy access to said serialization above using object constructors for string/object conversion.
++ Command Building
 + Easy common library access to amazing plugins like (Vault & PlaceholderAPI)
-& More!
+& Much More!
 
 
 _API Table of Contents_:
