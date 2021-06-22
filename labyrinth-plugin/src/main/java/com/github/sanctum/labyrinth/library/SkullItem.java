@@ -2,13 +2,9 @@ package com.github.sanctum.labyrinth.library;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -97,9 +93,9 @@ public class SkullItem {
 		SkullMeta meta = (SkullMeta) item.getItemMeta();
 		if (!meta.hasOwner()) {
 			meta.setOwningPlayer(p);
-			}
-			item.setItemMeta(meta);
-			this.head = item;
+		}
+		item.setItemMeta(meta);
+		this.head = item;
 	}
 
 	/**
@@ -222,34 +218,11 @@ public class SkullItem {
 		 * @return The desired skin applied to a player skull or bare.
 		 */
 		public ItemStack getHead() {
-			if (this.head == null) {
-				boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-				Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-				assert type != null;
-				ItemStack skull = new ItemStack(type);
-				if (value != null) {
-
-					SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-					GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-
-					profile.getProperties().put("textures", new Property("textures", this.value));
-
-					try {
-						Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-						mtd.setAccessible(true);
-						mtd.invoke(skullMeta, profile);
-					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-						ex.printStackTrace();
-					}
-
-					skull.setItemMeta(skullMeta);
-					if (log.stream().noneMatch(s -> s.name.equals(name))) {
-						log.add(this);
-					}
-				}
-				this.head = skull;
-			}
-			return this.head;
+			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			assert type != null;
+			ItemStack skull = new ItemStack(type);
+			return skull;
 		}
 
 
@@ -274,24 +247,6 @@ public class SkullItem {
 			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 			assert type != null;
 			ItemStack skull = new ItemStack(type);
-			if (headValue != null) {
-
-				SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-				GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-
-				profile.getProperties().put("textures", new Property("textures", headValue));
-
-				try {
-					Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-					mtd.setAccessible(true);
-					mtd.invoke(skullMeta, profile);
-				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-					ex.printStackTrace();
-				}
-
-				skull.setItemMeta(skullMeta);
-				return skull;
-			}
 			return skull;
 		}
 
