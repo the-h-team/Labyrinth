@@ -17,6 +17,34 @@ It is an easy access spigot development library that assists you in areas that m
 	    <artifactId>Labyrinth</artifactId>
 	    <version>1.5.8</version>
 	</dependency>
+<!-- Used specifically for loading/retrieving custom skull items. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-Skull</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically as a full GUI arsenal (Singular/Shared/Live/Slideshow/Anvil). -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-GUI</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically for base library functions. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-Plugin</artifactId>
+            <version>1.5.9</version>
+            <scope>provided</scope>
+        </dependency>
+<!-- Used specifically for AFK implementations. -->
+        <dependency>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
+            <artifactId>Labyrinth-AFK</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 ```
 ### Importing with gradle
 ```gradle
