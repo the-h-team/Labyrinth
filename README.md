@@ -24,7 +24,7 @@ It is an easy access spigot development library that assists you in areas that m
             <version>1.5.9</version>
             <scope>provided</scope>
         </dependency>
-<!-- Used specifically as a full GUI arsenal (Singular/Shared/Live/Slideshow/Anvil). -->
+<!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>Labyrinth-GUI</artifactId>
