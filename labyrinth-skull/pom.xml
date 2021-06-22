@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Labyrinth-GUI</artifactId>
+    <artifactId>Labyrinth-Skull</artifactId>
     <version>1.5.9</version>
 
     <!--TODO: determine licensing (likely MIT)-->

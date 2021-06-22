@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" filepath="$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" filepath="$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" filepath="$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" />
     </modules>
   </component>
 </project>

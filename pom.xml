@@ -6,11 +6,12 @@
 
     <groupId>com.github.sanctum</groupId>
     <artifactId>Labyrinth</artifactId>
-    <version>1.5.8</version>
+    <version>1.5.9</version>
     <modules>
         <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>
         <module>labyrinth-plugin</module>
+        <module>labyrinth-skull</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -128,8 +129,8 @@
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.3-R0.1-SNAPSHOT</version>
+            <artifactId>spigot</artifactId>
+            <version>1.16.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -2,9 +2,13 @@ package com.github.sanctum.labyrinth.library;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -20,7 +24,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  * @author Hempfest
+ * @deprecated A dedicated head database is being built.
  */
+@Deprecated
 public class SkullItem {
 
 	public static String COMMAND_BLOCK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY0YzIxZDE3YWQ2MzYzODdlYTNjNzM2YmZmNmFkZTg5NzMxN2UxMzc0Y2Q1ZDliMWMxNWU2ZTg5NTM0MzIifX19";
@@ -39,7 +45,7 @@ public class SkullItem {
 
 	private ItemStack head;
 
-	public SkullItem(String holder, ItemStack head) {
+	protected SkullItem(String holder, ItemStack head) {
 		this.holder = holder;
 		this.head = head;
 		if (Head.find(UUID.fromString(holder)) == null) {
@@ -104,6 +110,7 @@ public class SkullItem {
 		private static final LinkedList<Search> log = new LinkedList<>();
 
 		private String name;
+		private ItemStack head;
 		private String id = null;
 		private String value = null;
 
@@ -212,24 +219,37 @@ public class SkullItem {
 		}
 
 		/**
-		 * @return The desired skin applied to a player skull or null.
+		 * @return The desired skin applied to a player skull or bare.
 		 */
 		public ItemStack getHead() {
-			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-			assert type != null;
-			ItemStack skull = new ItemStack(type);
-			if (value != null) {
-				UUID hashAsId = new UUID(value.hashCode(), value.hashCode());
-				ItemStack result = Bukkit.getUnsafe().modifyItemStack(skull,
-						"{SkullOwner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + value + "\"}]}}}"
-				);
-				if (log.stream().noneMatch(s -> s.name.equals(name))) {
-					log.add(this);
+			if (this.head == null) {
+				boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
+				Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+				assert type != null;
+				ItemStack skull = new ItemStack(type);
+				if (value != null) {
+
+					SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+					GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+
+					profile.getProperties().put("textures", new Property("textures", this.value));
+
+					try {
+						Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+						mtd.setAccessible(true);
+						mtd.invoke(skullMeta, profile);
+					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+						ex.printStackTrace();
+					}
+
+					skull.setItemMeta(skullMeta);
+					if (log.stream().noneMatch(s -> s.name.equals(name))) {
+						log.add(this);
+					}
 				}
-				return result;
+				this.head = skull;
 			}
-			return null;
+			return this.head;
 		}
 
 
@@ -237,6 +257,7 @@ public class SkullItem {
 
 	/**
 	 * Used for all inquiries about custom/player head data.
+	 * See <a href="https://minecraft-heads.com/custom-heads">here</a> for browsing :)
 	 */
 	public static class Head {
 
@@ -253,10 +274,25 @@ public class SkullItem {
 			Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 			assert type != null;
 			ItemStack skull = new ItemStack(type);
-			UUID hashAsId = new UUID(headValue.hashCode(), headValue.hashCode());
-			return Bukkit.getUnsafe().modifyItemStack(skull,
-					"{SkullOwner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + headValue + "\"}]}}}"
-			);
+			if (headValue != null) {
+
+				SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+				GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+
+				profile.getProperties().put("textures", new Property("textures", headValue));
+
+				try {
+					Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+					mtd.setAccessible(true);
+					mtd.invoke(skullMeta, profile);
+				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+					ex.printStackTrace();
+				}
+
+				skull.setItemMeta(skullMeta);
+				return skull;
+			}
+			return skull;
 		}
 
 		/**

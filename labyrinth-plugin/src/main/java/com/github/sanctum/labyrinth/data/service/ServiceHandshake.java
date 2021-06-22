@@ -64,9 +64,9 @@ public class ServiceHandshake {
 
 			} else {
 
-				Labyrinth.getInstance().getLogger().severe("===================================================================");
-				Labyrinth.getInstance().getLogger().severe("- Version service " + key.getClass().getSimpleName() + " has an invalid mechanical override.");
-				Labyrinth.getInstance().getLogger().severe("===================================================================");
+				Labyrinth.getInstance().getLogger().warning("===================================================================");
+				Labyrinth.getInstance().getLogger().warning("- Version service " + key.getClass().getSimpleName() + " has an invalid mechanical override skipping...");
+				Labyrinth.getInstance().getLogger().warning("===================================================================");
 
 			}
 
