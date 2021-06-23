@@ -83,7 +83,7 @@ public final class Menu {
      * @param menuBuilder a MenuBuilder
      * @param javaPlugin  your plugin
      */
-    protected Menu(MenuBuilder menuBuilder, JavaPlugin javaPlugin) {
+    protected Menu(MenuBuilder menuBuilder, JavaPlugin javaPlugin) throws InstantiationException {
         this.plugin = javaPlugin;
         this.numberOfRows = menuBuilder.numberOfRows;
         this.title = (menuBuilder.title != null) ? menuBuilder.title : "Menu#" + hashCode();
@@ -109,6 +109,9 @@ public final class Menu {
                 actions.putIfAbsent(i, menuBuilder.fillerAction);
             }
         }
+
+        if (this.plugin == null) throw new InstantiationException("The plugin instance provided is not valid");
+
         Bukkit.getPluginManager().registerEvents(new ClickListener(), plugin);
     }
 

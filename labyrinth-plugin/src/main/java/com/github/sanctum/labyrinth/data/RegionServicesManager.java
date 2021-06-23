@@ -11,9 +11,11 @@ import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -272,7 +274,15 @@ public final class RegionServicesManager {
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					if (e.getItem().getType() == Material.WOODEN_AXE) {
+					boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("WOODEN_AXE"));
+
+					Material mat = Items.getMaterial("WOODEN_AXE");
+
+					if (!isNew) {
+						mat = Items.getMaterial("WOOD_AXE");
+					}
+
+					if (e.getItem().getType() == mat) {
 						Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
 						if (e.getResult() != Event.Result.DENY) {
 							e.setResult(Event.Result.DENY);
@@ -301,7 +311,15 @@ public final class RegionServicesManager {
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					if (e.getItem().getType() == Material.WOODEN_AXE) {
+					boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("WOODEN_AXE"));
+
+					Material mat = Items.getMaterial("WOODEN_AXE");
+
+					if (!isNew) {
+						mat = Items.getMaterial("WOOD_AXE");
+					}
+
+					if (e.getItem().getType() == mat) {
 						Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
 						if (e.getResult() != Event.Result.DENY) {
 							e.setResult(Event.Result.DENY);

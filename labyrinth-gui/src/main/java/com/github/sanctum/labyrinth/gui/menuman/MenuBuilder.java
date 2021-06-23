@@ -277,6 +277,12 @@ public final class MenuBuilder {
 	 * @return new Menu initialized with this object's contents
 	 */
 	public Menu create(JavaPlugin yourPlugin) {
-		return new Menu(this, yourPlugin);
+		Menu result = null;
+		try {
+			result = new Menu(this, yourPlugin);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }

@@ -14,13 +14,6 @@ public class ServiceHandshake {
 		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
 		InputStream stream = Labyrinth.getInstance().getResource(version + ".jar");
 
-		if (stream == null) {
-			Labyrinth.getInstance().getLogger().severe("===================================================================");
-			Labyrinth.getInstance().getLogger().severe("- Version service " + version + " not found. Consult labyrinth developers.");
-			Labyrinth.getInstance().getLogger().severe("===================================================================");
-			return;
-		}
-
 		File file = new File("plugins/Labyrinth/Service/" + version + ".jar");
 
 		for (File f : file.getParentFile().listFiles()) {
@@ -29,6 +22,13 @@ public class ServiceHandshake {
 					Labyrinth.getInstance().getLogger().info("- Deleting old version traces.");
 				}
 			}
+		}
+
+		if (stream == null) {
+			Labyrinth.getInstance().getLogger().severe("===================================================================");
+			Labyrinth.getInstance().getLogger().severe("- Version service " + version + " not found. Consult labyrinth developers.");
+			Labyrinth.getInstance().getLogger().severe("===================================================================");
+			return;
 		}
 
 		if (!file.exists()) {
