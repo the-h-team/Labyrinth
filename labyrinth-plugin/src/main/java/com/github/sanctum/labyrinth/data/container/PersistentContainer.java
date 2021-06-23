@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
+import com.github.sanctum.labyrinth.library.NamespacedKey;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.bukkit.NamespacedKey;
 
 /**
  * Total safe encapsulation of serializable objects for persistent storage use.
