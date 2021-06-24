@@ -5,11 +5,13 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -144,12 +146,24 @@ public final class CustomHeadLoader {
 
 			profile.getProperties().put("textures", new Property("textures", headValue));
 
-			try {
-				Field profileField = skullMeta.getClass().getDeclaredField("profile");
-				profileField.setAccessible(true);
-				profileField.set(skullMeta, profile);
-			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
-				e1.printStackTrace();
+			if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9") || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11") || Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13")) {
+
+				try {
+					Field profileField = skullMeta.getClass().getDeclaredField("profile");
+					profileField.setAccessible(true);
+					profileField.set(skullMeta, profile);
+				} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
+					e1.printStackTrace();
+				}
+
+			} else {
+				try {
+					Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+					mtd.setAccessible(true);
+					mtd.invoke(skullMeta, profile);
+				} catch (IllegalAccessException | java.lang.reflect.InvocationTargetException | NoSuchMethodException ex) {
+					ex.printStackTrace();
+				}
 			}
 
 			skull.setItemMeta(skullMeta);
