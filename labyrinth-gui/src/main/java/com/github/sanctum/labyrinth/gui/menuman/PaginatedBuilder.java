@@ -2,8 +2,8 @@ package com.github.sanctum.labyrinth.gui.menuman;
 
 import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.gui.InventoryRows;
+import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.task.Asynchronous;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,10 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -28,7 +25,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -126,6 +122,7 @@ public final class PaginatedBuilder<T> {
 	 */
 	public PaginatedBuilder<T> forPlugin(Plugin plugin) {
 		NAMESPACE = new NamespacedKey(plugin, "paginated_utility_manager");
+		PLUGIN = plugin;
 		CONTROLLER = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(CONTROLLER, plugin);
 		return this;
@@ -695,37 +692,13 @@ public final class PaginatedBuilder<T> {
 	 */
 	public class PaginatedListener implements Listener {
 
-		private boolean metaMatches(ItemStack one, ItemStack two) {
-			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			Material type;
-			if (isNew) {
-				type = Material.valueOf("PLAYER_HEAD");
-			} else {
-				type = Material.valueOf("SKULL_ITEM");
-			}
-			if (one.getType() == type && two.getType() == type) {
-				if (one.hasItemMeta() && two.hasItemMeta()) {
-					if (one.getItemMeta() instanceof SkullMeta && two.getItemMeta() instanceof SkullMeta) {
-						SkullMeta Meta1 = (SkullMeta) one.getItemMeta();
-						SkullMeta Meta2 = (SkullMeta) one.getItemMeta();
-						if (Meta1.hasOwner() && Meta2.hasOwner()) {
-							return Meta1.getOwningPlayer().getUniqueId().equals(Meta2.getOwningPlayer().getUniqueId());
-						}
-					}
-					return false;
-				}
-				return false;
-			}
-			return false;
-		}
-
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
 			if (e.getView().getTopInventory().getSize() < SIZE)
 				return;
-			if (getInventory() == e.getInventory()) {
+			if (e.getInventory().equals(getInventory())) {
 
 				Player p = (Player) e.getPlayer();
 
@@ -744,7 +717,7 @@ public final class PaginatedBuilder<T> {
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onMove(InventoryMoveItemEvent e) {
-			if (e.getSource() == getInventory()) {
+			if (e.getSource().equals(getInventory())) {
 				e.setCancelled(true);
 			}
 		}
@@ -755,9 +728,9 @@ public final class PaginatedBuilder<T> {
 				return;
 			if (e.getView().getTopInventory().getSize() < SIZE)
 				return;
-			if (getInventory() != e.getInventory())
-				return;
-			if (e.getInventory() == getInventory()) {
+			if (!e.getInventory().equals(getInventory())) return;
+
+			if (e.getInventory().equals(getInventory())) {
 				e.setResult(Event.Result.DENY);
 			}
 		}
@@ -766,16 +739,14 @@ public final class PaginatedBuilder<T> {
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getWhoClicked() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < SIZE)
-				return;
+			if (e.getView().getTopInventory().getSize() < SIZE) return;
 
 			if (e.getHotbarButton() != -1) {
 				e.setCancelled(true);
 				return;
 			}
 
-			if (getInventory() != e.getInventory())
-				return;
+			if (!e.getInventory().equals(getInventory())) return;
 
 			if (e.getClickedInventory() == e.getInventory()) {
 				Player p = (Player) e.getWhoClicked();
@@ -798,8 +769,8 @@ public final class PaginatedBuilder<T> {
 						e.setCancelled(false);
 						return;
 					}
-					if (PROCESS_LIST.stream().anyMatch(i -> i.isSimilar(item) || metaMatches(i, item))) {
-						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item) || metaMatches(en.getKey(), item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
+					if (PROCESS_LIST.stream().anyMatch(i -> i.isSimilar(item))) {
+						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
 					if (NAVIGATION_BACK.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
 						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));

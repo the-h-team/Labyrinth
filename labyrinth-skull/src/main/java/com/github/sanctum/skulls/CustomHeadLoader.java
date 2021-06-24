@@ -4,8 +4,7 @@ import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -132,7 +131,12 @@ public final class CustomHeadLoader {
 		boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
 		Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 		assert type != null;
-		ItemStack skull = new ItemStack(type);
+		ItemStack skull;
+		if (isNew) {
+			skull = new ItemStack(type);
+		} else {
+			skull = new ItemStack(type, 1, (short) 3);
+		}
 		if (headValue != null) {
 
 			SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
@@ -141,11 +145,11 @@ public final class CustomHeadLoader {
 			profile.getProperties().put("textures", new Property("textures", headValue));
 
 			try {
-				Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-				mtd.setAccessible(true);
-				mtd.invoke(skullMeta, profile);
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-				ex.printStackTrace();
+				Field profileField = skullMeta.getClass().getDeclaredField("profile");
+				profileField.setAccessible(true);
+				profileField.set(skullMeta, profile);
+			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
+				e1.printStackTrace();
 			}
 
 			skull.setItemMeta(skullMeta);

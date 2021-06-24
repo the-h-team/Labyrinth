@@ -63,9 +63,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class Labyrinth extends JavaPlugin implements Listener {
 
-	public static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
-	public static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
-	public static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
+	private static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
+	private static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
+	private static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
 	private static final List<PersistentContainer> CONTAINERS = new LinkedList<>();
 	private static Labyrinth INSTANCE;
 	private VentMap eventMap;
@@ -118,10 +118,14 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			Thread.sleep(1);
 		} catch (InterruptedException ignored) {
 		}
+
 		SkullItem.getLog().clear();
-		if (Item.getCache().size() > 0) {
-			for (Item i : Item.getCache()) {
-				Item.removeEntry(i);
+
+		if (Bukkit.getVersion().contains("1.14") || Bukkit.getVersion().contains("1.15") || Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
+			if (Item.getCache().size() > 0) {
+				for (Item i : Item.getCache()) {
+					Item.removeEntry(i);
+				}
 			}
 		}
 
@@ -129,6 +133,18 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	public VentMap getEventMap() {
 		return eventMap;
+	}
+
+	public static ConcurrentLinkedQueue<Integer> getTasks() {
+		return TASKS;
+	}
+
+	public static LinkedList<Cooldown> getCooldowns() {
+		return COOLDOWNS;
+	}
+
+	public static LinkedList<WrappedComponent> getComponents() {
+		return COMPONENTS;
 	}
 
 	/**
@@ -166,7 +182,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	}
 
 
-	public static class ComponentListener implements Listener {
+	static class ComponentListener implements Listener {
 		@EventHandler
 		public void onCommandNote(PlayerCommandPreprocessEvent e) {
 			for (WrappedComponent component : COMPONENTS) {

@@ -26,7 +26,7 @@ public class WrappedComponent {
 		this.component = component;
 		this.commandSerial = HUID.randomID();
 		this.component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + toString()));
-		Labyrinth.COMPONENTS.add(this);
+		Labyrinth.getComponents().add(this);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class WrappedComponent {
 	}
 
 	public void remove() {
-		Schedule.sync(() -> Labyrinth.COMPONENTS.remove(this)).wait(1);
+		Schedule.sync(() -> Labyrinth.getComponents().remove(this)).wait(1);
 	}
 
 }

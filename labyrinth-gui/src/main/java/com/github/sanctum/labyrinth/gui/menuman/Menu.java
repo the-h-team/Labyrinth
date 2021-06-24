@@ -374,11 +374,11 @@ public final class Menu {
         @EventHandler
         public void onMenuClick(InventoryClickEvent e) {
             // If the top inventory isn't ours, ignore it
-            if (e.getInventory() != inventory) {
+            if (!e.getInventory().equals(inventory)) {
                 return;
             }
             // If the bottom inventory was clicked...
-            if (e.getClickedInventory() == e.getView().getBottomInventory()) {
+            if (e.getView().getBottomInventory().equals(e.getClickedInventory())) {
                 // and we want to cancel clicks for the bottom, cancel the event
                 if (cancelClickLower) e.setCancelled(true);
                 // if we are not allowing shift clicks
@@ -399,7 +399,7 @@ public final class Menu {
             final Player player = (Player) whoClicked;
             final int slot = e.getSlot();
             // if this is a menu click (top inventory)
-            if (e.getClickedInventory() == e.getInventory()) {
+            if (e.getInventory().equals(e.getClickedInventory())) {
                 // search the menu elements map for the slot
                 if (contents.keySet().parallelStream().anyMatch(key -> key == slot)) {
                     // cancel the click
@@ -427,7 +427,7 @@ public final class Menu {
         @EventHandler
         public void onMenuDrag(InventoryDragEvent e) {
             // If the top inventory isn't ours, ignore it
-            if (e.getInventory() != inventory) {
+            if (!e.getInventory().equals(inventory)) {
                 return;
             }
             // If the slots include the top inventory, cancel the event
@@ -447,7 +447,7 @@ public final class Menu {
          */
         @EventHandler
         public void onMenuOpen(InventoryOpenEvent e) {
-            if (e.getInventory() != inventory) {
+            if (!e.getInventory().equals(inventory)) {
                 return;
             }
             if (pendingDelete != null) {
@@ -470,7 +470,7 @@ public final class Menu {
          */
         @EventHandler
         public void onMenuClose(InventoryCloseEvent e) {
-            if (e.getInventory() != inventory) {
+            if (!e.getInventory().equals(inventory)) {
                 return;
             }
             final HumanEntity closer = e.getPlayer();

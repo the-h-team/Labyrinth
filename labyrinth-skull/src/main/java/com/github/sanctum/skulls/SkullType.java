@@ -1,5 +1,7 @@
 package com.github.sanctum.skulls;
 
+import com.github.sanctum.labyrinth.library.Items;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.Material;
@@ -23,7 +25,13 @@ public enum SkullType implements SkullObject {
 
 	SkullType(String value) {
 		if (value.equals("LP")) {
-			this.itemStack = new ItemStack(Material.PLAYER_HEAD);
+			boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("PLAYER_HEAD"));
+			if (isNew) {
+				this.itemStack = new ItemStack(Items.getMaterial("playerhead"));
+			} else {
+				this.itemStack = new ItemStack(Items.getMaterial("skullitem"), 1, (short) 3);
+			}
+
 		} else if (value.equals("LC")) {
 			this.itemStack = new ItemStack(Material.AIR);
 		} else {

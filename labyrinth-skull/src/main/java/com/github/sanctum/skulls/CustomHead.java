@@ -114,19 +114,16 @@ public abstract class CustomHead implements SkullObject {
 		 * @return The head of the specified player or null if not found.
 		 */
 		public static @Nullable ItemStack get(OfflinePlayer player) {
-
-			CustomHead ch = HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).findFirst().orElseGet(() -> {
+			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).map(CustomHead::get).findFirst().orElseGet(() -> {
 
 				OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
 				if (search.getResult() != null) {
 					CustomHead head = new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId());
 					HEADS.add(head);
-					return head;
+					return head.get();
 				}
 				return null;
 			});
-
-			return ch != null ? ch.get() : null;
 		}
 
 		/**
@@ -138,19 +135,16 @@ public abstract class CustomHead implements SkullObject {
 		 * @return The head of the specified user or null if not found.
 		 */
 		public static @Nullable ItemStack get(UUID id) {
-
-			CustomHead ch = HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).findFirst().orElseGet(() -> {
+			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).map(CustomHead::get).findFirst().orElseGet(() -> {
 
 				OnlineHeadSearch search = new OnlineHeadSearch(id);
 				if (search.getResult() != null) {
 					CustomHead head = new LabyrinthHeadImpl(Bukkit.getOfflinePlayer(id).getName(), "Human", search.getResult(), id);
 					HEADS.add(head);
-					return head;
+					return head.get();
 				}
 				return null;
 			});
-
-			return ch != null ? ch.get() : null;
 		}
 
 		/**
@@ -163,18 +157,16 @@ public abstract class CustomHead implements SkullObject {
 		 */
 		public static @Nullable ItemStack get(String name) {
 
-			CustomHead ch = HEADS.stream().filter(h -> h.name().equals(name)).findFirst().orElseGet(() -> {
+			return HEADS.stream().filter(h -> h.name().equals(name)).map(CustomHead::get).findFirst().orElseGet(() -> {
 
 				OnlineHeadSearch search = new OnlineHeadSearch(name);
 				if (search.getResult() != null) {
 					CustomHead head = new LabyrinthHeadImpl(name, "Human", search.getResult());
 					HEADS.add(head);
-					return head;
+					return head.get();
 				}
 				return null;
 			});
-
-			return ch != null ? ch.get() : null;
 		}
 
 		/**

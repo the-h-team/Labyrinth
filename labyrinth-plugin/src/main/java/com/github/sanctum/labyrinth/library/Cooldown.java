@@ -94,7 +94,7 @@ public abstract class Cooldown {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		return Labyrinth.COOLDOWNS.contains(this) && compareNum <= 0;
+		return Labyrinth.getCooldowns().contains(this) && compareNum <= 0;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", getCooldown());
 		library.saveConfig();
-		Labyrinth.COOLDOWNS.add(this);
+		Labyrinth.getCooldowns().add(this);
 	}
 
 	/**
@@ -139,7 +139,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + getId() + ".expiration", abv(getTimeLeft()));
 		library.saveConfig();
-		Labyrinth.COOLDOWNS.add(this);
+		Labyrinth.getCooldowns().add(this);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public abstract class Cooldown {
 	 * @return A cooldown based object retaining original values from save.
 	 */
 	public static Cooldown getById(String id) {
-		return Labyrinth.COOLDOWNS.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
+		return Labyrinth.getCooldowns().stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
 			FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
 
@@ -212,7 +212,7 @@ public abstract class Cooldown {
 		FileManager library = FileList.search(Labyrinth.getInstance()).find("Cooldowns", "Persistent");
 		library.getConfig().set("Library." + c.getId(), null);
 		library.saveConfig();
-		Schedule.sync(() -> Labyrinth.COOLDOWNS.remove(c)).run();
+		Schedule.sync(() -> Labyrinth.getCooldowns().remove(c)).run();
 	}
 
 
