@@ -15,27 +15,27 @@ It is an easy access spigot development library that assists you in areas that m
   	<dependency>
 	    <groupId>com.github.the-h-team</groupId>
 	    <artifactId>Labyrinth</artifactId>
-	    <version>1.5.9</version>
+	    <version>1.6.0</version>
 	</dependency>
 <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
             <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>Labyrinth-Skull</artifactId>
-            <version>1.5.9</version>
+            <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
 <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>Labyrinth-GUI</artifactId>
-            <version>1.5.9</version>
+            <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
 <!-- Used specifically for base library functions. -->
         <dependency>
             <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>Labyrinth-Plugin</artifactId>
-            <version>1.5.9</version>
+            <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
 <!-- Used specifically for AFK implementations. -->
@@ -56,7 +56,7 @@ It is an easy access spigot development library that assists you in areas that m
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.5.9'
+	        implementation 'com.github.the-h-team:Labyrinth:1.6.0'
 	}
 ```
 
