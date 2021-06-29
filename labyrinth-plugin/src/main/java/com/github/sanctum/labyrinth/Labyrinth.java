@@ -208,6 +208,11 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	public static class ComponentListener implements Listener {
 		@EventHandler
 		public void onCommandNote(PlayerCommandPreprocessEvent e) {
+			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
+				e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
+				e.setCancelled(true);
+				return;
+			}
 			for (WrappedComponent component : COMPONENTS) {
 				if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
 					Schedule.sync(() -> component.action().apply()).run();
@@ -217,10 +222,6 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 					}
 					e.setCancelled(true);
 				}
-			}
-			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
-				e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
-				e.setCancelled(true);
 			}
 		}
 	}
