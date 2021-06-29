@@ -216,12 +216,11 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						Schedule.sync(component::remove).waitReal(200);
 					}
 					e.setCancelled(true);
-				} else {
-					if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
-						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
-						e.setCancelled(true);
-					}
 				}
+			}
+			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
+				e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
+				e.setCancelled(true);
 			}
 		}
 	}
