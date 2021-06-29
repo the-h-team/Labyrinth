@@ -1,41 +1,25 @@
 package com.github.sanctum.labyrinth.event;
 
 import com.github.sanctum.labyrinth.data.Region;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
-import org.jetbrains.annotations.NotNull;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 
-public abstract class RegionInteractEvent extends PlayerEvent implements Cancellable {
-
-	private static final HandlerList handlers = new HandlerList();
+public abstract class RegionInteractEvent extends DefaultEvent.Player {
 
 	private final Region region;
 	private final Type type;
 	private boolean cancelled;
 
-	public RegionInteractEvent(Type type, Player player, Region region) {
-		super(player);
-		this.player = player;
+	public RegionInteractEvent(Type type, org.bukkit.entity.Player player, Region region) {
+		super(player, false);
 		this.region = region;
 		this.type = type;
-	}
-
-	@Override
-	public @NotNull HandlerList getHandlers() {
-		return handlers;
-	}
-
-	public static HandlerList getHandlerList() {
-		return handlers;
 	}
 
 	public Region getRegion() {
 		return region;
 	}
 
-	public Type getType() {
+	public Type getInteractionType() {
 		return type;
 	}
 

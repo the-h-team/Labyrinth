@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
@@ -67,32 +66,15 @@ public class HUID {
 	 *
 	 * @param wID The written ID to convert to object form.
 	 * @return The HUID object.
-	 * @throws TypeNotPresentException Throw's exception if the id being parsed isn't representative of HUID type.
 	 */
 	public static HUID fromString(String wID) {
 		if (!StringUtils.isAlphanumeric(wID) && !wID.contains("-")) {
-			throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, not alphanumeric."));
+			return null;
 		}
 		if (wID.replace("-", "").length() != 12) {
-			try {
-				return fromOldString(wID);
-			} catch (NullPointerException e) {
-				throw new TypeNotPresentException("HUID", new Throwable("[Labyrinth] - Unable to parse HUID, size greater/less than 12 char spec."));
-			}
+			return null;
 		}
 		return new HUID(wID.replace("-", ""));
-	}
-
-	private static HUID fromOldString(String wID) {
-		if (!wID.contains("-")) {
-			throw new NullPointerException("[hempCore] - Unable to parse HUID");
-		}
-		if (wID.replace("-", "").length() != 6) {
-			throw new NullPointerException("[hempCore] - Unable to parse HUID");
-		}
-		Labyrinth.getInstance().getLogger().warning("- Mocking full size NEW HUID, this is not guaranteed to work and could cause problems.");
-		String add = new RandomID(6).generate();
-		return new HUID(wID.replace("-", "") + add);
 	}
 
 }

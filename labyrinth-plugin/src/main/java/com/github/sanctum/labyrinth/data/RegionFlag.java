@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
-import com.github.sanctum.labyrinth.task.Schedule;
 import org.bukkit.plugin.Plugin;
 
 public class RegionFlag extends Cuboid.Flag {
@@ -9,7 +9,7 @@ public class RegionFlag extends Cuboid.Flag {
 	public static class Builder {
 
 		private final Plugin plugin;
-		private RegionService service;
+		private Vent.Subscription<?> subscription;
 		private String id;
 		private String message;
 
@@ -26,8 +26,13 @@ public class RegionFlag extends Cuboid.Flag {
 			return this;
 		}
 
+		@Deprecated
 		public Builder envelope(RegionService service) {
-			this.service = service;
+			return this;
+		}
+
+		public Builder envelope(Vent.Subscription<?> subscription) {
+			this.subscription = subscription;
 			return this;
 		}
 
@@ -37,7 +42,8 @@ public class RegionFlag extends Cuboid.Flag {
 		}
 
 		public Cuboid.Flag finish() {
-			Schedule.sync(() -> RegionServicesManager.getInstance().load(service)).wait(1);
+			//Schedule.sync(() -> RegionServicesManager.getInstance().load(service)).wait(1);
+			Vent.subscribe(subscription);
 			return new RegionFlag(this.plugin, this.id, this.message);
 		}
 

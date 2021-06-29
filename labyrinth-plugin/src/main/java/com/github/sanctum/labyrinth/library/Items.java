@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.Labyrinth;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
@@ -40,9 +41,8 @@ public final class Items {
 		Material mat = Material.getMaterial(value);
 		if (mat != null) {
 			return new ItemStack(mat);
-		} else {
-			return SkullItem.Head.provide(value);
 		}
+		return new ItemStack(Labyrinth.isLegacy() ? getMaterial("skullitem") : getMaterial("playerhead"));
 	}
 
 	/**

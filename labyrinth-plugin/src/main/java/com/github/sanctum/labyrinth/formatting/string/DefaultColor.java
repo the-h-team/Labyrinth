@@ -29,11 +29,11 @@ public enum DefaultColor implements CustomColor {
 
 	@Override
 	public String join() {
-		return "<" + this.start + ">" + "</" + this.end + ">";
+		return "<" + this.start + ">" + this.context + "</" + this.end + ">";
 	}
 
 	public String join(String context) {
-		return join().replace("<" + this.start + ">", "<" + this.start + ">" + context);
+		return "<" + this.start + ">" + context + "</" + this.end + ">";
 	}
 
 	@Override

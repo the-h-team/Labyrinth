@@ -6,7 +6,7 @@
 
     <groupId>com.github.sanctum</groupId>
     <artifactId>Labyrinth</artifactId>
-    <version>1.5.9</version>
+    <version>1.6.1</version>
     <modules>
         <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>

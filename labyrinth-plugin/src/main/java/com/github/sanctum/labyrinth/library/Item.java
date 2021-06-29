@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.event.ItemRecipeProcessEvent;
-import com.github.sanctum.labyrinth.event.ItemStackProcessEvent;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import java.util.Arrays;
@@ -70,8 +68,6 @@ public class Item {
 		this.mat = appearance;
 		this.name = itemName;
 		Item.cache.add(this);
-		ItemRecipeProcessEvent event = new ItemRecipeProcessEvent(appearance, name);
-		Bukkit.getPluginManager().callEvent(event);
 	}
 
 	public Item setKey(String key) {
@@ -94,9 +90,7 @@ public class Item {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(StringUtils.use(name).translate());
 		item.setItemMeta(meta);
-		ItemStackProcessEvent event = new ItemStackProcessEvent(name, item);
-		Bukkit.getPluginManager().callEvent(event);
-		this.item = event.getItem();
+		this.item = item;
 		return this;
 	}
 

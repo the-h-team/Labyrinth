@@ -1,10 +1,12 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import com.github.sanctum.labyrinth.library.ListUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -29,6 +31,18 @@ public abstract class UniformedComponents<T> implements Serializable {
 	public abstract <R> Stream<R> map(Function<? super T, ? extends R> mapper);
 
 	public abstract Stream<T> filter(Predicate<? super T> predicate);
+
+	public List<T> append(Consumer<T> action) {
+		return ListUtils.use(list()).append(action);
+	}
+
+	public List<T> append(ListUtils.ListOperation<T> operation) {
+		return ListUtils.use(list()).append(operation);
+	}
+
+	public boolean exists(Predicate<? super T> predicate) {
+		return filter(predicate).count() > 0;
+	}
 
 	public abstract T getFirst();
 
@@ -64,7 +78,7 @@ public abstract class UniformedComponents<T> implements Serializable {
 
 			@Override
 			public T[] array() {
-				return null;
+				return (T[]) list().toArray();
 			}
 
 			@Override

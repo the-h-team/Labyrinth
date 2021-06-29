@@ -23,7 +23,7 @@ public abstract class Vent {
 	protected Vent() {
 	}
 
-	public Vent(boolean isAsync) {
+	protected Vent(boolean isAsync) {
 		this.async = isAsync;
 	}
 
@@ -41,7 +41,9 @@ public abstract class Vent {
 		this.plugin = plugin;
 	}
 
-	public abstract String getName();
+	public String getName() {
+		return this.getType().getSimpleName();
+	}
 
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
@@ -129,6 +131,7 @@ public abstract class Vent {
 	}
 
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
+		if (subscription == null) return;
 		Call.getMap().SUBSCRIPTIONS.add(subscription);
 	}
 
@@ -155,7 +158,7 @@ public abstract class Vent {
 
 	public enum Priority {
 
-		READ_ONLY(0),
+		READ_ONLY(5),
 
 		LOW(1),
 
@@ -180,15 +183,19 @@ public abstract class Vent {
 
 		private final T event;
 
+		private T copy;
+
 		private final Runtime type;
 
 		public Call(T event) {
 			this.event = event;
+			this.copy = event;
 			this.type = Runtime.Synchronous;
 		}
 
 		public Call(Runtime type, T event) {
 			this.event = event;
+			this.copy = event;
 			this.type = type;
 		}
 
@@ -209,9 +216,6 @@ public abstract class Vent {
 
 						if (s.getEventType().isAssignableFrom(event.getType())) {
 							switch (s.getPriority()) {
-								case READ_ONLY:
-									((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-									break;
 								case LOW:
 								case MEDIUM:
 								case HIGH:
@@ -219,10 +223,15 @@ public abstract class Vent {
 									if (event.getState() == CancelState.ON) {
 										if (!event.isCancelled()) {
 											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+											this.copy = event;
 										}
 									} else {
 										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+										this.copy = event;
 									}
+									break;
+								case READ_ONLY:
+									((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
 									break;
 							}
 						}
@@ -245,11 +254,6 @@ public abstract class Vent {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
-									case READ_ONLY:
-										Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-										Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
-										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-										break;
 									case LOW:
 									case MEDIUM:
 									case HIGH:
@@ -259,12 +263,19 @@ public abstract class Vent {
 												Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
 												Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
 												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+												this.copy = event;
 											}
 										} else {
 											Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
 											Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
 											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+											this.copy = event;
 										}
+										break;
+									case READ_ONLY:
+										Labyrinth.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+										Labyrinth.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+										((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
 										break;
 								}
 							}
@@ -298,9 +309,6 @@ public abstract class Vent {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
-									case READ_ONLY:
-										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-										break;
 									case LOW:
 									case MEDIUM:
 									case HIGH:
@@ -308,10 +316,15 @@ public abstract class Vent {
 										if (event.getState() == CancelState.ON) {
 											if (!event.isCancelled()) {
 												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+												this.copy = event;
 											}
 										} else {
 											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
+											this.copy = event;
 										}
+										break;
+									case READ_ONLY:
+										((SubscriberCall<T>) s.getAction()).accept(this.copy, (Subscription<T>) s);
 										break;
 								}
 							}

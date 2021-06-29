@@ -13,9 +13,9 @@ import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
+import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.SkullItem;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.IOException;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -119,9 +120,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		} catch (InterruptedException ignored) {
 		}
 
-		SkullItem.getLog().clear();
-
-		if (Bukkit.getVersion().contains("1.14") || Bukkit.getVersion().contains("1.15") || Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
+		if (!isLegacy()) {
 			if (Item.getCache().size() > 0) {
 				for (Item i : Item.getCache()) {
 					Item.removeEntry(i);
@@ -135,14 +134,29 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		return eventMap;
 	}
 
+	/**
+	 * Get a queued list of running task id's
+	 *
+	 * @return A list of most running task id's
+	 */
 	public static ConcurrentLinkedQueue<Integer> getTasks() {
 		return TASKS;
 	}
 
+	/**
+	 * Get all pre-cached cooldowns.
+	 *
+	 * @return A list of all cached cooldowns.
+	 */
 	public static LinkedList<Cooldown> getCooldowns() {
 		return COOLDOWNS;
 	}
 
+	/**
+	 * Get all action wrapped text components.
+	 *
+	 * @return A list of all cached text components.
+	 */
 	public static LinkedList<WrappedComponent> getComponents() {
 		return COMPONENTS;
 	}
@@ -175,6 +189,15 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	}
 
 	/**
+	 * @return true if the given server version is legacy only or false if its pro-1.13
+	 */
+	public static boolean isLegacy() {
+		return Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9")
+				|| Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11")
+				|| Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13");
+	}
+
+	/**
 	 * Auxiliary <strong>library</strong> instance.
 	 */
 	public static Plugin getInstance() {
@@ -182,7 +205,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	}
 
 
-	static class ComponentListener implements Listener {
+	public static class ComponentListener implements Listener {
 		@EventHandler
 		public void onCommandNote(PlayerCommandPreprocessEvent e) {
 			for (WrappedComponent component : COMPONENTS) {
@@ -193,6 +216,11 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 						Schedule.sync(component::remove).waitReal(200);
 					}
 					e.setCancelled(true);
+				} else {
+					if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
+						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
+						e.setCancelled(true);
+					}
 				}
 			}
 		}

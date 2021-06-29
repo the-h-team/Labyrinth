@@ -16,6 +16,10 @@ public class ServiceHandshake {
 
 		File file = new File("plugins/Labyrinth/Service/" + version + ".jar");
 
+		if (!file.getParentFile().exists()) {
+			file.getParentFile().mkdirs();
+		}
+
 		for (File f : file.getParentFile().listFiles()) {
 			if (f.isFile()) {
 				if (f.delete()) {

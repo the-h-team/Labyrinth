@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -85,7 +86,7 @@ public class PaginatedList<T> {
 	}
 
 	/**
-	 * Provided the page number and total page count, provide a finishing
+	 * Provided the page number and total page count. Provide a finishing
 	 * sequence for the pagination.
 	 *
 	 * @param compliment The finishing execution to be ran one time.
@@ -93,6 +94,26 @@ public class PaginatedList<T> {
 	 */
 	public PaginatedList<T> finish(FinishingCompliment<T> compliment) {
 		this.finish = compliment;
+		return this;
+	}
+
+	/**
+	 * Provided the page number and total page count. Provide a finishing
+	 * sequence for the pagination (So the desired player can browse pages)
+	 *
+	 * @param builderConsumer The finishing execution to be ran one time.
+	 * @return The same paginated list procedure.
+	 */
+	public PaginatedList<T> finish(Consumer<PrintedPaginationBuilder> builderConsumer) {
+		this.finish = (list, page, max) -> {
+
+			PrintedPaginationBuilder builder = new PrintedPaginationBuilder(max).setPage(page);
+
+			builderConsumer.accept(builder);
+
+			builder.build(list);
+
+		};
 		return this;
 	}
 

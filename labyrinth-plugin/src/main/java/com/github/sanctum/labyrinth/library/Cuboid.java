@@ -3,10 +3,10 @@ package com.github.sanctum.labyrinth.library;
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
-import com.github.sanctum.labyrinth.data.RegionService;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
 import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +17,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -189,7 +188,7 @@ public interface Cuboid {
 
 	}
 
-	abstract class Flag implements RegionService, Cloneable {
+	abstract class Flag implements Listener, Cloneable {
 
 		private final Plugin plugin;
 		private boolean allowed;
@@ -260,79 +259,65 @@ public interface Cuboid {
 			BREAK = RegionFlag.Builder.initialize(Labyrinth.getInstance())
 					.label("break")
 					.receive("&4You cant do this!")
-					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.NORMAL)
-						public void onBuild(RegionDestroyEvent e) {
+					.envelope(new Vent.Subscription<>(RegionDestroyEvent.class, Labyrinth.getInstance(), Vent.Priority.MEDIUM, (e, subscription) -> {
+						Region region = e.getRegion();
 
-							Region region = e.getRegion();
-
-							if (region.hasFlag(BREAK)) {
-								Flag f = region.getFlag(BREAK.getId()).get();
-								if (f.isValid()) {
-									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-											Message.form(e.getPlayer()).send(BREAK.getMessage());
-											e.setCancelled(true);
-										}
+						if (region.hasFlag(getFlag("break").get())) {
+							Flag f = region.getFlag("break").get();
+							if (f.isValid()) {
+								if (!f.isAllowed()) {
+									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										Message.form(e.getPlayer()).send(getFlag("break").get().getMessage());
+										e.setCancelled(true);
 									}
 								}
 							}
-
 						}
-					})
+					}))
 					.finish();
 
 			BUILD = RegionFlag.Builder.initialize(Labyrinth.getInstance())
 					.label("build")
 					.receive("&4You cant do this!")
-					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.NORMAL)
-						public void onBuild(RegionBuildEvent e) {
+					.envelope(new Vent.Subscription<>(RegionBuildEvent.class, Labyrinth.getInstance(), Vent.Priority.MEDIUM, (e, subscription) -> {
+						Region region = e.getRegion();
 
-							Region region = e.getRegion();
-
-							if (region.hasFlag(BUILD)) {
-								Flag f = region.getFlag(BUILD.getId()).get();
-								if (f.isValid()) {
-									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-											Message.form(e.getPlayer()).send(BUILD.getMessage());
-											e.setCancelled(true);
-										}
+						if (region.hasFlag(getFlag("build").get())) {
+							Flag f = region.getFlag("build").get();
+							if (f.isValid()) {
+								if (!f.isAllowed()) {
+									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										Message.form(e.getPlayer()).send(getFlag("build").get().getMessage());
+										e.setCancelled(true);
 									}
 								}
 							}
-
 						}
-					})
+					}))
 					.finish();
 
 			PVP = RegionFlag.Builder.initialize(Labyrinth.getInstance())
 					.label("pvp")
 					.receive("&4You cant fight people here.")
-					.envelope(new RegionService() {
-						@EventHandler(priority = EventPriority.NORMAL)
-						public void onPvP(RegionPVPEvent e) {
-							Player p = e.getPlayer();
+					.envelope(new Vent.Subscription<>(RegionPVPEvent.class, Labyrinth.getInstance(), Vent.Priority.MEDIUM, (e, subscription) -> {
+						Player p = e.getPlayer();
 
-							Message msg = Message.form(p);
+						Message msg = Message.form(p);
 
-							Region region = e.getRegion();
+						Region region = e.getRegion();
 
-							if (region.hasFlag(PVP)) {
-								Flag f = region.getFlag(PVP.getId()).get();
-								if (f.isValid()) {
-									if (!f.isAllowed()) {
-										if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-											msg.send(PVP.getMessage());
-											e.setCancelled(true);
-										}
+						if (region.hasFlag(getFlag("pvp").get())) {
+							Flag f = region.getFlag("pvp").get();
+							if (f.isValid()) {
+								if (!f.isAllowed()) {
+									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+										msg.send(getFlag("pvp").get().getMessage());
+										e.setCancelled(true);
 									}
 								}
 							}
-
 						}
-					})
+					}))
 					.finish();
 
 		}

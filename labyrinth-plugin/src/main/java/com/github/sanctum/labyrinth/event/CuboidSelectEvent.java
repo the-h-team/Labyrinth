@@ -1,32 +1,18 @@
 package com.github.sanctum.labyrinth.event;
 
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import java.util.Optional;
 import org.bukkit.Location;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
-public abstract class CuboidSelectEvent extends PlayerEvent {
-
-	private static final HandlerList handlers = new HandlerList();
+public abstract class CuboidSelectEvent extends DefaultEvent.Player {
 
 	private final Cuboid.Selection selection;
 
 	public CuboidSelectEvent(Cuboid.Selection selection) {
-		super(selection.getPlayer());
-		this.player = selection.getPlayer();
+		super(selection.getPlayer(), false);
 		this.selection = selection;
-	}
-
-	@Override
-	public @NotNull HandlerList getHandlers() {
-		return handlers;
-	}
-
-	public static HandlerList getHandlerList() {
-		return handlers;
 	}
 
 	public Optional<Location> getPos1() {

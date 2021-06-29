@@ -136,4 +136,5 @@ public final class NamespacedKey {
 	public static NamespacedKey minecraft(@NotNull String key) {
 		return new NamespacedKey(MINECRAFT, key);
 	}
+
 }

@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
+import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.api.RGBApi;
@@ -46,7 +47,11 @@ public class ColoredString {
 				r = "Cannot convert raw component to String";
 				break;
 			case HEX:
-				r = ChatColor.translateAlternateColorCodes('&', RGBApi.toColoredMessage(text));
+				if (Labyrinth.isLegacy()) {
+					r = ChatColor.translateAlternateColorCodes('&', text);
+				} else {
+					r = ChatColor.translateAlternateColorCodes('&', RGBApi.toColoredMessage(text));
+				}
 				break;
 		}
 		return r;

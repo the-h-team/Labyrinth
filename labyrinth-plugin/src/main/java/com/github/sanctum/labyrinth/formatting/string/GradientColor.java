@@ -93,7 +93,7 @@ public class GradientColor implements CustomColor {
 	}
 
 	/**
-	 * Translate the colorized context.
+	 * Translate the colorized context to JSON
 	 *
 	 * @return The translated gradient formatted context.
 	 */

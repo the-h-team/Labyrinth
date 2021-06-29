@@ -23,8 +23,11 @@ public class PersistentContainer extends PersistentData {
 
 	private final Map<String, Object> DATA;
 
+	private final Map<String, Boolean> FLAG;
+
 	public PersistentContainer(NamespacedKey key) {
 		this.NAME = key;
+		this.FLAG = new HashMap<>();
 		this.DATA = new HashMap<>();
 	}
 
@@ -89,23 +92,26 @@ public class PersistentContainer extends PersistentData {
 	 * @param key The key delimiter for the desired value to save.
 	 */
 	public synchronized void save(String key) throws IOException {
-		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
-		manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
-		manager.saveConfig();
+		if (this.FLAG.get(key)) {
+			FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
+			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
+			manager.saveConfig();
+		}
 	}
 
 	protected synchronized <R> R load(Class<R> type, String key) {
 		FileManager manager = FileList.search(Labyrinth.getInstance()).find("Components", "Persistent");
 		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
 			R value = deserialize(type, manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key));
-			this.DATA.put(key, value);
-			return (R) this.DATA.get(key);
+			return attach(key, value);
 		}
 		return null;
 	}
 
 	/**
 	 * Place a specified value into this persistent container under a specified key delimiter.
+	 * <p>
+	 * The persistence of this object will be attempted on shutdown.
 	 *
 	 * @param key   The key delimiter for this value.
 	 * @param value The value to store.
@@ -114,6 +120,23 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public <R> R attach(String key, R value) {
 		this.DATA.put(key, value);
+		this.FLAG.put(key, true);
+		return value;
+	}
+
+	/**
+	 * Place a specified value into this persistent container under a specified key delimiter.
+	 * <p>
+	 * The persistence of this object will <strong>NOT</strong> be attempted on shutdown.
+	 *
+	 * @param key   The key delimiter for this value.
+	 * @param value The value to store.
+	 * @param <R>   The type this value represents.
+	 * @return The stored value.
+	 */
+	public <R> R lend(String key, R value) {
+		this.DATA.put(key, value);
+		this.FLAG.put(key, false);
 		return value;
 	}
 

@@ -15,7 +15,6 @@ import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -71,14 +70,21 @@ public final class RegionServicesManager {
 
 	public boolean load(Cuboid.Flag flag) {
 		Bukkit.getPluginManager().registerEvents(flag, Labyrinth.getInstance());
-		return SERVICES.add(flag) && getFlagManager().getFlags().add(flag);
+		return getFlagManager().getFlags().add(flag);
 	}
 
+	public boolean load(Vent.Subscription<?> subscription) {
+		Vent.subscribe(subscription);
+		return true;
+	}
+
+	@Deprecated
 	public boolean load(RegionService service) {
 		Bukkit.getPluginManager().registerEvents(service, Labyrinth.getInstance());
 		return SERVICES.add(service);
 	}
 
+	@Deprecated
 	public boolean unload(RegionService service) {
 		HandlerList.unregisterAll(service);
 		return SERVICES.remove(service);
@@ -204,10 +210,7 @@ public final class RegionServicesManager {
 
 					final Cuboid.Selection selection = Cuboid.Selection.source(p);
 
-					Schedule.sync(() -> {
-						CuboidSelectionEvent event = new CuboidSelectionEvent(selection);
-						instance.getServer().getPluginManager().callEvent(event);
-					}).run();
+					Schedule.sync(() -> new Vent.Call<>(new CuboidSelectionEvent(selection)).run()).run();
 
 				}
 
@@ -217,8 +220,7 @@ public final class RegionServicesManager {
 
 				Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
 				if (r.isPresent()) {
-					RegionDestroyEvent event = new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock());
-					Bukkit.getPluginManager().callEvent(event);
+					RegionDestroyEvent event = new Vent.Call<>(new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock())).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 					}
@@ -230,8 +232,7 @@ public final class RegionServicesManager {
 
 				Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
 				if (r.isPresent()) {
-					RegionBuildEvent event = new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock());
-					Bukkit.getPluginManager().callEvent(event);
+					RegionBuildEvent event = new Vent.Call<>(new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock())).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 					}
@@ -261,8 +262,7 @@ public final class RegionServicesManager {
 				if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
 					if (r.isPresent()) {
-						RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT);
-						Bukkit.getPluginManager().callEvent(event);
+						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 						}
@@ -274,7 +274,7 @@ public final class RegionServicesManager {
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("WOODEN_AXE"));
+					boolean isNew = Labyrinth.isLegacy();
 
 					Material mat = Items.getMaterial("WOODEN_AXE");
 
@@ -290,16 +290,14 @@ public final class RegionServicesManager {
 
 						selection.setPos1(e.getBlock().get().getLocation());
 
-						CuboidCreationEvent event = new CuboidCreationEvent(selection);
-						Bukkit.getPluginManager().callEvent(event);
+						new Vent.Call<>(new CuboidCreationEvent(selection)).run();
 
 					}
 				}
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
 					if (r.isPresent()) {
-						RegionInteractionEvent event = new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT);
-						Bukkit.getPluginManager().callEvent(event);
+						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 						}
@@ -311,7 +309,7 @@ public final class RegionServicesManager {
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("WOODEN_AXE"));
+					boolean isNew = Labyrinth.isLegacy();
 
 					Material mat = Items.getMaterial("WOODEN_AXE");
 
@@ -327,8 +325,7 @@ public final class RegionServicesManager {
 
 						selection.setPos2(e.getBlock().get().getLocation());
 
-						CuboidCreationEvent event = new CuboidCreationEvent(selection);
-						Bukkit.getPluginManager().callEvent(event);
+						new Vent.Call<>(new CuboidCreationEvent(selection)).run();
 					}
 				}
 
@@ -346,8 +343,7 @@ public final class RegionServicesManager {
 					if (r.getRegion().isPresent()) {
 						Region region = r.getRegion().get();
 
-						RegionPVPEvent e = new RegionPVPEvent(p, target, region);
-						Bukkit.getPluginManager().callEvent(e);
+						RegionPVPEvent e = new Vent.Call<>(new RegionPVPEvent(p, target, region)).run();
 
 						if (e.isCancelled()) {
 							event.setCancelled(true);
@@ -355,8 +351,6 @@ public final class RegionServicesManager {
 						}
 
 						if (region instanceof Region.Spawn) {
-
-							Region.Spawn spawn = (Region.Spawn) region;
 
 							Region.Resident o = Region.Resident.get(p);
 
@@ -379,8 +373,7 @@ public final class RegionServicesManager {
 					if (r.getRegion().isPresent()) {
 						Region region = r.getRegion().get();
 
-						RegionPVPEvent e = new RegionPVPEvent(p, target, region);
-						Bukkit.getPluginManager().callEvent(e);
+						RegionPVPEvent e = new Vent.Call<>(new RegionPVPEvent(p, target, region)).run();
 
 						if (e.isCancelled()) {
 							event.setCancelled(true);
