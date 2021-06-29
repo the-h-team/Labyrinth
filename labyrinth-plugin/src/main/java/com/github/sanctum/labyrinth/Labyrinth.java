@@ -209,7 +209,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 		@EventHandler
 		public void onCommandNote(PlayerCommandPreprocessEvent e) {
 			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
-				if (COMPONENTS.stream().anyMatch(c -> c.toString().equals(e.getMessage().replace("/", "")))) {
+				if (COMPONENTS.stream().noneMatch(c -> c.toString().equals(e.getMessage().replace("/", "")))) {
 					e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
 					e.setCancelled(true);
 					return;
