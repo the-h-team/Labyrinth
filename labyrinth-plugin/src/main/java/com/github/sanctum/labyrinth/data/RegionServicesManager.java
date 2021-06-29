@@ -268,17 +268,18 @@ public final class RegionServicesManager {
 						}
 					}
 
-					if (e.getItem() == null)
+					if (e.getItem() == null) {
 						return;
+					}
 
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					boolean isNew = Labyrinth.isLegacy();
+					boolean isOld = Labyrinth.isLegacy();
 
 					Material mat = Items.getMaterial("WOODEN_AXE");
 
-					if (!isNew) {
+					if (isOld) {
 						mat = Items.getMaterial("WOOD_AXE");
 					}
 
@@ -309,11 +310,11 @@ public final class RegionServicesManager {
 					if (!e.getPlayer().hasPermission("labyrinth.selection"))
 						return;
 
-					boolean isNew = Labyrinth.isLegacy();
+					boolean isOld = Labyrinth.isLegacy();
 
 					Material mat = Items.getMaterial("WOODEN_AXE");
 
-					if (!isNew) {
+					if (isOld) {
 						mat = Items.getMaterial("WOOD_AXE");
 					}
 

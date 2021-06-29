@@ -131,7 +131,10 @@ public abstract class Vent {
 	}
 
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
-		if (subscription == null) return;
+		if (subscription == null) {
+			Labyrinth.getInstance().getLogger().severe("Null subscription found from unknown source (Not labyrinth).");
+			return;
+		}
 		Call.getMap().SUBSCRIPTIONS.add(subscription);
 	}
 
