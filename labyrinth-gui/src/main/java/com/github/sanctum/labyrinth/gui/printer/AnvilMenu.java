@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.gui.printer;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -104,7 +104,7 @@ public class AnvilMenu {
         nms.handleInventoryCloseEvent(holder);
         nms.setActiveContainerDefault(holder);
 
-        Bukkit.getPluginManager().registerEvents(listener, Labyrinth.getInstance());
+        Bukkit.getPluginManager().registerEvents(listener, LabyrinthProvider.getInstance().getPluginInstance());
 
         final Object container = nms.newContainerAnvil(holder, title);
 

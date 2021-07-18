@@ -1,4 +1,5 @@
 name: Labyrinth
-version: 1.6.1
+version: ${project.version}
 main: com.github.sanctum.labyrinth.Labyrinth
 api-version: 1.16
+description: ${parent.description}

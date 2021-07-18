@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.gui.shared;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
@@ -37,8 +37,8 @@ public abstract class SharedMenu implements Listener {
 	protected static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
 	protected static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
 	protected static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
-	protected final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
-	protected final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
+	protected final LinkedList<Option> menuOptions = new LinkedList<>();
+	protected final Map<ItemStack, SharedProcess> processMap = new HashMap<>();
 
 	protected SharedMenu(Plugin plugin, String id) {
 		this.plugin = plugin;
@@ -59,7 +59,7 @@ public abstract class SharedMenu implements Listener {
 	 * @return The same menu w/ parent file location creation.
 	 */
 	public final synchronized SharedMenu inject() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		if (container.get(ItemStack[].class, id) == null) {
 			container.attach(id, new ItemStack[getSize()]);
 		}
@@ -111,7 +111,7 @@ public abstract class SharedMenu implements Listener {
 	 * @return The configured settings for this menu.
 	 */
 	public LinkedList<Option> getOptions() {
-		return MENU_OPTIONS;
+		return menuOptions;
 	}
 
 	/**
@@ -121,9 +121,9 @@ public abstract class SharedMenu implements Listener {
 	 * @return false if the option isn't configured.
 	 */
 	public final synchronized boolean removeOption(final @NotNull Option option) {
-		for (Option o : MENU_OPTIONS) {
+		for (Option o : menuOptions) {
 			if (o == option) {
-				Schedule.sync(() -> MENU_OPTIONS.remove(option)).run();
+				Schedule.sync(() -> menuOptions.remove(option)).run();
 				return true;
 			}
 		}
@@ -150,8 +150,8 @@ public abstract class SharedMenu implements Listener {
 	 * @return false if the option already found.
 	 */
 	public final synchronized boolean addOption(final @NotNull Option option) {
-		if (!MENU_OPTIONS.contains(option)) {
-			MENU_OPTIONS.add(option);
+		if (!menuOptions.contains(option)) {
+			menuOptions.add(option);
 			return true;
 		}
 		return false;
@@ -187,7 +187,7 @@ public abstract class SharedMenu implements Listener {
 	 * @param process The process to run when the item is interacted with.
 	 */
 	public final synchronized void setItem(int index, Supplier<ItemStack> item, SharedProcess process) {
-		this.PROCESS_MAP.put(item.get(), process);
+		this.processMap.put(item.get(), process);
 		Schedule.sync(() -> getInventory().setItem(index, item.get())).run();
 	}
 
@@ -198,7 +198,7 @@ public abstract class SharedMenu implements Listener {
 	 */
 	public final @NotNull
 	synchronized ItemStack[] getContents() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		ItemStack[] content = new ItemStack[getSize()];
 		ItemStack[] contentC = container.get(ItemStack[].class, id);
 		if (contentC != null) {
@@ -242,7 +242,7 @@ public abstract class SharedMenu implements Listener {
 	 * Remove this menu from cache entirely including its meta.
 	 */
 	public final synchronized void remove() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		container.delete(id);
 		INVENTORY_MAP.remove(getId());
 		HandlerList.unregisterAll(LISTENER_MAP.get(this.huid));
@@ -256,7 +256,7 @@ public abstract class SharedMenu implements Listener {
 	 * @param contents The item's to save.
 	 */
 	public final synchronized void save(ItemStack[] contents) {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		container.attach(id, contents);
 	}
 
@@ -270,26 +270,26 @@ public abstract class SharedMenu implements Listener {
 			return;
 		}
 		if (e.getHotbarButton() != -1) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_HOTBAR)) {
+			if (menuOptions.contains(Option.CANCEL_HOTBAR)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
 		if (e.getClickedInventory() == getInventory()) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_UPPER)) {
+			if (menuOptions.contains(Option.CANCEL_UPPER)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
 		if (e.getClickedInventory() == e.getView().getBottomInventory()) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_LOWER)) {
+			if (menuOptions.contains(Option.CANCEL_LOWER)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
-		if (this.PROCESS_MAP.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
-			ItemStack item = this.PROCESS_MAP.keySet().stream().filter(it -> it.isSimilar(e.getCurrentItem())).findFirst().orElse(null);
-			this.PROCESS_MAP.get(item).clickEvent(new SharedClick(e));
+		if (this.processMap.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
+			ItemStack item = this.processMap.keySet().stream().filter(it -> it.isSimilar(e.getCurrentItem())).findFirst().orElse(null);
+			this.processMap.get(item).clickEvent(new SharedClick(e));
 		}
 		Schedule.sync(() -> save(clickedInventory.getContents())).run();
 	}
@@ -361,7 +361,7 @@ public abstract class SharedMenu implements Listener {
 	 */
 	public static @NotNull
 	synchronized SharedMenu get(String id) {
-		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(Labyrinth.getInstance(), i) {
+		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(LabyrinthProvider.getInstance().getPluginInstance(), i) {
 			@Override
 			public @NotNull String getName() {
 				return "Labyrinth Provided";

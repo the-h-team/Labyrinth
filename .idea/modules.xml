@@ -4,9 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Labyrinth.iml" filepath="$PROJECT_DIR$/Labyrinth.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" filepath="$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labyrinth-common/labyrinth-common.iml" filepath="$PROJECT_DIR$/labyrinth-common/labyrinth-common.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" filepath="$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" filepath="$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labyrinth-spigot/labyrinth-spigot.iml" filepath="$PROJECT_DIR$/labyrinth-spigot/labyrinth-spigot.iml" />
     </modules>
   </component>
 </project>

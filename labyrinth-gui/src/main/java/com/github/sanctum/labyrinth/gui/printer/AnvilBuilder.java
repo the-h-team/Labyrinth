@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.gui.printer;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+
 import java.util.function.Consumer;
 
 /**
@@ -62,10 +64,11 @@ public class AnvilBuilder {
 			return new AnvilMenu(title, left, right);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
-			Labyrinth.getInstance().getLogger().severe("============================================");
-			Labyrinth.getInstance().getLogger().severe("An issue occurred while retrieving the version wrapper.");
-			Labyrinth.getInstance().getLogger().severe("Contact the Labyrinth developers.");
-			Labyrinth.getInstance().getLogger().severe("============================================");
+			final LabyrinthAPI labyrinthAPI = LabyrinthProvider.getInstance();
+			labyrinthAPI.getLogger().severe("============================================");
+			labyrinthAPI.getLogger().severe("An issue occurred while retrieving the version wrapper.");
+			labyrinthAPI.getLogger().severe("Contact the Labyrinth developers.");
+			labyrinthAPI.getLogger().severe("============================================");
 			return null;
 		}
 	}

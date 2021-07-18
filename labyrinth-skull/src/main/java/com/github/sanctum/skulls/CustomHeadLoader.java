@@ -1,6 +1,6 @@
 package com.github.sanctum.skulls;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -61,7 +61,7 @@ public final class CustomHeadLoader {
 					if (value != null) {
 						additions.put(new HeadText(name, category), provide(value));
 					} else {
-						Labyrinth.getInstance().getLogger().severe("- Custom head #" + id + " has no value to use.");
+						LabyrinthProvider.getInstance().getLogger().severe("- Custom head #" + id + " has no value to use.");
 					}
 
 
@@ -95,7 +95,7 @@ public final class CustomHeadLoader {
 			if (result != null) {
 				this.additions.put(entry.getKey(), result);
 			} else {
-				Labyrinth.getInstance().getLogger().severe("- Custom named head '" + entry.getKey() + "' unable to load.");
+				LabyrinthProvider.getInstance().getLogger().severe("- Custom named head '" + entry.getKey() + "' unable to load.");
 			}
 		}
 		return this;
@@ -108,7 +108,7 @@ public final class CustomHeadLoader {
 		if (!getHeads().isEmpty()) {
 			CustomHead.Manager.load(this);
 		} else {
-			Labyrinth.getInstance().getLogger().warning("- No heads were loaded from configuration " + manager.toString());
+			LabyrinthProvider.getInstance().getLogger().warning("- No heads were loaded from configuration " + manager.toString());
 		}
 	}
 

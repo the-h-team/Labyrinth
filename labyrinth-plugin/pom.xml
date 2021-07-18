@@ -3,16 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>Labyrinth</artifactId>
-        <groupId>com.github.sanctum</groupId>
-        <version>1.6.1</version>
+        <artifactId>labyrinth</artifactId>
+        <groupId>com.github.the-h-team</groupId>
+        <version>1.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Labyrinth-plugin</artifactId>
-    <version>1.6.1</version>
+    <artifactId>labyrinth-plugin</artifactId>
+    <name>Labyrinth-Paper</name>
+    <description>The Labyrinth library built to target Paper Spigot fork.</description>
 
     <build>
+        <finalName>${project.name}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -25,6 +27,45 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.milkbowl.vault</pattern>
+                                    <shadedPattern>lib.vault</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.github.the-h-team:labyrinth*</include>
+                                    <include>com.github.MilkBowl:VaultAPI</include>
+                                    <include>com.github.the-h-team:Enterprise</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>com.github.MilkBowl:VaultAPI</artifact>
+                                    <includes>
+                                        <include>net/milkbowl/vault/economy/Economy**</include>
+                                        <include>net/milkbowl/vault/permission/Permission**</include>
+                                        <include>META-INF/**</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:Enterprise</artifact>
+                                    <includes>
+                                        <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
+                                        <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:labyrinth-*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
@@ -40,7 +81,55 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-common</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-afk</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-gui</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-skull</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>Enterprise</artifactId>
+            <version>1.5</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
-
 
 </project>
