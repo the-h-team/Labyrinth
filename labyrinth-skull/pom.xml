@@ -25,7 +25,7 @@
             <version>1.16.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>com.github.sanctum</groupId>
             <artifactId>1_8_R1-head-support</artifactId>
             <version>1.8-R1-SNAPSHOT</version>
@@ -157,6 +157,6 @@
             <version>1.17-R1-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/1_17_R1.jar</systemPath>
-        </dependency>
+        </dependency>-->
     </dependencies>
 </project>

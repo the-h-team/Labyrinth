@@ -7,11 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="labyrinth-gui" />
-        <module name="labyrinth-spigot" />
         <module name="labyrinth-common" />
         <module name="labyrinth-afk" />
         <module name="labyrinth-skull" />
-        <module name="labyrinth-plugin" />
+        <module name="labyrinth-paper" />
+        <module name="labyrinth-spigot" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -19,6 +19,7 @@
       <module name="labyrinth-afk" target="1.8" />
       <module name="labyrinth-common" target="1.8" />
       <module name="labyrinth-gui" target="1.8" />
+      <module name="labyrinth-paper" target="1.8" />
       <module name="labyrinth-plugin" target="1.8" />
       <module name="labyrinth-skull" target="1.8" />
       <module name="labyrinth-spigot" target="1.8" />

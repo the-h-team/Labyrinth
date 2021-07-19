@@ -13,7 +13,6 @@
         <module>labyrinth-gui</module>
         <module>labyrinth-skull</module>
         <module>labyrinth-plugin</module>
-        <module>labyrinth-spigot</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -165,6 +164,11 @@
             <artifactId>annotations</artifactId>
             <version>20.1.0</version>
             <scope>provided</scope>
+        </dependency>
+        <!--suppress MavenDuplicateDependenciesInspection -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
         </dependency>
     </dependencies>
 

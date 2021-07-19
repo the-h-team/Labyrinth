@@ -8,10 +8,15 @@
         <version>1.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <modules>
+        <module>labyrinth-paper</module>
+        <module>labyrinth-spigot</module>
+    </modules>
 
     <artifactId>labyrinth-plugin</artifactId>
-    <name>Labyrinth-Paper</name>
-    <description>The Labyrinth library built to target Paper Spigot fork.</description>
+    <name>Labyrinth-Plugin</name>
+    <description>Aggregator project for Bukkit plugin distributions</description>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>
@@ -38,6 +43,8 @@
                                     <include>com.github.the-h-team:labyrinth*</include>
                                     <include>com.github.MilkBowl:VaultAPI</include>
                                     <include>com.github.the-h-team:Enterprise</include>
+                                    <include>net.kyori:*</include>
+                                    <include>org.checkerframework:*</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -58,6 +65,12 @@
                                         <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
                                         <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
                                     </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
                                 </filter>
                                 <filter>
                                     <artifact>com.github.the-h-team:labyrinth-*</artifact>
@@ -100,11 +113,6 @@
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skull</artifactId>
             <version>1.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bukkit</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
