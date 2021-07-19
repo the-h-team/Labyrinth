@@ -43,21 +43,21 @@ public class InventorySlide {
 
 	public static class Element {
 
-		private final ItemStack ITEM;
+		private final ItemStack item;
 
-		private final int SLOT;
+		private final int slot;
 
 		protected Element(ItemStack item, int slot) {
-			this.ITEM = item;
-			this.SLOT = slot;
+			this.item = item;
+			this.slot = slot;
 		}
 
 		public ItemStack getItem() {
-			return ITEM;
+			return item;
 		}
 
 		public int getSlot() {
-			return SLOT;
+			return slot;
 		}
 
 		public static class Update {
@@ -154,36 +154,36 @@ public class InventorySlide {
 
 			class Passthrough {
 
-				private final int SLOT;
+				private final int slot;
 
-				private Action ACTION;
+				private Action action;
 
-				private final InventorySlide SLIDE;
+				private final InventorySlide slide;
 
 				public Passthrough(int slot, InventorySlide slide) {
-					this.SLOT = slot;
-					this.SLIDE = slide;
+					this.slot = slot;
+					this.slide = slide;
 				}
 
 				protected int getSlot() {
-					return SLOT;
+					return slot;
 				}
 
 				@SuppressWarnings("UnusedReturnValue")
 				protected InventorySlide skip() {
-					this.SLIDE.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
-					return this.SLIDE;
+					this.slide.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(slot - 1, 0)));
+					return this.slide;
 				}
 
 				public InventorySlide apply(Action action) {
-					this.ACTION = action;
-					this.SLIDE.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
-					this.SLIDE.action.add(this);
-					return this.SLIDE;
+					this.action = action;
+					this.slide.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(slot - 1, 0)));
+					this.slide.action.add(this);
+					return this.slide;
 				}
 
 				protected Action getAction() {
-					return ACTION;
+					return action;
 				}
 			}
 
