@@ -41,6 +41,7 @@ public final class PaginatedBuilder<T> {
 	final LinkedList<ItemStack> processList;
 	final Map<ItemStack, PaginatedMenuClick<T>> itemActions;
 	final UUID id;
+	String title;
 	Inventory inventory;
 	PaginatedListener controller; // TODO: establish finality
 	NamespacedKey namespace;
@@ -53,7 +54,6 @@ public final class PaginatedBuilder<T> {
 	ItemStack borderItem;
 	ItemStack fillerItem;
 	private Plugin plugin;
-	private String title;
 	private String firstPageMessage;
 	private String lastPageMessage;
 	private PaginatedMenuClose<T> menuClose;
