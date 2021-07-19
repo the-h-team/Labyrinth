@@ -10,8 +10,7 @@
         <module name="labyrinth-common" />
         <module name="labyrinth-afk" />
         <module name="labyrinth-skull" />
-        <module name="labyrinth-paper" />
-        <module name="labyrinth-spigot" />
+        <module name="labyrinth-plugin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

@@ -6,10 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" filepath="$PROJECT_DIR$/labyrinth-afk/labyrinth-afk.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-common/labyrinth-common.iml" filepath="$PROJECT_DIR$/labyrinth-common/labyrinth-common.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" filepath="$PROJECT_DIR$/labyrinth-gui/labyrinth-gui.iml" />
-      <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-paper/labyrinth-paper.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-paper/labyrinth-paper.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" filepath="$PROJECT_DIR$/labyrinth-skull/labyrinth-skull.iml" />
-      <module fileurl="file://$PROJECT_DIR$/labyrinth-plugin/labyrinth-spigot/labyrinth-spigot.iml" filepath="$PROJECT_DIR$/labyrinth-plugin/labyrinth-spigot/labyrinth-spigot.iml" />
     </modules>
   </component>
 </project>

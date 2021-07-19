@@ -20,6 +20,7 @@
         <option value="$PROJECT_DIR$/labyrinth-event/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-region-loader/pom.xml" />
         <option value="$PROJECT_DIR$/labyrinth-region/pom.xml" />
+        <option value="$PROJECT_DIR$/labyrinth-spigot/pom.xml" />
       </set>
     </option>
   </component>
