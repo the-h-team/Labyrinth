@@ -382,15 +382,15 @@ public abstract class SharedMenu implements Listener {
 	public enum Option {
 
 		/**
-		 * Tell's the menu that lower inventory clicks need to be cancelled.
+		 * Tells the menu that lower inventory clicks need to be cancelled.
 		 */
 		CANCEL_LOWER,
 		/**
-		 * Tell's the menu that the upper inventory clicks need to be cancelled.
+		 * Tells the menu that the upper inventory clicks need to be cancelled.
 		 */
 		CANCEL_UPPER,
 		/**
-		 * Tell's the menu that the hot-bar swap transactions need to be cancelled.
+		 * Tells the menu that the hotbar-swap transactions need to be cancelled.
 		 */
 		CANCEL_HOTBAR
 

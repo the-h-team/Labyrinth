@@ -38,7 +38,7 @@ public class PaginatedProcessAction<T> {
 		if (item == null) {
 			throw new IllegalStateException("Missing item construction, ensure that happens before action click processing.");
 		}
-		builder.ITEM_ACTIONS.putIfAbsent(item, click);
+		builder.itemActions.putIfAbsent(item, click);
 		return this;
 	}
 

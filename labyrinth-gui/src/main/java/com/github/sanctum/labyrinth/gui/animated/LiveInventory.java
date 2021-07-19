@@ -97,10 +97,8 @@ public class LiveInventory implements Listener {
 		for (int i = 0; i < slides; i++) {
 			InventorySlide slide = new InventorySlide().fill(slides);
 			this.SLIDES.add(slide);
-			if (slide.ACTION != null) {
-				for (InventorySlide.Element.Action.Passthrough passthrough : slide.ACTION) {
-					this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
-				}
+			for (InventorySlide.Element.Action.Passthrough passthrough : slide.action) {
+				this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
 			}
 		}
 		return this;
@@ -114,10 +112,8 @@ public class LiveInventory implements Listener {
 
 	public LiveInventory then(InventorySlide slide) {
 		this.SLIDES.add(slide);
-		if (slide.ACTION != null) {
-			for (InventorySlide.Element.Action.Passthrough passthrough : slide.ACTION) {
-				this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
-			}
+		for (InventorySlide.Element.Action.Passthrough passthrough : slide.action) {
+			this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
 		}
 		return this;
 	}
@@ -314,6 +310,7 @@ public class LiveInventory implements Listener {
 		return this.TASKS.get(p);
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public LiveInventory setDirection(Player target, InventorySlide.Direction direction) {
 		if (direction == InventorySlide.Direction.RESET) {
 			REVERSING.put(target, false);

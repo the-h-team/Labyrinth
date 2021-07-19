@@ -33,85 +33,85 @@ import org.bukkit.plugin.Plugin;
  */
 public final class PaginatedBuilder<T> {
 
-	protected Inventory INVENTORY;
-	protected Plugin PLUGIN;
-	protected Map<Player, Asynchronous> TASK = new HashMap<>();
-	protected boolean LIVE;
-	protected int LIMIT = 28;
-	protected int INDEX = 1;
-	protected int PAGE = 1;
-	protected int SIZE = 54;
-	protected final UUID ID;
-	protected String TITLE;
-	protected String FIRST_PAGE_MESSAGE;
-	protected String LAST_PAGE_MESSAGE;
-	protected List<T> COLLECTION;
-	protected ItemStack BORDER_ITEM;
-	protected ItemStack FILLER_ITEM;
-	protected PaginatedMenuClose<T> MENU_CLOSE;
-	protected PaginatedMenuProcess<T> MENU_PROCESS;
-	protected final Map<ItemStack, Integer> NAVIGATION_LEFT;
-	protected final Map<ItemStack, Integer> NAVIGATION_RIGHT;
-	protected final Map<ItemStack, Integer> NAVIGATION_BACK;
-	protected final Map<ItemStack, Integer> INITIAL_CONTENTS;
-	protected PaginatedListener CONTROLLER;
-	protected NamespacedKey NAMESPACE;
-	protected final LinkedList<ItemStack> PROCESS_LIST;
-	protected final Map<ItemStack, PaginatedMenuClick<T>> ITEM_ACTIONS;
+	final Map<Player, Asynchronous> task = new HashMap<>();
+	final Map<ItemStack, Integer> navigationLeft;
+	final Map<ItemStack, Integer> navigationRight;
+	final Map<ItemStack, Integer> navigationBack;
+	final Map<ItemStack, Integer> initialContents;
+	final LinkedList<ItemStack> processList;
+	final Map<ItemStack, PaginatedMenuClick<T>> itemActions;
+	final UUID id;
+	Inventory inventory;
+	PaginatedListener controller; // TODO: establish finality
+	NamespacedKey namespace;
+	boolean live;
+	private int limit = 28;
+	int index = 1;
+	int page = 1;
+	int size = 54;
+	List<T> collection;
+	ItemStack borderItem;
+	ItemStack fillerItem;
+	private Plugin plugin;
+	private String title;
+	private String firstPageMessage;
+	private String lastPageMessage;
+	private PaginatedMenuClose<T> menuClose;
+	private PaginatedMenuProcess<T> menuProcess;
 
 	public PaginatedBuilder(Plugin plugin) {
-		this.ITEM_ACTIONS = new HashMap<>();
-		this.PROCESS_LIST = new LinkedList<>();
-		this.NAVIGATION_LEFT = new HashMap<>();
-		this.NAVIGATION_RIGHT = new HashMap<>();
-		this.NAVIGATION_BACK = new HashMap<>();
-		this.INITIAL_CONTENTS = new HashMap<>();
-		this.PLUGIN = plugin;
-		this.ID = UUID.randomUUID();
-		this.NAMESPACE = new NamespacedKey(plugin, "paginated_utility_manager");
-		this.CONTROLLER = new PaginatedListener();
-		Bukkit.getPluginManager().registerEvents(CONTROLLER, plugin);
+		this.itemActions = new HashMap<>();
+		this.processList = new LinkedList<>();
+		this.navigationLeft = new HashMap<>();
+		this.navigationRight = new HashMap<>();
+		this.navigationBack = new HashMap<>();
+		this.initialContents = new HashMap<>();
+		this.plugin = plugin;
+		this.id = UUID.randomUUID();
+		this.namespace = new NamespacedKey(plugin, "paginated_utility_manager");
+		this.controller = new PaginatedListener();
+		Bukkit.getPluginManager().registerEvents(controller, plugin);
 	}
 
 	public PaginatedBuilder(List<T> list) {
-		this.ITEM_ACTIONS = new HashMap<>();
-		this.PROCESS_LIST = new LinkedList<>();
-		this.NAVIGATION_LEFT = new HashMap<>();
-		this.NAVIGATION_RIGHT = new HashMap<>();
-		this.NAVIGATION_BACK = new HashMap<>();
-		this.INITIAL_CONTENTS = new HashMap<>();
-		this.COLLECTION = new LinkedList<>(list);
-		this.ID = UUID.randomUUID();
+		this.itemActions = new HashMap<>();
+		this.processList = new LinkedList<>();
+		this.navigationLeft = new HashMap<>();
+		this.navigationRight = new HashMap<>();
+		this.navigationBack = new HashMap<>();
+		this.initialContents = new HashMap<>();
+		this.collection = new LinkedList<>(list);
+		this.id = UUID.randomUUID();
 	}
 
 	public PaginatedBuilder(Plugin plugin, List<T> list) {
-		this.ITEM_ACTIONS = new HashMap<>();
-		this.COLLECTION = new LinkedList<>(list);
-		this.PROCESS_LIST = new LinkedList<>();
-		this.NAVIGATION_LEFT = new HashMap<>();
-		this.NAVIGATION_RIGHT = new HashMap<>();
-		this.NAVIGATION_BACK = new HashMap<>();
-		this.INITIAL_CONTENTS = new HashMap<>();
-		this.PLUGIN = plugin;
-		this.ID = UUID.randomUUID();
-		NAMESPACE = new NamespacedKey(plugin, "paginated_utility_manager");
-		CONTROLLER = new PaginatedListener();
-		Bukkit.getPluginManager().registerEvents(CONTROLLER, plugin);
+		this.itemActions = new HashMap<>();
+		this.collection = new LinkedList<>(list);
+		this.processList = new LinkedList<>();
+		this.navigationLeft = new HashMap<>();
+		this.navigationRight = new HashMap<>();
+		this.navigationBack = new HashMap<>();
+		this.initialContents = new HashMap<>();
+		this.plugin = plugin;
+		this.id = UUID.randomUUID();
+		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
+		controller = new PaginatedListener();
+		Bukkit.getPluginManager().registerEvents(controller, plugin);
 	}
 
 	public PaginatedBuilder(Plugin plugin, String title) {
-		this.TITLE = title;
-		this.PLUGIN = plugin;
-		this.ITEM_ACTIONS = new HashMap<>();
-		this.PROCESS_LIST = new LinkedList<>();
-		this.NAVIGATION_LEFT = new HashMap<>();
-		this.NAVIGATION_RIGHT = new HashMap<>();
-		this.NAVIGATION_BACK = new HashMap<>();
-		this.INITIAL_CONTENTS = new HashMap<>();
-		this.ID = UUID.randomUUID();
-		NAMESPACE = new NamespacedKey(plugin, "paginated_utility_manager");
-		CONTROLLER = new PaginatedListener();
-		Bukkit.getPluginManager().registerEvents(CONTROLLER, plugin);
+		this.title = title;
+		this.plugin = plugin;
+		this.itemActions = new HashMap<>();
+		this.processList = new LinkedList<>();
+		this.navigationLeft = new HashMap<>();
+		this.navigationRight = new HashMap<>();
+		this.navigationBack = new HashMap<>();
+		this.initialContents = new HashMap<>();
+		this.id = UUID.randomUUID();
+		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
+		controller = new PaginatedListener();
+		Bukkit.getPluginManager().registerEvents(controller, plugin);
 	}
 
 	/**
@@ -121,10 +121,10 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> forPlugin(Plugin plugin) {
-		NAMESPACE = new NamespacedKey(plugin, "paginated_utility_manager");
-		PLUGIN = plugin;
-		CONTROLLER = new PaginatedListener();
-		Bukkit.getPluginManager().registerEvents(CONTROLLER, plugin);
+		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
+		this.plugin = plugin;
+		controller = new PaginatedListener();
+		Bukkit.getPluginManager().registerEvents(controller, plugin);
 		return this;
 	}
 
@@ -135,7 +135,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> sort(Comparator<? super T> comparable) {
-		this.COLLECTION.sort(comparable);
+		this.collection.sort(comparable);
 		return this;
 	}
 
@@ -146,12 +146,12 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setTitle(String title) {
-		this.TITLE = title.replace("{PAGE}", "" + PAGE);
+		this.title = title.replace("{PAGE}", "" + page);
 		return this;
 	}
 
 	public PaginatedBuilder<T> isLive() {
-		this.LIVE = true;
+		this.live = true;
 		return this;
 	}
 
@@ -162,7 +162,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> collect(List<T> collection) {
-		this.COLLECTION = new LinkedList<>(collection);
+		this.collection = new LinkedList<>(collection);
 		return this;
 	}
 
@@ -173,7 +173,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> collect(LinkedList<T> collection) {
-		this.COLLECTION = new LinkedList<>(collection);
+		this.collection = new LinkedList<>(collection);
 		return this;
 	}
 
@@ -184,7 +184,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> limit(int amountPer) {
-		this.LIMIT = amountPer;
+		this.limit = amountPer;
 		return this;
 	}
 
@@ -195,7 +195,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setSize(int size) {
-		this.SIZE = size;
+		this.size = size;
 		return this;
 	}
 
@@ -206,7 +206,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setSize(InventoryRows rows) {
-		this.SIZE = rows.slotCount;
+		this.size = rows.slotCount;
 		return this;
 	}
 
@@ -217,7 +217,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setAlreadyFirst(String context) {
-		this.FIRST_PAGE_MESSAGE = context.replace("{PAGE}", "" + PAGE);
+		this.firstPageMessage = context.replace("{PAGE}", "" + page);
 		return this;
 	}
 
@@ -228,7 +228,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setAlreadyLast(String context) {
-		this.LAST_PAGE_MESSAGE = context.replace("{PAGE}", "" + PAGE);
+		this.lastPageMessage = context.replace("{PAGE}", "" + page);
 		return this;
 	}
 
@@ -239,7 +239,7 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setCloseAction(PaginatedMenuClose<T> inventoryClose) {
-		this.MENU_CLOSE = inventoryClose;
+		this.menuClose = inventoryClose;
 		return this;
 	}
 
@@ -250,14 +250,14 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setupProcess(PaginatedMenuProcess<T> inventoryProcess) {
-		this.MENU_PROCESS = inventoryProcess;
+		this.menuProcess = inventoryProcess;
 		return this;
 	}
 
 	/**
 	 * Initialize a border for the menu or fill remaining slots with specified materials.
 	 *
-	 * @return A border building elemement.
+	 * @return A border building element.
 	 */
 	public PaginatedBorderElement<T> setupBorder() {
 		return new PaginatedBorderElement<>(this);
@@ -279,119 +279,119 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	protected PaginatedBuilder<T> adjust(int desiredPage) {
-		PAGE = desiredPage;
-		if (BORDER_ITEM != null) {
-			switch (SIZE) {
+		page = desiredPage;
+		if (borderItem != null) {
+			switch (size) {
 				case 27:
 					int f;
 					for (f = 0; f < 10; f++) {
-						if (INVENTORY.getItem(f) == null)
-							INVENTORY.setItem(f, BORDER_ITEM);
+						if (inventory.getItem(f) == null)
+							inventory.setItem(f, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
 					for (f = 18; f < 27; f++) {
-						if (INVENTORY.getItem(f) == null)
-							INVENTORY.setItem(f, BORDER_ITEM);
+						if (inventory.getItem(f) == null)
+							inventory.setItem(f, borderItem);
 					}
 					break;
 				case 36:
 					int h;
 					for (h = 0; h < 10; h++) {
-						if (INVENTORY.getItem(h) == null)
-							INVENTORY.setItem(h, BORDER_ITEM);
+						if (inventory.getItem(h) == null)
+							inventory.setItem(h, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
 					for (h = 27; h < 36; h++) {
-						if (INVENTORY.getItem(h) == null)
-							INVENTORY.setItem(h, BORDER_ITEM);
+						if (inventory.getItem(h) == null)
+							inventory.setItem(h, borderItem);
 					}
 					break;
 				case 45:
 					int o;
 					for (o = 0; o < 10; o++) {
-						if (INVENTORY.getItem(o) == null)
-							INVENTORY.setItem(o, BORDER_ITEM);
+						if (inventory.getItem(o) == null)
+							inventory.setItem(o, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
-					INVENTORY.setItem(27, BORDER_ITEM);
-					INVENTORY.setItem(35, BORDER_ITEM);
-					INVENTORY.setItem(36, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
+					inventory.setItem(27, borderItem);
+					inventory.setItem(35, borderItem);
+					inventory.setItem(36, borderItem);
 					for (o = 36; o < 45; o++) {
-						if (INVENTORY.getItem(o) == null)
-							INVENTORY.setItem(o, BORDER_ITEM);
+						if (inventory.getItem(o) == null)
+							inventory.setItem(o, borderItem);
 					}
 					break;
 				case 54:
 					int j;
 					for (j = 0; j < 10; j++) {
-						if (INVENTORY.getItem(j) == null)
-							INVENTORY.setItem(j, BORDER_ITEM);
+						if (inventory.getItem(j) == null)
+							inventory.setItem(j, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
-					INVENTORY.setItem(27, BORDER_ITEM);
-					INVENTORY.setItem(35, BORDER_ITEM);
-					INVENTORY.setItem(36, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
+					inventory.setItem(27, borderItem);
+					inventory.setItem(35, borderItem);
+					inventory.setItem(36, borderItem);
 					for (j = 44; j < 54; j++) {
-						if (INVENTORY.getItem(j) == null)
-							INVENTORY.setItem(j, BORDER_ITEM);
+						if (inventory.getItem(j) == null)
+							inventory.setItem(j, borderItem);
 					}
 					break;
 			}
 		}
-		if (COLLECTION != null && !COLLECTION.isEmpty()) {
-			PaginatedList<T> list = new PaginatedList<>(this.COLLECTION)
-					.limit(LIMIT)
+		if (collection != null && !collection.isEmpty()) {
+			PaginatedList<T> list = new PaginatedList<>(this.collection)
+					.limit(limit)
 					.decorate((pagination, object, page, max, placement) -> {
 						if (object != null) {
-							this.INDEX = placement;
-							if (MENU_PROCESS != null) {
-								if (INDEX <= this.COLLECTION.size()) {
+							this.index = placement;
+							if (menuProcess != null) {
+								if (index <= this.collection.size()) {
 									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
-									MENU_PROCESS.accept(element);
-									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
+									menuProcess.accept(element);
+									CompletableFuture.runAsync(() -> inventory.addItem(element.getItem())).join();
 
-									if (!PROCESS_LIST.contains(element.getItem())) {
-										PROCESS_LIST.add(element.getItem());
+									if (!processList.contains(element.getItem())) {
+										processList.add(element.getItem());
 									}
 								}
 							}
 						} else {
-							this.PLUGIN.getLogger().warning("- +1 object failed to load in menu " + this.TITLE);
+							this.plugin.getLogger().warning("- +1 object failed to load in menu " + this.title);
 						}
 					});
 
-			list.get(this.PAGE);
+			list.get(this.page);
 
 		}
-		if (FILLER_ITEM != null) {
-			for (int l = 0; l < SIZE; l++) {
-				if (INVENTORY.getItem(l) == null) {
-					INVENTORY.setItem(l, FILLER_ITEM);
+		if (fillerItem != null) {
+			for (int l = 0; l < size; l++) {
+				if (inventory.getItem(l) == null) {
+					inventory.setItem(l, fillerItem);
 				}
 			}
 		}
-		ItemStack left = NAVIGATION_LEFT.keySet().stream().findFirst().orElse(null);
-		ItemStack right = NAVIGATION_RIGHT.keySet().stream().findFirst().orElse(null);
-		ItemStack back = NAVIGATION_BACK.keySet().stream().findFirst().orElse(null);
+		ItemStack left = navigationLeft.keySet().stream().findFirst().orElse(null);
+		ItemStack right = navigationRight.keySet().stream().findFirst().orElse(null);
+		ItemStack back = navigationBack.keySet().stream().findFirst().orElse(null);
 		if (left != null) {
-			if (!INVENTORY.contains(left)) {
-				INVENTORY.setItem(NAVIGATION_LEFT.get(left), left);
-				INVENTORY.setItem(NAVIGATION_RIGHT.get(right), right);
-				INVENTORY.setItem(NAVIGATION_BACK.get(back), back);
+			if (!inventory.contains(left)) {
+				inventory.setItem(navigationLeft.get(left), left);
+				inventory.setItem(navigationRight.get(right), right);
+				inventory.setItem(navigationBack.get(back), back);
 			}
 		}
-		if (!INITIAL_CONTENTS.isEmpty()) {
-			for (Map.Entry<ItemStack, Integer> entry : INITIAL_CONTENTS.entrySet()) {
+		if (!initialContents.isEmpty()) {
+			for (Map.Entry<ItemStack, Integer> entry : initialContents.entrySet()) {
 				if (entry.getValue() == -1) {
-					INVENTORY.addItem(entry.getKey());
+					inventory.addItem(entry.getKey());
 				} else {
-					INVENTORY.setItem(entry.getValue(), entry.getKey());
+					inventory.setItem(entry.getValue(), entry.getKey());
 				}
 			}
 		}
@@ -404,118 +404,118 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	protected PaginatedBuilder<T> adjust() {
-		if (BORDER_ITEM != null) {
-			switch (SIZE) {
+		if (borderItem != null) {
+			switch (size) {
 				case 27:
 					int f;
 					for (f = 0; f < 10; f++) {
-						if (INVENTORY.getItem(f) == null)
-							INVENTORY.setItem(f, BORDER_ITEM);
+						if (inventory.getItem(f) == null)
+							inventory.setItem(f, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
 					for (f = 18; f < 27; f++) {
-						if (INVENTORY.getItem(f) == null)
-							INVENTORY.setItem(f, BORDER_ITEM);
+						if (inventory.getItem(f) == null)
+							inventory.setItem(f, borderItem);
 					}
 					break;
 				case 36:
 					int h;
 					for (h = 0; h < 10; h++) {
-						if (INVENTORY.getItem(h) == null)
-							INVENTORY.setItem(h, BORDER_ITEM);
+						if (inventory.getItem(h) == null)
+							inventory.setItem(h, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
 					for (h = 27; h < 36; h++) {
-						if (INVENTORY.getItem(h) == null)
-							INVENTORY.setItem(h, BORDER_ITEM);
+						if (inventory.getItem(h) == null)
+							inventory.setItem(h, borderItem);
 					}
 					break;
 				case 45:
 					int o;
 					for (o = 0; o < 10; o++) {
-						if (INVENTORY.getItem(o) == null)
-							INVENTORY.setItem(o, BORDER_ITEM);
+						if (inventory.getItem(o) == null)
+							inventory.setItem(o, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
-					INVENTORY.setItem(27, BORDER_ITEM);
-					INVENTORY.setItem(35, BORDER_ITEM);
-					INVENTORY.setItem(36, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
+					inventory.setItem(27, borderItem);
+					inventory.setItem(35, borderItem);
+					inventory.setItem(36, borderItem);
 					for (o = 36; o < 45; o++) {
-						if (INVENTORY.getItem(o) == null)
-							INVENTORY.setItem(o, BORDER_ITEM);
+						if (inventory.getItem(o) == null)
+							inventory.setItem(o, borderItem);
 					}
 					break;
 				case 54:
 					int j;
 					for (j = 0; j < 10; j++) {
-						if (INVENTORY.getItem(j) == null)
-							INVENTORY.setItem(j, BORDER_ITEM);
+						if (inventory.getItem(j) == null)
+							inventory.setItem(j, borderItem);
 					}
-					INVENTORY.setItem(17, BORDER_ITEM);
-					INVENTORY.setItem(18, BORDER_ITEM);
-					INVENTORY.setItem(26, BORDER_ITEM);
-					INVENTORY.setItem(27, BORDER_ITEM);
-					INVENTORY.setItem(35, BORDER_ITEM);
-					INVENTORY.setItem(36, BORDER_ITEM);
+					inventory.setItem(17, borderItem);
+					inventory.setItem(18, borderItem);
+					inventory.setItem(26, borderItem);
+					inventory.setItem(27, borderItem);
+					inventory.setItem(35, borderItem);
+					inventory.setItem(36, borderItem);
 					for (j = 44; j < 54; j++) {
-						if (INVENTORY.getItem(j) == null)
-							INVENTORY.setItem(j, BORDER_ITEM);
+						if (inventory.getItem(j) == null)
+							inventory.setItem(j, borderItem);
 					}
 					break;
 			}
 		}
-		if (COLLECTION != null && !COLLECTION.isEmpty()) {
-			PaginatedList<T> list = new PaginatedList<>(this.COLLECTION)
-					.limit(LIMIT)
+		if (collection != null && !collection.isEmpty()) {
+			PaginatedList<T> list = new PaginatedList<>(this.collection)
+					.limit(limit)
 					.decorate((pagination, object, page, max, placement) -> {
 						if (object != null) {
-							this.INDEX = placement;
-							if (MENU_PROCESS != null) {
-								if (INDEX <= this.COLLECTION.size()) {
+							this.index = placement;
+							if (menuProcess != null) {
+								if (index <= this.collection.size()) {
 									PaginatedProcessAction<T> element = new PaginatedProcessAction<>(this, object);
-									MENU_PROCESS.accept(element);
-									CompletableFuture.runAsync(() -> INVENTORY.addItem(element.getItem())).join();
+									menuProcess.accept(element);
+									CompletableFuture.runAsync(() -> inventory.addItem(element.getItem())).join();
 
-									if (!PROCESS_LIST.contains(element.getItem())) {
-										PROCESS_LIST.add(element.getItem());
+									if (!processList.contains(element.getItem())) {
+										processList.add(element.getItem());
 									}
 								}
 							}
 						} else {
-							this.PLUGIN.getLogger().warning("- +1 object failed to load in menu " + this.TITLE);
+							this.plugin.getLogger().warning("- +1 object failed to load in menu " + this.title);
 						}
 					});
 
-			list.get(this.PAGE);
+			list.get(this.page);
 
 		}
-		if (FILLER_ITEM != null) {
-			for (int l = 0; l < SIZE; l++) {
-				if (INVENTORY.getItem(l) == null) {
-					INVENTORY.setItem(l, FILLER_ITEM);
+		if (fillerItem != null) {
+			for (int l = 0; l < size; l++) {
+				if (inventory.getItem(l) == null) {
+					inventory.setItem(l, fillerItem);
 				}
 			}
 		}
-		ItemStack left = NAVIGATION_LEFT.keySet().stream().findFirst().orElse(null);
-		ItemStack right = NAVIGATION_RIGHT.keySet().stream().findFirst().orElse(null);
-		ItemStack back = NAVIGATION_BACK.keySet().stream().findFirst().orElse(null);
+		ItemStack left = navigationLeft.keySet().stream().findFirst().orElse(null);
+		ItemStack right = navigationRight.keySet().stream().findFirst().orElse(null);
+		ItemStack back = navigationBack.keySet().stream().findFirst().orElse(null);
 		if (left != null) {
-			if (!INVENTORY.contains(left)) {
-				INVENTORY.setItem(NAVIGATION_LEFT.get(left), left);
-				INVENTORY.setItem(NAVIGATION_RIGHT.get(right), right);
-				INVENTORY.setItem(NAVIGATION_BACK.get(back), back);
+			if (!inventory.contains(left)) {
+				inventory.setItem(navigationLeft.get(left), left);
+				inventory.setItem(navigationRight.get(right), right);
+				inventory.setItem(navigationBack.get(back), back);
 			}
 		}
-		if (!INITIAL_CONTENTS.isEmpty()) {
-			for (Map.Entry<ItemStack, Integer> entry : INITIAL_CONTENTS.entrySet()) {
+		if (!initialContents.isEmpty()) {
+			for (Map.Entry<ItemStack, Integer> entry : initialContents.entrySet()) {
 				if (entry.getValue() == -1) {
-					INVENTORY.addItem(entry.getKey());
+					inventory.addItem(entry.getKey());
 				} else {
-					INVENTORY.setItem(entry.getValue(), entry.getKey());
+					inventory.setItem(entry.getValue(), entry.getKey());
 				}
 			}
 		}
@@ -531,8 +531,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationLeft(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_LEFT.putIfAbsent(item.get(), slot);
-		this.ITEM_ACTIONS.putIfAbsent(item.get(), click);
+		this.navigationLeft.putIfAbsent(item.get(), slot);
+		this.itemActions.putIfAbsent(item.get(), click);
 		return this;
 	}
 
@@ -545,8 +545,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationRight(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_RIGHT.putIfAbsent(item.get(), slot);
-		this.ITEM_ACTIONS.putIfAbsent(item.get(), click);
+		this.navigationRight.putIfAbsent(item.get(), slot);
+		this.itemActions.putIfAbsent(item.get(), click);
 		return this;
 	}
 
@@ -559,8 +559,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationBack(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_BACK.putIfAbsent(item.get(), slot);
-		this.ITEM_ACTIONS.putIfAbsent(item.get(), click);
+		this.navigationBack.putIfAbsent(item.get(), slot);
+		this.itemActions.putIfAbsent(item.get(), click);
 		return this;
 	}
 
@@ -573,8 +573,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationLeft(ItemStack item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_LEFT.putIfAbsent(item, slot);
-		this.ITEM_ACTIONS.putIfAbsent(item, click);
+		this.navigationLeft.putIfAbsent(item, slot);
+		this.itemActions.putIfAbsent(item, click);
 		return this;
 	}
 
@@ -587,8 +587,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationRight(ItemStack item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_RIGHT.putIfAbsent(item, slot);
-		this.ITEM_ACTIONS.putIfAbsent(item, click);
+		this.navigationRight.putIfAbsent(item, slot);
+		this.itemActions.putIfAbsent(item, click);
 		return this;
 	}
 
@@ -601,8 +601,8 @@ public final class PaginatedBuilder<T> {
 	 * @return The same menu builder.
 	 */
 	public PaginatedBuilder<T> setNavigationBack(ItemStack item, int slot, PaginatedMenuClick<T> click) {
-		this.NAVIGATION_BACK.putIfAbsent(item, slot);
-		this.ITEM_ACTIONS.putIfAbsent(item, click);
+		this.navigationBack.putIfAbsent(item, slot);
+		this.itemActions.putIfAbsent(item, click);
 		return this;
 	}
 
@@ -621,7 +621,7 @@ public final class PaginatedBuilder<T> {
 	 * @return A UUID.
 	 */
 	public UUID getId() {
-		return ID;
+		return id;
 	}
 
 	/**
@@ -630,7 +630,7 @@ public final class PaginatedBuilder<T> {
 	 * @return An inventory object.
 	 */
 	public Inventory getInventory() {
-		return INVENTORY;
+		return inventory;
 	}
 
 	/**
@@ -639,7 +639,7 @@ public final class PaginatedBuilder<T> {
 	 * @return A bukkit listener.
 	 */
 	public PaginatedListener getController() {
-		return CONTROLLER;
+		return controller;
 	}
 
 	/**
@@ -648,7 +648,7 @@ public final class PaginatedBuilder<T> {
 	 * @return Amount of items per page.
 	 */
 	public int getAmountPerPage() {
-		return LIMIT;
+		return limit;
 	}
 
 	/**
@@ -657,25 +657,25 @@ public final class PaginatedBuilder<T> {
 	 * @return Max amount of GUI pages.
 	 */
 	public int getMaxPages() {
-		return (COLLECTION.size() / (LIMIT - 1)) < 0 ? COLLECTION.size() / LIMIT : COLLECTION.size() / LIMIT - 1;
+		return (collection.size() / (limit - 1)) < 0 ? collection.size() / limit : collection.size() / limit - 1;
 	}
 
 	/**
-	 * Get the default namespace used when one isnt provided.
+	 * Get the default namespace used when one isn't provided.
 	 *
 	 * @return A namespaced key.
 	 */
 	public NamespacedKey getKey() {
-		return NAMESPACE;
+		return namespace;
 	}
 
 	/**
-	 * Get the collection involed with the menu.
+	 * Get the collection involved with the menu.
 	 *
 	 * @return The string collection used in the GUI.
 	 */
 	public List<T> getCollection() {
-		return COLLECTION;
+		return collection;
 	}
 
 	/**
@@ -683,8 +683,8 @@ public final class PaginatedBuilder<T> {
 	 *
 	 * @return The plugin connected with the menu.
 	 */
-	public Plugin getPlugin() {
-		return PLUGIN;
+	public Plugin getPlugin() { // TODO: mark nullity
+		return plugin;
 	}
 
 	/**
@@ -696,21 +696,21 @@ public final class PaginatedBuilder<T> {
 		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < SIZE)
+			if (e.getView().getTopInventory().getSize() < size)
 				return;
 			if (e.getInventory().equals(getInventory())) {
 
 				Player p = (Player) e.getPlayer();
 
-				if (TASK.containsKey(p)) {
-					TASK.get(p).cancelTask();
-					TASK.remove(p);
+				if (task.containsKey(p)) {
+					task.get(p).cancelTask();
+					task.remove(p);
 				}
-				if (MENU_CLOSE != null) {
-					MENU_CLOSE.closeEvent(new PaginatedCloseAction<>(PaginatedBuilder.this, p, e.getView()));
+				if (menuClose != null) {
+					menuClose.closeEvent(new PaginatedCloseAction<>(PaginatedBuilder.this, p, e.getView()));
 				}
-				PAGE = 0;
-				INDEX = 0;
+				page = 0;
+				index = 0;
 				p.updateInventory();
 			}
 		}
@@ -726,7 +726,7 @@ public final class PaginatedBuilder<T> {
 		public void onDrag(InventoryDragEvent e) {
 			if (!(e.getWhoClicked() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < SIZE)
+			if (e.getView().getTopInventory().getSize() < size)
 				return;
 			if (!e.getInventory().equals(getInventory())) return;
 
@@ -739,7 +739,7 @@ public final class PaginatedBuilder<T> {
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getWhoClicked() instanceof Player))
 				return;
-			if (e.getView().getTopInventory().getSize() < SIZE) return;
+			if (e.getView().getTopInventory().getSize() < size) return;
 
 			if (e.getHotbarButton() != -1) {
 				e.setCancelled(true);
@@ -769,34 +769,35 @@ public final class PaginatedBuilder<T> {
 						e.setCancelled(false);
 						return;
 					}
-					if (PROCESS_LIST.stream().anyMatch(i -> i.isSimilar(item))) {
-						ITEM_ACTIONS.entrySet().stream().filter(en -> en.getKey().isSimilar(item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
+					if (processList.stream().anyMatch(i -> i.isSimilar(item))) {
+						// TODO: Reformat to safe optional use
+						itemActions.entrySet().stream().filter(en -> en.getKey().isSimilar(item)).map(Map.Entry::getValue).findFirst().get().clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
-					if (NAVIGATION_BACK.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
+					if (navigationBack.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						itemActions.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 					}
-					if (NAVIGATION_LEFT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (PAGE == 1) {
-							p.sendMessage(FIRST_PAGE_MESSAGE);
+					if (navigationLeft.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						if (page == 1) {
+							p.sendMessage(firstPageMessage);
 						} else {
-							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, PAGE);
+							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, page);
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
-								PAGE -= 1;
+								page -= 1;
 							}
-							ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
+							itemActions.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 						}
 					}
-					if (NAVIGATION_RIGHT.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
-						if (!((INDEX + 1) >= COLLECTION.size() + 1)) {
-							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, PAGE);
+					if (navigationRight.keySet().stream().anyMatch(i -> i.isSimilar(item))) {
+						if (!((index + 1) >= collection.size() + 1)) {
+							SyncMenuSwitchPageEvent<T> event1 = new SyncMenuSwitchPageEvent<>(PaginatedBuilder.this, p, e.getView(), item, page);
 							Bukkit.getPluginManager().callEvent(event1);
 							if (!event1.isCancelled()) {
-								PAGE += 1;
-								ITEM_ACTIONS.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
+								page += 1;
+								itemActions.get(item).clickEvent(new PaginatedClickAction<>(PaginatedBuilder.this, p, e.getView(), item, e.isLeftClick(), e.isRightClick(), e.isShiftClick(), e.getClick() == ClickType.MIDDLE));
 							}
 						} else {
-							p.sendMessage(LAST_PAGE_MESSAGE);
+							p.sendMessage(lastPageMessage);
 						}
 					}
 				}

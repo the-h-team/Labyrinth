@@ -17,14 +17,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class InventorySlide {
 
-	protected final List<Element> ITEMS;
-
-	protected List<Element.Action.Passthrough> ACTION;
-
-	public InventorySlide() {
-		this.ITEMS = new LinkedList<>();
-		this.ACTION = new LinkedList<>();
-	}
+	protected final List<Element> items = new LinkedList<>();
+	protected final List<Element.Action.Passthrough> action = new LinkedList<>();
 
 	public InventorySlide fill(int amount) {
 		for (int i = 1; i < amount + 2; i++) {
@@ -38,7 +32,7 @@ public class InventorySlide {
 	}
 
 	public LinkedList<Element> getElements() {
-		LinkedList<Element> obj = new LinkedList<>(this.ITEMS);
+		LinkedList<Element> obj = new LinkedList<>(this.items);
 		obj.sort(Comparator.comparingInt(Element::getSlot));
 		return obj;
 	}
@@ -175,15 +169,16 @@ public class InventorySlide {
 					return SLOT;
 				}
 
+				@SuppressWarnings("UnusedReturnValue")
 				protected InventorySlide skip() {
-					this.SLIDE.ITEMS.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
+					this.SLIDE.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
 					return this.SLIDE;
 				}
 
 				public InventorySlide apply(Action action) {
 					this.ACTION = action;
-					this.SLIDE.ITEMS.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
-					this.SLIDE.ACTION.add(this);
+					this.SLIDE.items.add(new Element(new Item.Edit(Material.PAPER).setTitle(" ").setLore("&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", "&cNon-customized item.", "&7&m▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬").build(), Math.max(SLOT - 1, 0)));
+					this.SLIDE.action.add(this);
 					return this.SLIDE;
 				}
 

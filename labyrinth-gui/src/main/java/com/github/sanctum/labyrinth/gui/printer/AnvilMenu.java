@@ -27,8 +27,8 @@ public class AnvilMenu {
     private final AnvilListener listener;
     private int containerId;
     private Inventory inventory;
-    protected ItemBuilder LEFT_ITEM;
-    protected ItemBuilder RIGHT_ITEM;
+    protected ItemBuilder leftItem; // TODO: decide finality
+    protected ItemBuilder rightItem; // TODO: decide finality
     protected AnvilCloseEvent event;
     private boolean visible;
     private boolean empty;
@@ -36,9 +36,9 @@ public class AnvilMenu {
 
     public AnvilMenu(Player holder, String title, ItemBuilder left, ItemBuilder right) throws InstantiationException {
         this.holder = holder;
-        this.LEFT_ITEM = left;
+        this.leftItem = left;
         this.title = title;
-        this.RIGHT_ITEM = right;
+        this.rightItem = right;
         this.listener = new AnvilListener();
         AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 
@@ -49,9 +49,9 @@ public class AnvilMenu {
     }
 
     public AnvilMenu(String title, ItemBuilder left, ItemBuilder right) throws InstantiationException {
-        this.LEFT_ITEM = left;
+        this.leftItem = left;
         this.title = title;
-        this.RIGHT_ITEM = right;
+        this.rightItem = right;
         this.listener = new AnvilListener();
         AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 
@@ -110,10 +110,10 @@ public class AnvilMenu {
 
         inventory = nms.toBukkitInventory(container);
 
-        inventory.setItem(Slot.INPUT_LEFT.get(), LEFT_ITEM.item);
+        inventory.setItem(Slot.INPUT_LEFT.get(), leftItem.item);
 
-        if (RIGHT_ITEM != null) {
-            inventory.setItem(Slot.INPUT_RIGHT.get(), RIGHT_ITEM.item);
+        if (rightItem != null) {
+            inventory.setItem(Slot.INPUT_RIGHT.get(), rightItem.item);
         }
 
         containerId = nms.getNextContainerId(holder, container);
@@ -175,27 +175,27 @@ public class AnvilMenu {
      * @return The left item builder.
      */
     public ItemBuilder getLeft() {
-        return LEFT_ITEM;
+        return leftItem;
     }
 
     /**
      * @return The right item builder.
      */
     public ItemBuilder getRight() {
-        return RIGHT_ITEM;
+        return rightItem;
     }
 
     /**
      * Check if the menu is open for anyone.
      *
-     * @return false if the menu isnt currently open
+     * @return false if the menu is not currently open
      */
     public boolean isVisible() {
         return visible;
     }
 
     /**
-     * Get whos viewing the menu.
+     * Get who is viewing the menu.
      *
      * @return Get the viewer of the inventory.
      */
@@ -221,6 +221,7 @@ public class AnvilMenu {
                     if (getLeft() != null && getLeft().click != null) {
                         if (clicked.getType() == getLeft().item.getType()) {
                             final ItemMeta meta = clicked.getItemMeta();
+                            //noinspection ConstantConditions
                             getLeft().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
                         }
                     } else closeInventory(false);
@@ -230,6 +231,7 @@ public class AnvilMenu {
                     if (getRight() != null && getRight().click != null) {
                         if (clicked.getType() == getRight().item.getType()) {
                             final ItemMeta meta = clicked.getItemMeta();
+                            //noinspection ConstantConditions
                             getRight().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
                         }
                     }

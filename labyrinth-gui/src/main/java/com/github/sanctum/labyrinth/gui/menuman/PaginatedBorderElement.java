@@ -29,6 +29,7 @@ public class PaginatedBorderElement<T> {
 	public PaginatedBorderElement<T> setBorderType(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
+		//noinspection ConstantConditions
 		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		this.materialB = item;
@@ -44,6 +45,7 @@ public class PaginatedBorderElement<T> {
 	public PaginatedBorderElement<T> setFillType(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
+		//noinspection ConstantConditions
 		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		this.materialF = item;
@@ -73,15 +75,15 @@ public class PaginatedBorderElement<T> {
 	}
 
 	/**
-	 * Complete the changes to the border element and convert back to a {@link com.github.sanctum.labyrinth.gui.builder.PaginatedBuilder}
+	 * Complete the changes to the border element and convert back to a {@link PaginatedBuilder}
 	 *
 	 * @return The previous paginated builder with the newly applied values.
 	 */
 	public PaginatedBuilder<T> build() {
 		if (this.materialF != null) {
-			builder.FILLER_ITEM = this.materialF;
+			builder.fillerItem = this.materialF;
 		}
-		builder.BORDER_ITEM = this.materialB;
+		builder.borderItem = this.materialB;
 		return builder;
 	}
 

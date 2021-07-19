@@ -89,6 +89,7 @@ public interface ClickAction {
 		 *
 		 * @return if the menu will close after the command is executed
 		 */
+		@SuppressWarnings("SameReturnValue")
 		public boolean closeOnClick() {
 			return true;
 		}

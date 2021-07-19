@@ -183,20 +183,21 @@ public final class Menu {
          * @param p The player to open the menu for.
          */
         public void open(Player p) {
-            this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-            if (this.builder.LIVE) {
-                this.builder.INVENTORY.setMaxStackSize(1);
-                if (this.builder.TASK.containsKey(p)) {
-                    this.builder.TASK.get(p).cancelTask();
+            this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+            if (this.builder.live) {
+                this.builder.inventory.setMaxStackSize(1);
+                if (this.builder.task.containsKey(p)) {
+                    this.builder.task.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> {
+                //noinspection CodeBlock2Expr
+                this.builder.task.put(p, Schedule.async(() -> {
                     Schedule.sync(() -> {
-                        this.builder.INVENTORY.clear();
+                        this.builder.inventory.clear();
                         this.builder.adjust();
                     }).run();
                 }));
-                this.builder.TASK.get(p).repeat(1, 5);
+                this.builder.task.get(p).repeat(1, 5);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(2);
             } else {
                 p.openInventory(this.builder.adjust(1).getInventory());
@@ -210,18 +211,18 @@ public final class Menu {
          * @param page The page to open the menu @.
          */
         public void open(Player p, int page) {
-            this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-            if (this.builder.LIVE) {
+            this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+            if (this.builder.live) {
 
-                if (this.builder.TASK.containsKey(p)) {
-                    this.builder.TASK.get(p).cancelTask();
+                if (this.builder.task.containsKey(p)) {
+                    this.builder.task.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
-                    this.builder.INVENTORY.clear();
+                this.builder.task.put(p, Schedule.async(() -> Schedule.sync(() -> {
+                    this.builder.inventory.clear();
                     this.builder.adjust(page);
                 }).run()));
-                this.builder.TASK.get(p).repeat(1, 5);
+                this.builder.task.get(p).repeat(1, 5);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(2);
             } else {
                 p.openInventory(this.builder.adjust(Math.min(page, this.builder.getMaxPages())).getInventory());
@@ -229,20 +230,21 @@ public final class Menu {
         }
 
         public void liven(Player p, int delay, int period) {
-            this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-            if (this.builder.LIVE) {
+            this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+            if (this.builder.live) {
 
-                if (this.builder.TASK.containsKey(p)) {
-                    this.builder.TASK.get(p).cancelTask();
+                if (this.builder.task.containsKey(p)) {
+                    this.builder.task.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> {
+                //noinspection CodeBlock2Expr
+                this.builder.task.put(p, Schedule.async(() -> {
                     Schedule.sync(() -> {
-                        this.builder.INVENTORY.clear();
+                        this.builder.inventory.clear();
                         this.builder.adjust();
                     }).run();
                 }));
-                this.builder.TASK.get(p).repeat(delay, period);
+                this.builder.task.get(p).repeat(delay, period);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
             } else {
                 p.openInventory(this.builder.adjust(1).getInventory());
@@ -250,18 +252,18 @@ public final class Menu {
         }
 
         public void liven(Player p, int page, int delay, int period) {
-            this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
-            if (this.builder.LIVE) {
+            this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+            if (this.builder.live) {
 
-                if (this.builder.TASK.containsKey(p)) {
-                    this.builder.TASK.get(p).cancelTask();
+                if (this.builder.task.containsKey(p)) {
+                    this.builder.task.get(p).cancelTask();
                 }
 
-                this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
-                    this.builder.INVENTORY.clear();
+                this.builder.task.put(p, Schedule.async(() -> Schedule.sync(() -> {
+                    this.builder.inventory.clear();
                     this.builder.adjust(page);
                 }).run()));
-                this.builder.TASK.get(p).repeat(delay, period);
+                this.builder.task.get(p).repeat(delay, period);
                 Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
             } else {
                 p.openInventory(this.builder.adjust(Math.min(page, this.builder.getMaxPages())).getInventory());
@@ -269,7 +271,7 @@ public final class Menu {
         }
 
         public Menu.Paginated<T> liven() {
-            this.builder.LIVE = true;
+            this.builder.live = true;
             return this;
         }
 
@@ -279,7 +281,7 @@ public final class Menu {
          * @param collection The string collection to update with.
          */
         public void recollect(Collection<T> collection) {
-            this.builder.COLLECTION = new LinkedList<>(collection);
+            this.builder.collection = new LinkedList<>(collection);
         }
 
         /**
@@ -288,7 +290,7 @@ public final class Menu {
          * @param collection The string collection to update with.
          */
         public void recollect(Player p, Collection<T> collection) {
-            this.builder.COLLECTION = new LinkedList<>(collection);
+            this.builder.collection = new LinkedList<>(collection);
             open(p);
         }
 
@@ -298,7 +300,7 @@ public final class Menu {
          * @param collection The string collection to update with.
          */
         public void recollect(Player p, int page, Collection<T> collection) {
-            this.builder.COLLECTION = new LinkedList<>(collection);
+            this.builder.collection = new LinkedList<>(collection);
             open(p, page);
         }
 

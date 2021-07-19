@@ -83,8 +83,8 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	 * Re-open the current page the player is on.
 	 */
 	public void refresh() {
-		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
-		whoClicked.openInventory(builder.adjust(builder.PAGE).getInventory());
+		builder.inventory = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		whoClicked.openInventory(builder.adjust(builder.page).getInventory());
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	 */
 	public void close() {
 		whoClicked.closeInventory();
-		HandlerList.unregisterAll(builder.CONTROLLER);
+		HandlerList.unregisterAll(builder.controller);
 	}
 
 	@Override
