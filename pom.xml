@@ -11,7 +11,7 @@
         <module>labyrinth-common</module>
         <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>
-        <module>labyrinth-skull</module>
+        <module>labyrinth-skulls</module>
         <module>labyrinth-plugin</module>
     </modules>
     <packaging>pom</packaging>
@@ -85,10 +85,6 @@
     </build>
 
     <repositories>
-        <repository>
-            <id>nms-repo</id>
-            <url>https://repo.codemc.org/repository/nms/</url>
-        </repository>
         <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>

@@ -47,7 +47,7 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.the-h-team:labyrinth-skull</artifact>
+                                    <artifact>com.github.the-h-team:labyrinth-skulls</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
-            <artifactId>labyrinth-skull</artifactId>
+            <artifactId>labyrinth-skulls</artifactId>
             <version>1.7.0</version>
         </dependency>
     </dependencies>
