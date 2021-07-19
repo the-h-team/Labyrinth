@@ -27,46 +27,27 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>net.milkbowl.vault</pattern>
-                                    <shadedPattern>lib.vault</shadedPattern>
-                                </relocation>
-                            </relocations>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.github.the-h-team:labyrinth*</include>
-                                    <include>com.github.MilkBowl:VaultAPI</include>
-                                    <include>com.github.the-h-team:Enterprise</include>
-                                </includes>
-                            </artifactSet>
                             <filters>
                                 <filter>
-                                    <artifact>com.github.MilkBowl:VaultAPI</artifact>
-                                    <includes>
-                                        <include>net/milkbowl/vault/economy/Economy**</include>
-                                        <include>net/milkbowl/vault/permission/Permission**</include>
-                                        <include>META-INF/**</include>
-                                    </includes>
+                                    <artifact>com.github.the-h-team:labyrinth-common</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.the-h-team:Enterprise</artifact>
-                                    <includes>
-                                        <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
-                                        <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>*:*</artifact>
+                                    <artifact>com.github.the-h-team:labyrinth-afk</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.the-h-team:labyrinth-*</artifact>
+                                    <artifact>com.github.the-h-team:labyrinth-gui</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:labyrinth-skull</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
@@ -106,30 +87,6 @@
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skull</artifactId>
             <version>1.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.bukkit</groupId>
-                    <artifactId>bukkit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.github.the-h-team</groupId>
-            <artifactId>Enterprise</artifactId>
-            <version>1.5</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
