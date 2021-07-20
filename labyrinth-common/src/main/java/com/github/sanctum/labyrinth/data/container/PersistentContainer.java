@@ -16,45 +16,43 @@ import java.util.stream.Collectors;
  */
 public class PersistentContainer extends PersistentData {
 
-	private final NamespacedKey NAME;
+	private final NamespacedKey key;
 
-	private final Map<String, Object> DATA;
+	private final Map<String, Object> dataMap = new HashMap<>();
 
-	private final Map<String, Boolean> FLAG;
+	private final Map<String, Boolean> persistenceMap = new HashMap<>();
 
 	public PersistentContainer(NamespacedKey key) {
-		this.NAME = key;
-		this.FLAG = new HashMap<>();
-		this.DATA = new HashMap<>();
+		this.key = key;
 	}
 
 	/**
 	 * Check if a specified key value is present within the container.
 	 *
-	 * @param key The key delimiter for this value.
-	 * @return true if the specified key is found within the container.
+	 * @param key the key delimiter for this value
+	 * @return true if the specified key is found within the container
 	 */
 	@Override
 	public synchronized boolean exists(String key) {
-		if (!this.DATA.containsKey(key)) {
+		if (!this.dataMap.containsKey(key)) {
 			return found(key);
 		}
 		return true;
 	}
 
 	/**
-	 * Check if a specified key value found persistently.
+	 * Check if a specified key value is stored persistently.
 	 *
-	 * @param key The key delimiter for the desired value.
-	 * @return true if the desired value found persistently within this container.
+	 * @param key the key delimiter for the desired value
+	 * @return true if the key value has been stored persistently
 	 */
 	protected synchronized boolean found(String key) {
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		boolean f = manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key);
-		if (f && !this.DATA.containsKey(key)) {
+		boolean f = manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key);
+		if (f && !this.dataMap.containsKey(key)) {
 			try {
-				Object o = new HFEncoded(manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)).deserialized();
-				this.DATA.put(key, o);
+				Object o = new HFEncoded(manager.getConfig().getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)).deserialized();
+				this.dataMap.put(key, o);
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -63,20 +61,20 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	/**
-	 * Delete the specified key values persistence
+	 * Delete the specified key's persisted data.
 	 *
-	 * @param key The key delimiter for the desired value to remove.
-	 * @return true if the persistence was successfully vanquished.
+	 * @param key the key delimiter for the desired value to remove
+	 * @return true if the persistence was successfully vanquished
 	 */
 	public synchronized boolean delete(String key) {
-		this.DATA.remove(key);
+		this.dataMap.remove(key);
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
-			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
+		if (manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)) {
+			manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
 			manager.saveConfig();
-			final ConfigurationSection section = manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey());
+			final ConfigurationSection section = manager.getConfig().getConfigurationSection(this.key.getNamespace() + "." + this.key.getKey());
 			if (section != null && section.getKeys(false).isEmpty()) {
-				manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey(), null);
+				manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey(), null);
 				manager.saveConfig();
 			}
 			return true;
@@ -86,21 +84,25 @@ public class PersistentContainer extends PersistentData {
 
 	/**
 	 * Save & override any existing traces of the specified key value.
+	 * <p>
+	 * Will only save persisted values (such with
+	 * {@link #attach(String, Object)}, but not with
+	 * {@link #lend(String, Object)}.
 	 *
-	 * @param key The key delimiter for the desired value to save.
+	 * @param key the key delimiter of desired value to save
 	 */
 	public synchronized void save(String key) throws IOException {
-		if (this.FLAG.get(key)) {
+		if (this.persistenceMap.get(key)) {
 			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, serialize(key));
+			manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
 			manager.saveConfig();
 		}
 	}
 
 	protected synchronized <R> R load(Class<R> type, String key) {
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
-			R value = deserialize(type, manager.getConfig().getString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key));
+		if (manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)) {
+			R value = deserialize(type, manager.getConfig().getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 			return attach(key, value);
 		}
 		return null;
@@ -111,14 +113,14 @@ public class PersistentContainer extends PersistentData {
 	 * <p>
 	 * The persistence of this object will be attempted on shutdown.
 	 *
-	 * @param key   The key delimiter for this value.
-	 * @param value The value to store.
-	 * @param <R>   The type this value represents.
-	 * @return The stored value.
+	 * @param key the key delimiter for this value
+	 * @param value the value to store
+	 * @param <R> the type this value represents
+	 * @return the stored value
 	 */
 	public <R> R attach(String key, R value) {
-		this.DATA.put(key, value);
-		this.FLAG.put(key, true);
+		this.dataMap.put(key, value);
+		this.persistenceMap.put(key, true);
 		return value;
 	}
 
@@ -127,65 +129,65 @@ public class PersistentContainer extends PersistentData {
 	 * <p>
 	 * The persistence of this object will <strong>NOT</strong> be attempted on shutdown.
 	 *
-	 * @param key   The key delimiter for this value.
-	 * @param value The value to store.
-	 * @param <R>   The type this value represents.
-	 * @return The stored value.
+	 * @param key the key delimiter for this value
+	 * @param value the value to store
+	 * @param <R> the type this value represents
+	 * @return the stored value
 	 */
 	public <R> R lend(String key, R value) {
-		this.DATA.put(key, value);
-		this.FLAG.put(key, false);
+		this.dataMap.put(key, value);
+		this.persistenceMap.put(key, false);
 		return value;
 	}
 
 	/**
 	 * Get a specified value by class type & key delimiter.
 	 *
-	 * <p>If no value is found but a storage location is found, the value will
-	 * assist in both determining the final result of this method use
-	 * as-well as loading found but not cached values into the container.
+	 * <p>If no value is found but a storage location is found, the class
+	 * parameter will assist in both determining the final result of this
+	 * method as well as loading found but not cached values into the container.
 	 *
-	 * @param type The type this value is assignable from.
-	 * @param key  The key delimiter for this value.
-	 * @param <R>  The type this value represents.
-	 * @return The desired persistent value otherwise null if not found or not
-	 * assignable from the same class type.
+	 * @param type the type this value is assignable from
+	 * @param key the key delimiter for this value
+	 * @param <R> the type this value represents
+	 * @return the desired persistent value otherwise null if not found or not
+	 * assignable from the same class type
 	 */
 	@Override
 	public <R> R get(Class<R> type, String key) {
-		if (!this.DATA.containsKey(key)) {
+		if (!this.dataMap.containsKey(key)) {
 			if (found(key)) {
 				return load(type, key);
 			}
 			return null;
 		}
-		if (!type.isAssignableFrom(this.DATA.get(key).getClass())) {
+		if (!type.isAssignableFrom(this.dataMap.get(key).getClass())) {
 			return null;
 		}
-		return (R) this.DATA.get(key);
+		return (R) this.dataMap.get(key);
 	}
 
 	/**
 	 * Get all cached object keys within the container.
 	 *
-	 * @return All cached object keys
+	 * @return all cached object keys
 	 */
 	@Override
 	public Set<String> keySet() {
-		return this.DATA.keySet();
+		return this.dataMap.keySet();
 	}
 
 	/**
 	 * Get all object keys both cached & non-cached.
 	 *
-	 * @return All object keys, period
+	 * @return all object keys, period
 	 */
 	public synchronized List<String> persistentKeySet() {
 		List<String> list = new LinkedList<>();
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey())) {
+		if (manager.getConfig().isConfigurationSection(this.key.getNamespace() + "." + this.key.getKey())) {
 			//noinspection ConstantConditions
-			list.addAll(manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false));
+			list.addAll(manager.getConfig().getConfigurationSection(this.key.getNamespace() + "." + this.key.getKey()).getKeys(false));
 		}
 		for (String cached : keySet()) {
 			if (!list.contains(cached)) {
@@ -198,29 +200,29 @@ public class PersistentContainer extends PersistentData {
 	/**
 	 * Get all cached objects within this container.
 	 *
-	 * @return All cached objects within the container.
+	 * @return all cached objects within the container
 	 */
 	public Collection<Object> values() {
-		return this.DATA.values();
+		return this.dataMap.values();
 	}
 
 	/**
 	 * Get all cached objects within this container of a specified type.
 	 *
-	 * @return All values of interest.
+	 * @return all values of interest
 	 */
 	@Override
 	public <R> Collection<? extends R> values(Class<R> type) {
-		return this.DATA.values().stream().filter(o -> type.isAssignableFrom(o.getClass())).map(o -> (R) o).collect(Collectors.toList());
+		return this.dataMap.values().stream().filter(o -> type.isAssignableFrom(o.getClass())).map(o -> (R) o).collect(Collectors.toList());
 	}
 
 	/**
-	 * Get the name space for this container.
+	 * Get the namespaced key for this container.
 	 *
-	 * @return The container's name space
+	 * @return this container's namespaced key
 	 */
 	public NamespacedKey getKey() {
-		return this.NAME;
+		return this.key;
 	}
 
 	/**
@@ -244,7 +246,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return The serialized string otherwise null if an issue occurred.
 	 */
 	public String serialize(String key) throws IOException {
-		return new HFEncoded(this.DATA.get(key)).serialize();
+		return new HFEncoded(this.dataMap.get(key)).serialize();
 	}
 
 
