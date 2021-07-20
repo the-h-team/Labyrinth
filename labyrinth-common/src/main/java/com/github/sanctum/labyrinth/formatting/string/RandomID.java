@@ -16,6 +16,7 @@ public class RandomID {
      */
     public RandomID(int length) {
         this.length = length;
+        //noinspection SpellCheckingInspection
         this.assortment = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     }
 

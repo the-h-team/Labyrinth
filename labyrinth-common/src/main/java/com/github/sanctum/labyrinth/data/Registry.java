@@ -82,7 +82,7 @@ public class Registry<T> {
 			try {
 				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
 			}
 		}
 

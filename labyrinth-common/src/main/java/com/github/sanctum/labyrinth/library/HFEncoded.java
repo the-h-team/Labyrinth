@@ -2,12 +2,15 @@ package com.github.sanctum.labyrinth.library;
 
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.util.Base64;
 
+@SuppressWarnings("RedundantThrows")
 public class HFEncoded {
 
 	private Object obj;
@@ -17,10 +20,10 @@ public class HFEncoded {
 	/**
 	 * Convert the entire object into a string while retaining all of its values.
 	 *
-	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified obejcts
+	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified objects
 	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
 	 *
-	 * @param obj The Java Serializable implemented object to convert.
+	 * @param obj a Serializable object (Java Serializable and/or Bukkit's ConfigurationSerializable)
 	 */
 	public HFEncoded(Object obj) {
 		this.obj = obj;
@@ -30,10 +33,10 @@ public class HFEncoded {
 	 * Convert a serialized object from its string form back into an object of desired type
 	 * while retaining all originally saved values.
 	 *
-	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified obejcts
+	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified objects
 	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
 	 *
-	 * @param objSerial The serialized object string to convert.
+	 * @param objSerial The serialized object string to convert
 	 */
 	public HFEncoded(String objSerial) {
 		this.objSerial = objSerial;
@@ -42,7 +45,7 @@ public class HFEncoded {
 	/**
 	 * Convert the object into a byte array using base 64 encryption.
 	 *
-	 * @return The inputted object as a byte array.
+	 * @return The inputted object as a byte array
 	 */
 	public byte[] toByteArray() {
 		try {
@@ -59,15 +62,18 @@ public class HFEncoded {
 	/**
 	 * The original stored object retaining all values converted to a string.
 	 *
-	 * @return Get's a serialized hash for this object with retained values.
-	 * @throws IOException Throw's an exception if Bukkit cannot serialize the object due to no
-	 *                     inheritance of the java.io Serializable interface.
+	 * @return a serialized, encoded form of this object with retained values
+	 * @throws NotSerializableException if unable to serialize the object
 	 */
-	public String serialize() throws IOException {
+	public String serialize() throws NotSerializableException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(output);
-		outputStream.writeObject(obj);
-		outputStream.flush();
+		try {
+			BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(output);
+			outputStream.writeObject(obj);
+			outputStream.flush();
+		} catch (IOException e) {
+			throw new IllegalStateException("This should never happen", e);
+		}
 
 		byte[] serial = output.toByteArray();
 		return Base64.getEncoder().encodeToString(serial);
@@ -75,14 +81,13 @@ public class HFEncoded {
 
 	/**
 	 * The original stored object retaining all values converted back to an object.
+	 * <p>
+	 * WARN: You will need to pass a type to the object upon use.
 	 *
-	 * <p>WARN: You will need to pass a type to the object upon use.</p>
-	 *
-	 * @return Get's an object back from a serialized string with all original values.
-	 * @throws IOException            Throw's IO if something had been modified in comparison to
-	 *                                it's original methods/class structure.
-	 * @throws ClassNotFoundException Throw's exception if the class was unable to be
-	 *                                located properly.
+	 * @return the deserialized form of an object with its original state
+	 * @throws IOException typically, if a class has been modified in comparison
+	 * to its original structure
+	 * @throws ClassNotFoundException if the class could not be located properly
 	 */
 	public Object deserialized() throws IOException, ClassNotFoundException {
 		byte[] serial = Base64.getDecoder().decode(objSerial);
@@ -98,9 +103,9 @@ public class HFEncoded {
 	 *
 	 * @param type The type this object represents.
 	 * @param <R>  The type this object represents
-	 * @return The deserialized object otherwise null.
+	 * @return a deserialized object or null
 	 */
-	public <R> R deserialize(Class<R> type) {
+	public <R> @Nullable R deserialize(Class<R> type) {
 		try {
 			Object o = deserialized();
 			if (type.isAssignableFrom(o.getClass())) {

@@ -58,6 +58,7 @@ public final class Items {
 	public static ItemStack getItem(Material type, String name) {
 		ItemStack i = new ItemStack(type);
 		ItemMeta meta = i.getItemMeta();
+		//noinspection ConstantConditions
 		meta.setDisplayName(StringUtils.use(name).translate());
 		i.setItemMeta(meta);
 		return i;

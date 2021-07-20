@@ -382,7 +382,8 @@ public class Item {
 	}
 
 	/**
-	 * Used to encapsulate already made itemstack's or make new ones and edit them.
+	 * Used to encapsulate already-made ItemStacks or to make new ones
+	 * and edit them.
 	 */
 	public static class Edit {
 

@@ -184,7 +184,7 @@ public class PaginatedAssortment {
 				}
 			}
 		} else {
-			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &epages!", ColoredString.ColorType.MC).toString());
+			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &e" + "pages!", ColoredString.ColorType.MC).toString());
 		}
 	}
 
@@ -259,7 +259,7 @@ public class PaginatedAssortment {
 				}
 			}
 		} else {
-			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &epages!", ColoredString.ColorType.MC).toString());
+			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &e" + "pages!", ColoredString.ColorType.MC).toString());
 		}
 	}
 

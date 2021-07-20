@@ -27,6 +27,7 @@ public abstract class Vent {
 		this.async = isAsync;
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	protected Vent(boolean isAsync, int id) {
 		this.id = id;
 		this.async = isAsync;

@@ -16,7 +16,7 @@ public class RegionTraverseEvent extends Vent {
 	}
 
 	public Region getRegion() {
-		return resident.getRegion().get();
+		return resident.getRegion().get(); // TODO: Try to throw explicitly or call #orElse(null) + update method nullity
 	}
 
 }

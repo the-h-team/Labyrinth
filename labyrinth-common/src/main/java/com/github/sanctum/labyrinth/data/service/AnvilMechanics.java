@@ -37,7 +37,7 @@ public interface AnvilMechanics {
 	void sendPacketOpenWindow(Player player, int containerId, String inventoryTitle);
 
 	/**
-	 * Sends PacketPlayOutCloseWindow to the player with the contaienr id
+	 * Sends PacketPlayOutCloseWindow to the player with the container id
 	 *
 	 * @param player      The player to send the packet to
 	 * @param containerId The container id to close

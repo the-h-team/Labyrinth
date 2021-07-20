@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class TabCompletionBuilder {
 	static final Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
-	static Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
+	static final Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
 
 	String[] args;
 	String commandLabel;
@@ -63,12 +63,12 @@ public class TabCompletionBuilder {
 	 * present then an empty list will be provided for completion.
 	 */
 	public @NotNull List<String> get(int length) {
-		List<TabCompletionFilter> indexs = COMPLETION_MAP.getOrDefault(length, null);
+		List<TabCompletionFilter> indexes = COMPLETION_MAP.getOrDefault(length, null);
 		List<String> results = new ArrayList<>();
-		if (indexs == null) {
+		if (indexes == null) {
 			return results;
 		}
-		for (TabCompletionFilter index : indexs) {
+		for (TabCompletionFilter index : indexes) {
 			if (!index.anywhere) {
 				if (args.length == index.length && Arrays.stream(args).anyMatch(s -> index.key.equalsIgnoreCase(s))) {
 					if (args[index.keyIndex].equalsIgnoreCase(index.key)) {

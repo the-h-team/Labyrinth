@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.IOException;
 import java.util.*;
@@ -73,7 +74,8 @@ public class PersistentContainer extends PersistentData {
 		if (manager.getConfig().isString(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key)) {
 			manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey() + "." + key, null);
 			manager.saveConfig();
-			if (manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false).isEmpty()) {
+			final ConfigurationSection section = manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey());
+			if (section != null && section.getKeys(false).isEmpty()) {
 				manager.getConfig().set(this.NAME.getNamespace() + "." + this.NAME.getKey(), null);
 				manager.saveConfig();
 			}
@@ -164,9 +166,9 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	/**
-	 * Get all cached object key's within the container.
+	 * Get all cached object keys within the container.
 	 *
-	 * @return All cached object key's
+	 * @return All cached object keys
 	 */
 	@Override
 	public Set<String> keySet() {
@@ -174,14 +176,15 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	/**
-	 * Get all object key's both cached & non-cached
+	 * Get all object keys both cached & non-cached.
 	 *
-	 * @return All object key's period.
+	 * @return All object keys, period
 	 */
 	public synchronized List<String> persistentKeySet() {
 		List<String> list = new LinkedList<>();
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
 		if (manager.getConfig().isConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey())) {
+			//noinspection ConstantConditions
 			list.addAll(manager.getConfig().getConfigurationSection(this.NAME.getNamespace() + "." + this.NAME.getKey()).getKeys(false));
 		}
 		for (String cached : keySet()) {

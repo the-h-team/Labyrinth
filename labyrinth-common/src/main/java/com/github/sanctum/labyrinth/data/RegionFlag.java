@@ -58,6 +58,7 @@ public class RegionFlag extends Cuboid.Flag {
 		super(plugin, id, message);
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public RegionFlag setMessage(String message) {
 		this.message = message;
 		return this;

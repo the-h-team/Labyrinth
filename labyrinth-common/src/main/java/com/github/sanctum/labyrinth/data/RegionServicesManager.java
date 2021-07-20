@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnusedReturnValue")
 public final class RegionServicesManager {
 
 	@SuppressWarnings("deprecation")
@@ -71,7 +72,7 @@ public final class RegionServicesManager {
 
 	public boolean load(Vent.Subscription<?> subscription) {
 		Vent.subscribe(subscription);
-		return true;
+		return true; // TODO: make void return with checked exception throws
 	}
 
 	@Deprecated
@@ -268,6 +269,7 @@ public final class RegionServicesManager {
 					Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(Region::match)).join();
 					if (r.isPresent()) {
 						// TODO: rewrite the optional#get call to safely obtain the value
+						//noinspection OptionalGetWithoutIsPresent
 						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
@@ -296,6 +298,7 @@ public final class RegionServicesManager {
 						}
 
 						// TODO: decide how to handle optional (ifPresent setPos1?)
+						//noinspection OptionalGetWithoutIsPresent
 						selection.setPos1(e.getBlock().get().getLocation());
 
 						new Vent.Call<>(new CuboidCreationEvent(selection)).run();
@@ -306,6 +309,7 @@ public final class RegionServicesManager {
 					Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(Region::match)).join();
 					if (r.isPresent()) {
 						// TODO: rewrite the optional#get call to safely obtain the value
+						//noinspection OptionalGetWithoutIsPresent
 						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
@@ -332,7 +336,8 @@ public final class RegionServicesManager {
 							e.setResult(Event.Result.DENY);
 						}
 
-						// TODO: decide how to handle optional (ifPresent setPos1?)
+						// TODO: decide how to handle optional (ifPresent setPos2?)
+						//noinspection OptionalGetWithoutIsPresent
 						selection.setPos2(e.getBlock().get().getLocation());
 
 						new Vent.Call<>(new CuboidCreationEvent(selection)).run();

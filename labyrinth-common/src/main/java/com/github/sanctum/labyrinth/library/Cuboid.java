@@ -54,6 +54,7 @@ public interface Cuboid {
 
 	int zMin();
 
+	@SuppressWarnings("UnusedReturnValue")
 	class Selection {
 
 		private static final List<Selection> cache = new LinkedList<>();
@@ -87,6 +88,7 @@ public interface Cuboid {
 			return wizard;
 		}
 
+		@SuppressWarnings("SameReturnValue")
 		public ItemStack getWand() {
 			return null;
 		}
@@ -211,6 +213,7 @@ public interface Cuboid {
 			this.allowed = true;
 		}
 
+		@SuppressWarnings("MethodDoesntCallSuperMethod")
 		@Override
 		public Flag clone() {
 			return new RegionFlag(this);
@@ -256,6 +259,7 @@ public interface Cuboid {
 		private final Flag BUILD;
 		private final Flag PVP;
 
+		@SuppressWarnings("OptionalGetWithoutIsPresent") // TODO: Refactor to avoid unchecked #get/safely operate on Optionals
 		public FlagManager() {
 
 			BREAK = RegionFlag.Builder.initialize(plugin)

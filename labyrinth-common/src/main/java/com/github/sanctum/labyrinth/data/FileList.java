@@ -18,13 +18,14 @@ public class FileList {
 	}
 
 	/**
-	 * Using a {@link org.bukkit.plugin.java.JavaPlugin} as the key, look for specific files.
+	 * Using a {@link Plugin plugin} as the key, look for specific files.
 	 * <p>
-	 * Using your plugins main class instance create custom data files with ease sourcing from
-	 * your plugins main folder.
+	 * <strong>Design:</strong> <em>Using your plugin's main class instance,
+	 * create custom data files with ease--sourced direct from your plugin's
+	 * data folder.</em>
 	 *
-	 * @param plugin The plugin source to browse.
-	 * @return A potential listing of configuration.
+	 * @param plugin The plugin source to browse
+	 * @return A potential listing of configuration
 	 */
 	public static FileList search(@NotNull final Plugin plugin) {
 		FileList list = null;
@@ -40,8 +41,9 @@ public class FileList {
 	/**
 	 * Get the list of all cached file managers for a specified plugin.
 	 *
-	 * @param plugin The plugin to retrieve file management for.
-	 * @return A list of file managers if the plugin is cached otherwise an empty list.
+	 * @param plugin the plugin to retrieve file management for
+	 * @return a list of file managers if the plugin is cached;
+	 * otherwise, an empty List
 	 */
 	public static List<FileManager> getFiles(Plugin plugin) {
 		return CACHE.entrySet().stream().filter(e -> e.getKey().getName().equals(plugin.getName())).map(Map.Entry::getValue).findFirst().orElse(new ArrayList<>());
@@ -50,7 +52,7 @@ public class FileList {
 	/**
 	 * Get the plugin attached to the search.
 	 *
-	 * @return The plugin attached to this file search.
+	 * @return The plugin attached to this file search
 	 */
 	public Plugin getPlugin() {
 		return plugin;
@@ -59,30 +61,33 @@ public class FileList {
 	/**
 	 * Copy a file of any type from this listings plugin.
 	 *
-	 * @param fileName     The name of the file following the file type.
-	 * @param fileMangager The filemanager instance to copy to.
+	 * @param fileName     The name of the file following the file type
+	 * @param fileManager The FileManager instance to copy to
 	 */
-	public void copy(String fileName, FileManager fileMangager) {
-		FileManager.copy(this.plugin.getResource(fileName), fileMangager);
+	public void copy(String fileName, FileManager fileManager) {
+		//noinspection ConstantConditions
+		FileManager.copy(this.plugin.getResource(fileName), fileManager);
 	}
 
 	/**
 	 * Copy a yml file from this listings plugin to a manager of specification.
 	 *
-	 * @param fileName     The file name only.
-	 * @param fileMangager The filemanager instance to copy to.
+	 * @param fileName     The file name only
+	 * @param fileManager The FileManager instance to copy to
 	 */
-	public void copyYML(String fileName, FileManager fileMangager) {
-		FileManager.copy(this.plugin.getResource(fileName + ".yml"), fileMangager);
+	public void copyYML(String fileName, FileManager fileManager) {
+		//noinspection ConstantConditions
+		FileManager.copy(this.plugin.getResource(fileName + ".yml"), fileManager);
 	}
 
 	/**
 	 * Copy a yml file from this listings plugin to a file of specification.
 	 *
-	 * @param fileName The file name only.
-	 * @param file     The file instance to copy to.
+	 * @param fileName The file name only
+	 * @param file     The file instance to copy to
 	 */
 	public void copyYML(String fileName, File file) {
+		//noinspection ConstantConditions
 		FileManager.copy(this.plugin.getResource(fileName + ".yml"), file);
 	}
 
