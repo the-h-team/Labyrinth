@@ -34,7 +34,7 @@ public class FileManager {
             //noinspection ResultOfMethodCallIgnored
             pluginDataDir.mkdir();
         }
-        // If d is null or empty, use plugin's data folder. If not getMechanics the file describing the subdirectory.
+        // If d is null or empty, use plugin's data folder. If present get the file describing the subdirectory.
         final File parent = (d == null || d.isEmpty()) ? pluginDataDir : new File(pluginDataDir, d);
         if (!parent.exists()) {
             //noinspection ResultOfMethodCallIgnored

@@ -116,7 +116,7 @@ public final class Menu {
     }
 
     /**
-     * Lazy initialization of inventory on first getMechanics.
+     * Lazy initialization of inventory on first get.
      * <p>
      * Added bonus: listener returns faster before getInventory is called.
      *

@@ -63,7 +63,6 @@ public class StringUtils {
 
 	/**
 	 * Form a custom gradient to wrap the provided context with.
-	 * Then decide whether or not to translate it or getMechanics the raw joined string back.
 	 *
 	 * @param from the starting hex code
 	 * @param to the ending hex code
@@ -75,8 +74,6 @@ public class StringUtils {
 
 	/**
 	 * Form a custom gradient to wrap the provided context with.
-	 * <p>
-	 * Then decide whether or not to translate it or getMechanics the raw joined string back.
 	 *
 	 * @param from the starting hex code
 	 * @param to the ending hex code
