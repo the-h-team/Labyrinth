@@ -11,13 +11,13 @@ import java.util.*;
  * @author [Hempfest, ms5984]
  */
 public class TabCompletionBuilder {
+	static final Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
+	static Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
 
-	protected String[] args;
-	protected String commandLabel;
-	protected static Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
-	protected static Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();
+	String[] args;
+	String commandLabel;
 
-	protected TabCompletionBuilder() {
+	TabCompletionBuilder() {
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class TabCompletionBuilder {
 	 * @param label The command to check for.
 	 * @return The same builder.
 	 */
-	protected TabCompletionBuilder forCommand(String label) {
+	TabCompletionBuilder forCommand(String label) {
 		this.commandLabel = label;
 		return this;
 	}

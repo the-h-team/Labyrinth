@@ -41,6 +41,7 @@ public final class NamespacedKey {
 	 * @param key       key
 	 * @deprecated should never be used by plugins, for internal use only!!
 	 */
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	protected NamespacedKey(@NotNull String namespace, @NotNull String key) {
 		this.namespace = namespace;
@@ -64,11 +65,7 @@ public final class NamespacedKey {
 	 * @param plugin the plugin to use for the namespace
 	 * @param key    the key to create
 	 */
-	public NamespacedKey(@NotNull Plugin plugin, @NotNull String key) {
-
-		if (plugin == null) {
-			LabyrinthProvider.getInstance().getLogger().severe("- Namespaced plugin cannot be null!");
-		}
+	public NamespacedKey(@NotNull("Plugin cannot be null!") Plugin plugin, @NotNull String key) {
 
 		this.namespace = plugin.getName().toLowerCase(Locale.ROOT);
 		this.key = key.toLowerCase(Locale.ROOT);

@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class FileManager {
     protected final String n;
     protected final String d;
-    protected File file;
+    protected final File file;
     protected FileConfiguration fc;
     protected final File parent;
     protected final Plugin plugin;

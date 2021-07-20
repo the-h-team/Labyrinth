@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author Hempfest
  */
+@SuppressWarnings("ConstantConditions")
 public class Item {
 
 	private static final LinkedList<Item> cache = new LinkedList<>();
@@ -101,6 +102,7 @@ public class Item {
 		return this;
 	}
 
+	@SuppressWarnings("deprecation")
 	public Item shapeRecipe(String... shape) {
 		ShapedRecipe recipe = new ShapedRecipe(key, item);
 		List<String> list = Arrays.asList(shape);
