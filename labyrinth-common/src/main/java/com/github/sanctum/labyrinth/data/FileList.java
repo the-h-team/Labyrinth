@@ -24,8 +24,8 @@ public class FileList {
 	 * create custom data files with ease--sourced direct from your plugin's
 	 * data folder.</em>
 	 *
-	 * @param plugin The plugin source to browse
-	 * @return A potential listing of configuration
+	 * @param plugin the plugin source to browse
+	 * @return a potential listing of configuration
 	 */
 	public static FileList search(@NotNull final Plugin plugin) {
 		FileList list = null;
@@ -52,7 +52,7 @@ public class FileList {
 	/**
 	 * Get the plugin attached to the search.
 	 *
-	 * @return The plugin attached to this file search
+	 * @return the plugin attached to this file search
 	 */
 	public Plugin getPlugin() {
 		return plugin;
@@ -61,8 +61,8 @@ public class FileList {
 	/**
 	 * Copy a file of any type from this listings plugin.
 	 *
-	 * @param fileName     The name of the file following the file type
-	 * @param fileManager The FileManager instance to copy to
+	 * @param fileName the name of the file following the file type
+	 * @param fileManager the FileManager instance to copy to
 	 */
 	public void copy(String fileName, FileManager fileManager) {
 		//noinspection ConstantConditions
@@ -72,8 +72,8 @@ public class FileList {
 	/**
 	 * Copy a yml file from this listings plugin to a manager of specification.
 	 *
-	 * @param fileName     The file name only
-	 * @param fileManager The FileManager instance to copy to
+	 * @param fileName the file name only
+	 * @param fileManager the FileManager instance to copy to
 	 */
 	public void copyYML(String fileName, FileManager fileManager) {
 		//noinspection ConstantConditions
@@ -83,8 +83,8 @@ public class FileList {
 	/**
 	 * Copy a yml file from this listings plugin to a file of specification.
 	 *
-	 * @param fileName The file name only
-	 * @param file     The file instance to copy to
+	 * @param fileName the file name only
+	 * @param file the file instance to copy to
 	 */
 	public void copyYML(String fileName, File file) {
 		//noinspection ConstantConditions
@@ -97,8 +97,8 @@ public class FileList {
 	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
 	 * main class passed through the initial search query.
 	 *
-	 * @param name Name of config file
-	 * @param desc Description of config file (designate subdirectory)
+	 * @param name name of config file
+	 * @param desc description of config file (designate subdirectory)
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
