@@ -102,9 +102,9 @@ public abstract class Vent {
 			if (key != null) {
 				Call.getMap().unsubscribe(eventType, key);
 			} else {
-				Call.getMap().SUBSCRIPTIONS.forEach(s -> {
+				Call.getMap().subscriptions.forEach(s -> {
 					if (s.equals(this)) {
-						Schedule.sync(() -> Call.getMap().SUBSCRIPTIONS.remove(this)).waitReal(1);
+						Schedule.sync(() -> Call.getMap().subscriptions.remove(this)).waitReal(1);
 					}
 				});
 			}
@@ -136,17 +136,17 @@ public abstract class Vent {
 			LabyrinthProvider.getInstance().getLogger().severe("Null subscription found from unknown source (Not labyrinth).");
 			return;
 		}
-		Call.getMap().SUBSCRIPTIONS.add(subscription);
+		Call.getMap().subscriptions.add(subscription);
 	}
 
 	public static <T extends Vent> void unsubscribeAll(Class<T> labyrinthEvent, Plugin user) {
 
 		VentMap map = Call.getMap();
 
-		for (Subscription<?> s : map.SUBSCRIPTIONS) {
+		for (Subscription<?> s : map.subscriptions) {
 			if (s.getEventType().isAssignableFrom(labyrinthEvent)) {
 				if (s.getUser().equals(user)) {
-					Schedule.sync(() -> map.SUBSCRIPTIONS.remove(s)).run();
+					Schedule.sync(() -> map.subscriptions.remove(s)).run();
 				}
 			}
 		}
@@ -210,13 +210,13 @@ public abstract class Vent {
 
 			switch (type) {
 				case Synchronous:
-					if (event.isAsynchronous()) throw new RuntimeException("This event can only be ran asynchronously");
+					if (event.isAsynchronous()) throw new IllegalStateException("This event can only be run asynchronously");
 
 					if (event.getHost() == null) {
 						event.setHost(plugin);
 					}
 
-					map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+					map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 						if (s.getEventType().isAssignableFrom(event.getType())) {
 							switch (s.getPriority()) {
@@ -244,7 +244,7 @@ public abstract class Vent {
 					return event;
 
 				case Asynchronous:
-					if (!event.isAsynchronous()) throw new RuntimeException("This event can only be ran synchronously");
+					if (!event.isAsynchronous()) throw new IllegalStateException("This event can only be run synchronously");
 
 					event.setHost(plugin);
 
@@ -254,7 +254,7 @@ public abstract class Vent {
 							event.setHost(plugin);
 						}
 
-						map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+						map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
@@ -301,7 +301,7 @@ public abstract class Vent {
 			switch (this.type) {
 				case Asynchronous:
 
-					if (!event.isAsynchronous()) throw new RuntimeException("This event can only be ran synchronously");
+					if (!event.isAsynchronous()) throw new IllegalStateException("This event can only be run synchronously");
 
 					if (event.getHost() == null) {
 						event.setHost(plugin);
@@ -309,7 +309,7 @@ public abstract class Vent {
 
 					return CompletableFuture.supplyAsync(() -> {
 
-						map.SUBSCRIPTIONS.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+						map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
