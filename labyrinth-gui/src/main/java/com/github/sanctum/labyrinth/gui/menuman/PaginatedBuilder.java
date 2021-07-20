@@ -34,13 +34,13 @@ import org.bukkit.plugin.Plugin;
 public final class PaginatedBuilder<T> {
 
 	final Map<Player, Asynchronous> task = new HashMap<>();
-	final Map<ItemStack, Integer> navigationLeft;
-	final Map<ItemStack, Integer> navigationRight;
-	final Map<ItemStack, Integer> navigationBack;
-	final Map<ItemStack, Integer> initialContents;
-	final LinkedList<ItemStack> processList;
-	final Map<ItemStack, PaginatedMenuClick<T>> itemActions;
-	final UUID id;
+	final Map<ItemStack, PaginatedMenuClick<T>> itemActions = new HashMap<>();
+	final LinkedList<ItemStack> processList = new LinkedList<>();
+	final Map<ItemStack, Integer> navigationLeft = new HashMap<>();
+	final Map<ItemStack, Integer> navigationRight = new HashMap<>();
+	final Map<ItemStack, Integer> navigationBack = new HashMap<>();
+	final Map<ItemStack, Integer> initialContents = new HashMap<>();
+	final UUID id = UUID.randomUUID();
 	String title;
 	Inventory inventory;
 	PaginatedListener controller; // TODO: establish finality
@@ -60,40 +60,19 @@ public final class PaginatedBuilder<T> {
 	private PaginatedMenuProcess<T> menuProcess;
 
 	public PaginatedBuilder(Plugin plugin) {
-		this.itemActions = new HashMap<>();
-		this.processList = new LinkedList<>();
-		this.navigationLeft = new HashMap<>();
-		this.navigationRight = new HashMap<>();
-		this.navigationBack = new HashMap<>();
-		this.initialContents = new HashMap<>();
 		this.plugin = plugin;
-		this.id = UUID.randomUUID();
 		this.namespace = new NamespacedKey(plugin, "paginated_utility_manager");
 		this.controller = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(controller, plugin);
 	}
 
 	public PaginatedBuilder(List<T> list) {
-		this.itemActions = new HashMap<>();
-		this.processList = new LinkedList<>();
-		this.navigationLeft = new HashMap<>();
-		this.navigationRight = new HashMap<>();
-		this.navigationBack = new HashMap<>();
-		this.initialContents = new HashMap<>();
 		this.collection = new LinkedList<>(list);
-		this.id = UUID.randomUUID();
 	}
 
 	public PaginatedBuilder(Plugin plugin, List<T> list) {
-		this.itemActions = new HashMap<>();
-		this.collection = new LinkedList<>(list);
-		this.processList = new LinkedList<>();
-		this.navigationLeft = new HashMap<>();
-		this.navigationRight = new HashMap<>();
-		this.navigationBack = new HashMap<>();
-		this.initialContents = new HashMap<>();
+		this(list);
 		this.plugin = plugin;
-		this.id = UUID.randomUUID();
 		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
 		controller = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(controller, plugin);
@@ -102,13 +81,6 @@ public final class PaginatedBuilder<T> {
 	public PaginatedBuilder(Plugin plugin, String title) {
 		this.title = title;
 		this.plugin = plugin;
-		this.itemActions = new HashMap<>();
-		this.processList = new LinkedList<>();
-		this.navigationLeft = new HashMap<>();
-		this.navigationRight = new HashMap<>();
-		this.navigationBack = new HashMap<>();
-		this.initialContents = new HashMap<>();
-		this.id = UUID.randomUUID();
 		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
 		controller = new PaginatedListener();
 		Bukkit.getPluginManager().registerEvents(controller, plugin);
