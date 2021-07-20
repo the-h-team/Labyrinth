@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+@SuppressWarnings("SpellCheckingInspection")
 public enum SkullType implements SkullObject {
 
 	COMMAND_BLOCK("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY0YzIxZDE3YWQ2MzYzODdlYTNjNzM2YmZmNmFkZTg5NzMxN2UxMzc0Y2Q1ZDliMWMxNWU2ZTg5NTM0MzIifX19"),
@@ -29,6 +30,7 @@ public enum SkullType implements SkullObject {
 			if (isNew) {
 				this.itemStack = new ItemStack(Items.getMaterial("playerhead"));
 			} else {
+				//noinspection deprecation
 				this.itemStack = new ItemStack(Items.getMaterial("skullitem"), 1, (short) 3);
 			}
 

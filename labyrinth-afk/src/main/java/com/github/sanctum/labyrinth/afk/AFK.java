@@ -124,7 +124,7 @@ public class AFK {
 							e.getAfk().saturate();
 							break;
 						case REMOVABLE:
-							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&owas kicked for being AFK too long.").translate());
+							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&o" + "was kicked for being AFK too long.").translate());
 							p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
 							e.getAfk().cancel();
 							break;
