@@ -22,10 +22,15 @@ public class Paragraph {
 	/**
 	 * Apply a regex to this paragraph sequence.
 	 * <p>
-	 * Defaults include: [ {@link Paragraph#SEPARATE_PERIOD_ONLY}, {@link Paragraph#SEPARATE_COMMA_ONLY} & {@link Paragraph#COMMA_AND_PERIOD} ]
+	 * <em>Defaults include:</em>
+	 * <ul>
+	 *     <li>{@link Paragraph#SEPARATE_PERIOD_ONLY}</li>
+	 *     <li>{@link Paragraph#SEPARATE_COMMA_ONLY}</li>
+	 *     <li>{@link Paragraph#COMMA_AND_PERIOD}</li>
+	 * </ul>
 	 *
-	 * @param regex The pattern regex to match.
-	 * @return The same paragraph object.
+	 * @param regex the pattern regex to match
+	 * @return this paragraph object
 	 */
 	public Paragraph setRegex(String regex) {
 		this.regex = regex;
@@ -33,9 +38,9 @@ public class Paragraph {
 	}
 
 	/**
-	 * Gets the newly formatted paragraph.
+	 * Get the newly-formatted paragraph.
 	 *
-	 * @return Get's the newly made paragraph.
+	 * @return the newly-formatted paragraph
 	 */
 	public String[] get() {
 		return this.text.split(this.regex);
@@ -44,11 +49,12 @@ public class Paragraph {
 	/**
 	 * Get a specific line from the paragraph.
 	 *
-	 * @param line The line to grab.
-	 * @return The desired paragraph line or the last element if the page goes over max.
+	 * @param lineNumber the line number
+	 * @return the desired paragraph line or the last
+	 * element if lineNumber exceeds element count
 	 */
-	public String get(int line) {
-		return get()[Math.min(line, get().length)];
+	public String get(int lineNumber) {
+		return get()[Math.min(lineNumber, get().length)];
 	}
 
 

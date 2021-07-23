@@ -96,13 +96,14 @@ public class HFEncoded {
 		return inputStream.readObject();
 	}
 
+	// TODO: Rethrow IO/ClassNotFound as checked exception(s) to remove nullity
 	/**
 	 * Deserialize an object of specified type from a string.
 	 * <p>
 	 * Primarily for misc use, deserialization is handled internally for normal object use from containers.
 	 *
-	 * @param type The type this object represents.
-	 * @param <R>  The type this object represents
+	 * @param type the type this object represents
+	 * @param <R> the type this object represents
 	 * @return a deserialized object or null
 	 */
 	public <R> @Nullable R deserialize(Class<R> type) {

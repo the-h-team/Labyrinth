@@ -30,10 +30,10 @@ public class WrappedComponent {
 	}
 
 	/**
-	 * Inject code to be ran when this object is interacted with.
+	 * Inject code to be run when this object is interacted with.
 	 *
-	 * @param action The information to read on interaction.
-	 * @return The same wrapped component.
+	 * @param action the information to read on interaction
+	 * @return this wrapped component
 	 */
 	public WrappedComponent accept(Applicable action) {
 		this.action = action;
@@ -50,9 +50,9 @@ public class WrappedComponent {
 	}
 
 	/**
-	 * Gets the command line serial as a string.
+	 * Get the command line serial as a string.
 	 *
-	 * @return The id of the wrapper.
+	 * @return the id of the wrapper
 	 */
 	@Override
 	public String toString() {

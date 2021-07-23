@@ -14,15 +14,15 @@ public interface PersistentDataService {
      * Containers must have been initialized <strong>at least once</strong>
      * prior to access in this view.
      *
-     * @return a list of containers associated with the specified plugin.
+     * @return a list of containers associated with the specified plugin
      */
     @NotNull List<PersistentContainer> getContainers(Plugin plugin);
 
     /**
      * Operate on a custom persistent data container at the specified coordinates.
      *
-     * @param key The namespaced key for this component.
-     * @return the existing data container, or a new instance
+     * @param key the namespaced key for this component
+     * @return the existing data container or a new instance
      */
     @NotNull PersistentContainer getContainer(NamespacedKey key);
 }

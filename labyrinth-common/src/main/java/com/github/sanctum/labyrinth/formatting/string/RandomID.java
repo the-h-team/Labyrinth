@@ -10,9 +10,9 @@ public class RandomID {
     private final String assortment;
 
     /**
-     * Generate a new random ID
+     * Generate random IDs.
      *
-     * @param length The length of the ID
+     * @param length the length of the IDs generated
      */
     public RandomID(int length) {
         this.length = length;
@@ -21,18 +21,21 @@ public class RandomID {
     }
 
     /**
-     * Generate a new random ID w/ a specified assortment format
+     * Generate new random IDs w/ a specified assortment format.
      *
-     * @param length     The length of the ID
-     * @param assortment The format of the ID
+     * @param length the length of the IDs generated
+     * @param assortment the format of the IDs
      */
     public RandomID(int length, String assortment) {
         this.length = length;
         this.assortment = assortment;
     }
 
+    // TODO: upgrade to ThreadLocalRandom
     /**
-     * Generate the ID
+     * Generate a random ID.
+     *
+     * @return a random ID
      */
     public String generate() {
         String ALPHA_NUMERIC_STRING = assortment;

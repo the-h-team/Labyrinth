@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Encapsulate a list of objects to be sorted and paginated.
  *
- * @param <T> The object type representative of this pagination operation.
+ * @param <T> the object type representative of this pagination operation
  * @author Hempfest
  */
 public class PaginatedList<T> {
@@ -31,9 +31,9 @@ public class PaginatedList<T> {
 	/**
 	 * Format/trim a given amount to a specific length format.
 	 *
-	 * @param amount    The amount to format.
-	 * @param precision The math precision to stop the decimal placing at.
-	 * @return The newly formatted double.
+	 * @param amount    the amount to format
+	 * @param precision the math precision to stop the decimal placing at
+	 * @return the newly formatted double
 	 */
 	public double format(Number amount, int precision) {
 		return MathUtils.use(amount).format(precision);
@@ -42,8 +42,8 @@ public class PaginatedList<T> {
 	/**
 	 * Setup a comparator for this list's sorting procedure.
 	 *
-	 * @param comparable The comparing operation to run for the given object type.
-	 * @return The same paginated list procedure.
+	 * @param comparable the comparing operation to run for the given object type
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> compare(Comparator<? super T> comparable) {
 		this.comparable = comparable;
@@ -51,11 +51,12 @@ public class PaginatedList<T> {
 	}
 
 	/**
-	 * Provided the page number, total page count, object in queue & current paginated list instance,
-	 * decorate any possible actions to take while iterating through the entries.
+	 * Provided the page number, total page count, object in queue and
+	 * current paginated list instance; decorate any possible actions
+	 * to take while iterating through the entries.
 	 *
-	 * @param decoration The primary execution to be ran for every entry given.
-	 * @return The same paginated list procedure.
+	 * @param decoration the primary execution to be ran for every entry given
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> decorate(ComponentDecoration<T> decoration) {
 		this.decoration = decoration;
@@ -64,10 +65,11 @@ public class PaginatedList<T> {
 
 	/**
 	 * Specify an amount of entries to be display per page.
+	 * <p>
 	 * Lower entry counts will result in larger page counts.
 	 *
-	 * @param linesPerPage The amount of entries per page to display.
-	 * @return The same paginated list procedure.
+	 * @param linesPerPage the amount of entries per page to display
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> limit(int linesPerPage) {
 		this.linesPerPage = linesPerPage;
@@ -78,8 +80,8 @@ public class PaginatedList<T> {
 	 * Provided the page number and total page count, provide a starting
 	 * sequence for the pagination.
 	 *
-	 * @param compliment The starting execution to be ran one time.
-	 * @return The same paginated list procedure.
+	 * @param compliment the starting execution to be run once
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> start(StartingCompliment<T> compliment) {
 		this.start = compliment;
@@ -87,11 +89,11 @@ public class PaginatedList<T> {
 	}
 
 	/**
-	 * Provided the page number and total page count. Provide a finishing
-	 * sequence for the pagination.
+	 * Provided the page number and total page count,
+	 * describe a finishing sequence for the pagination.
 	 *
-	 * @param compliment The finishing execution to be ran one time.
-	 * @return The same paginated list procedure.
+	 * @param compliment the finishing execution to be run once
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> finish(FinishingCompliment<T> compliment) {
 		this.finish = compliment;
@@ -99,11 +101,11 @@ public class PaginatedList<T> {
 	}
 
 	/**
-	 * Provided the page number and total page count. Provide a finishing
-	 * sequence for the pagination (So the desired player can browse pages)
+	 * Provided the page number and total page count, describe a finishing
+	 * sequence for the pagination (so the desired player can browse pages).
 	 *
-	 * @param builderConsumer The finishing execution to be ran one time.
-	 * @return The same paginated list procedure.
+	 * @param builderConsumer the finishing execution to be run once
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> finish(Consumer<PrintedPaginationBuilder> builderConsumer) {
 		this.finish = (list, page, max) -> {
@@ -119,10 +121,10 @@ public class PaginatedList<T> {
 	}
 
 	/**
-	 * Separate un-wanted elements from the list.
+	 * Separate unwanted elements from the list.
 	 *
-	 * @param predicate The check to succeed before adding each element.
-	 * @return The same paginated list procedure.
+	 * @param predicate test that must succeed to include an element
+	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> filter(Predicate<? super T> predicate) {
 		this.typeList = typeList.stream().filter(predicate).collect(Collectors.toList());
@@ -132,8 +134,8 @@ public class PaginatedList<T> {
 	/**
 	 * Run all prior sorting arrangements and sequence operations for a specified page.
 	 *
-	 * @param pageNum The page to to collect.
-	 * @return A list of collected objects from the sorting procedure.
+	 * @param pageNum the page to to collect
+	 * @return a list of collected objects from the sorting procedure
 	 */
 	public List<T> get(int pageNum) {
 		LinkedList<T> list = new LinkedList<>();

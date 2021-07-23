@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface ActionComponentService {
     /**
-     * Get all action wrapped text components.
+     * Get a list of all action-wrapped text components.
      *
-     * @return A list of all cached text components.
+     * @return a list of all cached action-wrapped text components
      */
     @NotNull List<WrappedComponent> getComponents();
 }

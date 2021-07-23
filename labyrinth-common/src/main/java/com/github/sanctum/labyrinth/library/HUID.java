@@ -33,9 +33,9 @@ public class HUID {
 	}
 
 	/**
-	 * Convert the HUID into string format (####-####-####)
+	 * Convert the HUID into string format (####-####-####).
 	 *
-	 * @return The HUID in string form.
+	 * @return the HUID in string form
 	 */
 	public String toString() {
 		if (!hUID.contains("-")) {
@@ -52,9 +52,9 @@ public class HUID {
 	}
 
 	/**
-	 * Get a completely random HUID
+	 * Get a completely random HUID.
 	 *
-	 * @return A completely randomized HUID
+	 * @return a completely random HUID
 	 */
 	public static HUID randomID() {
 		HUID result = new HUID();
@@ -63,10 +63,11 @@ public class HUID {
 	}
 
 	/**
-	 * Convert a string form HUID back from it's string into an HUID object.
+	 * Convert a string-form HUID back from its string representation
+	 * into an HUID object.
 	 *
-	 * @param wID The written ID to convert to object form.
-	 * @return The HUID object.
+	 * @param wID the written ID to convert to object form
+	 * @return the HUID object
 	 */
 	public static HUID fromString(String wID) {
 		if (!StringUtils.isAlphanumeric(wID) && !wID.contains("-")) {

@@ -16,16 +16,16 @@ public abstract class Cooldown {
 	private String format = "&e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
 
 	/**
-	 * Get the cooldown object's delimiter-id
+	 * Get this cooldown's delimiter-id
 	 *
-	 * @return The cooldown object's custom delimiter
+	 * @return the cooldown's custom delimiter
 	 */
 	public abstract String getId();
 
 	/**
 	 * Get the original cooldown period.
 	 *
-	 * @return The original specified cooldown period.
+	 * @return the original specified cooldown period
 	 */
 	public abstract long getCooldown();
 
@@ -34,9 +34,9 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * The raw value for total cooldown time remaining.
+	 * Get the raw int value of total cooldown time remaining.
 	 *
-	 * @return Gets the total amount of time left from the conversion table
+	 * @return the total amount of time left from the conversion table
 	 */
 	public final int getTimeLeft() {
 		return (int) Math.abs(getTimePassed());
@@ -44,10 +44,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
+	 * <p>
 	 * This != total cooldown time converted to days; it's a soft-cap
 	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of days left within the conversion table.
+	 * @return the amount of days left within the conversion table
 	 */
 	public final int getDaysLeft() {
 		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
@@ -55,10 +56,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of hours left from the total cooldown length equated.
-	 * This != total cooldown time converted to hours its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to hours; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of hours left within the conversion table.
+	 * @return the amount of hours left within the conversion table
 	 */
 	public final long getHoursLeft() {
 		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
@@ -66,10 +68,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of minutes left from the total cooldown length equated.
-	 * This != total cooldown time converted to minutes its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to minutes; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of minutes left within the conversion table.
+	 * @return the amount of minutes left within the conversion table
 	 */
 	public final long getMinutesLeft() {
 		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
@@ -77,19 +80,20 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
-	 * This != total cooldown time converted to seconds its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to seconds; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of seconds left within the conversion table.
+	 * @return the amount of seconds left within the conversion table
 	 */
 	public final long getSecondsLeft() {
 		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
 	}
 
 	/**
-	 * Check's if the cooldown from Labyrinth cache is complete.
+	 * Check if the cooldown from Labyrinth cache is complete.
 	 *
-	 * @return The result of completion for the cooldown.
+	 * @return the result of completion for the cooldown
 	 */
 	public final boolean isComplete() {
 		Long a = getCooldown();
@@ -136,7 +140,7 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * Update the hard-storage for persistence to this cooldown's remaining time.
+	 * Update the hard storage (persistence) to this live cooldown's remaining time.
 	 * <p>
 	 * Note: If a cooldown is already saved with the same id, it will be overwritten.
 	 * <p>

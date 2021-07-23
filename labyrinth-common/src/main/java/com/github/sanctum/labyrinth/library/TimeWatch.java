@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Used for accurate time span inquisitions
+ * Used for accurate time span inquisitions.
  *
  * @author Hempfest
  */
@@ -17,8 +17,8 @@ public class TimeWatch {
 	/**
 	 * Use a specified starting date in milliseconds.
 	 *
-	 * @param milli The starting time interval in milliseconds.
-	 * @return A new time watch object.
+	 * @param milli the starting time interval in milliseconds
+	 * @return a new time watch object
 	 */
 	public static TimeWatch start(long milli) {
 		return new TimeWatch(milli);
@@ -27,8 +27,8 @@ public class TimeWatch {
 	/**
 	 * Use a specified starting date in milliseconds.
 	 *
-	 * @param date The starting date.
-	 * @return A new time watch object.
+	 * @param date the starting date
+	 * @return a new time watch object
 	 */
 	public static TimeWatch start(Date date) {
 		return new TimeWatch(date);
@@ -45,17 +45,17 @@ public class TimeWatch {
 	/**
 	 * Get the starting date for this object.
 	 *
-	 * @return The date this time watch started.
+	 * @return the date this time watch started
 	 */
 	public Date getStart() {
 		return new Date(time);
 	}
 
 	/**
-	 * Gives you the allotted time interval between the starting date and the specified time instant.
+	 * Calculates the allotted time interval between the starting date and the specified time instant.
 	 *
-	 * @param stop The target time instant to calculate time between for.
-	 * @return A time duration interval.
+	 * @param stop the target time instant to calculate time between for
+	 * @return a time duration interval
 	 */
 	public Duration interval(Instant stop) {
 		return Duration.between(getStart().toInstant(), stop);
@@ -64,9 +64,9 @@ public class TimeWatch {
 	/**
 	 * Check if x amount of time is between now and the starting date.
 	 *
-	 * @param threshold The threshold to use for time conversions.
-	 * @param time      The time to use for time conversions
-	 * @return true if x amount of time within y time threshold as since elapsed.
+	 * @param threshold the threshold to use for time conversions
+	 * @param time      the time to use for time conversions
+	 * @return true if time within threshold has elapsed
 	 */
 	public boolean isBetween(TimeUnit threshold, long time) {
 		switch (threshold) {
@@ -85,9 +85,9 @@ public class TimeWatch {
 	/**
 	 * Check if x amount of time or more has passed since the starting date.
 	 *
-	 * @param threshold The threshold to use for time conversions.
-	 * @param time      The time to use for time conversions
-	 * @return true if x amount of time within y time threshold as since elapsed.
+	 * @param threshold the threshold to use for time conversions
+	 * @param time      the time to use for time conversions
+	 * @return true if time within threshold has elapsed
 	 */
 	public boolean isGreaterThan(TimeUnit threshold, long time) {
 		switch (threshold) {
@@ -115,20 +115,21 @@ public class TimeWatch {
 		}
 
 		/**
-		 * Subtract a time stamp from another manually to feed as a starting point.
+		 * Subtract a timestamp from another manually to feed as a starting point.
 		 *
-		 * @param milli The already equated time stamp.
-		 * @return A stop watch record for this time stamp.
+		 * @param milli the already-equated timestamp
+		 * @return a stop watch record for this timestamp
 		 */
 		public static Recording from(long milli) {
 			return new Recording(milli);
 		}
 
 		/**
-		 * Subtract the specified time stamp from the current time to feed as a starting point.
+		 * Subtract the specified timestamp from the current time
+		 * to feed as a starting point.
 		 *
-		 * @param milli The starting time stamp.
-		 * @return A stop watch record for this time stamp.
+		 * @param milli the starting timestamp
+		 * @return a stop watch record for this timestamp
 		 */
 		public static Recording subtract(long milli) {
 			return new Recording(System.currentTimeMillis() - milli);

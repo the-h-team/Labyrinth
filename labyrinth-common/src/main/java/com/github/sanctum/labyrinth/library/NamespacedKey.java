@@ -115,8 +115,8 @@ public final class NamespacedKey {
 	/**
 	 * Return a new random key in the {@link #BUKKIT} namespace.
 	 *
-	 * @return new key
 	 * @deprecated should never be used by plugins, for internal use only!!
+	 * @return new key
 	 */
 	@Deprecated
 	@NotNull

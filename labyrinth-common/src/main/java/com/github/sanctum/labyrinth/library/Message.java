@@ -27,11 +27,12 @@ public class Message {
 	}
 
 	/**
-	 * NOTE: Only for console use
+	 * <strong>NOTE: Only for console use.</strong>
+	 * <p>
 	 * Send easy messages through console with prefix specification.
 	 *
-	 * @param prefix the prefix to be used for console
 	 * @deprecated Use {@link Message#loggedFor(Plugin)}
+	 * @param prefix the prefix to be used for console
 	 */
 	@Deprecated
 	public Message(String prefix) {
@@ -73,7 +74,7 @@ public class Message {
 	/**
 	 * Update the prefix used for the message.
 	 *
-	 * @param prefix The prefix to use
+	 * @param prefix the prefix to use
 	 * @return this Message instance
 	 */
 	public Message setPrefix(String prefix) {
@@ -84,7 +85,7 @@ public class Message {
 	/**
 	 * Send a string message to a player automatically colored.
 	 *
-	 * @param text The context to send the player
+	 * @param text the context to send the player
 	 * @return this Message instance
 	 */
 	public Message send(String text) {
@@ -155,7 +156,7 @@ public class Message {
 	/**
 	 * Send an action bar message to the player.
 	 *
-	 * @param text the message to display.
+	 * @param text the message to display
 	 * @return this Message instance
 	 */
 	public Message action(String text) {
@@ -164,10 +165,11 @@ public class Message {
 	}
 
 	/**
-	 * NOTE: Only for console use.
+	 * <strong>NOTE: Only for console use.</strong>
+	 * <p>
 	 * Send console an info message.
 	 *
-	 * @param text The text to be used within the message
+	 * @param text the text to be used within the message
 	 */
 	public Message info(String text) {
 		logger.info(text);
@@ -175,10 +177,11 @@ public class Message {
 	}
 
 	/**
-	 * NOTE: Only for console use.
+	 * <strong>NOTE: Only for console use.</strong>
+	 * <p>
 	 * Send console an error message.
 	 *
-	 * @param text The text to be used within the message
+	 * @param text the text to be used within the message
 	 */
 	public Message error(String text) {
 		logger.severe(text);
@@ -186,10 +189,11 @@ public class Message {
 	}
 
 	/**
-	 * NOTE: Only for console use.
+	 * <strong>NOTE: Only for console use.</strong>
+	 * <p>
 	 * Send console a warning message.
 	 *
-	 * @param text The text to be used within the message
+	 * @param text the text to be used within the message
 	 */
 	public Message warn(String text) {
 		logger.warning(text);

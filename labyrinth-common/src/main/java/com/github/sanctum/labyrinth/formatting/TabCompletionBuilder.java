@@ -23,8 +23,8 @@ public class TabCompletionBuilder {
 	/**
 	 * Supply the string arguments for completion.
 	 *
-	 * @param args The string arguments to provide.
-	 * @return The same completion builder.
+	 * @param args the string arguments to provide
+	 * @return this builder
 	 */
 	public TabCompletionBuilder forArgs(String[] args) {
 		this.args = args;
@@ -35,10 +35,10 @@ public class TabCompletionBuilder {
 	 * Configure completion results & filter by string argument length
 	 * <p>
 	 * Basic accordance should be applied here from tab complete method.
-	 * Example: ( args[int].length() )
+	 * <pre>Example: ( args[int].length() )</pre>
 	 *
-	 * @param length The string argument length to customize completions for.
-	 * @return A tab completion filter
+	 * @param length the string argument length to customize completions for
+	 * @return a tab completion filter
 	 */
 	public TabCompletionFilter level(int length) {
 		return new TabCompletionFilter(this, length);
@@ -47,8 +47,8 @@ public class TabCompletionBuilder {
 	/**
 	 * For internal use. Specify the command needed for anywhere completion.
 	 *
-	 * @param label The command to check for.
-	 * @return The same builder.
+	 * @param label the command to check for
+	 * @return this builder
 	 */
 	TabCompletionBuilder forCommand(String label) {
 		this.commandLabel = label;
@@ -58,9 +58,9 @@ public class TabCompletionBuilder {
 	/**
 	 * Get the filtered completions from the builder.
 	 *
-	 * @param length The string argument length to pull completions for.
-	 * @return The provided list of completions based off of filter results, if no filter results are
-	 * present then an empty list will be provided for completion.
+	 * @param length the string argument length to pull completions for
+	 * @return the provided list of completions based off of filter results;
+	 * if no results remain an empty list will be provided for completion
 	 */
 	public @NotNull List<String> get(int length) {
 		List<TabCompletionFilter> indexes = COMPLETION_MAP.getOrDefault(length, null);

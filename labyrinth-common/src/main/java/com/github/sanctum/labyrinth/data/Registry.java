@@ -23,7 +23,7 @@ import java.util.jar.JarFile;
  * of a given plugin or a provided {@link File} and then running custom operations with them. Ex. Registering {@link org.bukkit.event.Listener} classes
  * automagically.
  *
- * @param <T> The type of class to search for and operate with.
+ * @param <T> the type of class to search for and operate with
  */
 public class Registry<T> {
 
@@ -39,9 +39,9 @@ public class Registry<T> {
 	/**
 	 * Select a class type to provide in a search of relevance.
 	 *
-	 * @param cl  The class to search for inheritance of.
-	 * @param <T> The type of search this will inquire.
-	 * @return The same registry instance.
+	 * @param cl the class to search for inheritance of
+	 * @param <T> the type of search this will inquire
+	 * @return this Registry instance
 	 */
 	public static <T> Registry<T> use(Class<T> cl) {
 		return new Registry<>(cl);
@@ -50,8 +50,8 @@ public class Registry<T> {
 	/**
 	 * Source a plugin for the main jar file directory.
 	 *
-	 * @param plugin The plugin to source the classes from.
-	 * @return The same registry instance.
+	 * @param plugin the plugin to source the classes from
+	 * @return this Registry instance
 	 */
 	public Registry<T> source(Plugin plugin) {
 		this.PLUGIN = plugin;
@@ -61,8 +61,8 @@ public class Registry<T> {
 	/**
 	 * Optionally search in a targeted package name.
 	 *
-	 * @param packageName The name of the package to search.
-	 * @return The same registry instance.
+	 * @param packageName the name of the package to search
+	 * @return this Registry instance
 	 */
 	public Registry<T> pick(String packageName) {
 		this.PACKAGE = packageName;
@@ -72,8 +72,8 @@ public class Registry<T> {
 	/**
 	 * Specify actions on each element instantiated from query.
 	 *
-	 * @param operation The operation to take effect when each element is instantiated.
-	 * @return The leftover data from the registry data operation.
+	 * @param operation an operation to perform when each element is instantiated
+	 * @return the leftover data from the registry data operation
 	 */
 	public RegistryData<T> operate(Consumer<T> operation) {
 		Set<Class<T>> classes = Sets.newHashSet();

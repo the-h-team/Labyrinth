@@ -90,7 +90,7 @@ public class FileManager {
      * implementation at custom locations.
      *
      * @param in      an InputStream, likely a plugin resource
-     * @param manager the manager to locate to.
+     * @param manager the manager to locate to
      * @throws IllegalArgumentException if the file describes a directory
      * @throws IllegalStateException    if write is unsuccessful
      */
@@ -144,9 +144,9 @@ public class FileManager {
     }
 
     /**
-     * Check if the backing file currently found.
+     * Check if the backing file is currently existent.
      * <p>
-     * Does interact whatsoever with the YamlConfiguration.
+     * Does not interact whatsoever with the internal YamlConfiguration.
      *
      * @return true if file found
      */
@@ -203,8 +203,10 @@ public class FileManager {
      * allowing for clean and compile-time-type-safe data retrieval and
      * mapping.
      *
-     * @param function Retrieve an object of arbitrary type from the configuration.
-     * @return The desired return value to be read.
+     * @param function an operation returning an object of arbitrary type
+     *                {@link R} from the configuration
+     * @param <R> type of the returned object (inferred)
+     * @return the value produced by the provided function
      */
     synchronized public <R> R readValue(Function<FileConfiguration, R> function) {
         return function.apply(getConfig());

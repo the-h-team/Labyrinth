@@ -10,8 +10,8 @@ public class TabCompletion {
 	/**
 	 * Build a list of tab completions using the provided string arguments.
 	 *
-	 * @param command The command the completion building is for.
-	 * @return A tab completion filtration builder.
+	 * @param command the command this completion is for
+	 * @return a tab completion filtration builder
 	 */
 	public static TabCompletionBuilder build(String command) {
 		return new TabCompletionBuilder().forCommand(command);
