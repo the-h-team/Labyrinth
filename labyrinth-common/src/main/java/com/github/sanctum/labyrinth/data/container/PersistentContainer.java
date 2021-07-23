@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
@@ -140,6 +141,7 @@ public class PersistentContainer extends PersistentData {
 		return value;
 	}
 
+	// TODO: Explicit throw of custom exception on get fail vs nullity contract
 	/**
 	 * Get a specified value by class type & key delimiter.
 	 *
@@ -154,7 +156,7 @@ public class PersistentContainer extends PersistentData {
 	 * assignable from the same class type
 	 */
 	@Override
-	public <R> R get(Class<R> type, String key) {
+	public <R> @Nullable R get(Class<R> type, String key) {
 		if (!this.dataMap.containsKey(key)) {
 			if (found(key)) {
 				return load(type, key);
@@ -228,24 +230,26 @@ public class PersistentContainer extends PersistentData {
 	/**
 	 * Deserialize an object of specified type from a string.
 	 * <p>
-	 * Primarily for misc use, deserialization is handled internally for normal object use from containers.
+	 * Primarily for misc use; deserialization is typically
+	 * handled internally for normal object use from containers.
 	 *
-	 * @param type  The type this object represents.
-	 * @param value The serialized object to deserialize
-	 * @param <R>   The type this object represents
-	 * @return The deserialized object otherwise null.
+	 * @param type  the type this object represents
+	 * @param value the serialized object to deserialize
+	 * @param <R>   the type this object represents
+	 * @return the deserialized object otherwise null
 	 */
-	public <R> R deserialize(Class<R> type, String value) {
+	public <R> @Nullable R deserialize(Class<R> type, String value) {
 		return new HFEncoded(value).deserialize(type);
 	}
 
+	// TODO: Explicit throw on serialization fail vs nullity contract
 	/**
-	 * Serialize a specified value from this container by its key delimiter
+	 * Serialize a specified value from this container by its key delimiter.
 	 *
-	 * @param key The key delimiter for the value.
-	 * @return The serialized string otherwise null if an issue occurred.
+	 * @param key the key delimiter for the value
+	 * @return the serialized string otherwise null if an issue occurred
 	 */
-	public String serialize(String key) throws IOException {
+	public @Nullable String serialize(String key) throws IOException {
 		return new HFEncoded(this.dataMap.get(key)).serialize();
 	}
 
