@@ -108,10 +108,10 @@ public final class RegionServicesManager {
 					if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
 						//noinspection ConstantConditions
 						for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
-							Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
+							Location o = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".pos1");
 
-							Location t = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos2");
-							Location s = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".start");
+							Location t = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".pos2");
+							Location s = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".start");
 							HUID d = HUID.fromString(id);
 							//noinspection ConstantConditions
 							UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
@@ -148,8 +148,8 @@ public final class RegionServicesManager {
 					if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
 						//noinspection ConstantConditions
 						for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
-							Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
-							Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
+							Location o = Region.DATA.getLegacySafeLocation("Markers.region." + id + ".pos1");
+							Location t = Region.DATA.getLegacySafeLocation("Markers.region." + id + ".pos2");
 							HUID d = HUID.fromString(id);
 							//noinspection ConstantConditions
 							UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));

@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -210,6 +213,23 @@ public class FileManager {
      */
     synchronized public <R> R readValue(Function<FileConfiguration, R> function) {
         return function.apply(getConfig());
+    }
+
+    /**
+     * Get a Location from config safely (including legacy).
+     *
+     * @param node node of the location
+     * @return the stored location
+     */
+    synchronized public @Nullable Location getLegacySafeLocation(String node) {
+        if (LabyrinthProvider.getInstance().requiresLocationLibrary()) {
+            return readValue(fc -> {
+                final Object o = fc.get(node);
+                if (!(o instanceof LegacyConfigLocation)) return null;
+                return ((LegacyConfigLocation) o).getLocation();
+            });
+        }
+        return readValue(fc -> fc.getLocation(node));
     }
 
     /**

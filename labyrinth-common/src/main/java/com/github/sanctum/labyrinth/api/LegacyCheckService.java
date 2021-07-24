@@ -16,4 +16,14 @@ public interface LegacyCheckService {
                 || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11")
                 || Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13");
     }
+
+    /**
+     * Check if due to the environment of the server
+     * the LegacyConfigLocation utility must be loaded.
+     *
+     * @return if version 1.14 or lower (needs util)
+     */
+    default boolean requiresLocationLibrary() {
+        return isLegacy() || Bukkit.getVersion().contains("1.14");
+    }
 }

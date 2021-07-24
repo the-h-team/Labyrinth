@@ -10,12 +10,7 @@ import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
-import com.github.sanctum.labyrinth.library.CommandUtils;
-import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.HUID;
-import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -23,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.Sound;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -68,6 +64,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final List<PersistentContainer> containers = new LinkedList<>();
 	private final VentMap eventMap = new VentMap();
 	private boolean cachedIsLegacy;
+	private boolean cachedNeedsLegacyLocation;
 
 	@Override
 	public void onEnable() {
@@ -76,6 +73,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		LabyrinthProvider.instance = this;
 
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
+		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
@@ -88,9 +86,11 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
 		// legacy check (FileConfiguration missing getLocation) (Hemp)
-		if (!isLegacy()) {
-			RegionServicesManager.Initializer.start(this);
+		if (isLegacy() || getServer().getVersion().contains("1.14")) {
+			// Load our Location util
+			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
+		RegionServicesManager.Initializer.start(this);
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
 
@@ -167,6 +167,11 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Override
 	public boolean isLegacy() {
 		return cachedIsLegacy;
+	}
+
+	@Override
+	public boolean requiresLocationLibrary() {
+		return cachedNeedsLegacyLocation;
 	}
 
 	@Override
