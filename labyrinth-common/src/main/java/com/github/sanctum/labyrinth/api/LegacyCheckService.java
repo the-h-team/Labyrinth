@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.api;
 
 import org.bukkit.Bukkit;
 
+/**
+ * Detects legacy server environments.
+ */
 public interface LegacyCheckService {
     /**
      * Check if the environment of the server is legacy.

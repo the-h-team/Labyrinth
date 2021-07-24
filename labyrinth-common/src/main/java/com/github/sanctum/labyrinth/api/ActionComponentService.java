@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Exposes cached action-wrapped components.
+ */
 public interface ActionComponentService {
     /**
      * Get a list of all action-wrapped text components.

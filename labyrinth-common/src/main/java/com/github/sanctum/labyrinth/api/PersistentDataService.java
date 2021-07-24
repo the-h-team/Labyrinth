@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Manages persistent data container access.
+ */
 public interface PersistentDataService {
     /**
      * Get a list of all containers associated with a specified plugin.

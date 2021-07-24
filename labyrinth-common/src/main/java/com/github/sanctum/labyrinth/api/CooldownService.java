@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Provides cooldown information.
+ */
 public interface CooldownService {
     /**
      * Get a list of all pre-cached cooldowns.
