@@ -16,10 +16,10 @@ public class TimeUtils {
 	 * Alternatively you can use {@link TimeWatch#isBetween(TimeUnit, long)} from the {@link TimeWatch} object
 	 * which is internally used for this method.
 	 *
-	 * @param date      The starting date to provide.
-	 * @param time      The amount of time to check has passed
-	 * @param threshold The time unit threshold to check
-	 * @return true if the allotted amount of time has since passed.
+	 * @param date      the starting date to provide
+	 * @param time      the amount of time to check has passed
+	 * @param threshold the time unit threshold to check
+	 * @return true if the allotted amount of time has since passed
 	 */
 	public static boolean timeElapsed(long date, long time, TimeUnit threshold) {
 		return TimeWatch.start(date).isGreaterThan(threshold, time);
@@ -28,9 +28,9 @@ public class TimeUtils {
 	/**
 	 * Check if x amount of seconds has passed since a starting date.
 	 *
-	 * @param date    The starting point date
-	 * @param seconds The amount of time to check has passed in seconds
-	 * @return If the amount of time has passed this = true
+	 * @param date    the starting point date
+	 * @param seconds the amount of time to check has passed in seconds
+	 * @return if the amount of time has passed this = true
 	 */
 	public static boolean isSecondsSince(Date date, long seconds) {
 		return timeElapsed(date.getTime(), seconds, TimeUnit.SECONDS);
@@ -39,9 +39,9 @@ public class TimeUtils {
 	/**
 	 * Check if x amount of minutes has passed since a starting date.
 	 *
-	 * @param date    The starting point date
-	 * @param minutes The amount of time to check has passed in minutes
-	 * @return If the amount of time has passed this = true
+	 * @param date    the starting point date
+	 * @param minutes the amount of time to check has passed in minutes
+	 * @return if the amount of time has passed this = true
 	 */
 	public static boolean isMinutesSince(Date date, long minutes) {
 		return timeElapsed(date.getTime(), minutes, TimeUnit.MINUTES);
@@ -50,9 +50,9 @@ public class TimeUtils {
 	/**
 	 * Check if x amount of hours has passed since a starting date.
 	 *
-	 * @param date  The starting point date
-	 * @param hours The amount of time to check has passed in hours
-	 * @return If the amount of time has passed this = true
+	 * @param date  the starting point date
+	 * @param hours the amount of time to check has passed in hours
+	 * @return if the amount of time has passed this = true
 	 */
 	public static boolean isHoursSince(Date date, long hours) {
 		return timeElapsed(date.getTime(), hours, TimeUnit.HOURS);
@@ -61,9 +61,9 @@ public class TimeUtils {
 	/**
 	 * Check if x amount of days has passed since a starting date.
 	 *
-	 * @param date The starting point date
-	 * @param days The amount of time to check has passed in days
-	 * @return If the amount of time has passed this = true
+	 * @param date the starting point date
+	 * @param days the amount of time to check has passed in days
+	 * @return if the amount of time has passed this = true
 	 */
 	public static boolean isDaysSince(Date date, long days) {
 		return timeElapsed(date.getTime(), days, TimeUnit.DAYS);

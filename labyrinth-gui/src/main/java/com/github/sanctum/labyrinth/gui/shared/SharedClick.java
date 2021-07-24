@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class SharedClick {
 
@@ -16,7 +17,7 @@ public class SharedClick {
 	/**
 	 * Cancel the ability for the player to modify the item.
 	 *
-	 * @return A shared click.
+	 * @return a shared click
 	 */
 	public SharedClick cancel() {
 		e.setCancelled(true);
@@ -26,7 +27,7 @@ public class SharedClick {
 	/**
 	 * Get the player who clicked on the menu.
 	 *
-	 * @return The player who clicked.
+	 * @return the player who clicked
 	 */
 	public Player getWhoClicked() {
 		return (Player) e.getWhoClicked();
@@ -36,7 +37,7 @@ public class SharedClick {
 	/**
 	 * Get the inventory view of the observing player.
 	 *
-	 * @return The player's inventory view.
+	 * @return the player's inventory view
 	 */
 	public InventoryView getView() {
 		return e.getView();
@@ -45,9 +46,9 @@ public class SharedClick {
 	/**
 	 * Get the item clicked on within the menu.
 	 *
-	 * @return The item clicked on or null.
+	 * @return the item clicked on (may be null)
 	 */
-	public ItemStack getClickedItem() {
+	public @Nullable ItemStack getClickedItem() {
 		return e.getCurrentItem();
 	}
 

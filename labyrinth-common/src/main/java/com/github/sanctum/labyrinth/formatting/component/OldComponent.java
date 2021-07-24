@@ -14,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 /**
  * @author Hempfest
  */
+@SuppressWarnings("deprecation")
 public class OldComponent extends TextLib {
 
 	private static String color(String text) {

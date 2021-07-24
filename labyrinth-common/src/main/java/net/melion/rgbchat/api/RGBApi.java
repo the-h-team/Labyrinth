@@ -45,7 +45,7 @@ public final class RGBApi {
 	/**
 	 * Convert a raw chat message to colored.
 	 *
-	 * @param rawChatMessage message to be colored.
+	 * @param rawChatMessage message to be colored
 	 * @return colored message
 	 */
 	public static String toColoredMessage(String rawChatMessage) {

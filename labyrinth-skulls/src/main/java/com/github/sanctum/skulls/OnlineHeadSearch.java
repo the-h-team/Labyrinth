@@ -21,6 +21,7 @@ public class OnlineHeadSearch {
 	protected String id = null;
 	protected String value = null;
 
+	// TODO: throw to prevent invalid object state and allow field finality
 	public OnlineHeadSearch(String name) {
 		this.name = name;
 		try {
@@ -40,6 +41,7 @@ public class OnlineHeadSearch {
 		}
 	}
 
+	// TODO: throw to prevent invalid object state and allow field finality
 	public OnlineHeadSearch(UUID id) {
 		try {
 			Gson g = new Gson();
@@ -59,16 +61,21 @@ public class OnlineHeadSearch {
 	}
 
 	/**
-	 * @return The name belonging to the search.
+	 * Get the name of this search.
+	 *
+	 * @return the name of this search
 	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-	 * @return The user id for this search.
+	 * Get the user id for this search.
+	 *
+	 * @return the user id for this search
 	 */
 	public UUID getUUID() {
+		// TODO: Remove null-check after above refactor
 		return this.id != null ? UUID.fromString(this.id) : null;
 	}
 
@@ -118,8 +125,11 @@ public class OnlineHeadSearch {
 		return sb.toString();
 	}
 
+	// TODO: With value never null, nullity should match CustomerHeadLoader.provide(String)
 	/**
-	 * @return The desired skin applied to a player skull or bare.
+	 * Get the desired skin applied to a player skull.
+	 *
+	 * @return the desired skin applied to a player skull
 	 */
 	public @Nullable ItemStack getResult() {
 		if (value != null) {

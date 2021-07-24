@@ -20,6 +20,7 @@ public class ServiceHandshake {
 		File file = new File("plugins/Labyrinth/Service/" + version + ".jar");
 
 		if (!file.getParentFile().exists()) {
+			//noinspection ResultOfMethodCallIgnored
 			file.getParentFile().mkdirs();
 		}
 

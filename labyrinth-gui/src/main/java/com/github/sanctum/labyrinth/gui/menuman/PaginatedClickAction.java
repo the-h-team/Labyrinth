@@ -41,25 +41,25 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the item clicked on.
 	 *
-	 * @return An itemstack from the operation.
+	 * @return an ItemStack from the operation
 	 */
-	public ItemStack getClickedItem() {
+	public ItemStack getClickedItem() { // TODO: assess nullity
 		return clickedItem;
 	}
 
 	/**
 	 * Get the page to be navigated to next whether forward of backward.
 	 *
-	 * @return The page the player is going next.
+	 * @return the page the player is going next
 	 */
 	public int getPage() {
-		return builder.PAGE;
+		return builder.page;
 	}
 
 	/**
 	 * Get the player.
 	 *
-	 * @return The player involved in the operation.
+	 * @return the player involved in the operation
 	 */
 	public Player getPlayer() {
 		return p;
@@ -69,7 +69,7 @@ public class PaginatedClickAction<T> {
 	 * If your inventory isn't live updating use this to switch pages when players click the navigation buttons.
 	 */
 	public void sync() {
-		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inventory = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust().getInventory());
 	}
 
@@ -77,24 +77,24 @@ public class PaginatedClickAction<T> {
 	 * If your inventory isn't live updating use this to switch pages when players click the navigation buttons.
 	 */
 	public void sync(int page) {
-		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inventory = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		p.openInventory(builder.adjust(page).getInventory());
 	}
 
 	public void sync(int delay, int period) {
-		this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+		this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
 
-		if (this.builder.LIVE) {
-			this.builder.INVENTORY.setMaxStackSize(1);
-			if (this.builder.TASK.containsKey(p)) {
-				this.builder.TASK.get(p).cancelTask();
+		if (this.builder.live) {
+			this.builder.inventory.setMaxStackSize(1);
+			if (this.builder.task.containsKey(p)) {
+				this.builder.task.get(p).cancelTask();
 			}
 
-			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
-				this.builder.INVENTORY.clear();
+			this.builder.task.put(p, Schedule.async(() -> Schedule.sync(() -> {
+				this.builder.inventory.clear();
 				this.builder.adjust();
 			}).run()));
-			this.builder.TASK.get(p).repeat(delay, period);
+			this.builder.task.get(p).repeat(delay, period);
 			Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
 		} else {
 			p.openInventory(this.builder.adjust().getInventory());
@@ -102,19 +102,19 @@ public class PaginatedClickAction<T> {
 	}
 
 	public void sync(int page, int delay, int period) {
-		this.builder.INVENTORY = Bukkit.createInventory(null, this.builder.SIZE, this.builder.TITLE.replace("{PAGE}", "" + (this.builder.PAGE + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
+		this.builder.inventory = Bukkit.createInventory(null, this.builder.size, this.builder.title.replace("{PAGE}", "" + (this.builder.page + 1)).replace("{MAX}", "" + this.builder.getMaxPages()));
 
-		if (this.builder.LIVE) {
-			this.builder.INVENTORY.setMaxStackSize(1);
-			if (this.builder.TASK.containsKey(p)) {
-				this.builder.TASK.get(p).cancelTask();
+		if (this.builder.live) {
+			this.builder.inventory.setMaxStackSize(1);
+			if (this.builder.task.containsKey(p)) {
+				this.builder.task.get(p).cancelTask();
 			}
 
-			this.builder.TASK.put(p, Schedule.async(() -> Schedule.sync(() -> {
-				this.builder.INVENTORY.clear();
+			this.builder.task.put(p, Schedule.async(() -> Schedule.sync(() -> {
+				this.builder.inventory.clear();
 				this.builder.adjust(page);
 			}).run()));
-			this.builder.TASK.get(p).repeat(delay, period);
+			this.builder.task.get(p).repeat(delay, period);
 			Schedule.sync(() -> p.openInventory(this.builder.getInventory())).waitReal(delay + 1);
 		} else {
 			p.openInventory(this.builder.adjust().getInventory());
@@ -124,7 +124,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the inventory view from the operation.
 	 *
-	 * @return The inventory view from the operation.
+	 * @return the inventory view from the operation
 	 */
 	public InventoryView getView() {
 		return view;
@@ -133,7 +133,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a left mouse button click.
 	 *
-	 * @return false if the click wasn't a left mouse button.
+	 * @return false if the click was not a left mouse button
 	 */
 	public boolean isLeftClick() {
 		return isLeftClick;
@@ -142,7 +142,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a shift button click.
 	 *
-	 * @return false if the click wasn't a shift button click.
+	 * @return false if the click was not a shift button click
 	 */
 	public boolean isShiftClick() {
 		return isShiftClick;
@@ -151,7 +151,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was with middle mouse button.
 	 *
-	 * @return false if the click wasnt a middle mouse button click.
+	 * @return false if the click was not a middle mouse button click
 	 */
 	public boolean isMiddleClick() {
 		return isMiddleClick;
@@ -160,7 +160,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a right mouse button click.
 	 *
-	 * @return false if the click wasn't a right mouse button.
+	 * @return false if the click was not a right mouse button
 	 */
 	public boolean isRightClick() {
 		return isRightClick;

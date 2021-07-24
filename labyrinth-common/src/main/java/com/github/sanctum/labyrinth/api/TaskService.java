@@ -4,11 +4,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+// TODO: description; elaborate on "most" in getTasks
 public interface TaskService {
     /**
-     * Get a queued list of running task id's
+     * Get a queued list of running task ids
      *
-     * @return A list of most running task id's
+     * @return a queue of most running task ids
      */
     @NotNull ConcurrentLinkedQueue<Integer> getTasks();
 }

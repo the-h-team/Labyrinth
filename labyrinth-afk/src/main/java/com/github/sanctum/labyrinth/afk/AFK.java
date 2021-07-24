@@ -124,7 +124,7 @@ public class AFK {
 							e.getAfk().saturate();
 							break;
 						case REMOVABLE:
-							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&owas kicked for being AFK too long.").translate());
+							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&o" + "was kicked for being AFK too long.").translate());
 							p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
 							e.getAfk().cancel();
 							break;
@@ -142,7 +142,7 @@ public class AFK {
 		 */
 		ACTIVE,
 		/**
-		 * The user has only recently been marked gone.
+		 * The user has only recently been determined absent.
 		 */
 		AWAY,
 		/**
@@ -157,7 +157,7 @@ public class AFK {
 	}
 
 	/**
-	 * Initialization object for building a plugin reference to a player's time-out request.
+	 * Initialization object for building a plugin reference to a player's timeout request.
 	 */
 	public static class Initializer {
 
@@ -173,11 +173,10 @@ public class AFK {
 
 		/**
 		 * Apply the reading logic for the status changing events.
-		 * <p>
-		 * param plugin The plugin to register the handler and instance under.
 		 *
-		 * @param handler The handler to use for message broadcasting logic.
-		 * @return The same afk initialization builder.
+		 * @param plugin The plugin to register the handler and instance under
+		 * @param handler The handler to use for message broadcasting logic
+		 * @return this builder
 		 */
 		public Initializer handle(Plugin plugin, Supplier<Handler> handler) {
 			if (AFK.handler == null) {
@@ -195,11 +194,10 @@ public class AFK {
 
 		/**
 		 * Apply the reading logic for the status changing events.
-		 * <p>
-		 * param plugin The plugin to register the handler and instance under.
 		 *
-		 * @param handler The handler to use for message broadcasting logic.
-		 * @return The same afk initialization builder.
+		 * @param plugin The plugin to register the handler and instance under
+		 * @param handler The handler to use for message broadcasting logic
+		 * @return this builder
 		 */
 		public Initializer handle(Plugin plugin, Handler handler) {
 			if (AFK.handler == null) {
@@ -216,11 +214,11 @@ public class AFK {
 		}
 
 		/**
-		 * Setup the pre-requisites to be met each stage of listening.
+		 * Setup the prerequisites to be met for each stage of listening.
 		 *
 		 * @param away The trigger for changing the status to {@link Status#AWAY}
 		 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
-		 * @return The initialized & cached object reference
+		 * @return the initialized & cached object reference
 		 */
 		public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) {
 			final AFK afk = new AFK(this.player);

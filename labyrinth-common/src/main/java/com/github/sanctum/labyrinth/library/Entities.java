@@ -18,11 +18,11 @@ public final class Entities {
 	}
 
 	/**
-	 * Search for an entity type result and ignore all case sensitivity and underscores
-	 * usually otherwise required.
+	 * Search for an entity type result ignoring case
+	 * typical delimiting underscores.
 	 *
-	 * @param name The name of the entity to look for disregarding caps and underscores
-	 * @return The desired entity type if not null.
+	 * @param name name of the entity; disregards case and underscores
+	 * @return the desired EntityType or null
 	 */
 	public static EntityType getEntity(String name) {
 		return TYPE_MAP.get(name.toLowerCase().replaceAll("_", ""));

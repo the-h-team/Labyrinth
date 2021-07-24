@@ -9,13 +9,13 @@ import org.jetbrains.annotations.NotNull;
 public class SharedBuilder {
 
 	/**
-	 * Within your plugins onEnable instantiate a new shared menu.
+	 * <strong>Within your plugins onEnable</strong> instantiate a new shared menu.
 	 *
-	 * @param plugin The plugin to register the menu under.
-	 * @param id     The unique id to find the menu with.
-	 * @param name   The name that display's for the menu
-	 * @param size   The size of the menu
-	 * @return A menu creation object.
+	 * @param plugin the plugin to register the menu under
+	 * @param id     the unique id to find the menu with
+	 * @param name   the name that displays for the menu
+	 * @param size   the size of the menu
+	 * @return a new menu creation object
 	 */
 	public static SharedMenu create(Plugin plugin, String id, String name, int size) {
 		return new SharedMenu(plugin, id) {

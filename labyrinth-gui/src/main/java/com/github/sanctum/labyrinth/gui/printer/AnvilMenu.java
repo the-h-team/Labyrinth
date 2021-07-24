@@ -27,8 +27,8 @@ public class AnvilMenu {
     private final AnvilListener listener;
     private int containerId;
     private Inventory inventory;
-    protected ItemBuilder LEFT_ITEM;
-    protected ItemBuilder RIGHT_ITEM;
+    protected ItemBuilder leftItem; // TODO: decide finality
+    protected ItemBuilder rightItem; // TODO: decide finality
     protected AnvilCloseEvent event;
     private boolean visible;
     private boolean empty;
@@ -36,9 +36,9 @@ public class AnvilMenu {
 
     public AnvilMenu(Player holder, String title, ItemBuilder left, ItemBuilder right) throws InstantiationException {
         this.holder = holder;
-        this.LEFT_ITEM = left;
+        this.leftItem = left;
         this.title = title;
-        this.RIGHT_ITEM = right;
+        this.rightItem = right;
         this.listener = new AnvilListener();
         AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 
@@ -49,9 +49,9 @@ public class AnvilMenu {
     }
 
     public AnvilMenu(String title, ItemBuilder left, ItemBuilder right) throws InstantiationException {
-        this.LEFT_ITEM = left;
+        this.leftItem = left;
         this.title = title;
-        this.RIGHT_ITEM = right;
+        this.rightItem = right;
         this.listener = new AnvilListener();
         AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 
@@ -63,8 +63,8 @@ public class AnvilMenu {
     /**
      * Set who is going to be viewing this inventory.
      *
-     * @param player The viewer of the gui.
-     * @return The same AnvilMenu.
+     * @param player the viewer of the gui
+     * @return this AnvilMenu
      */
     public AnvilMenu setViewer(Player player) {
         this.holder = player;
@@ -74,7 +74,7 @@ public class AnvilMenu {
     /**
      * Apply normal running logic for this anvil (Behaves like a normal anvil).
      *
-     * @return The same AnvilMenu.
+     * @return this AnvilMenu
      */
     public AnvilMenu isEmpty() {
         this.empty = true;
@@ -84,8 +84,8 @@ public class AnvilMenu {
     /**
      * Apply running logic to the closing event of this menu.
      *
-     * @param event The expression to run
-     * @return The same AnvilMenu.
+     * @param event the expression to run
+     * @return this AnvilMenu
      */
     public AnvilMenu applyClosingLogic(AnvilCloseEvent event) {
         this.event = event;
@@ -110,10 +110,10 @@ public class AnvilMenu {
 
         inventory = nms.toBukkitInventory(container);
 
-        inventory.setItem(Slot.INPUT_LEFT.get(), LEFT_ITEM.item);
+        inventory.setItem(Slot.INPUT_LEFT.get(), leftItem.item);
 
-        if (RIGHT_ITEM != null) {
-            inventory.setItem(Slot.INPUT_RIGHT.get(), RIGHT_ITEM.item);
+        if (rightItem != null) {
+            inventory.setItem(Slot.INPUT_RIGHT.get(), rightItem.item);
         }
 
         containerId = nms.getNextContainerId(holder, container);
@@ -128,8 +128,8 @@ public class AnvilMenu {
     /**
      * Closes the inventory if it's open.
      *
-     * @param sendClosePacket If the inventory is a natural event based close.
-     * @throws IllegalArgumentException If the inventory isn't visible
+     * @param sendClosePacket if the inventory is a natural event-based close
+     * @throws IllegalArgumentException if the inventory isn't visible
      */
     public void closeInventory(boolean sendClosePacket) {
         if (!visible)
@@ -147,7 +147,7 @@ public class AnvilMenu {
     /**
      * Returns the inventory for this anvil menu.
      *
-     * @return The inventory for this menu.
+     * @return the inventory for this menu
      */
     public Inventory getInventory() {
         return inventory;
@@ -156,55 +156,59 @@ public class AnvilMenu {
     /**
      * Get the title of this menu.
      *
-     * @return The menu title
+     * @return the title of this menu
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * Gets the {@link Listener} for this menu.
+     * Get the {@link Listener} for this menu.
      *
-     * @return The listener for this menu.
+     * @return the listener for this menu
      */
     public AnvilListener getListener() {
         return listener;
     }
 
     /**
-     * @return The left item builder.
+     * Get the left item builder.
+     *
+     * @return the left item builder
      */
     public ItemBuilder getLeft() {
-        return LEFT_ITEM;
+        return leftItem;
     }
 
     /**
-     * @return The right item builder.
+     * Get the right item builder.
+     *
+     * @return the right item builder
      */
     public ItemBuilder getRight() {
-        return RIGHT_ITEM;
+        return rightItem;
     }
 
     /**
      * Check if the menu is open for anyone.
      *
-     * @return false if the menu isnt currently open
+     * @return false if the menu is not currently open
      */
     public boolean isVisible() {
         return visible;
     }
 
     /**
-     * Get whos viewing the menu.
+     * Get who is viewing the menu.
      *
-     * @return Get the viewer of the inventory.
+     * @return the viewer of the inventory
      */
     public Player getViewer() {
         return holder;
     }
 
     /**
-     * Simply holds the listeners for the GUI
+     * Contains the EventHandlers for the GUI.
      */
     private class AnvilListener implements Listener {
 
@@ -221,6 +225,7 @@ public class AnvilMenu {
                     if (getLeft() != null && getLeft().click != null) {
                         if (clicked.getType() == getLeft().item.getType()) {
                             final ItemMeta meta = clicked.getItemMeta();
+                            //noinspection ConstantConditions
                             getLeft().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
                         }
                     } else closeInventory(false);
@@ -230,6 +235,7 @@ public class AnvilMenu {
                     if (getRight() != null && getRight().click != null) {
                         if (clicked.getType() == getRight().item.getType()) {
                             final ItemMeta meta = clicked.getItemMeta();
+                            //noinspection ConstantConditions
                             getRight().click.execute(clicker, meta.getDisplayName(), meta.getDisplayName().split(" "));
                         }
                     }

@@ -2,6 +2,7 @@ package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
+import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Field;
@@ -40,13 +41,16 @@ public final class CustomHeadLoader {
 
 	/**
 	 * Search through a specific section in your config for the heads.
+	 * <p>
+	 * Example:
+	 * <pre>ConfigHeader.My_heads</pre>
 	 *
-	 * @param section The standard node {@link org.bukkit.configuration.Configuration} section from your file to use.
-	 *                Example: <strong>ConfigHeader.My_heads</strong>
-	 * @return The same head loader instance with attempted values.
+	 * @param section the key of a {@link org.bukkit.configuration.ConfigurationSection} from your file to use
+	 * @return this head loader instance with attempted values
 	 */
 	public CustomHeadLoader look(String section) {
 		if (manager.isConfigurationSection(section)) {
+			//noinspection ConstantConditions
 			for (String id : manager.getConfigurationSection(section).getKeys(false)) {
 				boolean custom = manager.getBoolean(section + "." + id + ".custom");
 				if (custom) {
@@ -70,7 +74,7 @@ public final class CustomHeadLoader {
 					String category = manager.getString(section + "." + id + ".category");
 					String user = manager.getString(section + "." + id + ".user");
 
-					boolean isID = user.contains("-");
+					boolean isID = user != null && user.contains("-");
 
 					if (isID) {
 						que.put(new HeadText(name, category), new OnlineHeadSearch(UUID.fromString(user)));
@@ -121,22 +125,24 @@ public final class CustomHeadLoader {
 	}
 
 
+	// TODO: decide nullity (does not seem to be Nullable); maybe add throws
 	/**
 	 * Apply Base64 data for a custom skin value.
 	 *
 	 * *NOTE: Not cached.
 	 *
-	 * @param headValue The target head value to apply to a skull item.
-	 * @return The specified custom head if not null
+	 * @param headValue the target head value to apply to a skull item
+	 * @return the specified custom head
 	 */
 	public static ItemStack provide(String headValue) {
 		boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
 		Material type = Material.matchMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
-		assert type != null;
+		Preconditions.checkNotNull(type);
 		ItemStack skull;
 		if (isNew) {
 			skull = new ItemStack(type);
 		} else {
+			//noinspection deprecation
 			skull = new ItemStack(type, 1, (short) 3);
 		}
 		if (headValue != null) {
@@ -149,6 +155,7 @@ public final class CustomHeadLoader {
 			if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9") || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11") || Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13")) {
 
 				try {
+					//noinspection ConstantConditions
 					Field profileField = skullMeta.getClass().getDeclaredField("profile");
 					profileField.setAccessible(true);
 					profileField.set(skullMeta, profile);
@@ -158,6 +165,7 @@ public final class CustomHeadLoader {
 
 			} else {
 				try {
+					//noinspection ConstantConditions
 					Method mtd = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
 					mtd.setAccessible(true);
 					mtd.invoke(skullMeta, profile);

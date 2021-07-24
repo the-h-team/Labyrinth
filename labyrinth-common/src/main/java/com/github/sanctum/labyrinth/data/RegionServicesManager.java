@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -25,8 +26,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnusedReturnValue")
 public final class RegionServicesManager {
 
+	@SuppressWarnings("deprecation")
 	private final LinkedList<RegionService> SERVICES = new LinkedList<>();
 
 	private final Cuboid.FlagManager flagManager;
@@ -69,7 +72,7 @@ public final class RegionServicesManager {
 
 	public boolean load(Vent.Subscription<?> subscription) {
 		Vent.subscribe(subscription);
-		return true;
+		return true; // TODO: make void return with checked exception throws
 	}
 
 	@Deprecated
@@ -103,16 +106,19 @@ public final class RegionServicesManager {
 				manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.PVP));
 				if (Region.DATA.exists()) {
 					if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
+						//noinspection ConstantConditions
 						for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
 							Location o = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos1");
 
 							Location t = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".pos2");
 							Location s = Region.DATA.getConfig().getLocation("Markers.spawn." + id + ".start");
 							HUID d = HUID.fromString(id);
+							//noinspection ConstantConditions
 							UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
 							List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 							List<Region.Flag> flags = new ArrayList<>();
 							if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn." + id + ".flags")) {
+								//noinspection ConstantConditions
 								for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.spawn." + id + ".flags").getKeys(false)) {
 									Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
 									if (f != null) {
@@ -130,6 +136,7 @@ public final class RegionServicesManager {
 							if (Region.DATA.getConfig().getString("Markers.spawn." + id + ".name") != null) {
 								spawn.setName(Region.DATA.getConfig().getString("Markers.spawn." + id + ".name"));
 							}
+							//noinspection ConstantConditions
 							Schedule.sync(() -> spawn.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).run();
 							spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 							spawn.addFlag(flags.toArray(new Region.Flag[0]));
@@ -139,14 +146,17 @@ public final class RegionServicesManager {
 						}
 					}
 					if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
+						//noinspection ConstantConditions
 						for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
 							Location o = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos1");
 							Location t = Region.DATA.getConfig().getLocation("Markers.region." + id + ".pos2");
 							HUID d = HUID.fromString(id);
+							//noinspection ConstantConditions
 							UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
 							List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 							List<Region.Flag> flags = new ArrayList<>();
 							if (Region.DATA.getConfig().isConfigurationSection("Markers.region." + id + ".flags")) {
+								//noinspection ConstantConditions
 								for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.region." + id + ".flags").getKeys(false)) {
 									Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
 									if (f != null) {
@@ -164,6 +174,7 @@ public final class RegionServicesManager {
 								region.setName(Region.DATA.getConfig().getString("Markers.region." + id + ".name"));
 							}
 							region.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".pass"));
+							//noinspection ConstantConditions
 							Schedule.sync(() -> region.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).run();
 							region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 							region.addFlag(flags.toArray(new Region.Flag[0]));
@@ -255,8 +266,10 @@ public final class RegionServicesManager {
 			Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", pluginInstance, Vent.Priority.MEDIUM, (e, subscription) -> {
 
 				if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
+					Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(Region::match)).join();
 					if (r.isPresent()) {
+						// TODO: rewrite the optional#get call to safely obtain the value
+						//noinspection OptionalGetWithoutIsPresent
 						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
@@ -284,6 +297,8 @@ public final class RegionServicesManager {
 							e.setResult(Event.Result.DENY);
 						}
 
+						// TODO: decide how to handle optional (ifPresent setPos1?)
+						//noinspection OptionalGetWithoutIsPresent
 						selection.setPos1(e.getBlock().get().getLocation());
 
 						new Vent.Call<>(new CuboidCreationEvent(selection)).run();
@@ -291,8 +306,10 @@ public final class RegionServicesManager {
 					}
 				}
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-					Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().get().getLocation())).join();
+					Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(Region::match)).join();
 					if (r.isPresent()) {
+						// TODO: rewrite the optional#get call to safely obtain the value
+						//noinspection OptionalGetWithoutIsPresent
 						RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
@@ -319,6 +336,8 @@ public final class RegionServicesManager {
 							e.setResult(Event.Result.DENY);
 						}
 
+						// TODO: decide how to handle optional (ifPresent setPos2?)
+						//noinspection OptionalGetWithoutIsPresent
 						selection.setPos2(e.getBlock().get().getLocation());
 
 						new Vent.Call<>(new CuboidCreationEvent(selection)).run();

@@ -27,8 +27,8 @@ public abstract class TextLib {
 	/**
 	 * Attach code reference information to a specified component click event.
 	 *
-	 * @param component The text component to attach runnable information to.
-	 * @return A wrapped text component with applicable data.
+	 * @param component the text component to attach runnable information to
+	 * @return a wrapped text component with applicable data
 	 */
 	public WrappedComponent wrap(TextComponent component) {
 		return new WrappedComponent(component);
@@ -37,9 +37,9 @@ public abstract class TextLib {
 	/**
 	 * Run a specific action in the event of clicking the provided component.
 	 *
-	 * @param action    The code to run when this component is clicked.
-	 * @param component The component to justify action to.
-	 * @return The newly action wrapped component.
+	 * @param action the code to run when this component is clicked
+	 * @param component the component to justify action to
+	 * @return the newly action wrapped component
 	 */
 	public TextComponent execute(Applicable action, TextComponent component) {
 		return wrap(component).accept(action).toReal();
@@ -48,9 +48,9 @@ public abstract class TextLib {
 	/**
 	 * Run a specific action in the event of clicking the provided component.
 	 *
-	 * @param action    The code to run when this component is clicked.
-	 * @param component The component to justify action to.
-	 * @return The newly action wrapped component.
+	 * @param action the code to run when this component is clicked
+	 * @param component the component to justify action to
+	 * @return the newly action wrapped component
 	 */
 	public TextComponent execute(Applicable action, Consumer<TextComponent> component) {
 		TextComponent comp = new TextComponent();
@@ -59,12 +59,12 @@ public abstract class TextLib {
 	}
 
 	/**
-	 * Write hover meta logic to an existing {@link TextComponent}
+	 * Write hover meta logic to an existing {@link TextComponent}.
 	 *
-	 * @param source    The player to format placeholders from.
-	 * @param component The original component to use.
-	 * @param messages  The hover messages to add to the component.
-	 * @return A hover formatted text component.
+	 * @param source the player to format placeholders from
+	 * @param component the original component to use
+	 * @param messages the hover messages to add to the component
+	 * @return a hover formatted text component
 	 */
 	public TextComponent format(Player source, Consumer<TextComponent> component, String... messages) {
 		TextComponent comp = new TextComponent();
@@ -78,12 +78,12 @@ public abstract class TextLib {
 	}
 
 	/**
-	 * Write hover meta logic to an existing {@link TextComponent}
+	 * Write hover meta logic to an existing {@link TextComponent}.
 	 *
-	 * @param source    The player to format placeholders from.
-	 * @param component The original component to use.
-	 * @param messages  The hover messages to add to the component.
-	 * @return A hover formatted text component.
+	 * @param source the player to format placeholders from
+	 * @param component the original component to use
+	 * @param messages the hover messages to add to the component
+	 * @return a hover formatted text component
 	 */
 	public TextComponent format(Player source, TextComponent component, String... messages) {
 		List<Content> array = new ArrayList<>();
@@ -98,9 +98,9 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String hoverTextMessage);
 
@@ -108,9 +108,9 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverTextMessage);
 
@@ -118,59 +118,64 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message);
 
 	/**
 	 * Meta: {Suggestable}
 	 * Suggest commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textSuggestable(String normalText, String hoverText, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'HHH' )
+	 * <pre>( AsyncChatEvent -> player -> 'HHH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3);
 
@@ -178,9 +183,9 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage);
 
@@ -188,9 +193,9 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverTextMessage);
 
@@ -198,66 +203,71 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textHoverable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message);
 
 	/**
 	 * Meta: {Suggestable}
 	 * Suggest commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textSuggestable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHN' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverTextMessage, String commandName);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'NHNH' )
+	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String normalText, String hoverText, String normalText2, String hoverText2, String hoverTextMessage, String hoverText2Message, String commandName, String commandName2);
 
 	/**
 	 * Meta: {Runnable}
 	 * Run commands from interaction with the message.
+	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * ( AsyncChatEvent -> player -> 'HHH' )
+	 * <pre>( AsyncChatEvent -> player -> 'HHH' )</pre>
 	 *
-	 * @return The compiled TextComponent object.
+	 * @return the compiled TextComponent
 	 */
 	public abstract TextComponent textRunnable(OfflinePlayer source, String hoverText, String hoverText2, String hoverText3, String hoverTextMessage, String hover2TextMessage, String hover3TextMessage, String commandName, String commandName2, String commandName3);
 
 	/**
-	 * Encapsulate an already instantiated {@link TextLib} instance
+	 * Perform operations with the extant {@link TextLib} instance.
 	 *
-	 * @param library The operations to run whilst using the text library.
+	 * @param library an operation to perform using the instance
 	 */
 	public static void consume(Consumer<TextLib> library) {
 		library.accept(getInstance());

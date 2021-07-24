@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnusedReturnValue")
 public abstract class Region implements Cuboid, Cloneable {
 
 	public static final FileManager DATA = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Regions", "Persistent");
@@ -43,7 +44,7 @@ public abstract class Region implements Cuboid, Cloneable {
 	protected final List<Flag> FLAGS;
 	private final List<UUID> MEMBERS;
 
-	protected Region(Region cuboid) {
+	protected Region(Region cuboid) { // TODO: add explanation why passthrough field isn't copied
 		this(cuboid.xMin, cuboid.xMax, cuboid.yMin, cuboid.yMax, cuboid.zMin, cuboid.zMax, cuboid.world, cuboid.id);
 		setPlugin(cuboid.plugin);
 		setOwner(cuboid.owner);
@@ -60,13 +61,13 @@ public abstract class Region implements Cuboid, Cloneable {
 		this(Math.min(point1.getBlockX(), point2.getBlockX()), Math.max(point1.getBlockX(), point2.getBlockX()), Math.min(point1.getBlockY(), point2.getBlockY()), Math.max(point1.getBlockY(), point2.getBlockY()), Math.min(point1.getBlockZ(), point2.getBlockZ()), Math.max(point1.getBlockZ(), point2.getBlockZ()), point1.getWorld(), id);
 	}
 
-	protected Region(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax, World world, HUID id) {
-		this.xMin = xmin;
-		this.xMax = xmax;
-		this.yMin = ymin;
-		this.yMax = ymax;
-		this.zMin = zmin;
-		this.zMax = zmax;
+	protected Region(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, World world, HUID id) {
+		this.xMin = xMin;
+		this.xMax = xMax;
+		this.yMin = yMin;
+		this.yMax = yMax;
+		this.zMin = zMin;
+		this.zMax = zMax;
 		this.world = world;
 		this.id = id;
 		this.FLAGS = new LinkedList<>();
@@ -361,6 +362,7 @@ public abstract class Region implements Cuboid, Cloneable {
 			throw new IOException("One or more locations were found null during the saving process.");
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public Region clone() {
 		return new Standard(this);
@@ -443,7 +445,11 @@ public abstract class Region implements Cuboid, Cloneable {
 
 		public Optional<Region> getRegion() {
 			if (getPlayer().isOnline()) {
-				return CompletableFuture.supplyAsync(() -> Region.match(getPlayer().getPlayer().getLocation())).join();
+				return CompletableFuture.supplyAsync(() -> Optional.ofNullable(getPlayer())
+						.map(OfflinePlayer::getPlayer)
+						.map(Player::getLocation)
+						.flatMap(Region::match)
+				).join();
 			}
 			return Optional.empty();
 		}

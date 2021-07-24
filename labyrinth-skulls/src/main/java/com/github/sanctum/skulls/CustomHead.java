@@ -62,7 +62,7 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Load a custom head object into cache.
 		 *
-		 * @param object The custom head object.
+		 * @param object the custom head object to cache
 		 */
 		public static void load(CustomHead object) {
 			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
@@ -91,7 +91,7 @@ public abstract class CustomHead implements SkullObject {
 		 * Using {@link CustomHead.Manager#newLoader(FileConfiguration)} or {@link CustomHead.Manager#newLoader(Plugin, String, String)} load configured head values
 		 * from your specified file location.
 		 *
-		 * @param loader The head loader instance.
+		 * @param loader the head loader instance
 		 */
 		public static void load(CustomHeadLoader loader) {
 			if (loader.isLoaded()) {
@@ -110,8 +110,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * Results are cached. If a result is already found within the query it is instead returned.
 		 *
-		 * @param player The player to fetch.
-		 * @return The head of the specified player or null if not found.
+		 * @param player the player to fetch
+		 * @return the head of the specified player or null if not found
 		 */
 		public static @Nullable ItemStack get(OfflinePlayer player) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).map(CustomHead::get).findFirst().orElseGet(() -> {
@@ -131,8 +131,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * As long as the id has a valid link to a player from the mojang api results are cached.
 		 *
-		 * @param id The valid player id.
-		 * @return The head of the specified user or null if not found.
+		 * @param id a valid player id
+		 * @return the head of the specified user or null if not found
 		 */
 		public static @Nullable ItemStack get(UUID id) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).map(CustomHead::get).findFirst().orElseGet(() -> {
@@ -152,8 +152,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * As long as the id has a valid link to a player from the mojang api results are cached.
 		 *
-		 * @param name The name of the player.
-		 * @return The head of the specified user or null if not found.
+		 * @param name the name of the player
+		 * @return the head of the specified user or null if not found
 		 */
 		public static @Nullable ItemStack get(String name) {
 
@@ -174,8 +174,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * As long as the id has a valid link to a player from the mojang api results are cached.
 		 *
-		 * @param name The name of the player.
-		 * @return The head of the specified user or null if not found.
+		 * @param name the name of the player
+		 * @return the head of the specified user or null if not found
 		 */
 		public static @Nullable CustomHead pick(String name) {
 			return HEADS.stream().filter(h -> h.name().equals(name)).findFirst().orElseGet(() -> {
@@ -195,8 +195,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * As long as the id has a valid link to a player from the mojang api results are cached.
 		 *
-		 * @param id The valid player id.
-		 * @return The head of the specified user or null if not found.
+		 * @param id a valid player id
+		 * @return the head of the specified user or null if not found
 		 */
 		public static @Nullable CustomHead pick(UUID id) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).findFirst().orElseGet(() -> {
@@ -216,8 +216,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * Results are cached. If a result is already found within the query it is instead returned.
 		 *
-		 * @param player The player to fetch.
-		 * @return The head of the specified player or null if not found.
+		 * @param player the player to fetch
+		 * @return the head of the specified player or null if not found
 		 */
 		public static @Nullable CustomHead pick(OfflinePlayer player) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).findFirst().orElseGet(() -> {
@@ -235,7 +235,7 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Get all known custom head categories.
 		 *
-		 * @return Every known custom head category.
+		 * @return a list of every known custom head category
 		 */
 		public static List<String> getCategories() {
 			return HEADS.stream().map(CustomHead::category).collect(Collectors.toList());
@@ -246,8 +246,8 @@ public abstract class CustomHead implements SkullObject {
 		 * <p>
 		 * If the specified category isn't found an empty list is returned.
 		 *
-		 * @param category The valid category to search.
-		 * @return All categorized heads or an empty list if ill-informed.
+		 * @param category the valid category to search
+		 * @return all categorized heads--or an empty list if you are ill-informed
 		 */
 		public static List<ItemStack> getCategory(String category) {
 			if (!getCategories().contains(category)) {
@@ -259,7 +259,7 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Get all currently cached custom heads.
 		 *
-		 * @return A list of <strong>ALL</strong> known custom heads.
+		 * @return a list of <strong>ALL</strong> known custom heads
 		 */
 		public static List<CustomHead> getHeads() {
 			return Collections.unmodifiableList(HEADS);
@@ -268,10 +268,10 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Assign the loading of additional configured head elements.
 		 *
-		 * @param plugin    The source plugin.
-		 * @param fileName  The name of the file to use.
-		 * @param directory The directory of the file.
-		 * @return A new head loader instance.
+		 * @param plugin    the source plugin
+		 * @param fileName  the name of the file to use
+		 * @param directory the directory of the file
+		 * @return a new head loader instance
 		 */
 		public static CustomHeadLoader newLoader(Plugin plugin, String fileName, String directory) {
 			return new CustomHeadLoader(plugin, fileName, directory);
@@ -280,8 +280,8 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Assign the loading of additional configured head elements.
 		 *
-		 * @param configuration The config to source the additions from
-		 * @return A new head loader instance.
+		 * @param configuration the config to source the additions from
+		 * @return a new head loader instance
 		 */
 		public static CustomHeadLoader newLoader(FileConfiguration configuration) {
 			return new CustomHeadLoader(configuration);
@@ -290,9 +290,10 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * For internal use only!!
 		 *
-		 * @param name The name of the custom head.
-		 * @param item The skull item.
 		 * @deprecated Use {@link CustomHead.Manager#load(CustomHead)} to load already verified items.
+		 * @param name the name of the custom head
+		 * @param category the category of the custom head
+		 * @param item the skull item
 		 */
 		@Deprecated
 		protected static void load(String name, String category, ItemStack item) {
@@ -308,9 +309,9 @@ public abstract class CustomHead implements SkullObject {
 		/**
 		 * Copy all lore from a targeted player head and change the owner to one specified.
 		 *
-		 * @param item The item to modify.
-		 * @param name The name of the new owner.
-		 * @return The modified item stack.
+		 * @param item the item to modify
+		 * @param name the name of the new owner
+		 * @return the modified ItemStack
 		 */
 		public static ItemStack modifyItemStack(ItemStack item, String name) {
 			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");

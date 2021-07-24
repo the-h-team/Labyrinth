@@ -17,7 +17,9 @@ import java.util.UUID;
  * Keys may only contain lowercase alphanumeric characters, periods,
  * underscores, hyphens, and forward slashes.
  * <p>
- * This class is 100% constructed by the bukkit developers but since its not available in versions prior to 1.12 this allots the same effects for legacy builds.
+ * This class is 100% constructed by the Bukkit developers, but since it
+ * is not available in Bukkit prior to 1.12 this internal mimic affords
+ * the same functionality to legacy versions.
  */
 public final class NamespacedKey {
 
@@ -41,6 +43,7 @@ public final class NamespacedKey {
 	 * @param key       key
 	 * @deprecated should never be used by plugins, for internal use only!!
 	 */
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	protected NamespacedKey(@NotNull String namespace, @NotNull String key) {
 		this.namespace = namespace;
@@ -64,11 +67,7 @@ public final class NamespacedKey {
 	 * @param plugin the plugin to use for the namespace
 	 * @param key    the key to create
 	 */
-	public NamespacedKey(@NotNull Plugin plugin, @NotNull String key) {
-
-		if (plugin == null) {
-			LabyrinthProvider.getInstance().getLogger().severe("- Namespaced plugin cannot be null!");
-		}
+	public NamespacedKey(@NotNull("Plugin cannot be null!") Plugin plugin, @NotNull String key) {
 
 		this.namespace = plugin.getName().toLowerCase(Locale.ROOT);
 		this.key = key.toLowerCase(Locale.ROOT);
@@ -118,8 +117,8 @@ public final class NamespacedKey {
 	/**
 	 * Return a new random key in the {@link #BUKKIT} namespace.
 	 *
-	 * @return new key
 	 * @deprecated should never be used by plugins, for internal use only!!
+	 * @return new key
 	 */
 	@Deprecated
 	@NotNull

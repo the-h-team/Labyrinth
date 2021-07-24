@@ -16,16 +16,16 @@ public abstract class Cooldown {
 	private String format = "&e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
 
 	/**
-	 * Get the cooldown object's delimiter-id
+	 * Get this cooldown's delimiter-id
 	 *
-	 * @return The cooldown object's custom delimiter
+	 * @return the cooldown's custom delimiter
 	 */
 	public abstract String getId();
 
 	/**
 	 * Get the original cooldown period.
 	 *
-	 * @return The original specified cooldown period.
+	 * @return the original specified cooldown period
 	 */
 	public abstract long getCooldown();
 
@@ -34,9 +34,9 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * The raw value for total cooldown time remaining.
+	 * Get the raw int value of total cooldown time remaining.
 	 *
-	 * @return Gets the total amount of time left from the conversion table
+	 * @return the total amount of time left from the conversion table
 	 */
 	public final int getTimeLeft() {
 		return (int) Math.abs(getTimePassed());
@@ -44,10 +44,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
-	 * This != total cooldown time converted to days its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to days; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of days left within the conversion table.
+	 * @return the amount of days left within the conversion table
 	 */
 	public final int getDaysLeft() {
 		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
@@ -55,10 +56,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of hours left from the total cooldown length equated.
-	 * This != total cooldown time converted to hours its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to hours; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of hours left within the conversion table.
+	 * @return the amount of hours left within the conversion table
 	 */
 	public final long getHoursLeft() {
 		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
@@ -66,10 +68,11 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of minutes left from the total cooldown length equated.
-	 * This != total cooldown time converted to minutes its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to minutes; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of minutes left within the conversion table.
+	 * @return the amount of minutes left within the conversion table
 	 */
 	public final long getMinutesLeft() {
 		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
@@ -77,19 +80,20 @@ public abstract class Cooldown {
 
 	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
-	 * This != total cooldown time converted to seconds its a soft=cap representative of
-	 * the cooldown's 'SS:MM:HH:DD' format.
+	 * <p>
+	 * This != total cooldown time converted to seconds; it's a soft-cap
+	 * representative of the cooldown's 'SS:MM:HH:DD' format.
 	 *
-	 * @return Get's the amount of seconds left within the conversion table.
+	 * @return the amount of seconds left within the conversion table
 	 */
 	public final long getSecondsLeft() {
 		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
 	}
 
 	/**
-	 * Check's if the cooldown from Labyrinth cache is complete.
+	 * Check if the cooldown from Labyrinth cache is complete.
 	 *
-	 * @return The result of completion for the cooldown.
+	 * @return the result of completion for the cooldown
 	 */
 	public final boolean isComplete() {
 		Long a = getCooldown();
@@ -100,12 +104,15 @@ public abstract class Cooldown {
 
 	/**
 	 * Get a formatted string containing the remaining time for the cooldown.
-	 * It's reccomended you override this and implement your own beautiful time format using the
-	 * provided time variables such as "getSeconds, getMinutes" etc.
 	 * <p>
-	 * For persistent format's use the {@link Cooldown#format(String)} method when using {@link Cooldown#getById(String)}
+	 * It is recommended you override this and implement your own beautiful
+	 * time format using the provided time variables such as
+	 * {@link #getSecondsLeft()}, {@link #getMinutesLeft()} etc.
+	 * <p>
+	 * For persistent formats, use the {@link Cooldown#format(String)}
+	 * method after using {@link Cooldown#getById(String)}.
 	 *
-	 * @return Get's the full amount of time left within the cooldown from seconds to days
+	 * @return the full amount of time left within the cooldown from seconds to days
 	 */
 	public String fullTimeLeft() {
 		return this.format
@@ -122,7 +129,8 @@ public abstract class Cooldown {
 
 	/**
 	 * Save the cooldown to Labyrinth cache.
-	 * Note: If a cooldown is already saved with the same Id it will be overwritten
+	 * <p>
+	 * Note: If a cooldown is already saved with the same id, it will be overwritten.
 	 */
 	public synchronized final void save() {
 		FileManager library = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Cooldowns", "Persistent");
@@ -132,9 +140,11 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * Update the hard-storage for persistence to this cooldown's remaining time.
-	 * Note: If a cooldown is already saved with the same Id it will be overwritten, primarily
-	 * to be used on plugin disable.
+	 * Update the hard storage (persistence) to this live cooldown's remaining time.
+	 * <p>
+	 * Note: If a cooldown is already saved with the same id, it will be overwritten.
+	 * <p>
+	 * <em>Primarily to be used on plugin disable.</em>
 	 */
 	public synchronized final void update() {
 		FileManager library = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Cooldowns", "Persistent");
@@ -144,10 +154,10 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * Convert's seconds into milliseconds for final time conversions.
+	 * Convert seconds into milliseconds for final time conversions.
 	 *
-	 * @param seconds The amount of time to convert.
-	 * @return The milliseconds needed for conversion.
+	 * @param seconds the amount of time in seconds to convert
+	 * @return the milliseconds needed for conversion
 	 */
 	protected final long abv(int seconds) {
 		return System.currentTimeMillis() + (seconds * 1000);
@@ -167,10 +177,10 @@ public abstract class Cooldown {
 	}
 
 	/**
-	 * Get a native cooldown object by its set delimiter-id
+	 * Get a native cooldown object by its set delimiter-id.
 	 *
-	 * @param id The custom delimiter to search for
-	 * @return A cooldown based object retaining original values from save.
+	 * @param id the custom delimiter to search for
+	 * @return a cooldown based object retaining original values from save
 	 */
 	public static Cooldown getById(String id) {
 		return LabyrinthProvider.getInstance().getCooldowns().stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
@@ -207,7 +217,7 @@ public abstract class Cooldown {
 	/**
 	 * Remove an object of Cooldown inheritance from Labyrinth cache.
 	 *
-	 * @param c The cooldown representative to remove from cache.
+	 * @param c the cooldown representative to remove from cache
 	 */
 	public static void remove(Cooldown c) {
 		FileManager library = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Cooldowns", "Persistent");

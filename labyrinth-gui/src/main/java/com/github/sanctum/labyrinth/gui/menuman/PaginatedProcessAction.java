@@ -21,7 +21,7 @@ public class PaginatedProcessAction<T> {
 	/**
 	 * The unique ID from the menu.
 	 *
-	 * @return The menus unique ID.
+	 * @return the unique ID from the menu
 	 */
 	public UUID getId() {
 		return builder.getId();
@@ -29,24 +29,25 @@ public class PaginatedProcessAction<T> {
 
 	/**
 	 * Apply what happens when the item is clicked on.
-	 * All data provided will be applied on RUNTIME
+	 * <p>
+	 * <strong>All data provided will be applied on RUNTIME</strong>
 	 *
-	 * @param click The lambda/method reference to apply
-	 * @return An action builder.
+	 * @param click the lambda/method reference to apply
+	 * @return this action builder
 	 */
 	public PaginatedProcessAction<T> setClick(PaginatedMenuClick<T> click) {
 		if (item == null) {
 			throw new IllegalStateException("Missing item construction, ensure that happens before action click processing.");
 		}
-		builder.ITEM_ACTIONS.putIfAbsent(item, click);
+		builder.itemActions.putIfAbsent(item, click);
 		return this;
 	}
 
 	/**
 	 * Supply the item construction for his process.
 	 *
-	 * @param itemStackSupplier The item construction to take place while processing the menu.
-	 * @return An action builder.
+	 * @param itemStackSupplier the item construction to take place while processing the menu
+	 * @return this action builder
 	 */
 	public PaginatedProcessAction<T> setItem(Supplier<ItemStack> itemStackSupplier) {
 		this.item = itemStackSupplier.get();
@@ -63,7 +64,7 @@ public class PaginatedProcessAction<T> {
 	/**
 	 * The context to be attached to the item from the collection.
 	 *
-	 * @return context from the menus collection.
+	 * @return context from the menus collection
 	 */
 	public T getContext() {
 		return t;

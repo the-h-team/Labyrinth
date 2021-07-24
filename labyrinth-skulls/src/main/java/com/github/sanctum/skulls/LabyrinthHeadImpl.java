@@ -4,6 +4,7 @@ import java.util.UUID;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("SameParameterValue")
 final class LabyrinthHeadImpl extends CustomHead {
 
 	private final String name;

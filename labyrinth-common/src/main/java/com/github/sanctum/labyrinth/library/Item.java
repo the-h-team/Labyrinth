@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author Hempfest
  */
+@SuppressWarnings("ConstantConditions")
 public class Item {
 
 	private static final LinkedList<Item> cache = new LinkedList<>();
@@ -101,6 +102,7 @@ public class Item {
 		return this;
 	}
 
+	@SuppressWarnings("deprecation")
 	public Item shapeRecipe(String... shape) {
 		ShapedRecipe recipe = new ShapedRecipe(key, item);
 		List<String> list = Arrays.asList(shape);
@@ -209,7 +211,7 @@ public class Item {
 	}
 
 	/**
-	 * Used to easily color and customize a leather armor piece of choice
+	 * Used to easily color and customize a leather armor piece of choice.
 	 */
 	public static class ColoredArmor {
 
@@ -240,8 +242,8 @@ public class Item {
 		/**
 		 * Select a piece of armor to start customizing!
 		 *
-		 * @param piece The piece of armor to customize
-		 * @return A coloredArmor instance.
+		 * @param piece the piece of armor to customize
+		 * @return a new ColoredArmor instance
 		 */
 		public static ColoredArmor select(@NotNull Piece piece) {
 			return new ColoredArmor(piece);
@@ -250,7 +252,7 @@ public class Item {
 		/**
 		 * Customize an entire set of leather armor.
 		 *
-		 * @return A coloredArmor instance.
+		 * @return a new ColoredArmor instance
 		 */
 		public static ColoredArmor prepare() {
 			return new ColoredArmor(Piece.HEAD);
@@ -259,10 +261,10 @@ public class Item {
 		/**
 		 * Change the title of this armor piece.
 		 * <p>
-		 * (Automatically color translated)
+		 * <strong>Automatically color translated.</strong>
 		 *
-		 * @param text The title of the item.
-		 * @return The same colored armor builder.
+		 * @param text the title of the item
+		 * @return this builder
 		 */
 		public ColoredArmor setTitle(@NotNull String text) {
 			this.TITLE = StringUtils.use(text).translate();
@@ -270,21 +272,22 @@ public class Item {
 		}
 
 		/**
-		 * Select a color for this armor piece
+		 * Select a color for this armor piece.
 		 *
-		 * @param c The {@link Color} of choice.
-		 * @return The same colored armor builder.
+		 * @param color a {@link Color} of choice
+		 * @return this builder
 		 */
-		public ColoredArmor setColor(@NotNull Color c) {
-			this.COLOR = c;
+		public ColoredArmor setColor(@NotNull Color color) {
+			this.COLOR = color;
 			return this;
 		}
 
 		/**
-		 * Select a color for this armor piece via hexadecimal (Ex. 0x0000f)
+		 * Select a color for this armor piece via hexadecimal.
+		 * <em>(Ex. 0x0000f)</em>
 		 *
-		 * @param rgb The hex RGB value to use.
-		 * @return The same colored armor builder.
+		 * @param rgb the hex RGB value to use
+		 * @return this builder
 		 */
 		public ColoredArmor setColor(int rgb) {
 			this.COLOR = Color.fromRGB(rgb);
@@ -292,12 +295,12 @@ public class Item {
 		}
 
 		/**
-		 * Select a color for this armor piece via R, G, B format.
+		 * Select a color for this armor piece via RGB format.
 		 *
-		 * @param red   The red value to use
-		 * @param green The green value to use
-		 * @param blue  The blue value to use
-		 * @return The same colored armor builder.
+		 * @param red the red value to use
+		 * @param green the green value to use
+		 * @param blue the blue value to use
+		 * @return this builder
 		 */
 		public ColoredArmor setColor(int red, int green, int blue) {
 			this.COLOR = Color.fromRGB(red, green, blue);
@@ -307,10 +310,10 @@ public class Item {
 		/**
 		 * Add some lore to this armor piece.
 		 * <p>
-		 * (Automatically color translated)
+		 * <strong>Automatically color translated.</strong>
 		 *
-		 * @param text The line(s) of lore to add to this armor piece
-		 * @return The same colored armor builder.
+		 * @param text the line(s) of lore to add to this armor piece
+		 * @return this builder
 		 */
 		public ColoredArmor setLore(@NotNull String... text) {
 			List<String> list = new LinkedList<>();
@@ -324,7 +327,7 @@ public class Item {
 		/**
 		 * Build an entire set of armor based off your options.
 		 *
-		 * @return The finished armor set fully customized.
+		 * @return the finished armor set, fully customized
 		 */
 		public ItemStack[] buildAll() {
 			List<ItemStack> i = new LinkedList<>(Arrays.asList(new ItemStack(Material.LEATHER_HELMET), new ItemStack(Material.LEATHER_CHESTPLATE), new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_BOOTS)));
@@ -350,7 +353,7 @@ public class Item {
 		/**
 		 * Build your piece of armor! Stare at yourself in awe in the mirror!
 		 *
-		 * @return The finished armor piece fully customized.
+		 * @return the finished armor piece, fully customized
 		 */
 		public ItemStack build() {
 			if (this.BASE.getItemMeta() instanceof LeatherArmorMeta) {
@@ -371,7 +374,7 @@ public class Item {
 		}
 
 		/**
-		 * An enum encapsulating bodily positioning
+		 * An enum encapsulating bodily positioning.
 		 */
 		public enum Piece {
 			HEAD, TORSO, LEGS, FEET
@@ -380,7 +383,8 @@ public class Item {
 	}
 
 	/**
-	 * Used to encapsulate already made itemstack's or make new ones and edit them.
+	 * Used to encapsulate already-made ItemStacks or to make new ones
+	 * and edit them.
 	 */
 	public static class Edit {
 

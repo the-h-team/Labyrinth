@@ -27,12 +27,12 @@ public class TabCompletionFilter {
 	}
 
 	/**
-	 * Require a specific command @ a specific index to be used before offering
-	 * the provided completions.
+	 * Require a specific command at a specific index to be used before
+	 * offering the provided completions.
 	 *
-	 * @param key   The command to require
-	 * @param index The string argument index of the command.
-	 * @return The same filtered tab completion.
+	 * @param key   the command to require
+	 * @param index the string argument index of the command
+	 * @return this filtered tab completion
 	 */
 	public TabCompletionFilter require(String key, int index) {
 		this.key = key;
@@ -49,7 +49,7 @@ public class TabCompletionFilter {
 	 * <p>
 	 * Only checks for the specified label at args[0] then feeds completions.
 	 *
-	 * @return The same filtered tab completion.
+	 * @return this filtered tab completion
 	 */
 	public TabCompletionFilter completeAt(String commandLabel) {
 		this.anywhere = true;
@@ -58,11 +58,11 @@ public class TabCompletionFilter {
 	}
 
 	/**
-	 * Use this option to specify the index that our completions will be shown/detected
-	 * when in live use.
+	 * Use this option to specify the index that our completions will be
+	 * shown/detected when in live use.
 	 *
 	 * @param index The string argument index to detect/show completions
-	 * @return The same filtered tab completion.
+	 * @return this filtered tab completion
 	 */
 	public TabCompletionFilter completeAt(int index) {
 		this.index = index;
@@ -71,11 +71,11 @@ public class TabCompletionFilter {
 
 	/**
 	 * Provide the completions to be injected when in use,
-	 * customizing things like permissions and other possible pre-process actions you
-	 * want to take.
+	 * customizing things like permissions and other possible
+	 * pre-process actions you want to take.
 	 *
-	 * @param completions The string completions to provide live
-	 * @return The same filtered tab completion.
+	 * @param completions the string completions to provide live
+	 * @return this filtered tab completion
 	 */
 	public TabCompletionFilter filter(Supplier<List<String>> completions) {
 		this.completions = completions.get();
@@ -85,9 +85,9 @@ public class TabCompletionFilter {
 	/**
 	 * Map a custom code reference when a specified completion gets triggered.
 	 *
-	 * @param completion The command to use
-	 * @param action     The action to run
-	 * @return The same filtered tab completion.
+	 * @param completion the command to use
+	 * @param action     the action to run
+	 * @return this filtered tab completion
 	 */
 	public TabCompletionFilter map(String completion, Applicable action) {
 		TabCompletionBuilder.APPLICABLE_MAP.putIfAbsent(completion, action);
@@ -95,9 +95,9 @@ public class TabCompletionFilter {
 	}
 
 	/**
-	 * Save all option's and convert back into a builder to export our list.
+	 * Save all options and convert back into a builder to export the list.
 	 *
-	 * @return Our previous completion builder with our newly configured values.
+	 * @return the original completion builder with new options applied
 	 */
 	public TabCompletionBuilder collect() {
 		List<TabCompletionFilter> indexList;

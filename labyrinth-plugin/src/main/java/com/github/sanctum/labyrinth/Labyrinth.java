@@ -87,6 +87,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		Schedule.sync(() -> new AdvancedHook(this)).applyAfter(() -> new VaultHook(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
+		// TODO: Add legacy check (FileConfiguration missing getLocation) (Hemp)
 		RegionServicesManager.Initializer.start(this);
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();

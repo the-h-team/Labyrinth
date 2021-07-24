@@ -21,8 +21,8 @@ public class MathUtils {
 	/**
 	 * Get a fresh math utility instance using the provided number context.
 	 *
-	 * @param n The number to use.
-	 * @return A new math utility instance.
+	 * @param n the number to use
+	 * @return a new math utility instance
 	 */
 	public static MathUtils use(Number n) {
 		return new MathUtils(n);
@@ -31,8 +31,8 @@ public class MathUtils {
 	/**
 	 * Format/trim a given amount to a specific length format.
 	 *
-	 * @param precision The math precision to stop the decimal placing at.
-	 * @return The newly formatted double.
+	 * @param precision the math precision to stop the decimal placing at
+	 * @return the newly formatted double
 	 */
 	public double format(int precision) {
 		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.HALF_EVEN);
@@ -42,8 +42,8 @@ public class MathUtils {
 	/**
 	 * Format the number with a specified language.
 	 *
-	 * @param locale The language to format to.
-	 * @return The formatted amount as a string. (Number compliant)
+	 * @param locale the language to format to
+	 * @return the formatted amount as a string (number compliant)
 	 */
 	public String format(Locale locale) {
 		return NumberFormat.getNumberInstance(locale).format(format(2));
@@ -52,9 +52,9 @@ public class MathUtils {
 	/**
 	 * Format the number with a specified language.
 	 *
-	 * @param locale    The language to format to.
-	 * @param precision The math context precision to apply.
-	 * @return The formatted amount as a string. (Number compliant)
+	 * @param locale    the language to format to
+	 * @param precision the math context precision to apply
+	 * @return the formatted amount as a string (number compliant)
 	 */
 	public String format(Locale locale, int precision) {
 		return NumberFormat.getNumberInstance(locale).format(format(precision));

@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Encapsulate a player object and getMechanics the properties of the permissible inheritance.
+ * Encapsulate a player object and get the properties of the permissible inheritance.
  *
  * @author Hempfest
  */

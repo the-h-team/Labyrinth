@@ -184,7 +184,7 @@ public class PaginatedAssortment {
 				}
 			}
 		} else {
-			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &epages!", ColoredString.ColorType.MC).toString());
+			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &e" + "pages!", ColoredString.ColorType.MC).toString());
 		}
 	}
 
@@ -259,7 +259,7 @@ public class PaginatedAssortment {
 				}
 			}
 		} else {
-			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &epages!", ColoredString.ColorType.MC).toString());
+			p.sendMessage(new ColoredString("&eThere are only &f" + totalPageCount + " &e" + "pages!", ColoredString.ColorType.MC).toString());
 		}
 	}
 
@@ -453,9 +453,9 @@ public class PaginatedAssortment {
 	}
 
 	/**
-	 * Gets the collection of strings to be exported into a list.
+	 * Get the collection of strings to be exported into a list.
 	 *
-	 * @return The list of strings to be sent to the player.
+	 * @return the strings to be sent to the player
 	 */
 	public Collection<String> getTargetList() {
 		return targetList;

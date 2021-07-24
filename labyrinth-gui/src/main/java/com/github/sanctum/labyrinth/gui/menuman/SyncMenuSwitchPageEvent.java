@@ -49,16 +49,16 @@ public class SyncMenuSwitchPageEvent<T> extends Event implements Cancellable {
 	/**
 	 * The item that was clicked on.
 	 *
-	 * @return An itemstack involved within the operation.
+	 * @return an ItemStack involved within the operation
 	 */
-	public ItemStack getItem() {
+	public ItemStack getItem() { // TODO: define nullity
 		return item;
 	}
 
 	/**
 	 * The unique ID of the menu clicked.
 	 *
-	 * @return The unique ID of the menu.
+	 * @return the unique ID of the menu
 	 */
 	public UUID getId() {
 		return builder.getId();
@@ -67,25 +67,25 @@ public class SyncMenuSwitchPageEvent<T> extends Event implements Cancellable {
 	/**
 	 * The player who clicked.
 	 *
-	 * @return The player who interacted within the event.
+	 * @return the player who interacted within the event
 	 */
 	public Player getWhoClicked() {
 		return whoClicked;
 	}
 
 	/**
-	 * Gets the inventory view within the operation.
+	 * Get the inventory view within the operation.
 	 *
-	 * @return The inventory view for the menu.
+	 * @return the inventory view for the menu
 	 */
 	public InventoryView getView() {
 		return view;
 	}
 
 	/**
-	 * Gets the current page the player is on within the menu.
+	 * Get the current page the player is on within the menu.
 	 *
-	 * @return The page the player is on.
+	 * @return the page the player is on
 	 */
 	public int getPage() {
 		return page;
@@ -94,10 +94,10 @@ public class SyncMenuSwitchPageEvent<T> extends Event implements Cancellable {
 	/**
 	 * Re-open the menu on a specified page.
 	 *
-	 * @param page The page to open for the player.
+	 * @param page the page to open for the player
 	 */
 	public void open(int page) {
-		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inventory = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		whoClicked.openInventory(builder.adjust(page).getInventory());
 	}
 
@@ -105,7 +105,7 @@ public class SyncMenuSwitchPageEvent<T> extends Event implements Cancellable {
 	 * Re-open the menu page the player is currently on.
 	 */
 	public void refresh() {
-		builder.INVENTORY = Bukkit.createInventory(null, builder.SIZE, builder.TITLE.replace("{PAGE}", "" + (builder.PAGE + 1)).replace("{MAX}", "" + builder.getMaxPages()));
+		builder.inventory = Bukkit.createInventory(null, builder.size, builder.title.replace("{PAGE}", "" + (builder.page + 1)).replace("{MAX}", "" + builder.getMaxPages()));
 		whoClicked.openInventory(builder.adjust(page).getInventory());
 	}
 
@@ -114,7 +114,7 @@ public class SyncMenuSwitchPageEvent<T> extends Event implements Cancellable {
 	 */
 	public void close() {
 		whoClicked.closeInventory();
-		HandlerList.unregisterAll(builder.CONTROLLER);
+		HandlerList.unregisterAll(builder.controller);
 	}
 
 	@Override
