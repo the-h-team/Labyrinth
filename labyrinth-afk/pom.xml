@@ -16,7 +16,7 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.0</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

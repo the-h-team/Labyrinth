@@ -78,22 +78,22 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-afk</artifactId>
-            <version>1.7.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
-            <version>1.7.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skulls</artifactId>
-            <version>1.7.0</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
