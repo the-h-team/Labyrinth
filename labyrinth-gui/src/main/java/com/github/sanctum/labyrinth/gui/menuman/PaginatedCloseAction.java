@@ -26,7 +26,7 @@ public class PaginatedCloseAction<T> {
 	/**
 	 * Get the player.
 	 *
-	 * @return The player involved in the operation.
+	 * @return the player involved in the operation
 	 */
 	public Player getPlayer() {
 		return p;
@@ -53,7 +53,7 @@ public class PaginatedCloseAction<T> {
 	/**
 	 * Get the inventory view involved in the operation.
 	 *
-	 * @return The inventory view involved in the operation.
+	 * @return the inventory view involved in the operation
 	 */
 	public InventoryView getView() {
 		return view;

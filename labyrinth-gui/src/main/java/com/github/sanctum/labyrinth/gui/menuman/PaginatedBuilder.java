@@ -29,7 +29,8 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * The primary object used to start a {@link Menu.Paginated} object.
- * Use this to customize everything from click,close events to element specifications.
+ * <p>
+ * Use this to customize everything from click/close events to element specifications.
  */
 public final class PaginatedBuilder<T> {
 
@@ -89,8 +90,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * A crucial step to initializing your menu.
 	 *
-	 * @param plugin The plugin to register the menu under.
-	 * @return The same menu builder.
+	 * @param plugin the plugin to register the menu under
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> forPlugin(Plugin plugin) {
 		namespace = new NamespacedKey(plugin, "paginated_utility_manager");
@@ -103,8 +104,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Sort the given elements by your own comparisons.
 	 *
-	 * @param comparable The ordering to apply for this listing.
-	 * @return The same menu builder.
+	 * @param comparable the ordering to apply for this listing
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> sort(Comparator<? super T> comparable) {
 		this.collection.sort(comparable);
@@ -114,24 +115,25 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Set the title to be viewed when players open this menu.
 	 *
-	 * @param title The title of the GUI.
-	 * @return The same menu builder.
+	 * @param title the title of the GUI
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setTitle(String title) {
 		this.title = title.replace("{PAGE}", "" + page);
 		return this;
 	}
 
+	// TODO: javadoc
 	public PaginatedBuilder<T> isLive() {
 		this.live = true;
 		return this;
 	}
 
 	/**
-	 * Store a specified collection to be converted to customized elements
+	 * Store a specified collection to be converted to customized elements.
 	 *
-	 * @param collection The collection of elements to use
-	 * @return The same menu builder.
+	 * @param collection the collection of elements to use
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> collect(List<T> collection) {
 		this.collection = new LinkedList<>(collection);
@@ -139,10 +141,10 @@ public final class PaginatedBuilder<T> {
 	}
 
 	/**
-	 * Store a specified collection to be converted to customized elements
+	 * Store a specified collection to be converted to customized elements.
 	 *
-	 * @param collection The collection of elements to use
-	 * @return The same menu builder.
+	 * @param collection the collection of elements to use
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> collect(LinkedList<T> collection) {
 		this.collection = new LinkedList<>(collection);
@@ -152,8 +154,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Limit the amount of items to be displayed per page.
 	 *
-	 * @param amountPer The amount of items per page.
-	 * @return The same menu builder.
+	 * @param amountPer the amount of items per page
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> limit(int amountPer) {
 		this.limit = amountPer;
@@ -163,8 +165,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Define how large the inventory will be
 	 *
-	 * @param size The size of the inventory
-	 * @return The same menu builder.
+	 * @param size the size of the inventory
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setSize(int size) {
 		this.size = size;
@@ -174,30 +176,32 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Define how large the inventory will be
 	 *
-	 * @param rows The size of the inventory
-	 * @return The same menu builder.
+	 * @param rows the new size of the inventory
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setSize(InventoryRows rows) {
 		this.size = rows.slotCount;
 		return this;
 	}
 
+	// TODO: parameter nullity
 	/**
 	 * Set the message to be displayed when a player attempts to switch to a previous page on the initial page.
 	 *
-	 * @param context The message to be displayed otherwise empty.
-	 * @return The same menu builder.
+	 * @param context the message to be displayed otherwise empty
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setAlreadyFirst(String context) {
 		this.firstPageMessage = context.replace("{PAGE}", "" + page);
 		return this;
 	}
 
+	// TODO: parameter nullity
 	/**
 	 * Set the message to be displayed when a player attempts to switch to the next page on the last page.
 	 *
-	 * @param context The message to be displayed otherwise empty.
-	 * @return The same menu builder.
+	 * @param context the message to be displayed otherwise empty
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setAlreadyLast(String context) {
 		this.lastPageMessage = context.replace("{PAGE}", "" + page);
@@ -207,8 +211,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Set the operation to be ran in the event of this menu being closed.
 	 *
-	 * @param inventoryClose The inventory close action
-	 * @return The same menu builder.
+	 * @param inventoryClose the inventory close action
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setCloseAction(PaginatedMenuClose<T> inventoryClose) {
 		this.menuClose = inventoryClose;
@@ -218,8 +222,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Create a {@link PaginatedProcessAction} to customize each item to be displayed within the collection.
 	 *
-	 * @param inventoryProcess The inventory processing operation.
-	 * @return The same menu builder.
+	 * @param inventoryProcess the inventory processing operation
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setupProcess(PaginatedMenuProcess<T> inventoryProcess) {
 		this.menuProcess = inventoryProcess;
@@ -229,7 +233,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Initialize a border for the menu or fill remaining slots with specified materials.
 	 *
-	 * @return A border building element.
+	 * @return a new border building element
 	 */
 	public PaginatedBorderElement<T> setupBorder() {
 		return new PaginatedBorderElement<>(this);
@@ -238,7 +242,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Initialize any additional elements with defined logic.
 	 *
-	 * @return An spare element builder.
+	 * @return a spare element builder
 	 */
 	public PaginatedElementAdditions<T> extraElements() {
 		return new PaginatedElementAdditions<>(this);
@@ -247,8 +251,8 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Automatically format all menu items in accordance and default to a specific page for opening.
 	 *
-	 * @param desiredPage The desired page to be opened.
-	 * @return The same menu builder.
+	 * @param desiredPage the desired page to be opened
+	 * @return this paginated menu builder
 	 */
 	protected PaginatedBuilder<T> adjust(int desiredPage) {
 		page = desiredPage;
@@ -373,7 +377,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Automatically format all menu items in accordance for opening.
 	 *
-	 * @return The same menu builder.
+	 * @return this paginated menu builder
 	 */
 	protected PaginatedBuilder<T> adjust() {
 		if (borderItem != null) {
@@ -497,10 +501,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-back navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-back with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-back with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationLeft(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationLeft.putIfAbsent(item.get(), slot);
@@ -511,10 +515,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-forward navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-forward with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-forward with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationRight(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationRight.putIfAbsent(item.get(), slot);
@@ -525,10 +529,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-exit navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-exit with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-exit with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationBack(Supplier<ItemStack> item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationBack.putIfAbsent(item.get(), slot);
@@ -539,10 +543,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-back navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-back with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-back with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationLeft(ItemStack item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationLeft.putIfAbsent(item, slot);
@@ -553,10 +557,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-forward navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-forward with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-forward with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationRight(ItemStack item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationRight.putIfAbsent(item, slot);
@@ -567,10 +571,10 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Customize a page-exit navigation key for the menu.
 	 *
-	 * @param item  The item to be used to page-exit with.
-	 * @param slot  The slot the item will reside permanently.
-	 * @param click The inventory click action for the item.
-	 * @return The same menu builder.
+	 * @param item  the item to be used to page-exit with
+	 * @param slot  the slot the item will occupy permanently
+	 * @param click the inventory click action for the item
+	 * @return this paginated menu builder
 	 */
 	public PaginatedBuilder<T> setNavigationBack(ItemStack item, int slot, PaginatedMenuClick<T> click) {
 		this.navigationBack.putIfAbsent(item, slot);
@@ -579,9 +583,10 @@ public final class PaginatedBuilder<T> {
 	}
 
 	/**
-	 * Complete the menu building process and convert the builder into a Paginated Menu ready to be used.
+	 * Complete the menu building process and convert the builder
+	 * into a Paginated Menu ready for use.
 	 *
-	 * @return A fully built paginated menu.
+	 * @return a fully-built, paginated menu
 	 */
 	public Menu.Paginated<T> build() {
 		return new Menu.Paginated<>(this);
@@ -590,7 +595,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the unique ID of this menu.
 	 *
-	 * @return A UUID.
+	 * @return the unique ID of this menu
 	 */
 	public UUID getId() {
 		return id;
@@ -599,16 +604,16 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the inventory for this menu.
 	 *
-	 * @return An inventory object.
+	 * @return the {@link Inventory} for this menu
 	 */
 	public Inventory getInventory() {
 		return inventory;
 	}
 
 	/**
-	 * Get the listener registered with this menu.
+	 * Get the Listener registered with this menu.
 	 *
-	 * @return A bukkit listener.
+	 * @return a Bukkit {@link Listener}
 	 */
 	public PaginatedListener getController() {
 		return controller;
@@ -617,7 +622,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the amount of items specified per page.
 	 *
-	 * @return Amount of items per page.
+	 * @return the amount of items per page
 	 */
 	public int getAmountPerPage() {
 		return limit;
@@ -626,7 +631,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the max amount of pages after collection conversions.
 	 *
-	 * @return Max amount of GUI pages.
+	 * @return the max amount of GUI pages
 	 */
 	public int getMaxPages() {
 		return (collection.size() / (limit - 1)) < 0 ? collection.size() / limit : collection.size() / limit - 1;
@@ -635,7 +640,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the default namespace used when one isn't provided.
 	 *
-	 * @return A namespaced key.
+	 * @return the default namespaced key
 	 */
 	public NamespacedKey getKey() {
 		return namespace;
@@ -644,7 +649,7 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the collection involved with the menu.
 	 *
-	 * @return The string collection used in the GUI.
+	 * @return the string collection used in the GUI
 	 */
 	public List<T> getCollection() {
 		return collection;
@@ -653,14 +658,14 @@ public final class PaginatedBuilder<T> {
 	/**
 	 * Get the plugin registered with the menu.
 	 *
-	 * @return The plugin connected with the menu.
+	 * @return the plugin connected with the menu
 	 */
 	public Plugin getPlugin() { // TODO: mark nullity
 		return plugin;
 	}
 
 	/**
-	 * Internal bukkit event logic, everything built within the paginated builder will be applied here automatically.
+	 * Internal bukkit event logic; everything built within the paginated builder will be applied here automatically.
 	 */
 	public class PaginatedListener implements Listener {
 

@@ -17,7 +17,9 @@ import java.util.UUID;
  * Keys may only contain lowercase alphanumeric characters, periods,
  * underscores, hyphens, and forward slashes.
  * <p>
- * This class is 100% constructed by the bukkit developers but since its not available in versions prior to 1.12 this allots the same effects for legacy builds.
+ * This class is 100% constructed by the Bukkit developers, but since it
+ * is not available in Bukkit prior to 1.12 this internal mimic affords
+ * the same functionality to legacy versions.
  */
 public final class NamespacedKey {
 

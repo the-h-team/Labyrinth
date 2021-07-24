@@ -13,10 +13,10 @@ public class Schedule {
 	 * <p>
 	 * Pre-conditions: [{@link Synchronous#cancelEmpty()},
 	 * {@link Synchronous#cancelAfter(Player)},
-	 * {@link Synchronous#cancelAfter(int)}]</p>
+	 * {@link Synchronous#cancelAfter(int)}]
 	 *
-	 * @param applicable The applicable data to execute within the task via void or lambda reference.
-	 * @return A synchronous task builder.
+	 * @param applicable the applicable data to execute within the task via void or lambda reference
+	 * @return a new synchronous task builder
 	 */
 	public static Synchronous sync(Applicable applicable) {
 		return new Synchronous(applicable);
@@ -29,10 +29,10 @@ public class Schedule {
 	 * <p>
 	 * Pre-conditions: [{@link Asynchronous#cancelAfter(Player)},
 	 * {@link Asynchronous#cancelAfter(int)},
-	 * {@link Asynchronous#cancelEmpty()}]</p>
+	 * {@link Asynchronous#cancelEmpty()}]
 	 *
-	 * @param applicable The applicable data to execute within the task via void or lambda reference.
-	 * @return A synchronous task builder.
+	 * @param applicable the applicable data to execute within the task via void or lambda reference
+	 * @return a new synchronous task builder
 	 */
 	public static Asynchronous async(Applicable applicable) {
 		return new Asynchronous(applicable);

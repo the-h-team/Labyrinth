@@ -23,8 +23,8 @@ public class AnvilBuilder {
 	/**
 	 * Build a fresh anvil gui with the provided title to boot.
 	 *
-	 * @param title The title of the menu.
-	 * @return A fresh {@link AnvilMenu} builder.
+	 * @param title the title of the menu
+	 * @return a fresh, new {@link AnvilMenu} builder
 	 */
 	public static AnvilBuilder from(String title) {
 		return new AnvilBuilder(title);
@@ -33,8 +33,8 @@ public class AnvilBuilder {
 	/**
 	 * Build the item to be displayed in the {@link AnvilMenu.Slot#INPUT_LEFT}
 	 *
-	 * @param builderConsumer An item builder with provided inventory click modification.
-	 * @return The same anvil gui builder.
+	 * @param builderConsumer an item builder with provided inventory click modification
+	 * @return this anvil gui builder
 	 */
 	public AnvilBuilder setLeftItem(Consumer<ItemBuilder> builderConsumer) {
 		this.left = ItemBuilder.next();
@@ -45,8 +45,8 @@ public class AnvilBuilder {
 	/**
 	 * Build the item to be displayed in the {@link AnvilMenu.Slot#INPUT_RIGHT}
 	 *
-	 * @param builderConsumer An item builder with provided inventory click modification.
-	 * @return The same anvil gui builder.
+	 * @param builderConsumer an item builder with provided inventory click modification
+	 * @return this anvil gui builder
 	 */
 	public AnvilBuilder setRightItem(Consumer<ItemBuilder> builderConsumer) {
 		this.right = ItemBuilder.next();
@@ -54,10 +54,13 @@ public class AnvilBuilder {
 		return this;
 	}
 
+	// TODO: convert to checked throws versus nullity
 	/**
 	 * Finish your builder and convert it into an Anvil GUI object ready for use.
 	 *
-	 * @return An anvil gui object ready for use or null if a {@link com.github.sanctum.labyrinth.data.service.AnvilMechanics} service is not found.
+	 * @return an anvil gui object ready for use or null if a valid
+	 * {@link com.github.sanctum.labyrinth.data.service.AnvilMechanics}
+	 * service is not found.
 	 */
 	public AnvilMenu get() {
 		try {

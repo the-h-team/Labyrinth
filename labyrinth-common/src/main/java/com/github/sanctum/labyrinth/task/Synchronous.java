@@ -138,12 +138,12 @@ public class Synchronous {
 
 	/**
 	 * Automatically cancel the task in the absence of a specified player.
+	 * <p>
+	 * If the task is dependent on a target player, you can use this
+	 * for easy automatic task cleanup.
 	 *
-	 * <p>If the task is dependant on a target player you can use this
-	 * for easy automatic task cleanup.</p>
-	 *
-	 * @param p The player to query.
-	 * @return The same synchronous task builder.
+	 * @param p the player to query
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelAfter(Player p) {
 		this.check = true;
@@ -152,12 +152,12 @@ public class Synchronous {
 	}
 
 	/**
-	 * Automatically cancel the task from a specified pre-condition.
+	 * Automatically cancel the task from a specified precondition.
+	 * <p>
+	 * This will simply cancel the task of your own will @ precondition.
 	 *
-	 * <p>This will simply cancel the task of your own will @ pre-condition.</p>
-	 *
-	 * @param condition The condition to fire the cancellation
-	 * @return The same synchronous task builder.
+	 * @param condition the condition to fire the cancellation
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelAfter(boolean condition) {
 		this.check = condition;
@@ -167,11 +167,11 @@ public class Synchronous {
 	/**
 	 * Automatically cancel the task after a specified amount of executions
 	 *
-	 * <p>Will work in tandem with other cancellation pre-conditions.
+	 * <p>Will work in tandem with other cancellation preconditions.
 	 * Use for easy automatic task cleanup.</p>
 	 *
-	 * @param count The amount of executions to run.
-	 * @return The same synchronous task builder.
+	 * @param count the amount of executions to run
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
@@ -181,8 +181,8 @@ public class Synchronous {
 	/**
 	 * Define your own running logic for cancellations.
 	 *
-	 * @param cancellation The cancellation objective.
-	 * @return The same synchronous task builder.
+	 * @param cancellation the cancellation objective
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelAfter(TaskCancellation cancellation) {
 		this.cancellation = cancellation;
@@ -192,9 +192,9 @@ public class Synchronous {
 	/**
 	 * Automatically cancel the task if a target object goes missing from a map.
 	 *
-	 * @param map The map to query keys from
-	 * @param o   The object to check for removal
-	 * @return The same synchronous task builder.
+	 * @param map the map to query keys from
+	 * @param o   the object to check for removal
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelAbsence(Map<?, ?> map, Object o) {
 		this.map = map;
@@ -205,7 +205,7 @@ public class Synchronous {
 	/**
 	 * Automatically cancel the task upon the instance of an empty server.
 	 *
-	 * @return The same synchronous task builder.
+	 * @return this synchronous task builder
 	 */
 	public Synchronous cancelEmpty() {
 		this.fallback = true;
@@ -219,7 +219,7 @@ public class Synchronous {
 	 * <p>If the task throws an un-caught exception it is recommended this is used to display
 	 * any possible source to possible problems that occur.</p>
 	 *
-	 * @return The same synchronous task builder.
+	 * @return this synchronous task builder
 	 */
 	public Synchronous debug() {
 		this.debug = true;
@@ -232,8 +232,8 @@ public class Synchronous {
 	 * <p>The information passed here will have secondary importance and will be called
 	 * directly after the initial task has executed one time for each time ran.</p>
 	 *
-	 * @param applicable The information to pass be it via Void or lambda reference.
-	 * @return The same synchronous task builder.
+	 * @param applicable the information to pass be it via Void or lambda reference
+	 * @return this synchronous task builder
 	 */
 	public Synchronous applyAfter(Applicable applicable) {
 		this.apply = applicable;
@@ -253,7 +253,7 @@ public class Synchronous {
 	/**
 	 * Run this scheduled task after a specified amount of ticks.
 	 *
-	 * @param interval The amount of in game ticks to wait.
+	 * @param interval the amount of in-game ticks to wait
 	 */
 	public void wait(int interval) {
 		try {
@@ -266,7 +266,7 @@ public class Synchronous {
 	 * Wait an interval of time before running this sync task.
 	 * <p>
 	 * This method uses 20 ticks = 1 second exactly, so if your
-	 * delay logic is based on real time, use this method.</p>
+	 * delay logic is based on real time, use this method.
 	 *
 	 * @param interval real-time delay where 20 ticks = 1 second
 	 */
@@ -281,8 +281,8 @@ public class Synchronous {
 	 * Immediately after the delay finishes the task will run once and wait the specified "period" until re-cycling.
 	 * Therefore running the delay > task > period , all over again.</p>
 	 *
-	 * @param delay  The amount of time to wait before executing the task.
-	 * @param period The amount of time to wait to cycle the task.
+	 * @param delay  the amount of time to wait before executing the task
+	 * @param period the amount of time to wait to cycle the task
 	 */
 	public void repeat(int delay, int period) {
 		try {
@@ -296,7 +296,7 @@ public class Synchronous {
 	 * repeat it every period elapsed until cancelled.
 	 * <p>
 	 * This method uses 20 ticks = 1 second exactly, so if your
-	 * delay+repeat logic is based on real time, use this method.</p>
+	 * delay+repeat logic is based on real time, use this method.
 	 *
 	 * @param delay  real-time delay where 20 ticks = 1 second
 	 * @param period real-time period where 20 ticks = 1 second

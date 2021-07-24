@@ -134,25 +134,25 @@ public class Asynchronous {
 	/**
 	 * Automatically cancel the task in the absence of a specified player.
 	 *
-	 * <p>If the task is dependant on a target player you can use this
+	 * <p>If the task is dependent on a target player you can use this
 	 * for easy automatic task cleanup.</p>
 	 *
-	 * @param p The player to query.
-	 * @return The same asynchronous task builder.
+	 * @param player the player to query
+	 * @return this asynchronous task builder
 	 */
-	public Asynchronous cancelAfter(Player p) {
+	public Asynchronous cancelAfter(Player player) {
 		this.check = true;
-		this.p = p;
+		this.p = player;
 		return this;
 	}
 
 	/**
-	 * Automatically cancel the task from a specified pre-condition.
+	 * Automatically cancel the task from a specified precondition.
+	 * <p>
+	 * This will simply cancel the task of your own will @ precondition.
 	 *
-	 * <p>This will simply cancel the task of your own will @ pre-condition.</p>
-	 *
-	 * @param condition The condition to fire the cancellation
-	 * @return The same asynchronous task builder.
+	 * @param condition the condition to fire the cancellation
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous cancelAfter(boolean condition) {
 		this.check = condition;
@@ -162,11 +162,11 @@ public class Asynchronous {
 	/**
 	 * Automatically cancel the task after a specified amount of executions
 	 *
-	 * <p>Will work in tandem with other cancellation pre-conditions.
+	 * <p>Will work in tandem with other cancellation preconditions.
 	 * Use for easy automatic task cleanup.</p>
 	 *
-	 * @param count The amount of executions to run.
-	 * @return The same asynchronous task builder.
+	 * @param count the amount of executions to run
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous cancelAfter(int count) {
 		this.cancel = String.valueOf(count + 1);
@@ -176,8 +176,8 @@ public class Asynchronous {
 	/**
 	 * Define your own running logic for cancellations.
 	 *
-	 * @param cancellation The cancellation objective.
-	 * @return The same asynchronous task builder.
+	 * @param cancellation the cancellation objective
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous cancelAfter(TaskCancellation cancellation) {
 		this.cancellation = cancellation;
@@ -187,9 +187,9 @@ public class Asynchronous {
 	/**
 	 * Automatically cancel the task if a target object goes missing from a map.
 	 *
-	 * @param map The map to query keys from
-	 * @param o   The object to check for removal
-	 * @return The same asynchronous task builder.
+	 * @param map the map to query keys from
+	 * @param o   the object to check for removal
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous cancelAbsence(Map<?, ?> map, Object o) {
 		this.map = map;
@@ -200,7 +200,7 @@ public class Asynchronous {
 	/**
 	 * Automatically cancel the task upon the instance of an empty server.
 	 *
-	 * @return The same asynchronous task builder.
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous cancelEmpty() {
 		this.fallback = true;
@@ -214,7 +214,7 @@ public class Asynchronous {
 	 * <p>If the task throws an un-caught exception it is recommended this is used to display
 	 * any possible source to possible problems that occur.</p>
 	 *
-	 * @return The same asynchronous task builder.
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous debug() {
 		this.debug = true;
@@ -227,8 +227,8 @@ public class Asynchronous {
 	 * <p>The information passed here will have secondary importance and will be called
 	 * directly after the initial task has executed one time for each time ran.</p>
 	 *
-	 * @param applicable The information to pass be it via Void or lambda reference.
-	 * @return The same asynchronous task builder.
+	 * @param applicable the information to pass be it via Void or lambda reference
+	 * @return this asynchronous task builder
 	 */
 	public Asynchronous applyAfter(Applicable applicable) {
 		this.apply = applicable;
@@ -248,7 +248,7 @@ public class Asynchronous {
 	/**
 	 * Run this scheduled task after a specified amount of ticks.
 	 *
-	 * @param interval The amount of in game ticks to wait.
+	 * @param interval the amount of in-game ticks to wait
 	 */
 	public void wait(int interval) {
 		try {
@@ -264,8 +264,8 @@ public class Asynchronous {
 	 * Immediately after the delay finishes the task will run once and wait the specified "period" until re-cycling.
 	 * Therefore running the delay > task > period , all over again.</p>
 	 *
-	 * @param delay  The amount of time to wait before executing the task.
-	 * @param period The amount of time to wait to cycle the task.
+	 * @param delay  the amount of time to wait before executing the task
+	 * @param period the amount of time to wait to cycle the task
 	 */
 	public void repeat(int delay, int period) {
 		try {

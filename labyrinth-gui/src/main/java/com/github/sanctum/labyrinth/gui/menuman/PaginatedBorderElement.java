@@ -23,8 +23,8 @@ public class PaginatedBorderElement<T> {
 	/**
 	 * Set the border to surround the given menu items by material.
 	 *
-	 * @param material The material to stylize with
-	 * @return A border element.
+	 * @param material the material to stylize with
+	 * @return this border element
 	 */
 	public PaginatedBorderElement<T> setBorderType(Material material) {
 		ItemStack item = new ItemStack(material);
@@ -39,8 +39,8 @@ public class PaginatedBorderElement<T> {
 	/**
 	 * Set the material to fill remaining empty slots with
 	 *
-	 * @param material The material to stylize with.
-	 * @return A border element.
+	 * @param material the material to stylize with
+	 * @return this border element
 	 */
 	public PaginatedBorderElement<T> setFillType(Material material) {
 		ItemStack item = new ItemStack(material);
@@ -55,8 +55,8 @@ public class PaginatedBorderElement<T> {
 	/**
 	 * Set the border to surround the given menu items by specific ItemStack
 	 *
-	 * @param material The specific ItemStack to stylize with.
-	 * @return A border element.
+	 * @param material the specific ItemStack to stylize with
+	 * @return this border element
 	 */
 	public PaginatedBorderElement<T> setBorderType(ItemStack material) {
 		this.materialB = material;
@@ -66,8 +66,8 @@ public class PaginatedBorderElement<T> {
 	/**
 	 * Set the specific ItemStack to fill remaining empty slots with.
 	 *
-	 * @param material The specific ItemStack to stylize with.
-	 * @return A border element.
+	 * @param material the specific ItemStack to stylize with
+	 * @return a border element
 	 */
 	public PaginatedBorderElement<T> setFillType(ItemStack material) {
 		this.materialF = material;
@@ -77,7 +77,7 @@ public class PaginatedBorderElement<T> {
 	/**
 	 * Complete the changes to the border element and convert back to a {@link PaginatedBuilder}
 	 *
-	 * @return The previous paginated builder with the newly applied values.
+	 * @return the previous paginated builder with the newly applied values
 	 */
 	public PaginatedBuilder<T> build() {
 		if (this.materialF != null) {

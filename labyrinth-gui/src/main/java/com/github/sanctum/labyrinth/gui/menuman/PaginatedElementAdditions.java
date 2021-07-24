@@ -17,8 +17,8 @@ public class PaginatedElementAdditions<T> {
 	/**
 	 * Create and add any extra element additions and specify a click action for them.
 	 *
-	 * @param item           The item to add.
-	 * @param inventoryClick The action to be run upon item being clicked.
+	 * @param item           the item to add
+	 * @param inventoryClick the action to be run upon item being clicked
 	 */
 	public PaginatedElementAdditions<T> invoke(ItemStack item, PaginatedMenuClick<T> inventoryClick) {
 		builder.itemActions.putIfAbsent(item, inventoryClick);
@@ -30,8 +30,9 @@ public class PaginatedElementAdditions<T> {
 	/**
 	 * Create and add any extra element additions and specify a click action and slot for them.
 	 *
-	 * @param item           The item to add.
-	 * @param inventoryClick The action to be run upon item being clicked.
+	 * @param item           the item to add
+	 * @param slot           the desired slot
+	 * @param inventoryClick the action to be run upon item being clicked
 	 */
 	public PaginatedElementAdditions<T> invoke(ItemStack item, int slot, PaginatedMenuClick<T> inventoryClick) {
 		builder.itemActions.putIfAbsent(item, inventoryClick);
@@ -43,8 +44,8 @@ public class PaginatedElementAdditions<T> {
 	/**
 	 * Create and add any extra element additions and specify a click action for them.
 	 *
-	 * @param supplier       The item to add.
-	 * @param inventoryClick The action to be run upon item being clicked.
+	 * @param supplier       the item to add
+	 * @param inventoryClick the action to be run upon item being clicked
 	 */
 	public PaginatedElementAdditions<T> invoke(Supplier<ItemStack> supplier, PaginatedMenuClick<T> inventoryClick) {
 		ItemStack item = supplier.get();
@@ -57,8 +58,9 @@ public class PaginatedElementAdditions<T> {
 	/**
 	 * Create and add any extra element additions and specify a click action and slot for them.
 	 *
-	 * @param supplier       The item to add.
-	 * @param inventoryClick The action to be run upon item being clicked.
+	 * @param supplier       the item to add
+	 * @param slot           the desired slot
+	 * @param inventoryClick the action to be run upon item being clicked
 	 */
 	public PaginatedElementAdditions<T> invoke(Supplier<ItemStack> supplier, int slot, PaginatedMenuClick<T> inventoryClick) {
 		ItemStack item = supplier.get();

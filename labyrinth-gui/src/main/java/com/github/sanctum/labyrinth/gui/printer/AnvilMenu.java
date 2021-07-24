@@ -63,8 +63,8 @@ public class AnvilMenu {
     /**
      * Set who is going to be viewing this inventory.
      *
-     * @param player The viewer of the gui.
-     * @return The same AnvilMenu.
+     * @param player the viewer of the gui
+     * @return this AnvilMenu
      */
     public AnvilMenu setViewer(Player player) {
         this.holder = player;
@@ -74,7 +74,7 @@ public class AnvilMenu {
     /**
      * Apply normal running logic for this anvil (Behaves like a normal anvil).
      *
-     * @return The same AnvilMenu.
+     * @return this AnvilMenu
      */
     public AnvilMenu isEmpty() {
         this.empty = true;
@@ -84,8 +84,8 @@ public class AnvilMenu {
     /**
      * Apply running logic to the closing event of this menu.
      *
-     * @param event The expression to run
-     * @return The same AnvilMenu.
+     * @param event the expression to run
+     * @return this AnvilMenu
      */
     public AnvilMenu applyClosingLogic(AnvilCloseEvent event) {
         this.event = event;
@@ -128,8 +128,8 @@ public class AnvilMenu {
     /**
      * Closes the inventory if it's open.
      *
-     * @param sendClosePacket If the inventory is a natural event based close.
-     * @throws IllegalArgumentException If the inventory isn't visible
+     * @param sendClosePacket if the inventory is a natural event-based close
+     * @throws IllegalArgumentException if the inventory isn't visible
      */
     public void closeInventory(boolean sendClosePacket) {
         if (!visible)
@@ -147,7 +147,7 @@ public class AnvilMenu {
     /**
      * Returns the inventory for this anvil menu.
      *
-     * @return The inventory for this menu.
+     * @return the inventory for this menu
      */
     public Inventory getInventory() {
         return inventory;
@@ -156,30 +156,34 @@ public class AnvilMenu {
     /**
      * Get the title of this menu.
      *
-     * @return The menu title
+     * @return the title of this menu
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * Gets the {@link Listener} for this menu.
+     * Get the {@link Listener} for this menu.
      *
-     * @return The listener for this menu.
+     * @return the listener for this menu
      */
     public AnvilListener getListener() {
         return listener;
     }
 
     /**
-     * @return The left item builder.
+     * Get the left item builder.
+     *
+     * @return the left item builder
      */
     public ItemBuilder getLeft() {
         return leftItem;
     }
 
     /**
-     * @return The right item builder.
+     * Get the right item builder.
+     *
+     * @return the right item builder
      */
     public ItemBuilder getRight() {
         return rightItem;
@@ -197,14 +201,14 @@ public class AnvilMenu {
     /**
      * Get who is viewing the menu.
      *
-     * @return Get the viewer of the inventory.
+     * @return the viewer of the inventory
      */
     public Player getViewer() {
         return holder;
     }
 
     /**
-     * Simply holds the listeners for the GUI
+     * Contains the EventHandlers for the GUI.
      */
     private class AnvilListener implements Listener {
 

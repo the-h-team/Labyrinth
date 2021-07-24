@@ -46,7 +46,7 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	/**
 	 * Get the item that was clicked within the menu.
 	 *
-	 * @return The item clicked on.
+	 * @return the item clicked on
 	 */
 	public ItemStack getItem() {
 		return item;
@@ -55,7 +55,7 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	/**
 	 * Get the unique ID linked with the interacted menu.
 	 *
-	 * @return The unique ID of the clicked menu.
+	 * @return the unique ID of the clicked menu
 	 */
 	public UUID getId() {
 		return builder.getId();
@@ -64,7 +64,7 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	/**
 	 * Get the player involved in the event.
 	 *
-	 * @return The player who clicked in the menu.
+	 * @return the player who clicked in the menu
 	 */
 	public Player getWhoClicked() {
 		return whoClicked;
@@ -73,7 +73,7 @@ public class SyncMenuClickItemEvent<T> extends Event implements Cancellable {
 	/**
 	 * Get the inventory view involved in the event.
 	 *
-	 * @return The inventory view of the menu.
+	 * @return the inventory view of the menu
 	 */
 	public InventoryView getView() {
 		return view;

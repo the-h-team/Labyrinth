@@ -41,7 +41,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the item clicked on.
 	 *
-	 * @return An ItemStack from the operation.
+	 * @return an ItemStack from the operation
 	 */
 	public ItemStack getClickedItem() { // TODO: assess nullity
 		return clickedItem;
@@ -50,7 +50,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the page to be navigated to next whether forward of backward.
 	 *
-	 * @return The page the player is going next.
+	 * @return the page the player is going next
 	 */
 	public int getPage() {
 		return builder.page;
@@ -59,7 +59,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the player.
 	 *
-	 * @return The player involved in the operation.
+	 * @return the player involved in the operation
 	 */
 	public Player getPlayer() {
 		return p;
@@ -124,7 +124,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Get the inventory view from the operation.
 	 *
-	 * @return The inventory view from the operation.
+	 * @return the inventory view from the operation
 	 */
 	public InventoryView getView() {
 		return view;
@@ -133,7 +133,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a left mouse button click.
 	 *
-	 * @return false if the click was not a left mouse button.
+	 * @return false if the click was not a left mouse button
 	 */
 	public boolean isLeftClick() {
 		return isLeftClick;
@@ -142,7 +142,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a shift button click.
 	 *
-	 * @return false if the click was not a shift button click.
+	 * @return false if the click was not a shift button click
 	 */
 	public boolean isShiftClick() {
 		return isShiftClick;
@@ -151,7 +151,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was with middle mouse button.
 	 *
-	 * @return false if the click was not a middle mouse button click.
+	 * @return false if the click was not a middle mouse button click
 	 */
 	public boolean isMiddleClick() {
 		return isMiddleClick;
@@ -160,7 +160,7 @@ public class PaginatedClickAction<T> {
 	/**
 	 * Check if the click was a right mouse button click.
 	 *
-	 * @return false if the click was not a right mouse button.
+	 * @return false if the click was not a right mouse button
 	 */
 	public boolean isRightClick() {
 		return isRightClick;

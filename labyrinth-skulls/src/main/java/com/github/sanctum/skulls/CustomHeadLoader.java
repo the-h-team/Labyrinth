@@ -41,10 +41,12 @@ public final class CustomHeadLoader {
 
 	/**
 	 * Search through a specific section in your config for the heads.
+	 * <p>
+	 * Example:
+	 * <pre>ConfigHeader.My_heads</pre>
 	 *
-	 * @param section The standard node {@link org.bukkit.configuration.Configuration} section from your file to use.
-	 *                Example: <strong>ConfigHeader.My_heads</strong>
-	 * @return The same head loader instance with attempted values.
+	 * @param section the key of a {@link org.bukkit.configuration.ConfigurationSection} from your file to use
+	 * @return this head loader instance with attempted values
 	 */
 	public CustomHeadLoader look(String section) {
 		if (manager.isConfigurationSection(section)) {
@@ -123,13 +125,14 @@ public final class CustomHeadLoader {
 	}
 
 
+	// TODO: decide nullity (does not seem to be Nullable); maybe add throws
 	/**
 	 * Apply Base64 data for a custom skin value.
 	 *
 	 * *NOTE: Not cached.
 	 *
-	 * @param headValue The target head value to apply to a skull item.
-	 * @return The specified custom head if not null
+	 * @param headValue the target head value to apply to a skull item
+	 * @return the specified custom head
 	 */
 	public static ItemStack provide(String headValue) {
 		boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
