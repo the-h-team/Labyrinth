@@ -17,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+
+import com.github.sanctum.templates.MetaTemplate;
+import com.github.sanctum.templates.Template;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
@@ -71,6 +74,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 		instance = this;
 		LabyrinthProvider.instance = this;
+		ConfigurationSerialization.registerClass(Template.class);
+		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
