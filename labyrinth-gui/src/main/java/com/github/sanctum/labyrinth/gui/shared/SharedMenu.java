@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.gui.shared;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
@@ -37,8 +37,8 @@ public abstract class SharedMenu implements Listener {
 	protected static final Map<HUID, Listener> LISTENER_MAP = new HashMap<>();
 	protected static final Map<HUID, Inventory> INVENTORY_MAP = new HashMap<>();
 	protected static final Map<UUID, Inventory> PLAYER_MAP = new HashMap<>();
-	protected final LinkedList<Option> MENU_OPTIONS = new LinkedList<>();
-	protected final Map<ItemStack, SharedProcess> PROCESS_MAP = new HashMap<>();
+	protected final LinkedList<Option> menuOptions = new LinkedList<>();
+	protected final Map<ItemStack, SharedProcess> processMap = new HashMap<>();
 
 	protected SharedMenu(Plugin plugin, String id) {
 		this.plugin = plugin;
@@ -51,15 +51,16 @@ public abstract class SharedMenu implements Listener {
 		MENU_MAP.put(id, this);
 	}
 
+	// TODO: how does this involve parent file? Storage of items to meta (just confused by explanation)
 	/**
-	 * Check's if the parent file location found and creates if it doesn't
+	 * Resolves parent file location and creates it as needed.
 	 * <p>
-	 * This method isn't necessary as its handled automatically with {@link SharedBuilder#create(Plugin, String, String, int)}
+	 * This method isn't necessary as it's handled automatically with {@link SharedBuilder#create(Plugin, String, String, int)}
 	 *
-	 * @return The same menu w/ parent file location creation.
+	 * @return the same menu w/ parent file location creation
 	 */
 	public final synchronized SharedMenu inject() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		if (container.get(ItemStack[].class, id) == null) {
 			container.attach(id, new ItemStack[getSize()]);
 		}
@@ -69,23 +70,23 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Get the actual saved id of this menu.
 	 *
-	 * @return The meta-id of this menu instance.
+	 * @return the meta-id of this menu instance
 	 */
 	public @NotNull String getPath() {
 		return this.id;
 	}
 
 	/**
-	 * Get the name of the menu.
+	 * Get the title of the menu.
 	 *
-	 * @return The menu's title.
+	 * @return the title of the menu
 	 */
 	public abstract @NotNull String getName();
 
 	/**
 	 * Get the unique id of the menu.
 	 *
-	 * @return The menu's id.
+	 * @return the unique id of the menu
 	 */
 	public @NotNull HUID getId() {
 		return this.huid;
@@ -94,36 +95,38 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Get the size of the menu.
 	 *
-	 * @return The menu's size.
+	 * @return the size of the menu
 	 */
 	public abstract int getSize();
 
 	/**
 	 * Get the plugin that created the menu.
 	 *
-	 * @return The menu's creator.
+	 * @return the plugin that created the menu
 	 */
 	public final @NotNull Plugin getPlugin() {
 		return plugin;
 	}
 
 	/**
-	 * @return The configured settings for this menu.
+	 * Get the configured settings for this menu.
+	 *
+	 * @return the configured settings for this menu
 	 */
 	public LinkedList<Option> getOptions() {
-		return MENU_OPTIONS;
+		return menuOptions;
 	}
 
 	/**
 	 * Remove a configured option from this menu's cache.
 	 *
-	 * @param option The option to remove.
-	 * @return false if the option isn't configured.
+	 * @param option the option to remove
+	 * @return false if the option isn't configured
 	 */
 	public final synchronized boolean removeOption(final @NotNull Option option) {
-		for (Option o : MENU_OPTIONS) {
+		for (Option o : menuOptions) {
 			if (o == option) {
-				Schedule.sync(() -> MENU_OPTIONS.remove(option)).run();
+				Schedule.sync(() -> menuOptions.remove(option)).run();
 				return true;
 			}
 		}
@@ -131,10 +134,10 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
-	 * Remove a configured option from this menu's cache.
+	 * Remove configured options from this menu's cache.
 	 *
-	 * @param option The option to remove.
-	 * @return false if an element that cant be removed gets hit.
+	 * @param option the option(s) to remove
+	 * @return false if an element that can't be removed is encountered
 	 */
 	public final synchronized boolean removeOption(final @NotNull Option... option) {
 		for (Option o : option) {
@@ -146,22 +149,22 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Add a configured option to this menu's cache.
 	 *
-	 * @param option The option to add.
-	 * @return false if the option already found.
+	 * @param option an option to add
+	 * @return false if the option already found
 	 */
 	public final synchronized boolean addOption(final @NotNull Option option) {
-		if (!MENU_OPTIONS.contains(option)) {
-			MENU_OPTIONS.add(option);
+		if (!menuOptions.contains(option)) {
+			menuOptions.add(option);
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Add a configured option to this menu's cache.
+	 * Add configured options to this menu's cache.
 	 *
-	 * @param option The option to add.
-	 * @return false if an element that cant be added gets used.
+	 * @param option the option(s) to add
+	 * @return false if an element that can't be added was provided
 	 */
 	public final synchronized boolean addOption(final @NotNull Option... option) {
 		for (Option o : option) {
@@ -173,7 +176,7 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Update the contents of the inventory
 	 *
-	 * @param newContents The new item's to fill in.
+	 * @param newContents the new items to fill in
 	 */
 	public final synchronized void setContents(@NotNull ItemStack[] newContents) {
 		Schedule.sync(() -> getInventory().setContents(newContents)).run();
@@ -182,23 +185,23 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * For GUI purposes. Set an item with custom meta within the inventory.
 	 *
-	 * @param index   The slot the item goes in
-	 * @param item    The item to place.
-	 * @param process The process to run when the item is interacted with.
+	 * @param index   the slot the item goes in
+	 * @param item    the item to place
+	 * @param process the process to run when the item is interacted with
 	 */
 	public final synchronized void setItem(int index, Supplier<ItemStack> item, SharedProcess process) {
-		this.PROCESS_MAP.put(item.get(), process);
+		this.processMap.put(item.get(), process);
 		Schedule.sync(() -> getInventory().setItem(index, item.get())).run();
 	}
 
 	/**
 	 * Get the menu's inventory contents.
 	 *
-	 * @return The inventory's contents
+	 * @return the inventory's contents
 	 */
 	public final @NotNull
 	synchronized ItemStack[] getContents() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		ItemStack[] content = new ItemStack[getSize()];
 		ItemStack[] contentC = container.get(ItemStack[].class, id);
 		if (contentC != null) {
@@ -210,7 +213,7 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Get the menu's inventory.
 	 *
-	 * @return The menu's inventory.
+	 * @return the menu's inventory
 	 */
 	public final @NotNull
 	synchronized Inventory getInventory() {
@@ -222,14 +225,14 @@ public abstract class SharedMenu implements Listener {
 	}
 
 	/**
-	 * Unregister the listener's for this menu.
+	 * Unregister the listeners for this menu.
 	 */
 	public final synchronized void unregister() {
 		HandlerList.unregisterAll(LISTENER_MAP.get(getId()));
 	}
 
 	/**
-	 * Re-register the listener's for this menu.
+	 * Re-register the listeners for this menu.
 	 */
 	public final synchronized void register() {
 		LISTENER_MAP.computeIfAbsent(huid, h -> {
@@ -242,7 +245,7 @@ public abstract class SharedMenu implements Listener {
 	 * Remove this menu from cache entirely including its meta.
 	 */
 	public final synchronized void remove() {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		container.delete(id);
 		INVENTORY_MAP.remove(getId());
 		HandlerList.unregisterAll(LISTENER_MAP.get(this.huid));
@@ -253,10 +256,10 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Save the menu's meta applying new contents to save with.
 	 *
-	 * @param contents The item's to save.
+	 * @param contents the items to save
 	 */
 	public final synchronized void save(ItemStack[] contents) {
-		PersistentContainer container = Labyrinth.getContainer(new NamespacedKey(plugin, "SharedMenus"));
+		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(plugin, "SharedMenus"));
 		container.attach(id, contents);
 	}
 
@@ -270,26 +273,26 @@ public abstract class SharedMenu implements Listener {
 			return;
 		}
 		if (e.getHotbarButton() != -1) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_HOTBAR)) {
+			if (menuOptions.contains(Option.CANCEL_HOTBAR)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
 		if (e.getClickedInventory() == getInventory()) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_UPPER)) {
+			if (menuOptions.contains(Option.CANCEL_UPPER)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
 		if (e.getClickedInventory() == e.getView().getBottomInventory()) {
-			if (MENU_OPTIONS.contains(Option.CANCEL_LOWER)) {
+			if (menuOptions.contains(Option.CANCEL_LOWER)) {
 				e.setCancelled(true);
 				return;
 			}
 		}
-		if (this.PROCESS_MAP.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
-			ItemStack item = this.PROCESS_MAP.keySet().stream().filter(it -> it.isSimilar(e.getCurrentItem())).findFirst().orElse(null);
-			this.PROCESS_MAP.get(item).clickEvent(new SharedClick(e));
+		if (this.processMap.keySet().stream().anyMatch(it -> it.isSimilar(e.getCurrentItem()))) {
+			ItemStack item = this.processMap.keySet().stream().filter(it -> it.isSimilar(e.getCurrentItem())).findFirst().orElse(null);
+			this.processMap.get(item).clickEvent(new SharedClick(e));
 		}
 		Schedule.sync(() -> save(clickedInventory.getContents())).run();
 	}
@@ -323,8 +326,8 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Open an online player's inventory to interact with.
 	 *
-	 * @param target The player to target.
-	 * @return The target's inventory.
+	 * @param target the player to target
+	 * @return the target's inventory
 	 */
 	public static @NotNull
 	synchronized Inventory open(Player target) {
@@ -344,8 +347,8 @@ public abstract class SharedMenu implements Listener {
 	/**
 	 * Look for a match of the provided menu id.
 	 *
-	 * @param id The menu id to look for.
-	 * @return true if the provided id belongs to a cached menu instance.
+	 * @param id the menu id to look for
+	 * @return true if the provided id belongs to a cached menu instance
 	 */
 	public static synchronized boolean exists(String id) {
 		return MENU_MAP.containsKey(id);
@@ -356,12 +359,12 @@ public abstract class SharedMenu implements Listener {
 	 * a new one with the desired id will be created using labyrinth but will not
 	 * persist in saving any data.
 	 *
-	 * @param id The menu id to look for.
-	 * @return A shared menu by id otherwise a labyrinth provided menu.
+	 * @param id the menu id to look for
+	 * @return a shared menu by id; otherwise, a labyrinth provided menu
 	 */
 	public static @NotNull
 	synchronized SharedMenu get(String id) {
-		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(Labyrinth.getInstance(), i) {
+		return MENU_MAP.computeIfAbsent(id, i -> new SharedMenu(LabyrinthProvider.getInstance().getPluginInstance(), i) {
 			@Override
 			public @NotNull String getName() {
 				return "Labyrinth Provided";
@@ -382,15 +385,15 @@ public abstract class SharedMenu implements Listener {
 	public enum Option {
 
 		/**
-		 * Tell's the menu that lower inventory clicks need to be cancelled.
+		 * Tells the menu that lower inventory clicks need to be cancelled.
 		 */
 		CANCEL_LOWER,
 		/**
-		 * Tell's the menu that the upper inventory clicks need to be cancelled.
+		 * Tells the menu that the upper inventory clicks need to be cancelled.
 		 */
 		CANCEL_UPPER,
 		/**
-		 * Tell's the menu that the hot-bar swap transactions need to be cancelled.
+		 * Tells the menu that the hotbar-swap transactions need to be cancelled.
 		 */
 		CANCEL_HOTBAR
 

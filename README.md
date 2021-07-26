@@ -1,79 +1,79 @@
 ## What is Labyrinth?
-It is an easy access spigot development library that assists you in areas that may otherwise have been far more time consuming.
-
+Labyrinth is an easy-access Spigot development library that assists you in areas that may
+otherwise have been far more time-consuming.
 
 
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
-### Importing with maven
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth~~~)
+### Importing with Maven
 ```xml
-	<repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-  	<dependency>
-	    <groupId>com.github.the-h-team</groupId>
-	    <artifactId>Labyrinth</artifactId>
-	    <version>1.6.0</version>
-	</dependency>
-<!-- Used specifically for loading/retrieving custom skull items. -->
+    <dependencies>
+    <!-- Used for accessing common library functions -->
         <dependency>
-            <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>Labyrinth-Skull</artifactId>
-            <version>1.6.0</version>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-common</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+    <!-- Used specifically for loading/retrieving custom skull items. -->
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-skulls</artifactId>
+            <version>1.7.0</version>
             <scope>provided</scope>
         </dependency>
-<!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
+    <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
-            <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>Labyrinth-GUI</artifactId>
-            <version>1.6.0</version>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-gui</artifactId>
+            <version>1.7.0</version>
             <scope>provided</scope>
         </dependency>
-<!-- Used specifically for base library functions. -->
+    <!-- Used specifically for AFK implementations. -->
         <dependency>
             <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>Labyrinth-Plugin</artifactId>
-            <version>1.6.0</version>
+            <artifactId>labyrinth-afk</artifactId>
+            <version>1.7.0</version>
             <scope>provided</scope>
         </dependency>
-<!-- Used specifically for AFK implementations. -->
+    <!-- For build use only! (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
-            <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>Labyrinth-AFK</artifactId>
-            <version>1.0.0</version>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-plugin</artifactId>
+            <version>1.7.0</version>
             <scope>provided</scope>
         </dependency>
+    </dependencies>
 ```
-### Importing with gradle
-```gradle
+### Importing with Gradle
+```groovy
 	allprojects {
 		repositories {
-			...
-			maven { url 'https://jitpack.io' }
+			mavenCentral()
 		}
 	}
 
 	dependencies {
-	        implementation 'com.github.the-h-team:Labyrinth:1.6.0'
+	        implementation 'com.github.the-h-team:labyrinth-common:1.7.0'
+	        implementation 'com.github.the-h-team:labyrinth-afk:1.7.0'
+	        implementation 'com.github.the-h-team:labyrinth-gui:1.7.0'
+	        implementation 'com.github.the-h-team:labyrinth-skulls:1.7.0'
 	}
 ```
 
 ## What are its key points?
-+ Easy collection management w/ pagination
-+ Automatic class registry tools
-+ External Jar loading
-+ Time/Command/String/Math/List Utilities
-+ Custom object Persistent Data Container using Base64 serialization
++ Easy Collection management with pagination
++ Tools for simple, automatic class registration
++ Load External Jars
++ Time, Command, String, Math and List Utilities
++ _Custom object!_ Persistent Data Storage using Base64 serialization
 + Command Building
-+ Easy common library access to amazing plugins like (Vault & PlaceholderAPI)
++ Safe, common library access to amazing plugins like Vault, Enterprise, PlaceholderAPI
 & Much More!
 
 
 _API Table of Contents_:
 --
---
+
   - [String Utility](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive)
   - [Time Utility](https://github.com/the-h-team/Labyrinth/wiki/Get-with-the-times)
   - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/PaginatedList-Example)
@@ -106,11 +106,5 @@ A spigot development tool that makes certain tasks much easier.
 
 *Original components licensed for use under the terms of the [GNU Lesser General Public License, version 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html).*
 
-*Ships with shaded, unedited LGPLv3 components:*
-- *from **VaultAPI** by [Morgan Humes](https://github.com/MilkBowl/) (aka MilkBowl); sources for these components can be found [here](https://github.com/MilkBowl/VaultAPI/).*
-- *from **Enterprise** by [Sanctum](https://github.com/the-h-team/); sources for included components can be found [here](https://github.com/the-h-team/Enterprise).*
-
-*MIT-derived components:*
+*Ships with MIT-derived components:*
 - *Java port of **RGBApi** by [F1b3r](https://github.com/F1b3rDEV); original Kotlin sources can be found [here](https://github.com/F1b3rDEV/minecraft-spigot-rgb-chat-support).*
-
-*You may inspect the [pom.xml](./pom.xml) for further detail on the shading process.*

@@ -4,29 +4,52 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.sanctum</groupId>
-    <artifactId>Labyrinth</artifactId>
-    <version>1.6.1</version>
+    <groupId>com.github.the-h-team</groupId>
+    <artifactId>labyrinth</artifactId>
+    <version>1.7.0-SNAPSHOT</version>
     <modules>
+        <module>labyrinth-common</module>
         <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>
+        <module>labyrinth-skulls</module>
         <module>labyrinth-plugin</module>
-        <module>labyrinth-skull</module>
     </modules>
     <packaging>pom</packaging>
 
     <name>Labyrinth</name>
     <description>A Spigot development library</description>
+    <inceptionYear>2020</inceptionYear>
 
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License v2.1 only</name>
+            <url>https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <organization>
         <name>Sanctum</name>
         <url>https://github.com/the-h-team</url>
     </organization>
+
+    <developers>
+        <developer>
+            <id>ms5984</id>
+            <name>Matt</name>
+            <url>https://github.com/ms5984</url>
+        </developer>
+        <developer>
+            <id>Hempfest</id>
+            <name>Hempfest</name>
+            <url>https://github.com/Hempfest</url>
+        </developer>
+    </developers>
 
     <scm>
         <connection>scm:git:git://github.com/the-h-team/Labyrinth.git</connection>
@@ -36,13 +59,9 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>codemc-snapshots</id>
-            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-        <repository>
-            <id>codemc-releases</id>
-            <url>https://repo.codemc.io/repository/maven-releases/</url>
-        </repository>
     </distributionManagement>
 
     <build>
@@ -52,51 +71,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.github.MilkBowl:VaultAPI</include>
-                                    <include>com.github.the-h-team:Enterprise</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>com.github.MilkBowl:VaultAPI</artifact>
-                                    <includes>
-                                        <include>net/milkbowl/vault/economy/Economy**</include>
-                                        <include>net/milkbowl/vault/permission/Permission**</include>
-                                        <include>META-INF/**</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.github.the-h-team:Enterprise</artifact>
-                                    <includes>
-                                        <include>com/github/sanctum/economy/construct/account/permissive/AccountType**</include>
-                                        <include>com/github/sanctum/economy/construct/implement/AdvancedEconomy**</include>
-                                    </includes>
-                                </filter>
-                            </filters>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
         <resources>
@@ -109,10 +86,6 @@
 
     <repositories>
         <repository>
-            <id>nms-repo</id>
-            <url>https://repo.codemc.org/repository/nms/</url>
-        </repository>
-        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -121,14 +94,53 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
+            <id>sonatype-snapshots-new-instance</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.MilkBowl</groupId>
+                <artifactId>VaultAPI</artifactId>
+                <version>1.7</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bukkit</groupId>
+                        <artifactId>bukkit</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.github.the-h-team</groupId>
+                <artifactId>Enterprise</artifactId>
+                <version>1.5</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.github.the-h-team</groupId>
+                <artifactId>templates</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -146,14 +158,14 @@
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
-            <version>1.5</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>templates</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -164,53 +176,6 @@
     </dependencies>
 
     <profiles>
-        <profile>
-            <!-- This profile adds the current commit hash to every artifact in the project. -->
-            <!-- In theory, this should allow you to inspect the produced jar and be able
-             to better tell what commit it was generated from. -->
-            <id>jitpack-build</id>
-            <activation>
-                <property>
-                    <name>env.JITPACK</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <!--suppress MavenModelInspection -->
-                <finalName>${project.artifactId}-${project.version}-${env.GIT_COMMIT}</finalName>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
-                        <configuration>
-                            <doclint>none</doclint>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <!-- GitHub Actions deployment -->
             <id>deploy</id>

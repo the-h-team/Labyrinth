@@ -1,45 +1,49 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.Labyrinth;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.Registry;
-import java.io.File;
-import java.io.InputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
+
+import java.io.File;
+import java.io.InputStream;
 
 public class ServiceHandshake {
 
 	public static void locate() {
 		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
-		InputStream stream = Labyrinth.getInstance().getResource(version + ".jar");
+		final LabyrinthAPI labyrinthAPI = LabyrinthProvider.getInstance();
+		InputStream stream = labyrinthAPI.getPluginInstance().getResource(version + ".jar");
 
 		File file = new File("plugins/Labyrinth/Service/" + version + ".jar");
 
 		if (!file.getParentFile().exists()) {
+			//noinspection ResultOfMethodCallIgnored
 			file.getParentFile().mkdirs();
 		}
 
 		for (File f : file.getParentFile().listFiles()) {
 			if (f.isFile()) {
 				if (f.delete()) {
-					Labyrinth.getInstance().getLogger().info("- Deleting old version traces.");
+					labyrinthAPI.getLogger().info("- Deleting old version traces.");
 				}
 			}
 		}
 
 		if (stream == null) {
-			Labyrinth.getInstance().getLogger().severe("===================================================================");
-			Labyrinth.getInstance().getLogger().severe("- Version service " + version + " not found. Consult labyrinth developers.");
-			Labyrinth.getInstance().getLogger().severe("===================================================================");
+			labyrinthAPI.getLogger().severe("===================================================================");
+			labyrinthAPI.getLogger().severe("- Version service " + version + " not found. Consult labyrinth developers.");
+			labyrinthAPI.getLogger().severe("===================================================================");
 			return;
 		}
 
 		if (!file.exists()) {
 			FileManager.copy(stream, file);
-			Labyrinth.getInstance().getLogger().info("===================================================================");
-			Labyrinth.getInstance().getLogger().info("- Compiling version " + version + ".");
-			Labyrinth.getInstance().getLogger().info("===================================================================");
+			labyrinthAPI.getLogger().info("===================================================================");
+			labyrinthAPI.getLogger().info("- Compiling version " + version + ".");
+			labyrinthAPI.getLogger().info("===================================================================");
 		}
 	}
 
@@ -47,30 +51,31 @@ public class ServiceHandshake {
 
 		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
 
-		new Registry.Loader<>(ExternalDataService.class).from("Service").source(Labyrinth.getInstance()).operate(key -> {
+		final LabyrinthAPI labyrinthAPI = LabyrinthProvider.getInstance();
+		new Registry.Loader<>(ExternalDataService.class).from("Service").source(labyrinthAPI.getPluginInstance()).operate(key -> {
 
 			AnvilMechanics mechanics = key.getMechanics();
 
 			if (mechanics != null) {
 
 				if (!key.getServerVersion().contains(version)) {
-					Labyrinth.getInstance().getLogger().severe("===================================================================");
-					Labyrinth.getInstance().getLogger().severe("- Version service " + key.getServerVersion() + " invalid for " + version);
-					Labyrinth.getInstance().getLogger().severe("===================================================================");
+					labyrinthAPI.getLogger().severe("===================================================================");
+					labyrinthAPI.getLogger().severe("- Version service " + key.getServerVersion() + " invalid for " + version);
+					labyrinthAPI.getLogger().severe("===================================================================");
 					return;
 				}
 
-				Bukkit.getServicesManager().register(AnvilMechanics.class, mechanics, Labyrinth.getInstance(), ServicePriority.High);
+				Bukkit.getServicesManager().register(AnvilMechanics.class, mechanics, labyrinthAPI.getPluginInstance(), ServicePriority.High);
 
-				Labyrinth.getInstance().getLogger().info("===================================================================");
-				Labyrinth.getInstance().getLogger().info("- Version service " + key.getClass().getSimpleName() + " selected as primary anvil gui instructor.");
-				Labyrinth.getInstance().getLogger().info("===================================================================");
+				labyrinthAPI.getLogger().info("===================================================================");
+				labyrinthAPI.getLogger().info("- Version service " + key.getClass().getSimpleName() + " selected as primary anvil gui instructor.");
+				labyrinthAPI.getLogger().info("===================================================================");
 
 			} else {
 
-				Labyrinth.getInstance().getLogger().warning("===================================================================");
-				Labyrinth.getInstance().getLogger().warning("- Version service " + key.getClass().getSimpleName() + " has an invalid mechanical override skipping...");
-				Labyrinth.getInstance().getLogger().warning("===================================================================");
+				labyrinthAPI.getLogger().warning("===================================================================");
+				labyrinthAPI.getLogger().warning("- Version service " + key.getClass().getSimpleName() + " has an invalid mechanical override skipping...");
+				labyrinthAPI.getLogger().warning("===================================================================");
 
 			}
 

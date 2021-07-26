@@ -3,34 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>Labyrinth</artifactId>
-        <groupId>com.github.sanctum</groupId>
-        <version>1.6.1</version>
+        <artifactId>labyrinth</artifactId>
+        <groupId>com.github.the-h-team</groupId>
+        <version>1.7.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Labyrinth-GUI</artifactId>
-    <version>1.6.1</version>
-
-    <!--TODO: determine licensing (likely MIT)-->
-    <licenses>
-        <license>
-            <name>To be determined. No license yet.</name>
-        </license>
-    </licenses>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
+    <artifactId>labyrinth-gui</artifactId>
+    <name>Labyrinth-GUI</name>
 
     <dependencies>
         <dependency>
-            <groupId>com.github.sanctum</groupId>
-            <artifactId>Labyrinth-plugin</artifactId>
-            <version>1.6.1</version>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>

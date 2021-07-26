@@ -1,8 +1,7 @@
 package com.github.sanctum.labyrinth;
 
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
-import com.github.sanctum.labyrinth.data.DefaultProvision;
-import com.github.sanctum.labyrinth.data.EconomyProvision;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -11,25 +10,22 @@ import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
-import com.github.sanctum.labyrinth.library.CommandUtils;
-import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.HUID;
-import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
+
+import com.github.sanctum.templates.MetaTemplate;
+import com.github.sanctum.templates.Template;
 import org.bukkit.Sound;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,36 +58,43 @@ import org.jetbrains.annotations.NotNull;
  * </p>
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
-public final class Labyrinth extends JavaPlugin implements Listener {
+public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI {
 
-	private static final LinkedList<Cooldown> COOLDOWNS = new LinkedList<>();
-	private static final LinkedList<WrappedComponent> COMPONENTS = new LinkedList<>();
-	private static final ConcurrentLinkedQueue<Integer> TASKS = new ConcurrentLinkedQueue<>();
-	private static final List<PersistentContainer> CONTAINERS = new LinkedList<>();
-	private static Labyrinth INSTANCE;
-	private VentMap eventMap;
+	private static Labyrinth instance;
+	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
+	private final LinkedList<WrappedComponent> components = new LinkedList<>();
+	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
+	private final List<PersistentContainer> containers = new LinkedList<>();
+	private final VentMap eventMap = new VentMap();
+	private boolean cachedIsLegacy;
+	private boolean cachedNeedsLegacyLocation;
 
 	@Override
 	public void onEnable() {
 
-		INSTANCE = this;
+		instance = this;
+		LabyrinthProvider.instance = this;
+		ConfigurationSerialization.registerClass(Template.class);
+		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
-		eventMap = new VentMap();
+		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
+		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
 		new EasyListener(ComponentListener.class).call(this);
 
-		EconomyProvision provision = new DefaultProvision();
-		Bukkit.getServicesManager().register(EconomyProvision.class, provision, this, ServicePriority.Normal);
-
-		getLogger().info("- Registered factory economy impl, " + provision.getImplementation());
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		Schedule.sync(() -> new AdvancedHook(this)).applyAfter(() -> new VaultHook(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
+		// legacy check (FileConfiguration missing getLocation) (Hemp)
+		if (isLegacy() || getServer().getVersion().contains("1.14")) {
+			// Load our Location util
+			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
+		}
 		RegionServicesManager.Initializer.start(this);
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
@@ -101,7 +104,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 
-		for (PersistentContainer component : CONTAINERS) {
+		for (PersistentContainer component : containers) {
 			for (String key : component.keySet()) {
 				try {
 					component.save(key);
@@ -112,7 +115,7 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 			}
 		}
 
-		for (int id : TASKS) {
+		for (int id : tasks) {
 			getServer().getScheduler().cancelTask(id);
 		}
 		try {
@@ -130,92 +133,68 @@ public final class Labyrinth extends JavaPlugin implements Listener {
 
 	}
 
-	public VentMap getEventMap() {
+	public @NotNull VentMap getEventMap() {
 		return eventMap;
 	}
 
-	/**
-	 * Get a queued list of running task id's
-	 *
-	 * @return A list of most running task id's
-	 */
-	public static ConcurrentLinkedQueue<Integer> getTasks() {
-		return TASKS;
+	@Override
+	public @NotNull ConcurrentLinkedQueue<Integer> getTasks() {
+		return tasks;
 	}
 
-	/**
-	 * Get all pre-cached cooldowns.
-	 *
-	 * @return A list of all cached cooldowns.
-	 */
-	public static LinkedList<Cooldown> getCooldowns() {
-		return COOLDOWNS;
+	@Override
+	public @NotNull LinkedList<Cooldown> getCooldowns() {
+		return cooldowns;
 	}
 
-	/**
-	 * Get all action wrapped text components.
-	 *
-	 * @return A list of all cached text components.
-	 */
-	public static LinkedList<WrappedComponent> getComponents() {
-		return COMPONENTS;
+	@Override
+	public @NotNull LinkedList<WrappedComponent> getComponents() {
+		return components;
 	}
 
-	/**
-	 * @return All data containers linked to the specified plugin.
-	 * <p>
-	 * Containers will have had to have been initialized <strong>ATLEAST</strong> once prior to viewing.
-	 */
-	public static List<PersistentContainer> getContainers(Plugin plugin) {
-		return CONTAINERS.stream().filter(c -> c.getKey().getNamespace().equalsIgnoreCase(plugin.getName())).collect(Collectors.toList());
+	@Override
+	public @NotNull List<PersistentContainer> getContainers(Plugin plugin) {
+		return containers.stream().filter(c -> c.getKey().getNamespace().equalsIgnoreCase(plugin.getName())).collect(Collectors.toList());
 	}
 
-	/**
-	 * Operate on a custom persistent data container using a specified name space.
-	 *
-	 * @param key The name space for this component.
-	 * @return The desired data container or a new instance using the defined name space.
-	 */
-	@NotNull
-	public static PersistentContainer getContainer(NamespacedKey key) {
-		for (PersistentContainer component : CONTAINERS) {
+	@Override
+	public @NotNull PersistentContainer getContainer(NamespacedKey key) {
+		for (PersistentContainer component : containers) {
 			if (component.getKey().getNamespace().equals(key.getNamespace()) && component.getKey().getKey().equals(key.getKey())) {
 				return component;
 			}
 		}
 		PersistentContainer component = new PersistentContainer(key);
-		CONTAINERS.add(component);
+		containers.add(component);
 		return component;
 	}
 
-	/**
-	 * @return true if the given server version is legacy only or false if its pro-1.13
-	 */
-	public static boolean isLegacy() {
-		return Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9")
-				|| Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11")
-				|| Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13");
+	@Override
+	public boolean isLegacy() {
+		return cachedIsLegacy;
 	}
 
-	/**
-	 * Auxiliary <strong>library</strong> instance.
-	 */
-	public static Plugin getInstance() {
-		return INSTANCE;
+	@Override
+	public boolean requiresLocationLibrary() {
+		return cachedNeedsLegacyLocation;
 	}
 
+	@Override
+	public Plugin getPluginInstance() {
+		return this;
+	}
 
 	public static class ComponentListener implements Listener {
 		@EventHandler
 		public void onCommandNote(PlayerCommandPreprocessEvent e) {
 			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
-				if (COMPONENTS.stream().noneMatch(c -> c.toString().equals(e.getMessage().replace("/", "")))) {
+				if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getMessage().replace("/", "")))) {
 					e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
 					e.setCancelled(true);
 					return;
 				}
 			}
-			for (WrappedComponent component : COMPONENTS) {
+			for (WrappedComponent component : instance.components) {
 				if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
 					Schedule.sync(() -> component.action().apply()).run();
 					if (!component.isMarked()) {

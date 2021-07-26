@@ -30,94 +30,78 @@ import org.bukkit.plugin.Plugin;
 
 public class LiveInventory implements Listener {
 
-	private String TITLE;
-	private InventorySlide.Element.Action.Shutdown CLOSE;
-	private InventoryRows ROWS;
-	private int DELAY = 1;
-	private int PERIOD = 4;
-	private boolean REVERT;
-	private ItemStack BORDER_ITEM;
-	private ItemStack FILLER_ITEM;
-	private Plugin PLUGIN;
+	// Base fields (relocated from old constructor)
+	private final Map<ItemStack, Integer> extras = new HashMap<>();
+	private final Map<Player, Listener> listener = new HashMap<>();
+	private final Map<Player, Long> viewTime = new HashMap<>();
+	private final Map<Player, Inventory> inv = new HashMap<>();
+	private final Map<Integer, InventorySlide.Element.Action> actions = new HashMap<>();
+	private final LinkedList<InventorySlide> slides = new LinkedList<>();
+	private final Map<Player, Integer> position = new HashMap<>();
+	private final Map<Player, Boolean> reversing = new HashMap<>();
+	private final Set<Player> viewers = new HashSet<>();
+	private final Map<Player, Asynchronous> tasks = new HashMap<>();
+
+	private String title;
+	private InventorySlide.Element.Action.Shutdown close;
+	private InventoryRows rows;
+	private int delay = 1;
+	private int period = 4;
+	private boolean revert;
+	private ItemStack borderItem;
+	private ItemStack fillerItem;
+	private Plugin plugin;
 
 	private Consumer<InventorySlide.Element.Update> UPDATE;
 
-	private final LinkedList<InventorySlide> SLIDES;
-	private final Set<Player> VIEWERS;
-	private final Map<Player, Long> VIEW_TIME;
-	private final Map<Player, Listener> LISTENER;
-	private final Map<Player, Integer> POSITION;
-	private final Map<Player, Inventory> INV;
-	private final Map<ItemStack, Integer> EXTRAS;
-	private final Map<Integer, InventorySlide.Element.Action> ACTIONS;
-	private final Map<Player, Asynchronous> TASKS;
-	private final Map<Player, Boolean> REVERSING;
-
-	public LiveInventory() {
-		this.EXTRAS = new HashMap<>();
-		this.LISTENER = new HashMap<>();
-		this.VIEW_TIME = new HashMap<>();
-		this.INV = new HashMap<>();
-		this.ACTIONS = new HashMap<>();
-		this.SLIDES = new LinkedList<>();
-		this.POSITION = new HashMap<>();
-		this.REVERSING = new HashMap<>();
-		this.VIEWERS = new HashSet<>();
-		this.TASKS = new HashMap<>();
-	}
-
 	public LiveInventory initialize(Plugin plugin) {
-		if (this.PLUGIN == null) {
-			this.PLUGIN = plugin;
+		if (this.plugin == null) {
+			this.plugin = plugin;
 		}
 		return this;
 	}
 
 	public LiveInventory title(String title) {
-		this.TITLE = title;
+		this.title = title;
 		return this;
 	}
 
 	public LiveInventory size(InventoryRows size) {
-		this.ROWS = size;
+		this.rows = size;
 		return this;
 	}
 
 	public LiveInventory fill(ItemStack item) {
-		this.FILLER_ITEM = new ItemStack(item);
+		this.fillerItem = new ItemStack(item);
 		return this;
 	}
 
 	public LiveInventory border(ItemStack item) {
-		this.BORDER_ITEM = new ItemStack(item);
+		this.borderItem = new ItemStack(item);
 		return this;
 	}
 
 	public LiveInventory layer(int slides) {
 		for (int i = 0; i < slides; i++) {
 			InventorySlide slide = new InventorySlide().fill(slides);
-			this.SLIDES.add(slide);
-			if (slide.ACTION != null) {
-				for (InventorySlide.Element.Action.Passthrough passthrough : slide.ACTION) {
-					this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
-				}
+			this.slides.add(slide);
+			for (InventorySlide.Element.Action.Passthrough passthrough : slide.action) {
+				this.actions.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
 			}
 		}
 		return this;
 	}
 
 	public LiveInventory add(ItemStack item, int slot, InventorySlide.Element.Action action) {
-		this.EXTRAS.put(item, slot);
-		this.ACTIONS.put(slot, action);
+		this.extras.put(item, slot);
+		this.actions.put(slot, action);
 		return this;
 	}
 
 	public LiveInventory then(InventorySlide slide) {
-		this.SLIDES.add(slide);
-		if (slide.ACTION != null) {
-			for (InventorySlide.Element.Action.Passthrough passthrough : slide.ACTION) {
-				this.ACTIONS.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
-			}
+		this.slides.add(slide);
+		for (InventorySlide.Element.Action.Passthrough passthrough : slide.action) {
+			this.actions.put(Math.max(passthrough.getSlot() - 1, 0), passthrough.getAction());
 		}
 		return this;
 	}
@@ -128,12 +112,12 @@ public class LiveInventory implements Listener {
 	}
 
 	public LiveInventory withRevert() {
-		this.REVERT = true;
+		this.revert = true;
 		return this;
 	}
 
 	public LiveInventory delay(int delay) {
-		this.DELAY = delay;
+		this.delay = delay;
 		return this;
 	}
 
@@ -143,58 +127,58 @@ public class LiveInventory implements Listener {
 	}
 
 	public LiveInventory setClose(InventorySlide.Element.Action.Shutdown action) {
-		this.CLOSE = action;
+		this.close = action;
 		return this;
 	}
 
 	public LiveInventory timeout(int period) {
-		this.PERIOD = period;
+		this.period = period;
 		return this;
 	}
 
 	protected int getPosition(Player target) {
-		if (!POSITION.containsKey(target)) {
-			POSITION.put(target, 0);
+		if (!position.containsKey(target)) {
+			position.put(target, 0);
 		}
-		return POSITION.getOrDefault(target, 0);
+		return position.getOrDefault(target, 0);
 	}
 
 	public InventorySlide getSlide(int index) {
-		return this.SLIDES.get(Math.max(Math.max(index, this.SLIDES.size() - 1), 0));
+		return this.slides.get(Math.max(Math.max(index, this.slides.size() - 1), 0));
 	}
 
 	public InventorySlide getSlide(Player p) {
-		return this.SLIDES.get(getPosition(p));
+		return this.slides.get(getPosition(p));
 	}
 
 	public List<InventorySlide> getSlides() {
-		return Collections.unmodifiableList(this.SLIDES);
+		return Collections.unmodifiableList(this.slides);
 	}
 
 	protected Asynchronous schedule(Player p) {
 
-		if (!this.LISTENER.containsKey(p)) {
-			this.LISTENER.put(p, new L(p));
-			Bukkit.getPluginManager().registerEvents(this.LISTENER.get(p), this.PLUGIN);
+		if (!this.listener.containsKey(p)) {
+			this.listener.put(p, new L(p));
+			Bukkit.getPluginManager().registerEvents(this.listener.get(p), this.plugin);
 		}
 
-		this.VIEW_TIME.put(p, System.currentTimeMillis());
+		this.viewTime.put(p, System.currentTimeMillis());
 
-		if (!this.INV.containsKey(p)) {
-			this.INV.put(p, Bukkit.createInventory(null, ROWS.getSlotCount(), StringUtils.use(this.TITLE).translate()));
+		if (!this.inv.containsKey(p)) {
+			this.inv.put(p, Bukkit.createInventory(null, rows.getSlotCount(), StringUtils.use(this.title).translate()));
 		}
 
-		if (this.TASKS.containsKey(p)) {
-			this.TASKS.get(p).cancelTask();
-			this.TASKS.remove(p);
+		if (this.tasks.containsKey(p)) {
+			this.tasks.get(p).cancelTask();
+			this.tasks.remove(p);
 		}
 
-		this.TASKS.put(p, Schedule.async(() -> {
+		this.tasks.put(p, Schedule.async(() -> {
 
 			int pos = getPosition(p);
 
-			if (pos + 1 >= SLIDES.size()) {
-				if (this.REVERT) {
+			if (pos + 1 >= slides.size()) {
+				if (this.revert) {
 					setDirection(p, InventorySlide.Direction.BACKWARD);
 				} else {
 					setDirection(p, InventorySlide.Direction.RESET);
@@ -211,91 +195,91 @@ public class LiveInventory implements Listener {
 				}
 			}
 
-			InventorySlide slide = SLIDES.get(pos);
+			InventorySlide slide = slides.get(pos);
 
 			for (InventorySlide.Element object : slide.getElements()) {
-				InventorySlide.Element.Update event = new InventorySlide.Element.Update(this, object.getItem(), Math.max(Math.min(object.getSlot() + 1, this.ROWS.getSlotCount()), 0), pos + 1, this.VIEW_TIME.get(p), p);
+				InventorySlide.Element.Update event = new InventorySlide.Element.Update(this, object.getItem(), Math.max(Math.min(object.getSlot() + 1, this.rows.getSlotCount()), 0), pos + 1, this.viewTime.get(p), p);
 				if (this.UPDATE != null) {
 					this.UPDATE.accept(event);
 				}
-				Schedule.sync(() -> this.INV.get(p).setItem(object.getSlot(), event.getItem())).run();
+				Schedule.sync(() -> this.inv.get(p).setItem(object.getSlot(), event.getItem())).run();
 			}
 
 			Schedule.sync(() -> {
 
-				if (this.BORDER_ITEM != null) {
-					switch (this.ROWS.getSlotCount()) {
+				if (this.borderItem != null) {
+					switch (this.rows.getSlotCount()) {
 						case 27:
 							int f;
 							for (f = 0; f < 10; f++) {
 								if (getInventory(p).getItem(f) == null)
-									getInventory(p).setItem(f, this.BORDER_ITEM);
+									getInventory(p).setItem(f, this.borderItem);
 							}
-							getInventory(p).setItem(17, this.BORDER_ITEM);
+							getInventory(p).setItem(17, this.borderItem);
 							for (f = 18; f < 27; f++) {
 								if (getInventory(p).getItem(f) == null)
-									getInventory(p).setItem(f, this.BORDER_ITEM);
+									getInventory(p).setItem(f, this.borderItem);
 							}
 							break;
 						case 36:
 							int h;
 							for (h = 0; h < 10; h++) {
 								if (getInventory(p).getItem(h) == null)
-									getInventory(p).setItem(h, this.BORDER_ITEM);
+									getInventory(p).setItem(h, this.borderItem);
 							}
-							getInventory(p).setItem(17, this.BORDER_ITEM);
-							getInventory(p).setItem(18, this.BORDER_ITEM);
-							getInventory(p).setItem(26, this.BORDER_ITEM);
+							getInventory(p).setItem(17, this.borderItem);
+							getInventory(p).setItem(18, this.borderItem);
+							getInventory(p).setItem(26, this.borderItem);
 							for (h = 27; h < 36; h++) {
 								if (getInventory(p).getItem(h) == null)
-									getInventory(p).setItem(h, this.BORDER_ITEM);
+									getInventory(p).setItem(h, this.borderItem);
 							}
 							break;
 						case 45:
 							int o;
 							for (o = 0; o < 10; o++) {
 								if (getInventory(p).getItem(o) == null)
-									getInventory(p).setItem(o, this.BORDER_ITEM);
+									getInventory(p).setItem(o, this.borderItem);
 							}
-							getInventory(p).setItem(17, this.BORDER_ITEM);
-							getInventory(p).setItem(18, this.BORDER_ITEM);
-							getInventory(p).setItem(26, this.BORDER_ITEM);
-							getInventory(p).setItem(27, this.BORDER_ITEM);
-							getInventory(p).setItem(35, this.BORDER_ITEM);
-							getInventory(p).setItem(36, this.BORDER_ITEM);
+							getInventory(p).setItem(17, this.borderItem);
+							getInventory(p).setItem(18, this.borderItem);
+							getInventory(p).setItem(26, this.borderItem);
+							getInventory(p).setItem(27, this.borderItem);
+							getInventory(p).setItem(35, this.borderItem);
+							getInventory(p).setItem(36, this.borderItem);
 							for (o = 36; o < 45; o++) {
 								if (getInventory(p).getItem(o) == null)
-									getInventory(p).setItem(o, this.BORDER_ITEM);
+									getInventory(p).setItem(o, this.borderItem);
 							}
 							break;
 						case 54:
 							int j;
 							for (j = 0; j < 10; j++) {
 								if (getInventory(p).getItem(j) == null)
-									getInventory(p).setItem(j, this.BORDER_ITEM);
+									getInventory(p).setItem(j, this.borderItem);
 							}
-							getInventory(p).setItem(17, this.BORDER_ITEM);
-							getInventory(p).setItem(18, this.BORDER_ITEM);
-							getInventory(p).setItem(26, this.BORDER_ITEM);
-							getInventory(p).setItem(27, this.BORDER_ITEM);
-							getInventory(p).setItem(35, this.BORDER_ITEM);
-							getInventory(p).setItem(36, this.BORDER_ITEM);
+							getInventory(p).setItem(17, this.borderItem);
+							getInventory(p).setItem(18, this.borderItem);
+							getInventory(p).setItem(26, this.borderItem);
+							getInventory(p).setItem(27, this.borderItem);
+							getInventory(p).setItem(35, this.borderItem);
+							getInventory(p).setItem(36, this.borderItem);
 							for (j = 44; j < 54; j++) {
 								if (getInventory(p).getItem(j) == null)
-									getInventory(p).setItem(j, this.BORDER_ITEM);
+									getInventory(p).setItem(j, this.borderItem);
 							}
 							break;
 					}
 				}
 
-				for (Map.Entry<ItemStack, Integer> entry : this.EXTRAS.entrySet()) {
+				for (Map.Entry<ItemStack, Integer> entry : this.extras.entrySet()) {
 					getInventory(p).setItem(entry.getValue(), entry.getKey());
 				}
 
-				if (this.FILLER_ITEM != null) {
-					for (int l = 0; l < this.ROWS.getSlotCount(); l++) {
+				if (this.fillerItem != null) {
+					for (int l = 0; l < this.rows.getSlotCount(); l++) {
 						if (getInventory(p).getItem(l) == null) {
-							getInventory(p).setItem(l, this.FILLER_ITEM);
+							getInventory(p).setItem(l, this.fillerItem);
 						}
 					}
 				}
@@ -310,20 +294,21 @@ public class LiveInventory implements Listener {
 
 		}));
 
-		this.TASKS.get(p);
-		return this.TASKS.get(p);
+		this.tasks.get(p);
+		return this.tasks.get(p);
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public LiveInventory setDirection(Player target, InventorySlide.Direction direction) {
 		if (direction == InventorySlide.Direction.RESET) {
-			REVERSING.put(target, false);
-			POSITION.put(target, 0);
+			reversing.put(target, false);
+			position.put(target, 0);
 			return this;
 		}
 		if (direction == InventorySlide.Direction.BACKWARD) {
-			REVERSING.put(target, true);
+			reversing.put(target, true);
 		} else {
-			REVERSING.put(target, false);
+			reversing.put(target, false);
 		}
 		int result = 0;
 		if (direction == InventorySlide.Direction.BACKWARD) {
@@ -333,94 +318,94 @@ public class LiveInventory implements Listener {
 				result = getPosition(target) + 1;
 			}
 		}
-		POSITION.put(target, result);
+		position.put(target, result);
 		return this;
 	}
 
 	public Inventory getInventory(Player viewer) {
-		return this.INV.getOrDefault(viewer, null);
+		return this.inv.getOrDefault(viewer, null);
 	}
 
 	public Set<Player> getViewers() {
-		return this.VIEWERS;
+		return this.viewers;
 	}
 
 	private boolean isReverting(Player target) {
-		return REVERSING.getOrDefault(target, false);
+		return reversing.getOrDefault(target, false);
 	}
 
 	public void open(Player p) {
 
-		if (!this.INV.containsKey(p)) {
-			this.INV.put(p, Bukkit.createInventory(null, ROWS.getSlotCount(), StringUtils.use(this.TITLE).translate()));
+		if (!this.inv.containsKey(p)) {
+			this.inv.put(p, Bukkit.createInventory(null, rows.getSlotCount(), StringUtils.use(this.title).translate()));
 		}
 
-		this.VIEWERS.add(p);
+		this.viewers.add(p);
 
 		Schedule.sync(() -> p.openInventory(getInventory(p))).run();
 
-		if (!this.LISTENER.containsKey(p)) {
-			this.LISTENER.put(p, new L(p));
-			Bukkit.getPluginManager().registerEvents(this.LISTENER.get(p), this.PLUGIN);
+		if (!this.listener.containsKey(p)) {
+			this.listener.put(p, new L(p));
+			Bukkit.getPluginManager().registerEvents(this.listener.get(p), this.plugin);
 		}
 
-		schedule(p).repeat(this.DELAY, this.PERIOD);
+		schedule(p).repeat(this.delay, this.period);
 
 	}
 
 	public void open(Player p, int minutes) {
 
-		if (!this.INV.containsKey(p)) {
-			this.INV.put(p, Bukkit.createInventory(null, ROWS.getSlotCount(), StringUtils.use(this.TITLE).translate()));
+		if (!this.inv.containsKey(p)) {
+			this.inv.put(p, Bukkit.createInventory(null, rows.getSlotCount(), StringUtils.use(this.title).translate()));
 		}
 
-		this.VIEWERS.add(p);
+		this.viewers.add(p);
 
 		Schedule.sync(() -> p.openInventory(getInventory(p))).run();
 
-		if (!this.LISTENER.containsKey(p)) {
-			this.LISTENER.put(p, new L(p));
-			Bukkit.getPluginManager().registerEvents(this.LISTENER.get(p), this.PLUGIN);
+		if (!this.listener.containsKey(p)) {
+			this.listener.put(p, new L(p));
+			Bukkit.getPluginManager().registerEvents(this.listener.get(p), this.plugin);
 		}
 
 		schedule(p).cancelAfter(task -> {
 
-			if (this.VIEW_TIME.containsKey(p)) {
-				if (TimeUtils.isMinutesSince(new Date(this.VIEW_TIME.get(p)), minutes)) {
+			if (this.viewTime.containsKey(p)) {
+				if (TimeUtils.isMinutesSince(new Date(this.viewTime.get(p)), minutes)) {
 					Schedule.sync(p::closeInventory).run();
 					task.cancel();
 				}
 			}
 
-		}).repeat(this.DELAY, this.PERIOD);
+		}).repeat(this.delay, this.period);
 
 	}
 
 	public void open(Player p, Map.Entry<TimeUnit, Long> measurement) {
 
-		if (!this.INV.containsKey(p)) {
-			this.INV.put(p, Bukkit.createInventory(null, ROWS.getSlotCount(), StringUtils.use(this.TITLE).translate()));
+		if (!this.inv.containsKey(p)) {
+			this.inv.put(p, Bukkit.createInventory(null, rows.getSlotCount(), StringUtils.use(this.title).translate()));
 		}
 
-		this.VIEWERS.add(p);
+		this.viewers.add(p);
 
 		Schedule.sync(() -> p.openInventory(getInventory(p))).run();
 
-		if (!this.LISTENER.containsKey(p)) {
-			this.LISTENER.put(p, new L(p));
-			Bukkit.getPluginManager().registerEvents(this.LISTENER.get(p), this.PLUGIN);
+		if (!this.listener.containsKey(p)) {
+			this.listener.put(p, new L(p));
+			Bukkit.getPluginManager().registerEvents(this.listener.get(p), this.plugin);
 		}
 
 		schedule(p).cancelAfter(task -> {
 
-			if (this.VIEW_TIME.containsKey(p)) {
-				if (TimeWatch.start(this.VIEW_TIME.get(p)).isGreaterThan(measurement.getKey(), measurement.getValue())) {
+			if (this.viewTime.containsKey(p)) {
+				if (TimeWatch.start(this.viewTime.get(p)).isGreaterThan(measurement.getKey(), measurement.getValue())) {
 					Schedule.sync(p::closeInventory).run();
 					task.cancel();
 				}
 			}
 
-		}).repeat(this.DELAY, this.PERIOD);
+		}).repeat(this.delay, this.period);
 
 	}
 
@@ -438,7 +423,7 @@ public class LiveInventory implements Listener {
 			if (!e.getPlayer().equals(p))
 				return;
 
-			LiveInventory.this.VIEWERS.remove(e.getPlayer());
+			LiveInventory.this.viewers.remove(e.getPlayer());
 		}
 
 		@EventHandler
@@ -462,7 +447,7 @@ public class LiveInventory implements Listener {
 
 				if (e.getCurrentItem() != null) {
 
-					InventorySlide.Element.Action data = LiveInventory.this.ACTIONS.get(e.getSlot());
+					InventorySlide.Element.Action data = LiveInventory.this.actions.get(e.getSlot());
 
 					if (data != null) {
 
@@ -495,17 +480,17 @@ public class LiveInventory implements Listener {
 				return;
 
 			if (e.getInventory().equals(test)) {
-				if (LiveInventory.this.TASKS.containsKey(p)) {
-					if (LiveInventory.this.CLOSE != null) {
-						LiveInventory.this.CLOSE.accept(LiveInventory.this, p, e.getView());
+				if (LiveInventory.this.tasks.containsKey(p)) {
+					if (LiveInventory.this.close != null) {
+						LiveInventory.this.close.accept(LiveInventory.this, p, e.getView());
 					}
-					LiveInventory.this.TASKS.get(p).cancelTask();
-					LiveInventory.this.VIEW_TIME.remove(p);
-					LiveInventory.this.INV.remove(p);
-					LiveInventory.this.TASKS.remove(p);
-					LiveInventory.this.VIEWERS.remove(p);
-					HandlerList.unregisterAll(LiveInventory.this.LISTENER.get(p));
-					LiveInventory.this.LISTENER.remove(p);
+					LiveInventory.this.tasks.get(p).cancelTask();
+					LiveInventory.this.viewTime.remove(p);
+					LiveInventory.this.inv.remove(p);
+					LiveInventory.this.tasks.remove(p);
+					LiveInventory.this.viewers.remove(p);
+					HandlerList.unregisterAll(LiveInventory.this.listener.get(p));
+					LiveInventory.this.listener.remove(p);
 				}
 			}
 		}
