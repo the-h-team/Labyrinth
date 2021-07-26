@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
-import com.github.sanctum.labyrinth.data.RegionServicesManager;
+import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
@@ -96,7 +96,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			// Load our Location util
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
-		RegionServicesManager.Initializer.start(this);
+		RegionServicesManagerImpl.initialize(this);
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
 
