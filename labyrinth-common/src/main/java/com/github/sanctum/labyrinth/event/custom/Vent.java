@@ -100,11 +100,11 @@ public abstract class Vent {
 
 		public void remove() {
 			if (key != null) {
-				Call.getMap().unsubscribe(eventType, key);
+				getMap().unsubscribe(eventType, key);
 			} else {
-				Call.getMap().subscriptions.forEach(s -> {
+				getMap().subscriptions.forEach(s -> {
 					if (s.equals(this)) {
-						Schedule.sync(() -> Call.getMap().subscriptions.remove(this)).waitReal(1);
+						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
 					}
 				});
 			}
@@ -129,6 +129,46 @@ public abstract class Vent {
 		public Class<T> getEventType() {
 			return eventType;
 		}
+
+		public static final class Builder<T extends Vent> {
+
+			private final Class<T> tClass;
+			private String key;
+			private Plugin plugin;
+			private Priority priority;
+
+			private Builder(Class<T> tClass) {
+				this.tClass = tClass;
+			}
+
+			public static <T extends Vent> Builder<T> target(Class<T> event) {
+				return new Builder<>(event);
+			}
+
+			public Builder<T> from(String key) {
+				this.key = key;
+				return this;
+			}
+
+			public Builder<T> from(Plugin plugin) {
+				this.plugin = plugin;
+				return this;
+			}
+
+			public Builder<T> assign(Priority priority) {
+				this.priority = priority;
+				return this;
+			}
+
+			public Subscription<T> assign(SubscriberCall<T> call) {
+				if (this.key != null) {
+					return new Subscription<>(tClass, key, plugin, priority, call);
+				}
+				return new Subscription<>(tClass, plugin, priority, call);
+			}
+
+		}
+
 	}
 
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
@@ -136,17 +176,14 @@ public abstract class Vent {
 			LabyrinthProvider.getInstance().getLogger().severe("Null subscription found from unknown source (Not labyrinth).");
 			return;
 		}
-		Call.getMap().subscriptions.add(subscription);
+		getMap().subscriptions.add(subscription);
 	}
 
 	public static <T extends Vent> void unsubscribeAll(Class<T> labyrinthEvent, Plugin user) {
-
-		VentMap map = Call.getMap();
-
-		for (Subscription<?> s : map.subscriptions) {
+		for (Subscription<?> s : getMap().subscriptions) {
 			if (s.getEventType().isAssignableFrom(labyrinthEvent)) {
 				if (s.getUser().equals(user)) {
-					Schedule.sync(() -> map.subscriptions.remove(s)).run();
+					Schedule.sync(() -> getMap().subscriptions.remove(s)).run();
 				}
 			}
 		}
@@ -186,6 +223,8 @@ public abstract class Vent {
 	public static class Call<T extends Vent> {
 
 		private final T event;
+
+		private boolean warned;
 
 		private T copy;
 
@@ -264,21 +303,30 @@ public abstract class Vent {
 									case HIGHEST:
 										if (event.getState() == CancelState.ON) {
 											if (!event.isCancelled()) {
-												LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-												LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+												if (!warned) {
+													LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+													LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+													this.warned = true;
+												}
 												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
 												this.copy = event;
 											}
 										} else {
-											LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-											LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+											if (!warned) {
+												LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+												LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+												this.warned = true;
+											}
 											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
 											this.copy = event;
 										}
 										break;
 									case READ_ONLY:
-										LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-										LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+										if (!warned) {
+											LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
+											LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
+											this.warned = true;
+										}
 										((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
 										break;
 								}
@@ -343,11 +391,9 @@ public abstract class Vent {
 					throw new IllegalArgumentException("An invalid RunType was provided!");
 			}
 		}
+	}
 
-		public static VentMap getMap() {
-			return LabyrinthProvider.getInstance().getEventMap();
-		}
-
-
+	private static VentMap getMap() {
+		return LabyrinthProvider.getInstance().getEventMap();
 	}
 }
