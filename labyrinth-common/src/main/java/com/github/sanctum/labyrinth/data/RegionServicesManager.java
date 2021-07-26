@@ -17,7 +17,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
@@ -26,76 +25,90 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+/**
+ * Used to provide registration to many region related services.
+ */
 @SuppressWarnings("UnusedReturnValue")
-public final class RegionServicesManager {
+public abstract class RegionServicesManager {
 
-	@SuppressWarnings("deprecation")
-	private final LinkedList<RegionService> SERVICES = new LinkedList<>();
-
-	private final Cuboid.FlagManager flagManager;
-
-	public RegionServicesManager() {
-		this.flagManager = new Cuboid.FlagManager();
-	}
-
+	/**
+	 * Get the main region service manager instance.
+	 *
+	 * @return the region services manager
+	 */
 	public static RegionServicesManager getInstance() {
 		return Bukkit.getServicesManager().load(RegionServicesManager.class);
 	}
 
-	public boolean isRegistered(Cuboid.Flag flag) {
-		return getFlagManager().getFlags().stream().anyMatch(f -> f.getId().equals(flag.getId()));
-	}
+	/**
+	 * Check if a flag is currently registered.
+	 *
+	 * @param flag the flag to check
+	 * @return false if not registered or null
+	 */
+	public abstract boolean isRegistered(Cuboid.Flag flag);
 
-	public boolean unregister(Cuboid.Flag flag) {
-		for (Region r : Region.cache().list()) {
-			r.getFlags().forEach(f -> {
-				if (f.getId().equals(flag.getId())) {
-					Schedule.sync(() -> r.removeFlag(f)).run();
-				}
-			});
-		}
-		return getFlagManager().getFlags().removeIf(f -> f.getId().equals(flag.getId()));
-	}
+	/**
+	 * Unregister a flag from cache.
+	 *
+	 * @param flag the flag to unregister
+	 * @return false if null or not registered
+	 */
+	public abstract boolean unregister(Cuboid.Flag flag);
 
-	public boolean register(Cuboid.Flag flag) {
-		if (getFlagManager().getFlags().stream().noneMatch(f -> f.getId().equals(flag.getId()))) {
-			getFlagManager().getFlags().add(flag);
-			return true;
-		}
-		return false;
-	}
+	/**
+	 * Register a flag into cache.
+	 *
+	 * @param flag the flag to register
+	 * @return false if already registered or null
+	 */
+	public abstract boolean register(Cuboid.Flag flag);
 
-	public boolean load(Cuboid.Flag flag) {
-		Bukkit.getPluginManager().registerEvents(flag, LabyrinthProvider.getInstance().getPluginInstance());
-		return getFlagManager().getFlags().add(flag);
-	}
+	/**
+	 * Register a flag into cache and its accompanied listener.
+	 *
+	 * @param flag the flag to register
+	 * @return false if already registered or null
+	 */
+	public abstract boolean load(Cuboid.Flag flag);
 
-	public boolean load(Vent.Subscription<?> subscription) {
-		Vent.subscribe(subscription);
-		return true; // TODO: make void return with checked exception throws
-	}
+	/**
+	 * Load a subscription to a region event or other into cache.
+	 *
+	 * @param subscription the subscription to invoke
+	 */
+	public abstract void load(Vent.Subscription<?> subscription);
 
-	@Deprecated
-	public boolean load(RegionService service) {
-		Bukkit.getPluginManager().registerEvents(service, LabyrinthProvider.getInstance().getPluginInstance());
-		return SERVICES.add(service);
-	}
+	/**
+	 * Unload a subscription by its relative namespace.
+	 *
+	 * @param type the event type to unsubscribe from
+	 * @param key  the namespace of the subscription
+	 * @param <T>  the inheritance of vent
+	 */
+	public abstract <T extends Vent> void unload(Class<T> type, String key);
 
-	@Deprecated
-	public boolean unload(RegionService service) {
-		HandlerList.unregisterAll(service);
-		return SERVICES.remove(service);
-	}
+	/**
+	 * Unload all subscriptions by the same relative namespace.
+	 *
+	 * @param type the event type to unsubscribe from
+	 * @param key  the namespace of the subscription
+	 * @param <T>  the inheritance of vent
+	 */
+	public abstract <T extends Vent> void unloadAll(Class<T> type, String key);
 
-	public Cuboid.FlagManager getFlagManager() {
-		return flagManager;
-	}
+	/**
+	 * Manage all cuboid region flags.
+	 *
+	 * @return this manager's flag manager
+	 */
+	public abstract Cuboid.FlagManager getFlagManager();
 
 	public static final class Initializer {
 
 		public static void start(LabyrinthAPI instance) {
 
-			RegionServicesManager servicesManager = new RegionServicesManager();
+			RegionServicesManager servicesManager = new RegionServicesManagerImpl();
 			final Plugin pluginInstance = instance.getPluginInstance();
 			Bukkit.getServicesManager().register(RegionServicesManager.class, servicesManager, pluginInstance, ServicePriority.Normal);
 
