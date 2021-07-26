@@ -84,7 +84,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	/**
-	 * Save & override any existing traces of the specified key value.
+	 * Save &amp; override any existing traces of the specified key value.
 	 * <p>
 	 * Will only save persisted values (such with
 	 * {@link #attach(String, Object)}, but not with
@@ -143,7 +143,7 @@ public class PersistentContainer extends PersistentData {
 
 	// TODO: Explicit throw of custom exception on get fail vs nullity contract
 	/**
-	 * Get a specified value by class type & key delimiter.
+	 * Get a specified value by class type &amp; key delimiter.
 	 *
 	 * <p>If no value is found but a storage location is found, the class
 	 * parameter will assist in both determining the final result of this
@@ -180,7 +180,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	/**
-	 * Get all object keys both cached & non-cached.
+	 * Get all object keys both cached &amp; non-cached.
 	 *
 	 * @return all object keys, period
 	 */

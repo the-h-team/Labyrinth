@@ -98,7 +98,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -108,7 +108,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHN' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -118,7 +118,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHNH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -129,7 +129,7 @@ public abstract class TextLib {
 	 * Suggest commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -140,7 +140,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -151,7 +151,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHN' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -162,7 +162,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHNH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -173,7 +173,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'HHH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'HHH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -183,7 +183,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -193,7 +193,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHN' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -203,7 +203,7 @@ public abstract class TextLib {
 	 * Meta: {Hoverable}
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHNH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -214,7 +214,7 @@ public abstract class TextLib {
 	 * Suggest commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -225,7 +225,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -236,7 +236,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHN' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHN' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -247,7 +247,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'NHNH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'NHNH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */
@@ -258,7 +258,7 @@ public abstract class TextLib {
 	 * Run commands from interaction with the message.
 	 * <p>
 	 * Compiles a color translated text component where N = normal, and H = hoverable
-	 * <pre>( AsyncChatEvent -> player -> 'HHH' )</pre>
+	 * <pre>( AsyncChatEvent -&gt; player -&gt; 'HHH' )</pre>
 	 *
 	 * @return the compiled TextComponent
 	 */

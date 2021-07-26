@@ -214,7 +214,7 @@ public class Message {
 	 * Use this to easily send messages to player or server.
 	 *
 	 * @param player the target player
-	 * @return a player & server messaging object
+	 * @return a player &amp; server messaging object
 	 */
 	public static Message form(Player player) {
 		return new Message(player);

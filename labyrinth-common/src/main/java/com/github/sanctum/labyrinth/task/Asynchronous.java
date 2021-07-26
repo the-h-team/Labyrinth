@@ -262,7 +262,7 @@ public class Asynchronous {
 	 *
 	 * <p>The interval at which this task repeats is based off the delay you specify.
 	 * Immediately after the delay finishes the task will run once and wait the specified "period" until re-cycling.
-	 * Therefore running the delay > task > period , all over again.</p>
+	 * Therefore running the delay &gt; task &gt; period , all over again.</p>
 	 *
 	 * @param delay  the amount of time to wait before executing the task
 	 * @param period the amount of time to wait to cycle the task

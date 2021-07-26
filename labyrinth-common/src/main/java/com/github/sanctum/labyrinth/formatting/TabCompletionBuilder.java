@@ -32,7 +32,7 @@ public class TabCompletionBuilder {
 	}
 
 	/**
-	 * Configure completion results & filter by string argument length
+	 * Configure completion results &amp; filter by string argument length.
 	 * <p>
 	 * Basic accordance should be applied here from tab complete method.
 	 * <pre>Example: ( args[int].length() )</pre>

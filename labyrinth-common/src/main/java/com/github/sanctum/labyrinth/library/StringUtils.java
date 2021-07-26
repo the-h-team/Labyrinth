@@ -84,7 +84,7 @@ public class StringUtils {
 	}
 
 	/**
-	 * Automatically color both HEX & Normal MC color codes for versions 1.16+ or only MC color codes for versions below.
+	 * Automatically color both HEX &amp; Normal MC color codes for versions 1.16+ or only MC color codes for versions below.
 	 *
 	 * @return the translated "colored" string
 	 */

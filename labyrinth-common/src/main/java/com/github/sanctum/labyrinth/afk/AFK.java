@@ -176,9 +176,9 @@ public class AFK {
 		/**
 		 * Setup the prerequisites to be met for each stage of listening.
 		 *
-		 * @param away The trigger for changing the status to {@link Status#AWAY}
-		 * @param kick The trigger for changing the status to {@link Status#REMOVABLE}
-		 * @return the initialized & cached object reference
+		 * @param away the trigger for changing the status to {@link Status#AWAY}
+		 * @param kick the trigger for changing the status to {@link Status#REMOVABLE}
+		 * @return the initialized and cached object reference
 		 */
 		public AFK stage(final StatusTrigger<Boolean> away, final StatusTrigger<Boolean> kick) {
 			final AFK afk = new AFK(this.player);
