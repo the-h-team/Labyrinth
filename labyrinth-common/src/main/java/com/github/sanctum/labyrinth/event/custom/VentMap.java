@@ -1,43 +1,48 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.task.Schedule;
-import org.bukkit.plugin.Plugin;
-
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.bukkit.plugin.Plugin;
 
-public final class VentMap {
+public abstract class VentMap {
 
 	final LinkedList<Vent.Subscription<?>> subscriptions = new LinkedList<>();
 
-	public <T extends Vent> void unsubscribe(Class<T> eventType, String key) {
-		for (Vent.Subscription<?> s : subscriptions) {
-			if (s.getEventType().isAssignableFrom(eventType)) {
-				if (s.getKey().isPresent() && s.getKey().get().equals(key)) {
-					Schedule.sync(() -> subscriptions.remove(s)).waitReal(1);
-					break;
-				}
-			}
-		}
-	}
+	/**
+	 * Unsubscribe from an event by providing the key of the desired subscription if found.
+	 *
+	 * @param eventType The {@link Vent} to unsubscribe from.
+	 * @param key       The key namespace for the subscription.
+	 * @param <T>       The inheritance of vent.
+	 */
+	public abstract <T extends Vent> void unsubscribe(Class<T> eventType, String key);
 
-	public <T extends Vent> void unsubscribeAll(Class<T> eventType, String key) {
-		for (Vent.Subscription<?> s : subscriptions) {
-			if (s.getEventType().isAssignableFrom(eventType)) {
-				if (s.getKey().isPresent() && s.getKey().get().equals(key)) {
-					Schedule.sync(() -> subscriptions.remove(s)).waitReal(1);
-				}
-			}
-		}
-	}
+	/**
+	 * Unsubscribe from an event by providing the key of the desired subscription. All instances of
+	 * the found subscription are scheduled for removal.
+	 *
+	 * @param eventType The {@link Vent} to unsubscribe from.
+	 * @param key       The key namespace for the subscription.
+	 * @param <T>       The inheritance of vent.
+	 */
+	public abstract <T extends Vent> void unsubscribeAll(Class<T> eventType, String key);
 
-	public List<Vent.Subscription<?>> getSubscriptions(Plugin plugin) {
-		return subscriptions.stream().filter(s -> s.getUser().equals(plugin)).collect(Collectors.toList());
-	}
+	/**
+	 * Narrow down a list of all subscriptions provided by a single plugin.
+	 *
+	 * @param plugin The plugin providing the subscriptions.
+	 * @return A list of all linked subscriptions.
+	 */
+	public abstract List<Vent.Subscription<?>> narrow(Plugin plugin);
 
-	public <T extends Vent> Vent.Subscription<?> getSubscription(Class<T> eventType, String key) {
-		return subscriptions.stream().filter(s -> s.getEventType().isAssignableFrom(eventType) && s.getKey().isPresent() && s.getKey().get().equals(key)).findFirst().orElse(null);
-	}
+	/**
+	 * Get a singular subscription by its relative key if found.
+	 *
+	 * @param eventType The {@link Vent} to retrieve the subscription for.
+	 * @param key       The namespace for the subscription.
+	 * @param <T>       The inheritance of vent.
+	 * @return The desired subscription if found otherwise null.
+	 */
+	public abstract <T extends Vent> Vent.Subscription<?> get(Class<T> eventType, String key);
 
 }

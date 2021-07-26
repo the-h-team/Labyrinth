@@ -9,6 +9,7 @@ import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
+import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.task.Schedule;
@@ -65,7 +66,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final LinkedList<WrappedComponent> components = new LinkedList<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
 	private final List<PersistentContainer> containers = new LinkedList<>();
-	private final VentMap eventMap = new VentMap();
+	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
 
