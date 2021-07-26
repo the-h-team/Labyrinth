@@ -37,4 +37,14 @@ public class EasyListener {
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
+	/**
+	 * Simple listener registration.
+	 *
+	 * @param plugin The plugin that's providing the listener.
+	 * @param listener The listener to register.
+	 */
+	public static void call(Plugin plugin, Listener listener) {
+		Bukkit.getPluginManager().registerEvents(listener, plugin);
+	}
+
 }
