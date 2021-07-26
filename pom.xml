@@ -213,7 +213,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>3.3.0</version>
                         <configuration>
-                            <doclint>missing,reference,syntax</doclint>
+                            <doclint>missing,reference</doclint>
                         </configuration>
                         <executions>
                             <execution>
