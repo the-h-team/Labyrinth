@@ -3,8 +3,10 @@ Labyrinth is an easy-access Spigot development library that assists you in areas
 otherwise have been far more time-consuming.
 
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth*?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.the-h-team/labyrinth*?label=sonatype&server=https%3A%2F%2Fs01.oss.sonatype.org&style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
+
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth~~~)
 ### Importing with Maven
 ```xml
     <dependencies>
