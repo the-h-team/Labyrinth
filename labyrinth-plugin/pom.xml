@@ -35,12 +35,6 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.the-h-team:labyrinth-afk</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
                                     <artifact>com.github.the-h-team:labyrinth-gui</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
