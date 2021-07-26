@@ -2,13 +2,14 @@ package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
-import com.github.sanctum.labyrinth.data.RegionServicesManager;
+import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
+import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.task.Schedule;
@@ -65,7 +66,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final LinkedList<WrappedComponent> components = new LinkedList<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
 	private final List<PersistentContainer> containers = new LinkedList<>();
-	private final VentMap eventMap = new VentMap();
+	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
 
@@ -95,7 +96,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			// Load our Location util
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
-		RegionServicesManager.Initializer.start(this);
+		RegionServicesManagerImpl.initialize(this);
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
 

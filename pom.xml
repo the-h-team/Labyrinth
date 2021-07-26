@@ -9,7 +9,6 @@
     <version>1.7.0-SNAPSHOT</version>
     <modules>
         <module>labyrinth-common</module>
-        <module>labyrinth-afk</module>
         <module>labyrinth-gui</module>
         <module>labyrinth-skulls</module>
         <module>labyrinth-plugin</module>
@@ -94,7 +93,7 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>sonatype-snapshots-new-instance</id>
+            <id>s01-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>

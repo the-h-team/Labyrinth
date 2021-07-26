@@ -26,11 +26,6 @@ public class RegionFlag extends Cuboid.Flag {
 			return this;
 		}
 
-		@Deprecated
-		public Builder envelope(RegionService service) {
-			return this;
-		}
-
 		public Builder envelope(Vent.Subscription<?> subscription) {
 			this.subscription = subscription;
 			return this;
