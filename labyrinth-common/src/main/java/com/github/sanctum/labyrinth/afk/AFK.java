@@ -1,26 +1,19 @@
 package com.github.sanctum.labyrinth.afk;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class AFK {
 
@@ -34,7 +27,7 @@ public class AFK {
 
 	private Status status = Status.ACTIVE;
 
-	private static Handler handler;
+	private static Vent.Subscription<StatusChange> handler;
 
 	private final Player player;
 
@@ -52,9 +45,34 @@ public class AFK {
 			return Optional.ofNullable(from(player));
 		} else {
 			return Optional.of(Initializer.next(player)
-					.handle(LabyrinthProvider.getInstance().getPluginInstance(), Handler::standard)
-					.stage(a -> TimeUnit.SECONDS.toMinutes(a.getWatch().interval(Instant.now()).getSeconds()) >= away, b -> TimeUnit.SECONDS.toMinutes(b.getWatch().interval(Instant.now()).getSeconds()) >= kick));
+					.handle(new Vent.Subscription<>(StatusChange.class, LabyrinthProvider.getInstance().getPluginInstance(), Vent.Priority.HIGH, (e, subscription) -> {
+
+						Player p = e.getAfk().getPlayer();
+						switch (e.getStatus()) {
+							case AWAY:
+								Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is now AFK").translate());
+								p.setDisplayName(StringUtils.use("&7*AFK&r " + p.getDisplayName()).translate());
+								break;
+							case RETURNING:
+								p.setDisplayName(p.getName());
+								Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is no longer AFK").translate());
+								e.getAfk().saturate();
+								break;
+							case REMOVABLE:
+								Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&o" + "was kicked for being AFK too long.").translate());
+								p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
+								e.getAfk().cancel();
+								break;
+						}
+
+					}))
+					.stage(a -> a.getRecording().getMinutes() >= away,
+							b -> b.getRecording().getMinutes() >= kick));
 		}
+	}
+
+	public static Set<AFK> getHistory() {
+		return HISTORY;
 	}
 
 	public static AFK from(Player player) {
@@ -66,15 +84,21 @@ public class AFK {
 		return null;
 	}
 
-	public static Handler getHandler() {
+	public static Vent.Subscription<StatusChange> getHandler() {
 		return handler;
 	}
 
+	/**
+	 * Set the activity of this user to Active.
+	 */
 	public void saturate() {
 		this.status = Status.ACTIVE;
 		this.time = System.currentTimeMillis();
 	}
 
+	/**
+	 * Completely remove this user's AFK trace from cache.
+	 */
 	public void cancel() {
 		Schedule.sync(() -> HISTORY.removeIf(a -> a.getPlayer().equals(getPlayer()))).run();
 	}
@@ -97,42 +121,6 @@ public class AFK {
 
 	public Player getPlayer() {
 		return player;
-	}
-
-	public interface Handler extends Listener {
-
-		void execute(StatusChange e);
-
-		default Plugin getPlugin() {
-			return JavaPlugin.getProvidingPlugin(getClass());
-		}
-
-		static Handler standard() {
-			return new AFK.Handler() {
-				@Override
-				@EventHandler
-				public void execute(AFK.StatusChange e) {
-					Player p = e.getAfk().getPlayer();
-					switch (e.getStatus()) {
-						case AWAY:
-							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is now AFK").translate());
-							p.setDisplayName(StringUtils.use("&7*AFK&r " + p.getDisplayName()).translate());
-							break;
-						case RETURNING:
-							p.setDisplayName(p.getName());
-							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &7Player &b" + p.getName() + " &7is no longer AFK").translate());
-							e.getAfk().saturate();
-							break;
-						case REMOVABLE:
-							Bukkit.broadcastMessage(StringUtils.use("&r[&2Labyrinth&r] &c&oPlayer &b" + p.getName() + " &c&o" + "was kicked for being AFK too long.").translate());
-							p.kickPlayer(StringUtils.use("&r[&2Labyrinth&r]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
-							e.getAfk().cancel();
-							break;
-					}
-				}
-			};
-		}
-
 	}
 
 	public enum Status {
@@ -174,41 +162,13 @@ public class AFK {
 		/**
 		 * Apply the reading logic for the status changing events.
 		 *
-		 * @param plugin The plugin to register the handler and instance under
-		 * @param handler The handler to use for message broadcasting logic
+		 * @param handler the handler to use for message broadcasting logic
 		 * @return this builder
 		 */
-		public Initializer handle(Plugin plugin, Supplier<Handler> handler) {
+		public Initializer handle(Vent.Subscription<StatusChange> handler) {
 			if (AFK.handler == null) {
-
-				if (plugin == null)
-					throw new IllegalArgumentException("Plugin cannot be null!");
-
-				if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
-					AFK.handler = handler.get();
-					Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
-				}
-			}
-			return this;
-		}
-
-		/**
-		 * Apply the reading logic for the status changing events.
-		 *
-		 * @param plugin The plugin to register the handler and instance under
-		 * @param handler The handler to use for message broadcasting logic
-		 * @return this builder
-		 */
-		public Initializer handle(Plugin plugin, Handler handler) {
-			if (AFK.handler == null) {
-
-				if (plugin == null)
-					throw new IllegalArgumentException("Plugin cannot be null!");
-
-				if (StatusChange.getHandlerList().getRegisteredListeners().length == 0) {
-					AFK.handler = handler;
-					Bukkit.getPluginManager().registerEvents(AFK.handler, plugin);
-				}
+				AFK.handler = handler;
+				Vent.subscribe(handler);
 			}
 			return this;
 		}
@@ -232,13 +192,11 @@ public class AFK {
 						if (away.accept(afk)) {
 							if (afk.status == Status.ACTIVE) {
 								afk.status = Status.AWAY;
-								StatusChange event = new StatusChange(afk, Status.AWAY);
-								Bukkit.getPluginManager().callEvent(event);
+								new Vent.Call<>(new StatusChange(afk, Status.AWAY)).run();
 							}
 							if (kick.accept(afk)) {
 								afk.status = Status.REMOVABLE;
-								StatusChange event = new StatusChange(afk, Status.REMOVABLE);
-								Bukkit.getPluginManager().callEvent(event);
+								new Vent.Call<>(new StatusChange(afk, Status.REMOVABLE)).run();
 							}
 						}
 					} else {
@@ -246,8 +204,7 @@ public class AFK {
 							afk.location = null;
 							afk.time = 0;
 							afk.status = Status.RETURNING;
-							StatusChange event = new StatusChange(afk, Status.RETURNING);
-							Bukkit.getPluginManager().callEvent(event);
+							new Vent.Call<>(new StatusChange(afk, Status.RETURNING)).run();
 						} else {
 							afk.time = 0;
 						}
@@ -261,26 +218,16 @@ public class AFK {
 
 	}
 
-	public static class StatusChange extends Event {
+	public static class StatusChange extends DefaultEvent.Player {
 
 		private final AFK afk;
 
 		private final Status status;
 
-		private static final HandlerList list = new HandlerList();
-
 		public StatusChange(AFK afk, Status status) {
+			super(afk.player, false);
 			this.afk = afk;
 			this.status = status;
-		}
-
-		@Override
-		public @NotNull HandlerList getHandlers() {
-			return list;
-		}
-
-		public static HandlerList getHandlerList() {
-			return list;
 		}
 
 		public AFK getAfk() {
@@ -341,9 +288,13 @@ public class AFK {
 
 	}
 
+	/**
+	 * A status trigger, define afk stages.
+	 *
+	 * @param <T> the event this trigger is for
+	 */
 	@FunctionalInterface
 	public interface StatusTrigger<T> {
 		T accept(AFK afk);
-
 	}
 }
