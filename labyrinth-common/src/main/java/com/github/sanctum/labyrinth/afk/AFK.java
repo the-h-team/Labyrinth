@@ -15,6 +15,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * A class entirely responsible for handling away from keyboard users.
+ */
 public class AFK {
 
 	private static final Set<AFK> HISTORY = new HashSet<>();
