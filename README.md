@@ -9,6 +9,15 @@ otherwise have been far more time-consuming.
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 ### Importing with Maven
 ```xml
+<project>
+    <repositories>
+        <!-- For snapshots/versions in development -->
+        <repository>
+            <id>s01-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <!-- No repository needed for Maven Central versions! :D -->
+    </repositories>
     <dependencies>
     <!-- Used for accessing common library functions -->
         <dependency>
@@ -45,21 +54,27 @@ otherwise have been far more time-consuming.
             <scope>provided</scope>
         </dependency>
     </dependencies>
+</project>
 ```
 ### Importing with Gradle
 ```groovy
-	allprojects {
-		repositories {
-			mavenCentral()
-		}
-	}
+    allprojects {
+        repositories {
+            // Normal releases
+            mavenCentral()
+            maven {
+                // For snapshots/development builds
+                url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+            }
+        }
+    }
 
-	dependencies {
-	        implementation 'com.github.the-h-team:labyrinth-common:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-afk:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-gui:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-skulls:1.7.0'
-	}
+    dependencies {
+        implementation 'com.github.the-h-team:labyrinth-common:1.7.0'
+        implementation 'com.github.the-h-team:labyrinth-afk:1.7.0'
+        implementation 'com.github.the-h-team:labyrinth-gui:1.7.0'
+        implementation 'com.github.the-h-team:labyrinth-skulls:1.7.0'
+    }
 ```
 
 ## What are its key points?
