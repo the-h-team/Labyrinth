@@ -40,14 +40,7 @@ otherwise have been far more time-consuming.
             <version>1.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-    <!-- Used specifically for AFK implementations. -->
-        <dependency>
-            <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>labyrinth-afk</artifactId>
-            <version>1.7.0</version>
-            <scope>provided</scope>
-        </dependency>
-    <!-- For build use only! (Includes main class + plugin.yml, try not to use this) -->
+    <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-plugin</artifactId>
@@ -71,10 +64,11 @@ otherwise have been far more time-consuming.
     }
 
     dependencies {
-        implementation 'com.github.the-h-team:labyrinth-common:1.7.0'
-        implementation 'com.github.the-h-team:labyrinth-afk:1.7.0'
-        implementation 'com.github.the-h-team:labyrinth-gui:1.7.0'
-        implementation 'com.github.the-h-team:labyrinth-skulls:1.7.0'
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.7.0-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.7.0-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.7.0-SNAPSHOT'
+        // for build use only! (includes full plugin and resources)
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.7.0-SNAPSHOT'
     }
 ```
 
