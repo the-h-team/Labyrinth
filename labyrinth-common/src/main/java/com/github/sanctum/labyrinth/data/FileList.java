@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.google.common.collect.ImmutableList;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,9 +10,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FileList {
-
-	protected static final Map<Plugin, List<FileManager>> CACHE = new HashMap<>();
+	// Outer key = plugin name. Inner key = "d;n" where d and n represent the respective fields
+	static final Map<String, Map<String, FileManager>> CACHE = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, FileList> REGISTRY = new ConcurrentHashMap<>();
+
 	private final Plugin plugin;
 
 	private FileList(Plugin plugin) {
@@ -45,7 +47,10 @@ public class FileList {
 	 * otherwise, an empty List
 	 */
 	public static List<FileManager> getFiles(Plugin plugin) {
-		return CACHE.entrySet().stream().filter(e -> e.getKey().getName().equals(plugin.getName())).map(Map.Entry::getValue).findFirst().orElse(new ArrayList<>());
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(Map::values)
+				.map(ImmutableList::copyOf)
+				.orElse(ImmutableList.of());
 	}
 
 	/**
@@ -106,24 +111,15 @@ public class FileList {
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
 		}
-		FileManager result = null;
-		// switch to stream api
-		final int hashCode = Objects.hash(name, desc);
-		if (CACHE.containsKey(this.plugin)) {
-			for (Map.Entry<Plugin, List<FileManager>> entry : CACHE.entrySet()) {
-				if (entry.getKey().equals(this.plugin)) {
-					if (entry.getValue().stream().anyMatch(fm -> fm.hashCode() == hashCode)) {
-						result = entry.getValue().stream().filter(fm -> fm.hashCode() == hashCode)
-								.findFirst()
-								.orElseGet(() -> new FileManager(this.plugin, name, desc));
-					}
-					break;
-				}
-			}
-		} else {
-			result = new FileManager(this.plugin, name, desc);
-		}
-		return result != null ? result : new FileManager(this.plugin, name, desc);
+		// See CACHE declaration above for new key strategy
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(m -> m.get(desc + ';' + name))
+				.orElseGet(() -> cacheFileManager(new FileManager(plugin, name, desc)));
+	}
+
+	private static FileManager cacheFileManager(FileManager fileManager) {
+		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.d + ';' + fileManager.n, fileManager);
+		return fileManager;
 	}
 
 	/**
@@ -139,6 +135,5 @@ public class FileList {
 	public @NotNull FileManager find(@NotNull final String name) throws IllegalArgumentException {
 		return find(name, null);
 	}
-
 
 }
