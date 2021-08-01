@@ -57,7 +57,7 @@ public class AFK {
 							long minutes = recording.getMinutes();
 							long seconds = recording.getSeconds();
 							String format = "&cYou will be kicked in &4{0} &cseconds.";
-							if (minutes == 1) {
+							if (minutes == 14) {
 								if (seconds == 50) {
 									p.sendTitle(StringUtils.use("&eHey AFK person!").translate(), StringUtils.use(MessageFormat.format(format, 10)).translate(), 0, 12, 5);
 								}
