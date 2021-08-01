@@ -24,8 +24,8 @@ public interface PersistentDataService {
     /**
      * Operate on a custom persistent data container at the specified coordinates.
      *
-     * @param key the namespaced key for this component
+     * @param namespacedKey the namespaced key for this component
      * @return the existing data container or a new instance
      */
-    @NotNull PersistentContainer getContainer(NamespacedKey key);
+    @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey);
 }
