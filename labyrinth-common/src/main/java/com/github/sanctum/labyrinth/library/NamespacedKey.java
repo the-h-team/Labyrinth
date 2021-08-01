@@ -137,4 +137,15 @@ public final class NamespacedKey {
 		return new NamespacedKey(MINECRAFT, key);
 	}
 
+	/**
+	 * Convert the provided plugin reference into the exact namespace
+	 * used by the constructor of this class.
+	 *
+	 * @param plugin a plugin
+	 * @return appropriate namespace for the plugin
+	 * @author ms5984
+	 */
+	public static String toNamespace(@NotNull Plugin plugin) {
+		return plugin.getName().toLowerCase(Locale.ROOT);
+	}
 }

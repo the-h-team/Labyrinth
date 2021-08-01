@@ -1,21 +1,28 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.google.common.collect.ImmutableList;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
 import org.jetbrains.annotations.Nullable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileList {
+	// Outer key = plugin name. Inner key = "d;n" where d and n represent the respective fields
+	static final Map<String, Map<String, FileManager>> CACHE = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<String, FileList> REGISTRY = new ConcurrentHashMap<>();
 
-	protected static final Map<Plugin, List<FileManager>> CACHE = new HashMap<>();
-	private static final LinkedList<FileList> REGISTRY = new LinkedList<>();
 	private final Plugin plugin;
 
 	private FileList(Plugin plugin) {
 		this.plugin = plugin;
-		REGISTRY.add(this);
+	}
+
+	private FileList cache(String pluginName) {
+		REGISTRY.put(pluginName, this);
+		return this;
 	}
 
 	/**
@@ -29,14 +36,7 @@ public class FileList {
 	 * @return a potential listing of configuration
 	 */
 	public static FileList search(@NotNull final Plugin plugin) {
-		FileList list = null;
-		for (FileList listing : REGISTRY) {
-			if (listing.plugin.equals(plugin)) {
-				list = listing;
-				break;
-			}
-		}
-		return list != null ? list : new FileList(plugin);
+		return REGISTRY.computeIfAbsent(plugin.getName(), name -> new FileList(plugin).cache(name));
 	}
 
 	/**
@@ -47,7 +47,10 @@ public class FileList {
 	 * otherwise, an empty List
 	 */
 	public static List<FileManager> getFiles(Plugin plugin) {
-		return CACHE.entrySet().stream().filter(e -> e.getKey().getName().equals(plugin.getName())).map(Map.Entry::getValue).findFirst().orElse(new ArrayList<>());
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(Map::values)
+				.map(ImmutableList::copyOf)
+				.orElse(ImmutableList.of());
 	}
 
 	/**
@@ -108,24 +111,15 @@ public class FileList {
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
 		}
-		FileManager result = null;
-		// switch to stream api
-		final int hashCode = Objects.hash(name, desc);
-		if (CACHE.containsKey(this.plugin)) {
-			for (Map.Entry<Plugin, List<FileManager>> entry : CACHE.entrySet()) {
-				if (entry.getKey().equals(this.plugin)) {
-					if (entry.getValue().stream().anyMatch(fm -> fm.hashCode() == hashCode)) {
-						result = entry.getValue().stream().filter(fm -> fm.hashCode() == hashCode)
-								.findFirst()
-								.orElseGet(() -> new FileManager(this.plugin, name, desc));
-					}
-					break;
-				}
-			}
-		} else {
-			result = new FileManager(this.plugin, name, desc);
-		}
-		return result != null ? result : new FileManager(this.plugin, name, desc);
+		// See CACHE declaration above for new key strategy
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(m -> m.get(desc + ';' + name))
+				.orElseGet(() -> cacheFileManager(new FileManager(plugin, name, desc)));
+	}
+
+	private static FileManager cacheFileManager(FileManager fileManager) {
+		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.d + ';' + fileManager.n, fileManager);
+		return fileManager;
 	}
 
 	/**
@@ -139,29 +133,7 @@ public class FileList {
 	 * @throws IllegalArgumentException if name is empty
 	 */
 	public @NotNull FileManager find(@NotNull final String name) throws IllegalArgumentException {
-		// move up to fail fast
-		if (name.isEmpty()) {
-			throw new IllegalArgumentException("Name cannot be empty!");
-		}
-		FileManager result = null;
-		// switch to stream api
-		final int hashCode = Objects.hash(name, null);
-		if (CACHE.containsKey(this.plugin)) {
-			for (Map.Entry<Plugin, List<FileManager>> entry : CACHE.entrySet()) {
-				if (entry.getKey().equals(this.plugin)) {
-					if (entry.getValue().stream().anyMatch(fm -> fm.hashCode() == hashCode)) {
-						result = entry.getValue().stream().filter(fm -> fm.hashCode() == hashCode)
-								.findFirst()
-								.orElseGet(() -> new FileManager(this.plugin, name, null));
-					}
-					break;
-				}
-			}
-		} else {
-			result = new FileManager(this.plugin, name, null);
-		}
-		return result != null ? result : new FileManager(this.plugin, name, null);
+		return find(name, null);
 	}
-
 
 }

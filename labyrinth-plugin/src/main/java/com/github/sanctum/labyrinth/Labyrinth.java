@@ -20,11 +20,14 @@ import java.awt.event.ComponentListener;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
+import com.google.common.collect.ImmutableList;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
@@ -69,7 +72,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
 	private final LinkedList<WrappedComponent> components = new LinkedList<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
-	private final List<PersistentContainer> containers = new LinkedList<>();
+	// outer key = namespace; inner key = key
+	private final Map<String, Map<String, PersistentContainer>> containers = new ConcurrentHashMap<>();
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
@@ -117,13 +121,15 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Override
 	public void onDisable() {
 
-		for (PersistentContainer component : containers) {
-			for (String key : component.keySet()) {
-				try {
-					component.save(key);
-				} catch (IOException e) {
-					getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
-					e.printStackTrace();
+		for (Map<String, PersistentContainer> namespaceMap : containers.values()) {
+			for (PersistentContainer component : namespaceMap.values()) {
+				for (String key : component.keySet()) {
+					try {
+						component.save(key);
+					} catch (IOException e) {
+						getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -167,19 +173,25 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	@Override
 	public @NotNull List<PersistentContainer> getContainers(Plugin plugin) {
-		return containers.stream().filter(c -> c.getKey().getNamespace().equalsIgnoreCase(plugin.getName())).collect(Collectors.toList());
+		final Map<String, PersistentContainer> namespaceMap = containers.get(NamespacedKey.toNamespace(plugin));
+		if (namespaceMap == null) return ImmutableList.of();
+		return ImmutableList.copyOf(namespaceMap.values());
 	}
 
 	@Override
-	public @NotNull PersistentContainer getContainer(NamespacedKey key) {
-		for (PersistentContainer component : containers) {
-			if (component.getKey().getNamespace().equals(key.getNamespace()) && component.getKey().getKey().equals(key.getKey())) {
-				return component;
-			}
+	public @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey) {
+		final String namespace = namespacedKey.getNamespace();
+		final String key = namespacedKey.getKey();
+		final Map<String, PersistentContainer> namespaceMap = Optional.ofNullable(containers.get(namespace)).orElseGet(ConcurrentHashMap::new);
+		if (containers.containsKey(namespace) && namespaceMap.containsKey(key)) {
+			return namespaceMap.get(key);
 		}
-		PersistentContainer component = new PersistentContainer(key);
-		containers.add(component);
-		return component;
+		final PersistentContainer newContainer = new PersistentContainer(namespacedKey);
+		namespaceMap.put(key, newContainer);
+		if (containers.containsKey(namespace)) {
+			containers.put(namespace, namespaceMap);
+		}
+		return newContainer;
 	}
 
 	@Override

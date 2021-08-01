@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,17 +44,6 @@ public class FileManager {
         }
         this.parent = parent;
         this.file = new File(parent, n.concat(".yml"));
-        if (FileList.CACHE.get(plugin) == null) {
-            LinkedList<FileManager> managers = new LinkedList<>();
-            managers.add(this);
-            FileList.CACHE.putIfAbsent(plugin, managers);
-        } else {
-            LinkedList<FileManager> managers = new LinkedList<>(FileList.CACHE.get(plugin));
-            if (!managers.contains(this)) {
-                managers.add(this);
-            }
-            FileList.CACHE.put(plugin, managers);
-        }
     }
 
     /**
@@ -250,17 +238,6 @@ public class FileManager {
         File defConfigStream = new File(this.plugin.getDataFolder(), getName() + ".yml");
         YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
         this.fc.setDefaults(defConfig);
-
-        if (FileList.CACHE.get(this.plugin) == null) {
-            LinkedList<FileManager> managers = new LinkedList<>();
-            managers.add(this);
-            FileList.CACHE.putIfAbsent(this.plugin, managers);
-        } else {
-            LinkedList<FileManager> managers = new LinkedList<>(FileList.CACHE.get(this.plugin));
-            managers.removeIf(m -> m.getName().equals(getName()) && m.getDescription().equals(getDescription()));
-            managers.add(this);
-            FileList.CACHE.put(this.plugin, managers);
-        }
     }
 
     /**
