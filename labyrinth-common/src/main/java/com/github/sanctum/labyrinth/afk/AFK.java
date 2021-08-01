@@ -153,7 +153,7 @@ public class AFK {
 	 * @param subscription The vent subscription to use.
 	 */
 	public static void override(Vent.Subscription<StatusChange> subscription) {
-		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(StatusChange.class, "default");
+		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(StatusChange.class, "afk-default");
 		Vent.subscribe(subscription);
 	}
 
@@ -164,7 +164,7 @@ public class AFK {
 	 * @param link The subscription link to override with
 	 */
 	public static void override(Vent.Link link) {
-		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(c -> !c.getSimpleName().equalsIgnoreCase("statuschange"), "default");
+		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(c -> !c.getEventType().getSimpleName().equalsIgnoreCase("statuschange") && c.getKey().isPresent() && c.getKey().get().equals("afk-default"));
 		Vent.chain(link);
 	}
 
@@ -276,9 +276,9 @@ public class AFK {
 		 * @return this builder
 		 */
 		public Initializer next(SubscriberCall<StatusChange> subscriberCall) {
-			if (LabyrinthProvider.getInstance().getEventMap().get(DefaultEvent.Communication.class, "default") == null) {
-				Vent.chain(new Vent.Link(new Vent.Subscription<>(StatusChange.class, "default", plugin, Vent.Priority.MEDIUM, subscriberCall))
-						.next(new Vent.Subscription<>(DefaultEvent.Leave.class, "default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
+			if (LabyrinthProvider.getInstance().getEventMap().get(DefaultEvent.Communication.class, "afk-default") == null) {
+				Vent.chain(new Vent.Link(new Vent.Subscription<>(StatusChange.class, "afk-default", plugin, Vent.Priority.MEDIUM, subscriberCall))
+						.next(new Vent.Subscription<>(DefaultEvent.Leave.class, "afk-default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
 
 							AFK afk = supply(e.getPlayer());
 
@@ -298,7 +298,7 @@ public class AFK {
 
 							}
 
-						})).next(new Vent.Subscription<>(DefaultEvent.Communication.class, "default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
+						})).next(new Vent.Subscription<>(DefaultEvent.Communication.class, "afk-default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
 
 							switch (e.getCommunicationType()) {
 								case COMMAND:

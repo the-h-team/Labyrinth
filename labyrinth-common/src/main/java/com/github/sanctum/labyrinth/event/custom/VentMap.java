@@ -39,10 +39,9 @@ public abstract class VentMap {
 	/**
 	 * Unsubscribe every found subscription labeled under the specified namespace.
 	 *
-	 * @param fun       The prerequisite to unsubscribing from a class
-	 * @param key       The key namespace for the subscription.
+	 * @param fun       The prerequisite to unsubscribing from a vent.
 	 */
-	public abstract void unsubscribeAll(Predicate<Class<?>> fun, String key);
+	public abstract void unsubscribeAll(Predicate<Vent.Subscription<?>> fun);
 
 	/**
 	 * Narrow down a list of all subscriptions provided by a single plugin.

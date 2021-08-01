@@ -41,13 +41,11 @@ public final class VentMapImpl extends VentMap {
 	}
 
     @Override
-    public void unsubscribeAll(Predicate<Class<?>> fun, String key) {
+    public void unsubscribeAll(Predicate<Vent.Subscription<?>> fun) {
         for (Vent.Subscription<?> s : subscriptions) {
-            if (s.getKey().isPresent() && s.getKey().get().equals(key)) {
-                if (fun.test(s.getEventType())) {
-                    Schedule.sync(() -> subscriptions.remove(s)).waitReal(1);
-                }
-            }
+	        if (fun.test(s)) {
+		        Schedule.sync(() -> subscriptions.remove(s)).waitReal(1);
+	        }
         }
     }
 
