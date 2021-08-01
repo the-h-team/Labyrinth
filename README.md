@@ -9,57 +9,67 @@ otherwise have been far more time-consuming.
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 ### Importing with Maven
 ```xml
+<project>
+    <repositories>
+        <!-- For snapshots/versions in development -->
+        <repository>
+            <id>s01-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <!-- No repository needed for Maven Central versions! :D -->
+    </repositories>
     <dependencies>
     <!-- Used for accessing common library functions -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skulls</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-    <!-- Used specifically for AFK implementations. -->
-        <dependency>
-            <groupId>com.github.the-h-team.Labyrinth</groupId>
-            <artifactId>labyrinth-afk</artifactId>
-            <version>1.7.0</version>
-            <scope>provided</scope>
-        </dependency>
-    <!-- For build use only! (Includes main class + plugin.yml, try not to use this) -->
+    <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-plugin</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+</project>
 ```
 ### Importing with Gradle
 ```groovy
-	allprojects {
-		repositories {
-			mavenCentral()
-		}
-	}
+    allprojects {
+        repositories {
+            // Normal releases
+            mavenCentral()
+            maven {
+                // For snapshots/development builds
+                url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+            }
+        }
+    }
 
-	dependencies {
-	        implementation 'com.github.the-h-team:labyrinth-common:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-afk:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-gui:1.7.0'
-	        implementation 'com.github.the-h-team:labyrinth-skulls:1.7.0'
-	}
+    dependencies {
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.7.0-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.7.0-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.7.0-SNAPSHOT'
+        // for build use only! (includes full plugin and resources)
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.7.0-SNAPSHOT'
+    }
 ```
 
 ## What are its key points?
