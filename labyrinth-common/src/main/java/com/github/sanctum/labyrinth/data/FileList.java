@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
+import org.jetbrains.annotations.Nullable;
 
 public class FileList {
 
@@ -102,7 +103,7 @@ public class FileList {
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager find(@NotNull final String name, final String desc) throws IllegalArgumentException {
+	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
 		// move up to fail fast
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
@@ -125,6 +126,41 @@ public class FileList {
 			result = new FileManager(this.plugin, name, desc);
 		}
 		return result != null ? result : new FileManager(this.plugin, name, desc);
+	}
+
+	/**
+	 * Retrieve a Config instance via its name and description.
+	 * <p>
+	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
+	 * main class passed through the initial search query.
+	 *
+	 * @param name name of config file
+	 * @return existing instance or create new Config
+	 * @throws IllegalArgumentException if name is empty
+	 */
+	public @NotNull FileManager find(@NotNull final String name) throws IllegalArgumentException {
+		// move up to fail fast
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Name cannot be empty!");
+		}
+		FileManager result = null;
+		// switch to stream api
+		final int hashCode = Objects.hash(name, null);
+		if (CACHE.containsKey(this.plugin)) {
+			for (Map.Entry<Plugin, List<FileManager>> entry : CACHE.entrySet()) {
+				if (entry.getKey().equals(this.plugin)) {
+					if (entry.getValue().stream().anyMatch(fm -> fm.hashCode() == hashCode)) {
+						result = entry.getValue().stream().filter(fm -> fm.hashCode() == hashCode)
+								.findFirst()
+								.orElseGet(() -> new FileManager(this.plugin, name, null));
+					}
+					break;
+				}
+			}
+		} else {
+			result = new FileManager(this.plugin, name, null);
+		}
+		return result != null ? result : new FileManager(this.plugin, name, null);
 	}
 
 

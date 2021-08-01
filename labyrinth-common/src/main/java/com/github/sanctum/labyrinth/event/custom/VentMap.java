@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import org.bukkit.plugin.Plugin;
 
 public abstract class VentMap {
@@ -28,6 +30,21 @@ public abstract class VentMap {
 	public abstract <T extends Vent> void unsubscribeAll(Class<T> eventType, String key);
 
 	/**
+	 * Unsubscribe every found subscription labeled under the specified namespace.
+	 *
+	 * @param key       The key namespace for the subscription.
+	 */
+	public abstract void unsubscribeAll(String key);
+
+	/**
+	 * Unsubscribe every found subscription labeled under the specified namespace.
+	 *
+	 * @param fun       The prerequisite to unsubscribing from a class
+	 * @param key       The key namespace for the subscription.
+	 */
+	public abstract void unsubscribeAll(Predicate<Class<?>> fun, String key);
+
+	/**
 	 * Narrow down a list of all subscriptions provided by a single plugin.
 	 *
 	 * @param plugin The plugin providing the subscriptions.
@@ -44,5 +61,9 @@ public abstract class VentMap {
 	 * @return The desired subscription if found otherwise null.
 	 */
 	public abstract <T extends Vent> Vent.Subscription<?> get(Class<T> eventType, String key);
+
+	public static VentMap getInstance() {
+		return LabyrinthProvider.getInstance().getEventMap();
+	}
 
 }

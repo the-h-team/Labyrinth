@@ -1,6 +1,20 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.afk.AFK;
 import com.github.sanctum.labyrinth.data.Region;
+import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import com.github.sanctum.labyrinth.library.ListUtils;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Monster;
@@ -13,6 +27,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -69,6 +85,14 @@ public class DefaultEvent extends Vent {
 		}
 	}
 
+	public static class Leave extends Player {
+
+		public Leave(org.bukkit.entity.Player p) {
+			super(p, false);
+			setState(CancelState.OFF);
+		}
+	}
+
 	public static class BlockBreak extends Player {
 
 		private final Block block;
@@ -86,6 +110,182 @@ public class DefaultEvent extends Vent {
 		public String getName() {
 			return "BlockBreak";
 		}
+	}
+
+	public static class Communication extends Player{
+		private final Type type;
+		private final CommunicationResult<?> result;
+
+		public Communication(org.bukkit.entity.Player p, Type type, CommunicationResult<?> communication) {
+			super(p, true);
+			this.type = type;
+			this.result = communication;
+		}
+
+		public Optional<ChatCommand> getCommand() {
+			return this.result != null && this.result.get().getClass().isAssignableFrom(String[].class) ?
+					Optional.ofNullable((ChatCommand) this.result) :
+					Optional.empty();
+		}
+
+		public Optional<ChatMessage> getMessage() {
+			return this.result != null && this.result.get().getClass().isAssignableFrom(BaseComponent[].class) ?
+					Optional.ofNullable((ChatMessage) this.result) :
+					Optional.empty();
+		}
+
+		public void setCommand(String command) {
+			ChatCommand impl = getCommand().get();
+			impl.setArgs(command);
+		}
+
+		public void setMessage(BaseComponent[] message) {
+			ChatMessage impl = getMessage().get();
+			impl.set(message);
+		}
+
+		public Type getCommunicationType() {
+			return this.type != null ? this.type : Type.UNKNOWN;
+		}
+
+		public static abstract class CommunicationResult<T> {
+
+			private final Set<? extends org.bukkit.entity.Player> recipients;
+
+			public CommunicationResult(Set<? extends org.bukkit.entity.Player> recipients) {
+				this.recipients = recipients;
+			}
+
+			public abstract T get();
+
+			public Optional<String> getText() {
+				return Optional.empty();
+			}
+
+			public Set<? extends org.bukkit.entity.Player> getRecipients() {
+				if (this.recipients != null) {
+					return this.recipients;
+				} else {
+					return new HashSet<>();
+				}
+			}
+
+		}
+
+		public static final class ChatMessage extends CommunicationResult<BaseComponent[]> {
+
+			private BaseComponent[] args;
+
+			private boolean changed;
+
+			private final String text;
+
+			private String format;
+
+			public ChatMessage(Collection<? extends org.bukkit.entity.Player> recipients, String text, String format) {
+				super(new HashSet<>(recipients));
+				List<BaseComponent> components = new LinkedList<>();
+				for (String s : format.split(" ")) {
+					components.add(new TextComponent(s));
+				}
+				this.args = ListUtils.use(components).append(b -> {
+					b.addExtra(" ");
+				}).toArray(new BaseComponent[0]);
+				this.text = text;
+				this.format = format;
+			}
+
+			@Override
+			public BaseComponent[] get() {
+				return this.args;
+			}
+
+			@Override
+			public Optional<String> getText() {
+				return Optional.of(this.text);
+			}
+
+			public BaseComponent getMessage() {
+				return new ColoredString(this.text, ColoredString.ColorType.MC_COMPONENT).toComponent();
+			}
+
+			public void set(BaseComponent[] components) {
+				this.changed = true;
+				this.args = components;
+			}
+
+			public boolean isChanged() {
+				return changed;
+			}
+
+			protected String getFormat() {
+				return this.format;
+			}
+
+			protected void setFormat(String format) {
+				this.format = format;
+			}
+
+		}
+
+		public static final class ChatCommand extends CommunicationResult<String[]> {
+
+			private String[] args;
+
+			private boolean changed;
+
+			private String label;
+
+			public ChatCommand(String[] args, Set<? extends org.bukkit.entity.Player> recipients) {
+				super(recipients != null ? new HashSet<>(recipients) : null);
+				this.args = args;
+				this.label = args[0];
+			}
+
+			public ChatCommand(String[] args, Collection<? extends org.bukkit.entity.Player> recipients) {
+				super(recipients != null ? new HashSet<>(recipients) : null);
+				this.args = args;
+				this.label = args[0];
+			}
+
+			@Override
+			public String[] get() {
+				return ListUtils.use(this.args).join(s -> s.stream().filter(st -> !st.equals(this.label)).collect(Collectors.toList()).toArray(s.toArray(new String[0])));
+			}
+
+			@Override
+			public Optional<String> getText() {
+				return Optional.of(this.label.replace("/", ""));
+			}
+
+			public boolean isChanged() {
+				return changed;
+			}
+
+			public void setArgs(String text) {
+				this.args = text.split(" ");
+				this.changed = true;
+				this.label = args[0];
+			}
+
+		}
+
+		public enum Type {
+			/**
+			 * A representation of a chat command.
+			 */
+			COMMAND,
+			/**
+			 * A representation of a chat message.
+			 */
+			CHAT,
+			/**
+			 * An unknown communication type.
+			 */
+			UNKNOWN;
+		}
+
+
 	}
 
 	public static class BlockPlace extends Player {
@@ -170,6 +370,50 @@ public class DefaultEvent extends Vent {
 	public static class Controller implements Listener {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
+		public void onChat(AsyncPlayerChatEvent e) {
+
+			Communication c = new Call<>(Runtime.Asynchronous, new Communication(e.getPlayer(), Communication.Type.CHAT, new Communication.ChatMessage(Bukkit.getOnlinePlayers(), e.getMessage(), e.getFormat().replace("<%1$s>", "").replace("%2$s", "")))).complete().join();
+
+			if (c.isCancelled()) {
+				e.setCancelled(true);
+			}
+
+			Communication.ChatMessage impl = (Communication.ChatMessage) c.getMessage().orElse(null);
+
+			if (impl != null) {
+				if (impl.isChanged()) {
+					String s = impl.getFormat();
+					e.getRecipients().clear();
+					e.setMessage(ListUtils.use(impl.args).join(b -> b.stream().map(bc -> bc.toLegacyText()).collect(Collectors.toList()).toString()));
+					for (org.bukkit.entity.Player p : impl.getRecipients()) {
+						p.spigot().sendMessage(impl.get());
+					}
+					if (s == null || s.isEmpty()) return;
+					if (!s.equals(e.getFormat())) {
+						e.setFormat(s);
+					}
+				}
+			}
+
+
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST)
+		public void onChat(PlayerCommandPreprocessEvent e) {
+
+			Communication c = new Call<>(Runtime.Asynchronous, new Communication(e.getPlayer(), Communication.Type.COMMAND, new Communication.ChatCommand(e.getMessage().split(" "), Bukkit.getOnlinePlayers()))).complete().join();
+
+			if (c.isCancelled()) {
+				e.setCancelled(true);
+			}
+
+			if (c.getCommand().get().isChanged()) {
+				e.setMessage(StringUtils.join(c.getCommand().get().args, " "));
+			}
+
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {
 			BlockPlace b = new Call<>(Runtime.Synchronous, new BlockPlace(e.getPlayer(), e.getBlock())).run();
 
@@ -190,13 +434,26 @@ public class DefaultEvent extends Vent {
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-		public void onFirstJoin(PlayerJoinEvent event) {
+		public void onJoin(PlayerJoinEvent event) {
 
 			Join e = new Call<>(Runtime.Synchronous, new Join(event.getPlayer())).run();
 
 			if (e.isCancelled()) {
 				event.getPlayer().kickPlayer(e.getKickMessage());
 			}
+
+			if (LabyrinthOptions.IMPL_AFK.enabled()) {
+
+				AFK.supply(e.getPlayer());
+
+			}
+
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+		public void onLeave(PlayerJoinEvent event) {
+
+			Leave e = new Call<>(Runtime.Synchronous, new Leave(event.getPlayer())).run();
 
 		}
 

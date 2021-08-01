@@ -1,0 +1,8 @@
+# If you run cracked you will want to disable this as running in offline mode causes this feature to hang on start up depending on your total logged players. (Bukkit api doesn't support offline mode)
+automatic-head-cache: true
+
+# Allow for labyrinth to register its default region services manager implementation on startup.
+region-service-impl: true
+
+# Let the labyrinth provided AFK implementation run? Afk announce time is 5 minutes & kick time is 15 minutes.
+labyrinth-provided-afk: false

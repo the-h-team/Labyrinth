@@ -3,8 +3,11 @@ package com.github.sanctum.labyrinth.event.custom;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import org.bukkit.Tag;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -75,6 +78,25 @@ public abstract class Vent {
 		return (Class<T>) getClass();
 	}
 
+	public static final class Link {
+
+		private final Subscription<?> parent;
+
+		protected final Set<Subscription<?>> subscriptions;
+
+		public Link(Subscription<?> parent) {
+			this.subscriptions = new HashSet<>();
+			this.parent = parent;
+		}
+
+		public <T extends Vent> Link next(Subscription<T> subscription) {
+			subscription.setParent(parent);
+			subscriptions.add(subscription);
+			return this;
+		}
+
+	}
+
 	public static class Subscription<T extends Vent> {
 
 		private final Class<T> eventType;
@@ -82,6 +104,7 @@ public abstract class Vent {
 		private final Priority priority;
 		private final Plugin user;
 		private String key;
+		private Subscription<?> parent;
 
 		public Subscription(Class<T> eventType, Plugin user, Priority priority, SubscriberCall<T> action) {
 			this.eventType = eventType;
@@ -101,13 +124,37 @@ public abstract class Vent {
 		public void remove() {
 			if (key != null) {
 				getMap().unsubscribe(eventType, key);
+
+				getMap().subscriptions.forEach(s -> {
+
+					if (s.getParent().equals(this)) {
+						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
+					}
+
+				});
+
 			} else {
+				getMap().subscriptions.forEach(s -> {
+
+					if (s.getParent().equals(this)) {
+						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
+					}
+
+				});
 				getMap().subscriptions.forEach(s -> {
 					if (s.equals(this)) {
 						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
 					}
 				});
 			}
+		}
+
+		public Subscription<?> getParent() {
+			return parent;
+		}
+
+		protected void setParent(Subscription<?> parent) {
+			this.parent = parent;
 		}
 
 		public Optional<String> getKey() {
@@ -133,6 +180,7 @@ public abstract class Vent {
 		public static final class Builder<T extends Vent> {
 
 			private final Class<T> tClass;
+			private Subscription<T> subscription;
 			private String key;
 			private Plugin plugin;
 			private Priority priority;
@@ -160,6 +208,18 @@ public abstract class Vent {
 				return this;
 			}
 
+			public Builder<T> use(SubscriberCall<T> call) {
+				if (this.key != null) {
+					this.subscription = new Subscription<>(tClass, key, plugin, priority, call);
+				}
+				this.subscription = new Subscription<>(tClass, plugin, priority, call);
+				return this;
+			}
+
+			public Subscription<T> finish() {
+				return this.subscription;
+			}
+
 			public Subscription<T> assign(SubscriberCall<T> call) {
 				if (this.key != null) {
 					return new Subscription<>(tClass, key, plugin, priority, call);
@@ -169,6 +229,8 @@ public abstract class Vent {
 
 		}
 
+
+
 	}
 
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
@@ -177,6 +239,25 @@ public abstract class Vent {
 			return;
 		}
 		getMap().subscriptions.add(subscription);
+	}
+
+	public static void chain(Link link) {
+		if (link == null) {
+			LabyrinthProvider.getInstance().getLogger().severe("Null subscription link found from unknown source (Not labyrinth).");
+			return;
+		}
+		Subscription<?> parent = null;
+		for (Subscription<?> sub : link.subscriptions) {
+			if (sub.getParent() != null) {
+				parent = sub.getParent();
+			}
+			getMap().subscriptions.add(sub);
+		}
+
+		if (parent != null) {
+			getMap().subscriptions.add(parent);
+		}
+
 	}
 
 	public static <T extends Vent> void unsubscribeAll(Class<T> labyrinthEvent, Plugin user) {

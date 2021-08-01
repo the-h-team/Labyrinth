@@ -1,6 +1,7 @@
 package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import java.util.ArrayList;
@@ -22,7 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A custom skinned player skull with an attached reference to its category and possible owner. If no owner is present then this head
+ * A custom skinned player skull with an attached reference to its category and possible owner. If no owner is present then this head is considered {@link SkullType#CUSTOM}
+ *
+ * All base64 head values found from "https://minecraft-heads.com/custom-heads" are supported.
  */
 public abstract class CustomHead implements SkullObject {
 
@@ -81,6 +84,11 @@ public abstract class CustomHead implements SkullObject {
 						list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
 					} else {
 						LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang. Cracked accounts are not supported for custom heads.");
+
+						OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
+						if (search2.getResult() != null) {
+							list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult(), null));
+						}
 					}
 				}
 			}
@@ -329,7 +337,15 @@ public abstract class CustomHead implements SkullObject {
 
 	static {
 
-		HEADS = new LinkedList<>(CustomHead.Manager.loadOffline());
+		if (LabyrinthOptions.HEAD_PRE_CACHE.enabled()) {
+
+			HEADS = new LinkedList<>(CustomHead.Manager.loadOffline());
+
+		} else {
+
+			HEADS = new LinkedList<>();
+
+		}
 
 		LOADED = true;
 

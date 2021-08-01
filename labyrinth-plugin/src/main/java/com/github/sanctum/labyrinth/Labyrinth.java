@@ -2,9 +2,12 @@ package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
+import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
+import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
@@ -13,6 +16,7 @@ import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.awt.event.ComponentListener;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,7 +76,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	@Override
 	public void onEnable() {
-
 		instance = this;
 		LabyrinthProvider.instance = this;
 		ConfigurationSerialization.registerClass(Template.class);
@@ -80,6 +83,12 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
+
+		FileManager copy = FileList.search(this).find("config");
+
+		if (!copy.exists()) {
+			FileManager.copy(getResource("config.yml"), copy);
+		}
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
@@ -96,7 +105,10 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			// Load our Location util
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
-		RegionServicesManagerImpl.initialize(this);
+
+		if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
+			RegionServicesManagerImpl.initialize(this);
+		}
 
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
 

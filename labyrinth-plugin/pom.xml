@@ -66,10 +66,15 @@
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>lib/*</exclude>
+                    <exclude>conf/*</exclude>
                 </excludes>
             </resource>
             <resource>
                 <directory>src/main/resources/lib</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/conf</directory>
                 <filtering>false</filtering>
             </resource>
         </resources>
