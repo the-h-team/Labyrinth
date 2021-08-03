@@ -114,15 +114,15 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 					break;
 				case COMMAND:
 
-					if (HUID.fromString(e.getMessage().get().getText().get().replace("/", "")) != null) {
-						if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getMessage().get().getText().get().replace("/", "")))) {
+					if (HUID.fromString(e.getCommand().get().getText().get().replace("/", "")) != null) {
+						if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getCommand().get().getText().get().replace("/", "")))) {
 							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
 							e.setCancelled(true);
 							return;
 						}
 					}
 					for (WrappedComponent component : instance.components) {
-						if (StringUtils.use(e.getMessage().get().getText().get().replace("/", "")).containsIgnoreCase(component.toString())) {
+						if (StringUtils.use(e.getCommand().get().getText().get().replace("/", "")).containsIgnoreCase(component.toString())) {
 							Schedule.sync(() -> component.action().apply()).run();
 							if (!component.isMarked()) {
 								component.setMarked(true);
