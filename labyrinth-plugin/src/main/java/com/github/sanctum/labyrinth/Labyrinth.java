@@ -86,6 +86,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
+	private int cachedComponentRemoval;
 	private long time;
 
 	@Override
@@ -104,6 +105,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 		if (!copy.exists()) {
 			FileManager.copy(getResource("config.yml"), copy);
 		}
+
+		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
@@ -126,7 +129,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 							Schedule.sync(() -> component.action().apply()).run();
 							if (!component.isMarked()) {
 								component.setMarked(true);
-								Schedule.sync(component::remove).waitReal(200);
+								Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
 							}
 							e.setCancelled(true);
 						}
