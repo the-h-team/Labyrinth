@@ -81,5 +81,14 @@ public class CommandBuilder {
 		}
 	}
 
+	public CommandBuilder build() {
+		if (impl == null) {
+			CommandImpl implementation = new CommandImpl(this);
+			this.impl = implementation;
+			CommandRegistration.use(implementation);
+		}
+		return this;
+	}
+
 
 }

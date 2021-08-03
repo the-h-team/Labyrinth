@@ -2,13 +2,16 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.library.MathUtils;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
 
 /**
  * Encapsulate a list of objects to be sorted and paginated.
@@ -25,7 +28,11 @@ public class PaginatedList<T> {
 	private int linesPerPage;
 
 	public PaginatedList(List<T> list) {
-		this.typeList = list;
+		this.typeList = new LinkedList<>(new LinkedHashSet<>(list));
+	}
+
+	public PaginatedList(Set<T> set) {
+		this.typeList = new LinkedList<>(set);
 	}
 
 	/**
@@ -131,6 +138,21 @@ public class PaginatedList<T> {
 		return this;
 	}
 
+	public int getTotalPageCount() {
+		int totalPageCount = 1;
+		if (this.comparable != null) {
+			typeList.sort(this.comparable);
+		}
+		if ((this.typeList.size() % linesPerPage) == 0) {
+			if (this.typeList.size() > 0) {
+				totalPageCount = this.typeList.size() / linesPerPage;
+			}
+		} else {
+			totalPageCount = (this.typeList.size() / linesPerPage) + 1;
+		}
+		return totalPageCount;
+	}
+
 	/**
 	 * Run all prior sorting arrangements and sequence operations for a specified page.
 	 *
@@ -143,15 +165,7 @@ public class PaginatedList<T> {
 
 		int o = linesPerPage;
 
-		List<T> tempList = new LinkedList<>(new LinkedHashSet<>(this.typeList));
-		int totalPageCount = 1;
-		if ((tempList.size() % o) == 0) {
-			if (tempList.size() > 0) {
-				totalPageCount = tempList.size() / o;
-			}
-		} else {
-			totalPageCount = (tempList.size() / o) + 1;
-		}
+		int totalPageCount = getTotalPageCount();
 
 		if (page <= totalPageCount) {
 
@@ -159,13 +173,10 @@ public class PaginatedList<T> {
 				this.start.apply(this, pageNum, totalPageCount);
 			}
 
-			if (!tempList.isEmpty()) {
+			if (!typeList.isEmpty()) {
 				int i1 = 0, k = 0;
 				page--;
-				if (this.comparable != null) {
-					tempList.sort(this.comparable);
-				}
-				LinkedList<T> sorted_list = new LinkedList<>(tempList);
+				LinkedList<T> sorted_list = new LinkedList<>(this.typeList);
 
 				for (T value : sorted_list) {
 
@@ -174,10 +185,9 @@ public class PaginatedList<T> {
 						i1++;
 						if (decoration != null) {
 							decoration.apply(this, value, pageNum, totalPageCount, k);
-							list.add(value);
 						}
+						list.add(value);
 					}
-					tempList.remove(value);
 				}
 				if (this.finish != null) {
 					this.finish.apply(this, pageNum, totalPageCount);

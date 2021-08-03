@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableList;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,11 +21,6 @@ public class FileList {
 		this.plugin = plugin;
 	}
 
-	private FileList cache(String pluginName) {
-		REGISTRY.put(pluginName, this);
-		return this;
-	}
-
 	/**
 	 * Using a {@link Plugin plugin} as the key, look for specific files.
 	 * <p>
@@ -36,7 +32,7 @@ public class FileList {
 	 * @return a potential listing of configuration
 	 */
 	public static FileList search(@NotNull final Plugin plugin) {
-		return REGISTRY.computeIfAbsent(plugin.getName(), name -> new FileList(plugin).cache(name));
+		return REGISTRY.computeIfAbsent(plugin.getName(), name -> new FileList(plugin));
 	}
 
 	/**

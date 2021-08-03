@@ -23,7 +23,9 @@ public class EasyListener {
 
 	public void call(Plugin plugin) {
 		try {
-			this.listener = impl.getDeclaredConstructor().newInstance();
+			if (this.listener == null && impl != null) {
+				this.listener = impl.getDeclaredConstructor().newInstance();
+			}
 			register(plugin);
 		} catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
 			LabyrinthProvider.getInstance().getLogger().warning("- Listener " + (impl != null ? impl.getSimpleName() : "Unknown") + " wasn't able to instantiate. Ensure the constructor contains no parameters.");

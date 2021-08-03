@@ -78,7 +78,7 @@ public abstract class Vent {
 		return (Class<T>) getClass();
 	}
 
-	public static final class Link {
+	public static class Link {
 
 		private final Subscription<?> parent;
 
@@ -92,6 +92,14 @@ public abstract class Vent {
 		public <T extends Vent> Link next(Subscription<T> subscription) {
 			subscription.setParent(parent);
 			subscriptions.add(subscription);
+			return this;
+		}
+
+		public Link next(Subscription<?>... subscription) {
+			for (Subscription<?> sub : subscription) {
+				sub.setParent(parent);
+				subscriptions.add(sub);
+			}
 			return this;
 		}
 

@@ -14,9 +14,17 @@ import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
-import com.github.sanctum.labyrinth.library.*;
+import com.github.sanctum.labyrinth.library.CommandUtils;
+import com.github.sanctum.labyrinth.library.Cooldown;
+import com.github.sanctum.labyrinth.library.HUID;
+import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
+import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.awt.event.ComponentListener;
+import com.github.sanctum.templates.MetaTemplate;
+import com.github.sanctum.templates.Template;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.github.sanctum.templates.MetaTemplate;
-import com.github.sanctum.templates.Template;
-import com.google.common.collect.ImmutableList;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
@@ -77,10 +81,12 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
+	private long time;
 
 	@Override
 	public void onEnable() {
 		instance = this;
+		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);

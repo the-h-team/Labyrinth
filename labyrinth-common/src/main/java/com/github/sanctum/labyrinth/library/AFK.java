@@ -1,21 +1,14 @@
-package com.github.sanctum.labyrinth.afk;
+package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.SubscriberCall;
 import com.github.sanctum.labyrinth.event.custom.Vent;
-import com.github.sanctum.labyrinth.formatting.UniformedComponents;
-import com.github.sanctum.labyrinth.library.ListUtils;
-import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.library.TextLib;
-import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

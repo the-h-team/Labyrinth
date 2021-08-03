@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.afk.AFK;
+import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
