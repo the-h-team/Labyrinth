@@ -11,7 +11,7 @@ public class PaginatedMenu extends Menu {
 	public PaginatedMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		super(host, title, rows, type, properties);
 		if (getProperties().contains(Property.SHAREABLE)) {
-			if (!getProperties().contains(Property.LIVE_META) && !getProperties().contains(Property.ANIMATED)) {
+			if (!getProperties().contains(Property.ANIMATED)) {
 				addElement(new SharedInventory(title, type, getProperties(), rows));
 			} else {
 				addElement(new NormalInventory(title, type, getProperties(), rows));
@@ -19,6 +19,11 @@ public class PaginatedMenu extends Menu {
 		} else {
 			addElement(new NormalInventory(title, type, getProperties(), rows));
 		}
+
+		if (getProperties().contains(Property.SAVABLE)) {
+			retrieve();
+		}
+
 	}
 
 	@Override

@@ -206,7 +206,7 @@ public interface Cuboid {
 		}
 
 		public Flag(Plugin plugin, String id, String message) {
-			plugin.getLogger().warning("- Flag " + '"' + id + '"' + " loaded.");
+			plugin.getLogger().info("- Flag " + '"' + id + '"' + " loaded.");
 			this.plugin = plugin;
 			this.id = id;
 			this.message = message;
@@ -220,7 +220,7 @@ public interface Cuboid {
 		}
 
 		public final void setAllowed(boolean allowed) {
-			plugin.getLogger().warning("- Flag " + '"' + id + '"' + " state of allowance changed to '" + String.valueOf(allowed).toUpperCase() + "'.");
+			plugin.getLogger().info("- Flag " + '"' + id + '"' + " state is '" + String.valueOf(allowed).toUpperCase() + "'.");
 			this.allowed = allowed;
 		}
 

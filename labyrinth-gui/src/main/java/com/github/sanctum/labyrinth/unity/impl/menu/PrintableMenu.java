@@ -10,19 +10,14 @@ import org.bukkit.plugin.Plugin;
 
 public class PrintableMenu extends Menu {
 
-	private final AnvilMechanics nms;
-
 	public PrintableMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		super(host, title, rows, type, properties);
 
 		AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
-
 		if (mechanics != null) {
-			this.nms = mechanics;
-			addElement(new AnvilInventory(title, type, getProperties(), rows));
+			addElement(new AnvilInventory(title, mechanics, type, getProperties(), rows));
 		} else {
 			LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
-			this.nms = null;
 		}
 
 	}

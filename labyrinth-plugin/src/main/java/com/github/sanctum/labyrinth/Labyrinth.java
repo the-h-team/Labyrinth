@@ -11,6 +11,7 @@ import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
@@ -22,6 +23,8 @@ import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.unity.construct.Menu;
+import com.github.sanctum.labyrinth.unity.impl.menu.SingularMenu;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
@@ -32,11 +35,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -119,8 +124,27 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
 			RegionServicesManagerImpl.initialize(this);
 		}
-
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
+
+		Material[] mats = new Material[]{
+			Material.BEDROCK, Material.STONE, Material.ANDESITE};
+
+		ItemStack[] items = new ItemStack[]{new ItemStack(mats[0]), new ItemStack(mats[2]), new ItemStack(mats[1]), null, new ItemStack(Material.AIR)};
+
+		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, Labyrinth.this, Vent.Priority.HIGH, (e, subscription) -> {
+
+
+			SingularMenu menu = Menu.get(SingularMenu.class, m -> m.getKey().isPresent() && m.getKey().get().equals("fish")).orElseMake(b ->
+					b.setCloseEvent(c -> {
+					}).setHost(this).setKey("fish").setSize(Menu.Rows.ONE).setTitle("Yes {0}/{1}").setProperty(Menu.Property.SHAREABLE, Menu.Property.CACHEABLE, Menu.Property.SAVABLE).setStock(i -> {
+
+						i.addItem(items);
+
+					}));
+
+			menu.getInventory().open(e.getPlayer());
+
+		}));
 
 	}
 

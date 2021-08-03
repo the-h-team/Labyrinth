@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.unity.impl;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,16 +10,35 @@ public class ClickElement extends PlayerElement{
 
 	private boolean cancelled;
 
+	private boolean hotbarAllowed;
+
 	private final ItemElement<?> parent;
 
 	private Consumer playerConsumer;
 
+	private Event.Result result;
+
 	private final int slot;
 
-	public ClickElement(Player clicker, int slot, ItemElement<?> element, InventoryView view) {
+	private final InventoryAction action;
+
+	public ClickElement(Player clicker, int slot, InventoryAction action, ItemElement<?> element, InventoryView view) {
 		super(clicker, view);
+		this.action = action;
 		this.slot = slot;
 		this.parent = element;
+	}
+
+	public InventoryAction getAction() {
+		return action;
+	}
+
+	public @Nullable Event.Result getResult() {
+		return result;
+	}
+
+	public void setResult(Event.Result result) {
+		this.result = result;
 	}
 
 	public int getSlot() {
@@ -30,6 +51,14 @@ public class ClickElement extends PlayerElement{
 
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
+	}
+
+	public boolean isHotbarAllowed() {
+		return hotbarAllowed;
+	}
+
+	public void setHotbarAllowed(boolean hotbarAllowed) {
+		this.hotbarAllowed = hotbarAllowed;
 	}
 
 	public @Nullable Consumer getConsumer() {
