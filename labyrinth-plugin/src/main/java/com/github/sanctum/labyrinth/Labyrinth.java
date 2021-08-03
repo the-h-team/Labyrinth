@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth;
 
-import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
@@ -8,6 +7,7 @@ import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.data.service.MenuOverride;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
@@ -20,28 +20,28 @@ import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
+import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.impl.menu.SingularMenu;
+import com.github.sanctum.labyrinth.unity.construct.MenuOptional;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.bukkit.Material;
+import java.util.function.Predicate;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +75,7 @@ import org.jetbrains.annotations.NotNull;
  * </p>
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
-public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI {
+public final class Labyrinth extends JavaPlugin implements Listener, MenuOverride {
 
 	private static Labyrinth instance;
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
@@ -96,8 +96,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
-		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
-		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
+		cachedIsLegacy = MenuOverride.super.isLegacy();
+		cachedNeedsLegacyLocation = MenuOverride.super.requiresLocationLibrary();
 
 		FileManager copy = FileList.search(this).find("config");
 
@@ -107,7 +107,35 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
-		new EasyListener(ComponentListener.class).call(this);
+		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Communication.class, this, Vent.Priority.HIGH, (e, subscription) -> {
+
+			switch (e.getCommunicationType()) {
+				case CHAT:
+					break;
+				case COMMAND:
+
+					if (HUID.fromString(e.getMessage().get().getText().get().replace("/", "")) != null) {
+						if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getMessage().get().getText().get().replace("/", "")))) {
+							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
+							e.setCancelled(true);
+							return;
+						}
+					}
+					for (WrappedComponent component : instance.components) {
+						if (StringUtils.use(e.getMessage().get().getText().get().replace("/", "")).containsIgnoreCase(component.toString())) {
+							Schedule.sync(() -> component.action().apply()).run();
+							if (!component.isMarked()) {
+								component.setMarked(true);
+								Schedule.sync(component::remove).waitReal(200);
+							}
+							e.setCancelled(true);
+						}
+					}
+
+					break;
+			}
+
+		}));
 
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
@@ -125,26 +153,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			RegionServicesManagerImpl.initialize(this);
 		}
 		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
-
-		Material[] mats = new Material[]{
-			Material.BEDROCK, Material.STONE, Material.ANDESITE};
-
-		ItemStack[] items = new ItemStack[]{new ItemStack(mats[0]), new ItemStack(mats[2]), new ItemStack(mats[1]), null, new ItemStack(Material.AIR)};
-
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, Labyrinth.this, Vent.Priority.HIGH, (e, subscription) -> {
-
-
-			SingularMenu menu = Menu.get(SingularMenu.class, m -> m.getKey().isPresent() && m.getKey().get().equals("fish")).orElseMake(b ->
-					b.setCloseEvent(c -> {
-					}).setHost(this).setKey("fish").setSize(Menu.Rows.ONE).setTitle("Yes {0}/{1}").setProperty(Menu.Property.SHAREABLE, Menu.Property.CACHEABLE, Menu.Property.SAVABLE).setStock(i -> {
-
-						i.addItem(items);
-
-					}));
-
-			menu.getInventory().open(e.getPlayer());
-
-		}));
 
 	}
 
@@ -239,27 +247,29 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		return this;
 	}
 
-	public static class ComponentListener implements Listener {
-		@EventHandler
-		public void onCommandNote(PlayerCommandPreprocessEvent e) {
-			if (HUID.fromString(e.getMessage().replace("/", "")) != null) {
-				if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getMessage().replace("/", "")))) {
-					e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
-					e.setCancelled(true);
-					return;
-				}
-			}
-			for (WrappedComponent component : instance.components) {
-				if (StringUtils.use(e.getMessage().replace("/", "")).containsIgnoreCase(component.toString())) {
-					Schedule.sync(() -> component.action().apply()).run();
-					if (!component.isMarked()) {
-						component.setMarked(true);
-						Schedule.sync(component::remove).waitReal(200);
-					}
-					e.setCancelled(true);
-				}
-			}
-		}
+	@Override
+	public @NotNull <T extends Menu> MenuOptional<T> getMenu(Class<T> type, Predicate<Menu> predicate) {
+		return Menu.get(type, predicate);
+	}
+
+	@Override
+	public @NotNull Message getNewMessage() {
+		return Message.loggedFor(this);
+	}
+
+	@Override
+	public @NotNull TimeWatch.Recording getTimeActive() {
+		return TimeWatch.Recording.subtract(this.time);
+	}
+
+	@Override
+	public @NotNull TimeWatch.Recording getTimeFrom(Date date) {
+		return getTimeFrom(date.getTime());
+	}
+
+	@Override
+	public @NotNull TimeWatch.Recording getTimeFrom(long l) {
+		return TimeWatch.Recording.subtract(l);
 	}
 
 

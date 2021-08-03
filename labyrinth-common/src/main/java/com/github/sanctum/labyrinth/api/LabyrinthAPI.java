@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 /**
  * The main API of Labyrinth provided by the plugin.
  */
-public interface LabyrinthAPI extends VentService, TaskService, CooldownService, ActionComponentService, PersistentDataService, LegacyCheckService {
+public interface LabyrinthAPI extends VentService, TaskService, RecordingService, MessagingService, CooldownService, ActionComponentService, PersistentDataService, LegacyCheckService {
     /**
      * Get a Logger for messaging the console as Labyrinth.
      *

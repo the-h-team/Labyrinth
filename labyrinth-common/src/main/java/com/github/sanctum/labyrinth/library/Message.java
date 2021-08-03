@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import java.util.function.Predicate;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
@@ -24,19 +25,6 @@ public class Message {
 	public Message(Plugin plugin) {
 		this.plugin = plugin;
 		this.logger = plugin.getLogger();
-	}
-
-	/**
-	 * <strong>NOTE: Only for console use.</strong>
-	 * <p>
-	 * Send easy messages through console with prefix specification.
-	 *
-	 * @deprecated Use {@link Message#loggedFor(Plugin)}
-	 * @param prefix the prefix to be used for console
-	 */
-	@Deprecated
-	public Message(String prefix) {
-		this.prefix = prefix;
 	}
 
 	/**
@@ -66,6 +54,15 @@ public class Message {
 	 * @param player the new player should now receive messages
 	 * @return this Message instance
 	 */
+	public Message setPlayer(Player player) {
+		this.p = player;
+		return this;
+	}
+
+	/**
+	 * @deprecated Use {@link Message#setPlayer(Player)}
+	 */
+	@Deprecated
 	public Message assignPlayer(Player player) {
 		this.p = player;
 		return this;
@@ -127,6 +124,33 @@ public class Message {
 				this.prefix = "&7[&e" + plugin.getName() + "&7]&r";
 			}
 			Bukkit.broadcast(StringUtils.use(prefix + " " + text).translate(), permission);
+		}
+		return this;
+	}
+
+	/**
+	 * Broadcast a message publicly to those who meet the desired terms.
+	 *
+	 * @param text The text to broadcast.
+	 * @param player The prerequisite to receiving the message.
+	 * @return this Message instance.
+	 */
+	public Message broadcast(String text, Predicate<Player> player) {
+		if (plugin != null) {
+			if (this.prefix == null) {
+				this.prefix = "&7[&e" + plugin.getName() + "&7]&r";
+			}
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				if (player.test(p)) {
+					p.sendMessage(StringUtils.use(prefix + " " + text).translate());
+				}
+			}
+		} else {
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				if (player.test(p)) {
+					p.sendMessage(StringUtils.use(text).translate());
+				}
+			}
 		}
 		return this;
 	}
