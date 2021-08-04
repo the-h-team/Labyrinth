@@ -12,8 +12,8 @@ public class SharedInventory extends InventoryElement {
 
 	private final Set<Player> viewers;
 
-	public SharedInventory(String title, Menu.Type type, Set<Menu.Property> properties, Menu.Rows rows) {
-		super(title, type, properties, rows, false);
+	public SharedInventory(String title, Menu menu) {
+		super(title, menu, true);
 		this.viewers = new HashSet<>();
 	}
 

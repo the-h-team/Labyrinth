@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.unity.impl.inventory.AnvilInventory;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class PrintableMenu extends Menu {
@@ -15,7 +16,7 @@ public class PrintableMenu extends Menu {
 
 		AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 		if (mechanics != null) {
-			addElement(new AnvilInventory(title, mechanics, type, getProperties(), rows));
+			addElement(new AnvilInventory(title, mechanics, this));
 		} else {
 			LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
 		}
@@ -26,4 +27,11 @@ public class PrintableMenu extends Menu {
 	public InventoryElement getInventory() {
 		return getElement(e -> e instanceof InventoryElement);
 	}
+
+
+	@Override
+	public void open(Player player) {
+		getInventory().open(player);
+	}
+
 }

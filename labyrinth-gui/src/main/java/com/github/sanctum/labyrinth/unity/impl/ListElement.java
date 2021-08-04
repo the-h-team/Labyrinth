@@ -15,6 +15,8 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 
 	private Menu.Populate<T> populator;
 
+	private InventoryElement parent;
+
 	public ListElement(List<T> list) {
 		this.list = list;
 	}
@@ -24,7 +26,7 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 		return this.populator;
 	}
 
-	public ListElement<T> setMax(int max) {
+	public ListElement<T> setLimit(int max) {
 		this.max = max;
 		return this;
 	}
@@ -34,7 +36,14 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 		return this;
 	}
 
+	public ListElement<T> setParent(InventoryElement parent) {
+		this.parent = parent;
+		return this;
+	}
 
+	public InventoryElement getParent() {
+		return parent;
+	}
 
 	@Override
 	public Set<ItemElement<?>> getAttachment() {
@@ -45,14 +54,14 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 				if (slot + 1 > max) {
 					slot = 0;
 				}
-				ItemElement<?> element = new ItemElement<>().setSlot(slot);
+				ItemElement<?> element = new ItemElement<>().setParent(getParent()).setSlot(slot);
 				populator.accept(t, element);
 				elements.add(element);
 				slot++;
 			}
 		} else {
 			for (T t : list) {
-				ItemElement<?> element = new ItemElement<>();
+				ItemElement<?> element = new ItemElement<>().setParent(getParent());
 				populator.accept(t, element);
 				elements.add(element);
 			}
@@ -60,7 +69,7 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 		return elements;
 	}
 
-	public ListElement<T> populate(Menu.Populate<T> populator) {
+	public ListElement<T> setPopulate(Menu.Populate<T> populator) {
 		this.populator = populator;
 		return this;
 	}

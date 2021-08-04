@@ -16,8 +16,8 @@ public class AnvilInventory extends InventoryElement {
 
 	private boolean visible;
 
-	public AnvilInventory(String title, AnvilMechanics mechanics, Menu.Type type, Set<Menu.Property> properties, Menu.Rows rows) {
-		super(title, type, properties, rows, true);
+	public AnvilInventory(String title, AnvilMechanics mechanics, Menu menu) {
+		super(title, menu, true);
 		this.nms = mechanics;
 	}
 

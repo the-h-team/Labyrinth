@@ -1,7 +1,10 @@
 package com.github.sanctum.labyrinth.unity.impl;
 
+import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
 import java.util.Optional;
+import java.util.function.Function;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +21,15 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 
 	private ItemStack item;
 
+	private InventoryElement.Page page;
+
 	private Menu.Click click;
 
-	public ItemElement() {}
+	private InventoryElement parent;
+
+	public ItemElement() {
+
+	}
 
 	public ItemElement(V data) {
 		this.data = data;
@@ -50,6 +59,17 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		return this;
 	}
 
+	public ItemElement<V> setElement(Function<Item.Edit, ItemStack> edit) {
+		Item.Edit ed;
+		if (this.item != null) {
+			ed = Items.edit(this.item);
+		} else {
+			ed = Items.edit();
+		}
+		this.item = edit.apply(ed);
+		return this;
+	}
+
 	public ItemElement<V> setNavigation(Navigation navigation) {
 		this.navigation = navigation;
 		return this;
@@ -64,9 +84,42 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		return this.item;
 	}
 
+	public ItemElement<?> setParent(InventoryElement parent) {
+		this.parent = parent;
+		return this;
+	}
+
+	public InventoryElement getParent() {
+		return parent;
+	}
+
 	@Override
 	public Menu.Click getAttachment() {
 		return this.click;
+	}
+
+	public ItemElement<?> setPage(@NotNull InventoryElement.Page page) {
+		this.page = page;
+		return this;
+	}
+
+	public InventoryElement.Page getPage() {
+		if (this.page == null) {
+			boolean tooFull = true;
+			for (InventoryElement.Page p : getParent().getAllPages()) {
+				if (!p.isFull()) {
+					tooFull = false;
+					setPage(p);
+					break;
+				}
+			}
+
+			if (tooFull) {
+				setPage(getParent().getPage(getParent().getAllPages().size() + 1));
+			}
+
+		}
+		return this.page;
 	}
 
 	public String getName() {

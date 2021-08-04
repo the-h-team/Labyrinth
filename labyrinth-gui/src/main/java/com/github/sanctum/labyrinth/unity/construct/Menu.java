@@ -13,7 +13,6 @@ import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
 import com.github.sanctum.labyrinth.unity.impl.menu.PrintableMenu;
 import com.github.sanctum.labyrinth.unity.impl.menu.SingularMenu;
 import com.github.sanctum.labyrinth.unity.impl.ClosingElement;
-import com.sun.xml.internal.bind.v2.model.core.Element;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -41,6 +41,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A unified menu creation object.
@@ -74,26 +75,15 @@ public abstract class Menu {
 		}
 	}
 
-	/**
-	 * Get or make the desired gui type from a single builder!
-	 *
-	 * Default menu types are: {@link PaginatedMenu}, {@link PrintableMenu} & {@link SingularMenu}
-	 *
-	 * @param type The menu class to use ex: {@code PaginatedMenu.class}
-	 * @param predicate The prerequisite to retrieving an already cached menu instance.
-	 * @param <T> The type of menu.
-	 * @return A menu optional.
-	 */
-	public static <T extends Menu> MenuOptional<T> get(Class<T> type, Predicate<Menu> predicate) {
-		T menu = null;
+
+	public static <T extends Menu, R> R get(Predicate<Menu> predicate, Function<T, R> function) {
+		R menu = null;
 		for (Menu m : menus) {
-			if (type.isAssignableFrom(m.getClass())) {
-				if (predicate.test(m)) {
-					menu = (T) m;
-				}
+			if (predicate.test(m)) {
+				menu = function.apply((T) m);
 			}
 		}
-		return MenuOptional.ofNullable(type, menu);
+		return menu;
 	}
 
 	/**
@@ -101,6 +91,8 @@ public abstract class Menu {
 	 */
 	public abstract InventoryElement getInventory();
 
+
+	public abstract void open(Player player);
 
 	/**
 	 * @return The namespace for the menu.
@@ -191,8 +183,8 @@ public abstract class Menu {
 		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 		if (getInventory().isPaginated()) {
 			Map<Integer, ItemStack[]> s = new HashMap<>();
-			for (Map.Entry<Integer, Set<ItemElement<?>>> entry : getInventory().getAllPages().entrySet()) {
-				s.put(entry.getKey(), UniformedComponents.accept(entry.getValue().stream().map(ItemElement::getElement).collect(Collectors.toList())).array());
+			for (InventoryElement.Page entry : getInventory().getAllPages()) {
+				s.put(entry.toNumber(), UniformedComponents.accept(entry.getAttachment().stream().map(ItemElement::getElement).collect(Collectors.toList())).array());
 			}
 			container.attach(getInventory().getTitle(), s);
 		} else {
@@ -294,10 +286,29 @@ public abstract class Menu {
 	 */
 	public static abstract class Element<T, V> {
 
+		private final Set<Element<?, ?>> elements = new HashSet<>();
+
 		public abstract T getElement();
 
 		public abstract V getAttachment();
 
+		public final <X, Y> X addElement(Element<X, Y> element) {
+			elements.add(element);
+			return element.getElement();
+		}
+
+		public final @Nullable Element<?, ?> findElement(Predicate<Element<?, ?>> predicate) {
+			for (Element<?, ?> e : elements) {
+				if (predicate.test(e)) {
+					return e;
+				}
+			}
+			return null;
+		}
+
+		public final @NotNull Set<Element<?, ?>> getElements() {
+			return this.elements;
+		}
 	}
 
 	/**
@@ -529,19 +540,15 @@ public abstract class Menu {
 		}
 
 		public T initialize() {
-			T menu = null;
+			Menu menu = null;
 			if (PaginatedMenu.class.isAssignableFrom(tClass)) {
-				menu = (T) new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
+				menu = new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
 			} else
 			if (PrintableMenu.class.isAssignableFrom(tClass)) {
-				menu = (T) new PrintableMenu(this.host, this.title, this.size, Type.PRINTABLE, properties.toArray(new Property[0]));
+				menu = new PrintableMenu(this.host, this.title, this.size, Type.PRINTABLE, properties.toArray(new Property[0]));
 			} else
 			if (SingularMenu.class.isAssignableFrom(tClass)) {
-				menu = (T) new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
-			}
-			
-			if (menu == null) {
-				menu = (T) new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
+				menu = new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
 			}
 			
 			if (inventoryEdit != null) {
@@ -553,7 +560,7 @@ public abstract class Menu {
 			menu.close = close;
 			menu.open = open;
 			menu.registerController();
-			return menu;
+			return (T) menu;
 		}
 
 
@@ -599,11 +606,6 @@ public abstract class Menu {
 						getInventory().open(p);
 					}
 
-				}
-
-				if (Menu.this instanceof PaginatedMenu) {
-					PaginatedMenu paginatedMenu = (PaginatedMenu) Menu.this;
-					paginatedMenu.getInventory().setPage(1);
 				}
 
 				p.updateInventory();
@@ -722,14 +724,39 @@ public abstract class Menu {
 								case Next:
 									if (Menu.this instanceof PaginatedMenu) {
 										PaginatedMenu m = (PaginatedMenu) Menu.this;
-										if ((m.getInventory().getPage() + 1) <= m.getInventory().getPageCount()) {
-											m.getInventory().setPage(m.getInventory().getPage() + 1);
+
+										if (getProperties().contains(Property.SAVABLE)) {
+											if (!getProperties().contains(Property.SHAREABLE)) {
+												m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+											} else {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+											}
 											if (consumer != null) {
 												consumer.accept(clickElement.getElement(), true);
 											}
 										} else {
-											if (consumer != null) {
-												consumer.accept(clickElement.getElement(), false);
+											if (!getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
 											}
 										}
 										break;
@@ -741,14 +768,55 @@ public abstract class Menu {
 								case Previous:
 									if (Menu.this instanceof PaginatedMenu) {
 										PaginatedMenu m = (PaginatedMenu) Menu.this;
-										if ((m.getInventory().getPage() - 1) < m.getInventory().getPageCount() && (m.getInventory().getPage() - 1) >= 1) {
-											m.getInventory().setPage(m.getInventory().getPage() - 1);
-											if (consumer != null) {
-												consumer.accept(clickElement.getElement(), true);
+
+										if (getProperties().contains(Property.SAVABLE)) {
+
+											if (!getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
 											}
 										} else {
-											if (consumer != null) {
-												consumer.accept(clickElement.getElement(), false);
+											if (!getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
 											}
 										}
 										break;
@@ -785,32 +853,114 @@ public abstract class Menu {
 
 							if (element2.getNavigation() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
-								switch (element2.getNavigation()) {
+								switch (element.getNavigation()) {
 									case Back:
 										if (consumer != null) {
-											consumer.accept(clickElement.getElement(), true);
+											consumer.accept(clickElement.getElement(), false);
 										}
 										break;
 									case Next:
 										if (Menu.this instanceof PaginatedMenu) {
 											PaginatedMenu m = (PaginatedMenu) Menu.this;
-											if ((m.getInventory().getPage() + 1) <= m.getInventory().getPageCount()) {
-												m.getInventory().setPage(m.getInventory().getPage() + 1);
+
+											if (getProperties().contains(Property.SAVABLE)) {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+												} else {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+												}
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
 											}
+											break;
 										}
 										if (consumer != null) {
-											consumer.accept(clickElement.getElement(), true);
+											consumer.accept(clickElement.getElement(), false);
 										}
 										break;
 									case Previous:
 										if (Menu.this instanceof PaginatedMenu) {
 											PaginatedMenu m = (PaginatedMenu) Menu.this;
-											if ((m.getInventory().getPage() - 1) < m.getInventory().getPageCount() && (m.getInventory().getPage() - 1) >= 1) {
-												m.getInventory().setPage(m.getInventory().getPage() - 1);
+
+											if (getProperties().contains(Property.SAVABLE)) {
+
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
+											} else {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
 											}
+											break;
 										}
 										if (consumer != null) {
-											consumer.accept(clickElement.getElement(), true);
+											consumer.accept(clickElement.getElement(), false);
 										}
 										break;
 								}
@@ -821,15 +971,25 @@ public abstract class Menu {
 							}
 						} else {
 							if (getProperties().contains(Property.SHAREABLE)) {
+
+								// this is for shareable menu's, if an alien item is placed into the inventory our goal is to get get the players current page number and set the new item element to that page.
+								// currently this isnt working as for some reason the item element turns to AIR right after it set's itself ??
+
 								if (getProperties().contains(Property.SAVABLE)) {
 									if (item != null && item.getType() != Material.AIR && !getInventory().contains(item)) {
 										PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + key));
-										getInventory().addItem(new ItemElement<>(container).setElement(item));
+										getInventory().addItem(new ItemElement<>(container).setPage(getInventory().getGlobalSlot()).setElement(item));
+
 									}
+								} else {
+									getInventory().addItem(new ItemElement<>().setPage(getInventory().getGlobalSlot()).setElement(item));
+									Bukkit.broadcastMessage("saved new item");
 								}
 							}
 						}
 					}
+				} else {
+					Bukkit.broadcastMessage("wtf");
 				}
 
 				if (!e.isCancelled()) {

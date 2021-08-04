@@ -55,8 +55,8 @@ public final class VentMapImpl extends VentMap {
 	}
 
 	@Override
-	public <T extends Vent> Vent.Subscription<?> get(Class<T> eventType, String key) {
-		return subscriptions.stream().filter(s -> s.getEventType().isAssignableFrom(eventType) && s.getKey().isPresent() && s.getKey().get().equals(key)).findFirst().orElse(null);
+	public <T extends Vent> Vent.Subscription<T> get(Class<T> eventType, String key) {
+		return (Vent.Subscription<T>) subscriptions.stream().filter(s -> s.getEventType().isAssignableFrom(eventType) && s.getKey().isPresent() && s.getKey().get().equals(key)).findFirst().orElse(null);
 	}
 
 }

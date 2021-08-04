@@ -225,14 +225,8 @@ public abstract class Vent {
 			}
 
 			public Subscription<T> finish() {
+				getMap().subscriptions.add(this.subscription);
 				return this.subscription;
-			}
-
-			public Subscription<T> assign(SubscriberCall<T> call) {
-				if (this.key != null) {
-					return new Subscription<>(tClass, key, plugin, priority, call);
-				}
-				return new Subscription<>(tClass, plugin, priority, call);
 			}
 
 		}

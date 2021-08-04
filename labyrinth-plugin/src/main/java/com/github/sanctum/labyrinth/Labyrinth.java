@@ -19,6 +19,7 @@ import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
@@ -26,11 +27,16 @@ import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.construct.MenuOptional;
+import com.github.sanctum.labyrinth.unity.impl.ItemElement;
+import com.github.sanctum.labyrinth.unity.impl.ListElement;
+import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
+import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +44,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
@@ -110,22 +118,87 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Communication.class, this, Vent.Priority.HIGH, (e, subscription) -> {
-
+		Vent.Subscription.Builder.target(DefaultEvent.Communication.class).assign(Vent.Priority.HIGH).from(this).use((e, subscription) -> {
 			switch (e.getCommunicationType()) {
 				case CHAT:
+
+					DefaultEvent.Communication.ChatMessage message = e.getMessage().orElse(null);
+
+					if (message == null) return;
+
+					String text = message.getText().orElse(null);
+
+					if (text == null) return;
+
+					if (text.contains("gui") || text.contains("plz")) {
+
+
+						PaginatedMenu menu = getMenu(m -> m.getKey().isPresent() && m.getKey().get().equals("test") && (m instanceof PaginatedMenu), m -> (PaginatedMenu)m);
+
+						if (menu == null) {
+							menu = Menu.Builder.using(PaginatedMenu.class).setHost(this).setKey("test").setCloseEvent(close -> {
+							}).setOpenEvent(open -> {
+
+							}).setProperty(Menu.Property.CACHEABLE, Menu.Property.SHAREABLE, Menu.Property.SAVABLE).setSize(Menu.Rows.SIX)
+									.setStock(i -> {
+
+										List<String> list = new ArrayList<>(Arrays.asList("Hempfest", "Accountings", "Denivere", "Eggs", "WittleRain", "Rain", "Farts", "Applecakes"));
+
+										i.setLimit(4).addItem(new ListElement<>(list).setPopulate((value, element) -> {
+											element.setElement(Items.edit(CustomHead.Manager.get(value)).setTitle(value).build()).setClick(c -> {
+												c.setCancelled(true);
+												c.setHotbarAllowed(false);
+												c.getElement().sendMessage("You clicked on " + element.getName());
+											});
+										})).addItem(b -> b.setElement(edit -> edit.setType(Material.CHORUS_FLOWER).setTitle("Next").build()).setNavigation(ItemElement.Navigation.Next).setSlot(46).setClick(c -> {
+											c.setHotbarAllowed(false);
+											c.setCancelled(true);
+											c.setConsumer((p, success) -> {
+												if (success) {
+													i.open(p);
+													p.sendMessage("Welcome to page " + i.getGlobalSlot());
+												}
+											});
+										})).addItem(b -> b.setElement(edit -> edit.setType(Material.CHORUS_FLOWER).setTitle("Previous").build()).setNavigation(ItemElement.Navigation.Previous).setSlot(45).setClick(c -> {
+											c.setHotbarAllowed(false);
+											c.setCancelled(true);
+											c.setConsumer((p, success) -> {
+												if (success) {
+													i.open(p);
+													p.sendMessage("Welcome to page " + i.getGlobalSlot());
+												}
+											});
+										}));
+
+									})
+									.setTitle("Vault {0}/{1}").initialize();
+						}
+
+						menu.open(e.getPlayer());
+
+					}
+
 					break;
 				case COMMAND:
 
-					if (HUID.fromString(e.getCommand().get().getText().get().replace("/", "")) != null) {
-						if (instance.components.stream().noneMatch(c -> c.toString().equals(e.getCommand().get().getText().get().replace("/", "")))) {
+
+					DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
+
+					if (cmd == null) return;
+
+					String label = cmd.getText().orElse(null);
+
+					if (label == null) return;
+
+					if (HUID.fromString(label.replace("/", "")) != null) {
+						if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
 							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
 							e.setCancelled(true);
 							return;
 						}
 					}
 					for (WrappedComponent component : instance.components) {
-						if (StringUtils.use(e.getCommand().get().getText().get().replace("/", "")).containsIgnoreCase(component.toString())) {
+						if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
 							Schedule.sync(() -> component.action().apply()).run();
 							if (!component.isMarked()) {
 								component.setMarked(true);
@@ -137,8 +210,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 
 					break;
 			}
-
-		}));
+		}).finish();
 
 		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
@@ -251,8 +323,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 	}
 
 	@Override
-	public @NotNull <T extends Menu> MenuOptional<T> getMenu(Class<T> type, Predicate<Menu> predicate) {
-		return Menu.get(type, predicate);
+	public <T extends Menu, R> R getMenu(Predicate<Menu> predicate, Function<T, R> function) {
+		return Menu.get(predicate, function);
 	}
 
 	@Override

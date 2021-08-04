@@ -59,7 +59,7 @@ public abstract class VentMap {
 	 * @param <T>       The inheritance of vent.
 	 * @return The desired subscription if found otherwise null.
 	 */
-	public abstract <T extends Vent> Vent.Subscription<?> get(Class<T> eventType, String key);
+	public abstract <T extends Vent> Vent.Subscription<T> get(Class<T> eventType, String key);
 
 	public static VentMap getInstance() {
 		return LabyrinthProvider.getInstance().getEventMap();
