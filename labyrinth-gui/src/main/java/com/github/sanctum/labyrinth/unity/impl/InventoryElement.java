@@ -97,7 +97,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (UniformedComponents.accept(Arrays.asList(inventory.getContents())).filter(i -> i != null).count() == 0) {
 				if (paginated) {
-					for (ItemElement<?> element : new PaginatedList<>(getWorkflow()).limit(this.limit).compare(this.comparator).filter(this.predicate).get(page)) {
+					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 						Optional<Integer> i = element.getSlot();
 						if (i.isPresent()) {
 							inventory.setItem(i.get(), element.getElement());
@@ -169,7 +169,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	public Set<Page> getAllPages() {
 		Set<Page> set = new HashSet<>();
-		for (int i = 1; i < getTotalPages(); i++) {
+		for (int i = 1; i < getTotalPages() + 1; i++) {
 			set.add(getPage(i));
 		}
 		return set;
@@ -206,14 +206,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	public Set<ItemElement<?>> getWorkflow() {
 		Set<ItemElement<?>> items = this.items.stream().filter(i -> !i.getSlot().isPresent()).collect(Collectors.toSet());
-		if (isPaginated()) {
-			items.addAll(listElement.getAttachment());
-		}
-		return items;
-	}
-
-	public Set<ItemElement<?>> getWorkflow(int page) {
-		Set<ItemElement<?>> items = this.items.stream().filter(i -> !i.getSlot().isPresent() && i.getPage().toNumber() == page).collect(Collectors.toSet());
 		if (isPaginated()) {
 			items.addAll(listElement.getAttachment());
 		}
@@ -300,7 +292,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			switch (this.menu.getType()) {
 				case PRINTABLE:
-					for (ItemElement<?> element : getWorkflow(page)) {
+					for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
 						Optional<Integer> in = element.getSlot();
 						if (in.isPresent()) {
 							getElement().setItem(in.get(), element.getElement());
@@ -328,15 +320,16 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 								this.tasks.put(player, Schedule.async(() -> {
 									Schedule.sync(() -> {
 										InventoryElement.this.getElement().clear();
-										for (ItemElement<?> element : getWorkflow(page)) {
+										for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
 											Optional<Integer> in = element.getSlot();
+											if (!element.getPage().equals(getGlobalSlot())) {
+												element.setPage(getGlobalSlot());
+											}
 											if (in.isPresent()) {
 												getElement().setItem(in.get(), element.getElement());
 											} else {
 												if (!getElement().contains(element.getElement())) {
-													if (!getGlobalSlot().isFull()) {
-														getElement().addItem(element.getElement());
-													}
+													getElement().addItem(element.getElement());
 												}
 											}
 										}
@@ -347,23 +340,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 									}).run();
 								}));
 								this.tasks.get(player).repeat(0, 1);
-							}
-
-							for (ItemElement<?> element : getWorkflow(page)) {
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement().setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement().contains(element.getElement())) {
-										if (!getGlobalSlot().isFull()) {
-											getElement().addItem(element.getElement());
-										}
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
 							}
 
 							SharedInventory inv = (SharedInventory) this;
@@ -379,15 +355,16 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							this.tasks.put(player, Schedule.async(() -> {
 								Schedule.sync(() -> {
 									InventoryElement.this.getElement(player).clear();
-									for (ItemElement<?> element : getWorkflow(page)) {
+									for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 										Optional<Integer> in = element.getSlot();
+										if (!element.getPage().equals(getPlayer(player).getPage())) {
+											element.setPage(getPlayer(player).getPage());
+										}
 										if (in.isPresent()) {
 											getElement(player).setItem(in.get(), element.getElement());
 										} else {
 											if (!getElement(player).contains(element.getElement())) {
-												if (!getGlobalSlot().isFull()) {
-													getElement(player).addItem(element.getElement());
-												}
+												getElement(player).addItem(element.getElement());
 											}
 										}
 									}
@@ -398,23 +375,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 								}).run();
 							}));
 							this.tasks.get(player).repeat(0, 1);
-
-							for (ItemElement<?> element : getWorkflow(page)) {
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement(player).setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement(player).contains(element.getElement())) {
-										if (!getGlobalSlot().isFull()) {
-											getElement(player).addItem(element.getElement());
-										}
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
-							}
 
 							player.openInventory(getElement(player));
 
@@ -440,15 +400,16 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					} else {
 
 						if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-							for (ItemElement<?> element : getWorkflow(page)) {
+							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
+								if (!element.getPage().equals(getGlobalSlot())) {
+									element.setPage(getGlobalSlot());
+								}
 								Optional<Integer> in = element.getSlot();
 								if (in.isPresent()) {
 									getElement().setItem(in.get(), element.getElement());
 								} else {
 									if (!getElement().contains(element.getElement())) {
-										if (!getGlobalSlot().isFull()) {
-											getElement().addItem(element.getElement());
-										}
+										getElement().addItem(element.getElement());
 									}
 								}
 							}
@@ -459,8 +420,11 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 							player.openInventory(getElement());
 						} else {
-							for (ItemElement<?> element : getWorkflow(page)) {
+							for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 								Optional<Integer> in = element.getSlot();
+								if (!element.getPage().equals(getPlayer(player).getPage())) {
+									element.setPage(getPlayer(player).getPage());
+								}
 								if (in.isPresent()) {
 									getElement(player).setItem(in.get(), element.getElement());
 								} else {
@@ -495,7 +459,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 								this.tasks.put(player, Schedule.async(() -> {
 									Schedule.sync(() -> {
 										InventoryElement.this.getElement().clear();
-										for (ItemElement<?> element : getWorkflow(page)) {
+										for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
 											Optional<Integer> in = element.getSlot();
 											if (in.isPresent()) {
 												getElement().setItem(in.get(), element.getElement());
@@ -513,7 +477,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 								}));
 								this.tasks.get(player).repeat(0, 1);
 							}
-							for (ItemElement<?> element : getWorkflow(page)) {
+							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
 								Optional<Integer> in = element.getSlot();
 								if (in.isPresent()) {
 									getElement().setItem(in.get(), element.getElement());
@@ -532,7 +496,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							this.tasks.put(player, Schedule.async(() -> {
 								Schedule.sync(() -> {
 									InventoryElement.this.getElement().clear();
-									for (ItemElement<?> element : getWorkflow(page)) {
+									for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 										Optional<Integer> in = element.getSlot();
 										if (in.isPresent()) {
 											getElement(player).setItem(in.get(), element.getElement());
@@ -550,7 +514,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							}));
 							this.tasks.get(player).repeat(0, 1);
 
-							for (ItemElement<?> element : getWorkflow(page)) {
+							for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 								Optional<Integer> in = element.getSlot();
 								if (in.isPresent()) {
 									getElement(player).setItem(in.get(), element.getElement());
@@ -633,7 +597,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public Set<ItemElement<?>> getAttachment() {
-			return new HashSet<>(new PaginatedList<>(getElement().getWorkflow(this.num)).limit(getElement().limit).compare(getElement().comparator).filter(getElement().predicate).get(toNumber()));
+			return new HashSet<>(new PaginatedList<>(getElement().getWorkflow()).limit(getElement().limit).compare(getElement().comparator).filter(getElement().predicate).get(toNumber()));
 		}
 	}
 }

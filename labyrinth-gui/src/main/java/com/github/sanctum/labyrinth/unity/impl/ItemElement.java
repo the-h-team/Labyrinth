@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
 import java.util.Optional;
 import java.util.function.Function;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +29,6 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	private InventoryElement parent;
 
 	public ItemElement() {
-
 	}
 
 	public ItemElement(V data) {
@@ -115,9 +115,8 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 			}
 
 			if (tooFull) {
-				setPage(getParent().getPage(getParent().getAllPages().size() + 1));
+				setPage(getParent().getPage(getParent().getAllPages().size()));
 			}
-
 		}
 		return this.page;
 	}

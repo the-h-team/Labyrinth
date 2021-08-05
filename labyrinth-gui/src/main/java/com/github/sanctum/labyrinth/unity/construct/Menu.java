@@ -364,19 +364,27 @@ public abstract class Menu {
 		/**
 		 * This menu type represents that of a multi-paged inventory space.
 		 */
-		PAGINATED,
+		PAGINATED(PaginatedMenu.class),
 
 		/**
 		 * This menu type represents that of an anvil inventory space.
 		 */
-		PRINTABLE,
+		PRINTABLE(PrintableMenu.class),
 
 		/**
 		 * This menu type represents that of a standard inventory space.
 		 */
-		SINGULAR;
+		SINGULAR(SingularMenu.class);
 
+		private final Class<?> parent;
 
+		Type(Class<?> parent) {
+			this.parent = parent;
+		}
+
+		public Class<?> getParent() {
+			return parent;
+		}
 	}
 
 	/**
@@ -410,14 +418,22 @@ public abstract class Menu {
 		}
 	}
 
+	public interface BuilderFactory<T extends Builder<V>, V extends Menu> {
+
+
+		T createBuilder();
+
+
+	}
+
 	/**
 	 * A builder for a new default menu implementation instance.
 	 *
 	 * @param <T> A type representative of a menu.
 	 */
-	public static final class Builder<T extends Menu> {
+	public static abstract class Builder<T extends Menu> {
 
-		private final Class<T> tClass;
+		private final Class<?> tClass;
 
 		private Plugin host;
 
@@ -435,20 +451,10 @@ public abstract class Menu {
 
 		private Rows size;
 
-		protected Builder(Class<T> tClass) {
-			this.tClass = tClass;
+		public Builder(Type type) {
+			this.tClass = type.getParent();
 		}
 
-		/**
-		 * Start the creation of a new menu.
-		 *
-		 * @param menuClass The menu class to use.
-		 * @param <T> The menu in creation.
-		 * @return A builder for a new menu.
-		 */
-		public static <T extends Menu> Builder<T> using(Class<T> menuClass) {
-			return new Builder<>(menuClass);
-		}
 
 		/**
 		 * Set the title of the menu.
@@ -539,7 +545,7 @@ public abstract class Menu {
 			return this;
 		}
 
-		public T initialize() {
+		public T join() {
 			Menu menu = null;
 			if (PaginatedMenu.class.isAssignableFrom(tClass)) {
 				menu = new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
@@ -853,7 +859,7 @@ public abstract class Menu {
 
 							if (element2.getNavigation() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
-								switch (element.getNavigation()) {
+								switch (element2.getNavigation()) {
 									case Back:
 										if (consumer != null) {
 											consumer.accept(clickElement.getElement(), false);
@@ -978,18 +984,15 @@ public abstract class Menu {
 								if (getProperties().contains(Property.SAVABLE)) {
 									if (item != null && item.getType() != Material.AIR && !getInventory().contains(item)) {
 										PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + key));
-										getInventory().addItem(new ItemElement<>(container).setPage(getInventory().getGlobalSlot()).setElement(item));
+										getInventory().addItem(new ItemElement<>(container).setPage(getInventory().getGlobalSlot()).setElement(e.getCursor()));
 
 									}
 								} else {
-									getInventory().addItem(new ItemElement<>().setPage(getInventory().getGlobalSlot()).setElement(item));
-									Bukkit.broadcastMessage("saved new item");
+									getInventory().addItem(new ItemElement<>().setPage(getInventory().getGlobalSlot()).setElement(e.getCursor()));
 								}
 							}
 						}
 					}
-				} else {
-					Bukkit.broadcastMessage("wtf");
 				}
 
 				if (!e.isCancelled()) {
