@@ -127,39 +127,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 					String label = cmd.getText().orElse(null);
 
 					if (label == null) return;
-					Menu m = MenuType.PAGINATED.build()
-							.setTitle("Test {0}/{1}")
-							.setHost(this)
-							.setCloseEvent(cl -> cl.getParent().save())
-							.setProperty(Menu.Property.CACHEABLE, Menu.Property.SHAREABLE)
-							.setSize(Menu.Rows.SIX)
-							.setKey("labyrinth_test")
-							.setStock(i -> i.setLimit(2).addItem(b -> b.setElement(ed -> ed.setType(Material.STRING).setTitle("Next").build()).setNavigation(ItemElement.Navigation.Next).setClick(click -> {
-
-								click.setConsumer((p, success) -> {
-									if (success) {
-										i.open(p);
-									}
-								});
-
-								click.setCancelled(true);
-
-							}).setSlot(45))
-									.addItem(b -> b.setElement(ed -> ed.setType(Material.STRING).setTitle("Back").build()).setNavigation(ItemElement.Navigation.Previous).setClick(click -> {
-
-										click.setConsumer((p, success) -> {
-											if (success) {
-												i.open(p);
-											}
-										});
-
-										click.setCancelled(true);
-
-									}).setSlot(46))
-									.addItem(new ListElement<>(CustomHead.Manager.getHeads().stream().map(CustomHead::get).collect(Collectors.toList())).setPopulate((value, element) -> element.setElement(value))))
-							.orGet(me -> me.getKey().isPresent() && me.getKey().get().equals("labyrinth_test"));
-
-					m.open(e.getPlayer());
 
 					if (HUID.fromString(label) != null) {
 						if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
