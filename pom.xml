@@ -11,6 +11,7 @@
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
         <module>labyrinth-skulls</module>
+        <module>labyrinth-regions</module>
         <module>labyrinth-plugin</module>
     </modules>
     <packaging>pom</packaging>

@@ -11,7 +11,7 @@ final class VaultEconomyProvision extends EconomyProvision {
 
     VaultEconomyProvision(Economy provider) {
         this.economy = provider;
-        EconomyProvision.vault = this;
+        vault = this;
     }
 
     @Override

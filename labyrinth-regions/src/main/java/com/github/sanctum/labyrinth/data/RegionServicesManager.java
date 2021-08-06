@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 /**
  * Used to provide registration to many region related services.
  */
-@SuppressWarnings("UnusedReturnValue")
 public abstract class RegionServicesManager {
 
 	/**

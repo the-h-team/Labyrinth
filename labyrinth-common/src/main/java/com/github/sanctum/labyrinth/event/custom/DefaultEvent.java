@@ -1,14 +1,14 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.library.AFK;
-import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -32,8 +31,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Optional;
 
 public class DefaultEvent extends Vent {
 
@@ -112,7 +109,7 @@ public class DefaultEvent extends Vent {
 		}
 	}
 
-	public static class Communication extends Player{
+	public static class Communication extends Player {
 		private final Type type;
 		private final CommunicationResult<?> result;
 
@@ -495,20 +492,6 @@ public class DefaultEvent extends Vent {
 					event.setCancelled(true);
 				}
 
-			}
-
-			if (event.getEntity() instanceof org.bukkit.entity.Player && event.getDamager() instanceof Monster) {
-				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
-				if (Region.Resident.get(target).isSpawnTagged()) {
-					event.setCancelled(true);
-				}
-			}
-			if (event.getEntity() instanceof org.bukkit.entity.Player && event.getDamager() instanceof Projectile && (
-					(Projectile) event.getDamager()).getShooter() instanceof Monster) {
-				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
-				if (Region.Resident.get(target).isSpawnTagged()) {
-					event.setCancelled(true);
-				}
 			}
 		}
 
