@@ -62,7 +62,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	public ItemElement<V> setElement(Function<Item.Edit, ItemStack> edit) {
 		Item.Edit ed;
 		if (this.item != null) {
-			ed = Items.edit(this.item);
+			ed = Items.edit().setItem(this.item);
 		} else {
 			ed = Items.edit();
 		}

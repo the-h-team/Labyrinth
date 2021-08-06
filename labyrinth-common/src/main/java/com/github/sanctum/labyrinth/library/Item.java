@@ -426,11 +426,23 @@ public class Item {
 			this.ITEM = new ItemStack(mat);
 		}
 
+		/**
+		 * Set the title of this item.
+		 *
+		 * @param text The text to title with.
+		 * @return The same item builder.
+		 */
 		public Edit setTitle(String text) {
 			this.TITLE = StringUtils.use(text).translate();
 			return this;
 		}
 
+		/**
+		 * Set the stack size for this item.
+		 *
+		 * @param amount The amount for this item.
+		 * @return The same item builder.
+		 */
 		public Edit setAmount(int amount) {
 			if (LISTED) {
 				for (ItemStack i : LIST) {
@@ -442,6 +454,12 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Set the item to be used with this edit.
+		 *
+		 * @param i The item to use with this edit.
+		 * @return The same item builder.
+		 */
 		public Edit setItem(ItemStack i) {
 			if (!LISTED) {
 				this.ITEM = i;
@@ -449,6 +467,12 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Set the items to be used with this edit.
+		 *
+		 * @param i The items to use with this edit.
+		 * @return The same item builder.
+		 */
 		public Edit setItem(ItemStack... i) {
 			if (LISTED) {
 				this.LIST = new ArrayList<>(Arrays.asList(i));
@@ -456,6 +480,25 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Set the items to be used with this edit.
+		 *
+		 * @param i The items to use with this edit.
+		 * @return The same item builder.
+		 */
+		public Edit setItem(Collection<ItemStack> i) {
+			if (LISTED) {
+				this.LIST = new ArrayList<>(i);
+			}
+			return this;
+		}
+
+		/**
+		 * Change the appearance of this item.
+		 *
+		 * @param type The type to change it to.
+		 * @return The same item builder.
+		 */
 		public Edit setType(Material type) {
 			if (LISTED) {
 				for (ItemStack i : LIST) {
@@ -467,6 +510,27 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Change the lore of this item.
+		 *
+		 * @param collection The lore to change it to.
+		 * @return The same item builder.
+		 */
+		public Edit setLore(Collection<String> collection) {
+			List<String> list = new LinkedList<>();
+			for (String s : collection) {
+				list.add(StringUtils.use(s).translate());
+			}
+			this.LORE = list;
+			return this;
+		}
+
+		/**
+		 * Change the lore of this item.
+		 *
+		 * @param text The lore to change it to.
+		 * @return The same item builder.
+		 */
 		public Edit setLore(String... text) {
 			List<String> list = new LinkedList<>();
 			for (String s : text) {
@@ -476,11 +540,24 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Set item flags.
+		 *
+		 * @param flag The flags to use.
+		 * @return The same item builder.
+		 */
 		public Edit setFlags(ItemFlag... flag) {
 			this.FLAGS = new LinkedList<>(Arrays.asList(flag));
 			return this;
 		}
 
+		/**
+		 * Add an enchantment to this item, accepts unsafe enchanting levels!
+		 *
+		 * @param enchant The enchantment to use.
+		 * @param level The level to set on the enchantment.
+		 * @return The same item builder.
+		 */
 		public Edit addEnchantment(Enchantment enchant, int level) {
 			if (this.ENCHANTS == null) {
 				this.ENCHANTS = new HashMap<>();
@@ -489,11 +566,25 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Configure the item's persistent data container.
+		 *
+		 * IF legacy no container will be present.
+		 *
+		 * @param container The persistent data container for the item.
+		 * @return The same item builder.
+		 */
 		public Edit getContainer(Consumer<LegacyContainer> container) {
 			this.consumer = container;
 			return this;
 		}
 
+		/**
+		 * Finish the item modification by editing the item saturation.
+		 *
+		 * @param damage The damageable inheritance to modify before retrieving
+		 * @return The list of fully customized item's
+		 */
 		public List<ItemStack> finish(Consumer<Damageable> damage) {
 			if (!LISTED) {
 				return Collections.emptyList();
@@ -530,6 +621,13 @@ public class Item {
 			return this.LIST;
 		}
 
+		/**
+		 * Finish the item modification by editing the item saturation & meta.
+		 *
+		 * @param damage The damageable inheritance to modify before retrieving
+		 * @param options The item meta to configure.
+		 * @return The list of fully customized item's
+		 */
 		public List<ItemStack> finish(Consumer<Damageable> damage, Consumer<ItemMeta> options) {
 			if (!LISTED) {
 				return Collections.emptyList();
@@ -568,6 +666,11 @@ public class Item {
 			return this.LIST;
 		}
 
+		/**
+		 * Finish the item modification.
+		 *
+		 * @return The list of fully customized item's
+		 */
 		public List<ItemStack> finish() {
 			if (!LISTED) {
 				return Collections.emptyList();
@@ -604,6 +707,12 @@ public class Item {
 			return this.LIST;
 		}
 
+		/**
+		 * Finish the item modification by editing the item saturation.
+		 *
+		 * @param damage The inheritance of damageable
+		 * @return The fully built item
+		 */
 		public ItemStack build(Consumer<Damageable> damage) {
 			if (LISTED) {
 				return this.LIST.get(0);
@@ -640,6 +749,13 @@ public class Item {
 			return this.ITEM;
 		}
 
+		/**
+		 * Finish the item modification by editing the item saturation & meta.
+		 *
+		 * @param damage The inheritance of damageable
+		 * @param options The item meta.
+		 * @return The fully built item
+		 */
 		public ItemStack build(Consumer<Damageable> damage, Consumer<ItemMeta> options) {
 			if (LISTED) {
 				return this.LIST.get(0);
@@ -677,6 +793,11 @@ public class Item {
 			return this.ITEM;
 		}
 
+		/**
+		 * Finish the item modification.
+		 *
+		 * @return The fully built item
+		 */
 		public ItemStack build() {
 			if (LISTED) {
 				return this.LIST.get(0);
@@ -729,6 +850,12 @@ public class Item {
 			return new CustomFirework(location);
 		}
 
+		/**
+		 * Modify firework effects.
+		 *
+		 * @param operation The firework effect builder.
+		 * @return The same custom firework.
+		 */
 		public CustomFirework addEffects(Consumer<FireworkEffect.Builder> operation) {
 			FireworkEffect.Builder builder = FireworkEffect.builder();
 			operation.accept(builder);
@@ -736,6 +863,11 @@ public class Item {
 			return this;
 		}
 
+		/**
+		 * Build and fire off the firework.
+		 *
+		 * @return Get the firework.
+		 */
 		public Firework build() {
 			Firework f = (Firework) LOCATION.getWorld().spawnEntity(LOCATION, Entities.getEntity("firework"));
 			FireworkMeta meta = f.getFireworkMeta();
@@ -746,6 +878,12 @@ public class Item {
 			return f;
 		}
 
+		/**
+		 * Build and fire off the firework and edit its meta.
+		 *
+		 * @param operation The firework meta operation
+		 * @return Get the firework.
+		 */
 		public Firework build(Consumer<FireworkMeta> operation) {
 			Firework f = (Firework) LOCATION.getWorld().spawnEntity(LOCATION, Entities.getEntity("firework"));
 			FireworkMeta meta = f.getFireworkMeta();

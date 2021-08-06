@@ -5,9 +5,9 @@ import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 
-public class AdvancedHook {
+public class AdvancedEconomyImplementation {
 
-	public AdvancedHook(LabyrinthAPI instance) {
+	public AdvancedEconomyImplementation(LabyrinthAPI instance) {
 		if (Bukkit.getPluginManager().getPlugin("Enterprise") != null) {
 			final AdvancedEconomy provider = Bukkit.getServicesManager().load(AdvancedEconomy.class);
 			if (provider != null) {

@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import java.util.Collection;
+import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,39 +35,19 @@ public final class Items {
 	}
 
 	/**
-	 * @param i
-	 * @return
+	 * Build and convert and itemstack all in one function.
+	 *
+	 * @param fun The item builder to stack conversion.
+	 * @return An item modification object.
 	 */
-	public static @NotNull Item.Edit edit(ItemStack i) {
-		return new Item.Edit(i);
+	public static @NotNull ItemStack edit(Function<Item.Edit, ItemStack> fun) {
+		return fun.apply(edit());
 	}
 
 	/**
-	 * @param mat
-	 * @return
-	 */
-	public static @NotNull Item.Edit edit(Material mat) {
-		return new Item.Edit(mat);
-	}
-
-	/**
-	 * @param i
-	 * @return
-	 */
-	public static @NotNull Item.Edit edit(ItemStack... i) {
-		return new Item.Edit(i);
-	}
-
-	/**
-	 * @param i
-	 * @return
-	 */
-	public static @NotNull Item.Edit edit(Collection<ItemStack> i) {
-		return new Item.Edit(i);
-	}
-
-	/**
-	 * @return
+	 * Build and convert and itemstack all in one function.
+	 *
+	 * @return An item modification object.
 	 */
 	public static @NotNull Item.Edit edit() {
 		return new Item.Edit(getMaterial("dirt"));

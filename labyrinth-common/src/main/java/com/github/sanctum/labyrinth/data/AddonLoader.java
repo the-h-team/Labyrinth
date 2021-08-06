@@ -17,7 +17,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 /**
- * Load addon classes in Java 16+.
+ * Load addon classes in Java 8-16+.
  *
  * @author ms5984
  */

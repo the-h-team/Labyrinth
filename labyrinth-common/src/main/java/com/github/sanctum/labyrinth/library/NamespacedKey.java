@@ -45,7 +45,7 @@ public final class NamespacedKey {
 	 */
 	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
-	protected NamespacedKey(@NotNull String namespace, @NotNull String key) {
+	public NamespacedKey(@NotNull String namespace, @NotNull String key) {
 		this.namespace = namespace;
 		this.key = key;
 

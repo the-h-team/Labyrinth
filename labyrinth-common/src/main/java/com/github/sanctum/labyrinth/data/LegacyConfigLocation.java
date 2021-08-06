@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.library;
+package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;

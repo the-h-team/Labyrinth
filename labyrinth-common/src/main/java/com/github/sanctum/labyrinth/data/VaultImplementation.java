@@ -5,9 +5,9 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 
-public class VaultHook {
+public class VaultImplementation {
 
-	public VaultHook(LabyrinthAPI instance) {
+	public VaultImplementation(LabyrinthAPI instance) {
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
 			final Economy provider = Bukkit.getServicesManager().load(Economy.class);
 			if (provider != null) {

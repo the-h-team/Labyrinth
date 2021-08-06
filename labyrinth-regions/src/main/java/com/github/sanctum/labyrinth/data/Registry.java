@@ -176,6 +176,30 @@ public class Registry<T> {
 			return this;
 		}
 
+		public RegistryData<T> confine(Consumer<T> action) {
+
+			File file = FileList.search(this.plugin).find("Test", this.directory).getFile().getParentFile();
+
+			List<Class<?>> classes = AddonLoader.forPlugin(JavaPlugin.getProvidingPlugin(this.plugin.getClass()))
+					.loadFolder(file);
+
+			List<T> data = new LinkedList<>();
+
+			for (Class<?> cl : classes) {
+				if (this.type.isAssignableFrom(cl)) {
+					try {
+						T e = (T) cl.getDeclaredConstructor().newInstance();
+						action.accept(e);
+						data.add(e);
+						break;
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			return new RegistryData<>(data, this.plugin, this.directory);
+		}
+
 		public RegistryData<T> operate(Consumer<T> action) {
 
 			File file = FileList.search(this.plugin).find("Test", this.directory).getFile().getParentFile();

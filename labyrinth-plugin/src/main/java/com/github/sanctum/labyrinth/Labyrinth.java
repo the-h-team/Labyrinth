@@ -1,14 +1,14 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.data.AdvancedHook;
+import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
-import com.github.sanctum.labyrinth.data.VaultHook;
+import com.github.sanctum.labyrinth.data.VaultImplementation;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
+import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
-import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.Vent;
@@ -19,21 +19,17 @@ import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
+import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.impl.ItemElement;
-import com.github.sanctum.labyrinth.unity.impl.ListElement;
-import com.github.sanctum.labyrinth.unity.impl.MenuType;
-import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
@@ -104,30 +99,26 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 
 		FileManager copy = FileList.search(this).find("config");
+		InputStream stream = getResource("config.yml");
+
+		assert stream != null;
 
 		if (!copy.exists()) {
-			FileManager.copy(getResource("config.yml"), copy);
+			FileManager.copy(stream, copy);
 		}
 
 		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
 
 		new EasyListener(DefaultEvent.Controller.class).call(this);
-
 		Vent.Subscription.Builder.target(DefaultEvent.Communication.class).assign(Vent.Priority.HIGH).from(this).use((e, subscription) -> {
 			switch (e.getCommunicationType()) {
 				case CHAT:
 					break;
 				case COMMAND:
-
-
 					DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
-
 					if (cmd == null) return;
-
 					String label = cmd.getText().orElse(null);
-
 					if (label == null) return;
-
 					if (HUID.fromString(label) != null) {
 						if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
 							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
@@ -153,7 +144,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
-		Schedule.sync(() -> new AdvancedHook(this)).applyAfter(() -> new VaultHook(this)).wait(2);
+		Schedule.sync(() -> new AdvancedEconomyImplementation(this)).applyAfter(() -> new VaultImplementation(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
 		// legacy check (FileConfiguration missing getLocation) (Hemp)
@@ -165,7 +156,10 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
 			RegionServicesManagerImpl.initialize(this);
 		}
-		Schedule.sync(ServiceHandshake::locate).applyAfter(ServiceHandshake::register).run();
+
+		ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(this);
+
+		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
 	}
 
@@ -223,13 +217,12 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	@Override
 	public @NotNull List<PersistentContainer> getContainers(Plugin plugin) {
-		final Set<PersistentContainer> set = containers.stream().filter(p -> p.getKey().getNamespace().equals(plugin.getName())).collect(Collectors.toSet());
-		return ImmutableList.copyOf(set);
+		return ImmutableList.copyOf(containers.stream().filter(p -> p.getKey().getNamespace().equals(plugin.getName())).collect(Collectors.toSet()));
 	}
 
 	@Override
 	public @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey) {
-		return containers.stream().sequential().filter(p -> p.getKey().equals(namespacedKey)).findFirst().orElseGet(() -> {
+		return containers.stream().filter(p -> p.getKey().equals(namespacedKey)).findFirst().orElseGet(() -> {
 			PersistentContainer container = new PersistentContainer(namespacedKey);
 			this.containers.add(container);
 			return container;

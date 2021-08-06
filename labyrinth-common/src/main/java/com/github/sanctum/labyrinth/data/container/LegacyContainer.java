@@ -1,7 +1,8 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.library.NamespacedKey;
+import java.util.HashSet;
 import java.util.Set;
-import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -39,32 +40,41 @@ public interface LegacyContainer {
 
 		@Override
 		public <T, Z> void set(@NotNull NamespacedKey key, @NotNull PersistentDataType<T, Z> type, @NotNull Z value) {
-			container.set(key, type, value);
+			final org.bukkit.NamespacedKey k = new org.bukkit.NamespacedKey(key.getNamespace(), key.getKey());
+			container.set(k, type, value);
 		}
 
 		@Override
 		public <T, Z> boolean has(@NotNull NamespacedKey key, @NotNull PersistentDataType<T, Z> type) {
-			return container.has(key, type);
+			final org.bukkit.NamespacedKey k = new org.bukkit.NamespacedKey(key.getNamespace(), key.getKey());
+			return container.has(k, type);
 		}
 
 		@Override
 		public <T, Z> @Nullable Z get(@NotNull NamespacedKey key, @NotNull PersistentDataType<T, Z> type) {
-			return container.get(key, type);
+			final org.bukkit.NamespacedKey k = new org.bukkit.NamespacedKey(key.getNamespace(), key.getKey());
+			return container.get(k, type);
 		}
 
 		@Override
 		public <T, Z> @NotNull Z getOrDefault(@NotNull NamespacedKey key, @NotNull PersistentDataType<T, Z> type, @NotNull Z defaultValue) {
-			return container.getOrDefault(key, type, defaultValue);
+			final org.bukkit.NamespacedKey k = new org.bukkit.NamespacedKey(key.getNamespace(), key.getKey());
+			return container.getOrDefault(k, type, defaultValue);
 		}
 
 		@Override
 		public @NotNull Set<NamespacedKey> getKeys() {
-			return container.getKeys();
+			Set<NamespacedKey> k = new HashSet<>();
+			for (org.bukkit.NamespacedKey key : container.getKeys()) {
+				k.add(new NamespacedKey(key.getNamespace(), key.getKey()));
+			}
+			return k;
 		}
 
 		@Override
 		public void remove(@NotNull NamespacedKey key) {
-			container.remove(key);
+			final org.bukkit.NamespacedKey k = new org.bukkit.NamespacedKey(key.getNamespace(), key.getKey());
+			container.remove(k);
 		}
 
 		@Override

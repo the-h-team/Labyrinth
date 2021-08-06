@@ -18,17 +18,4 @@ public abstract class LabyrinthProvider {
 		return instance;
 	}
 
-	/**
-	 * Get an extended api instance with quick menu creation access.
-	 * <p>
-	 * Ex. {@link MenuOverride}
-	 *
-	 * @param api The override to use.
-	 * @param <R> The desired API type.
-	 * @return instance of the Labyrinth API
-	 */
-	public static <R extends LabyrinthAPI> R getInstance(Class<R> api) {
-		return (R) instance;
-	}
-
 }
