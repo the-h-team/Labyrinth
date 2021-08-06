@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.container.LegacyContainer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import org.bukkit.Bukkit;
@@ -393,6 +394,7 @@ public class Item {
 		private boolean LISTED = false;
 		private List<String> LORE;
 		private List<ItemFlag> FLAGS;
+		private Consumer<LegacyContainer> consumer;
 		private Map<Enchantment, Integer> ENCHANTS;
 		private String TITLE;
 
@@ -440,6 +442,20 @@ public class Item {
 			return this;
 		}
 
+		public Edit setItem(ItemStack i) {
+			if (!LISTED) {
+				this.ITEM = i;
+			}
+			return this;
+		}
+
+		public Edit setItem(ItemStack... i) {
+			if (LISTED) {
+				this.LIST = new ArrayList<>(Arrays.asList(i));
+			}
+			return this;
+		}
+
 		public Edit setType(Material type) {
 			if (LISTED) {
 				for (ItemStack i : LIST) {
@@ -460,6 +476,11 @@ public class Item {
 			return this;
 		}
 
+		public Edit setFlags(ItemFlag... flag) {
+			this.FLAGS = new LinkedList<>(Arrays.asList(flag));
+			return this;
+		}
+
 		public Edit addEnchantment(Enchantment enchant, int level) {
 			if (this.ENCHANTS == null) {
 				this.ENCHANTS = new HashMap<>();
@@ -468,8 +489,8 @@ public class Item {
 			return this;
 		}
 
-		public Edit setFlags(ItemFlag... flag) {
-			this.FLAGS = new LinkedList<>(Arrays.asList(flag));
+		public Edit getContainer(Consumer<LegacyContainer> container) {
+			this.consumer = container;
 			return this;
 		}
 
@@ -480,6 +501,13 @@ public class Item {
 			for (ItemStack it : this.LIST) {
 				ItemMeta meta = it.getItemMeta();
 				damage.accept((Damageable) meta);
+
+				if (this.consumer != null) {
+					if (!LabyrinthProvider.getInstance().isLegacy()) {
+						this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+					}
+				}
+
 				if (this.TITLE != null) {
 					meta.setDisplayName(this.TITLE);
 				}
@@ -510,6 +538,13 @@ public class Item {
 				ItemMeta meta = it.getItemMeta();
 				damage.accept((Damageable) meta);
 				options.accept(meta);
+
+				if (this.consumer != null) {
+					if (!LabyrinthProvider.getInstance().isLegacy()) {
+						this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+					}
+				}
+
 				if (this.TITLE != null) {
 					meta.setDisplayName(this.TITLE);
 				}
@@ -539,6 +574,13 @@ public class Item {
 			}
 			for (ItemStack it : this.LIST) {
 				ItemMeta meta = it.getItemMeta();
+
+				if (this.consumer != null) {
+					if (!LabyrinthProvider.getInstance().isLegacy()) {
+						this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+					}
+				}
+
 				if (this.TITLE != null) {
 					meta.setDisplayName(this.TITLE);
 				}
@@ -568,6 +610,13 @@ public class Item {
 			}
 			ItemMeta meta = this.ITEM.getItemMeta();
 			damage.accept((Damageable) meta);
+
+			if (this.consumer != null) {
+				if (!LabyrinthProvider.getInstance().isLegacy()) {
+					this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+				}
+			}
+
 			if (this.TITLE != null) {
 				meta.setDisplayName(this.TITLE);
 			}
@@ -598,6 +647,13 @@ public class Item {
 			ItemMeta meta = this.ITEM.getItemMeta();
 			damage.accept((Damageable) meta);
 			options.accept(meta);
+
+			if (this.consumer != null) {
+				if (!LabyrinthProvider.getInstance().isLegacy()) {
+					this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+				}
+			}
+
 			if (this.TITLE != null) {
 				meta.setDisplayName(this.TITLE);
 			}
@@ -626,6 +682,13 @@ public class Item {
 				return this.LIST.get(0);
 			}
 			ItemMeta meta = this.ITEM.getItemMeta();
+
+
+			if (this.consumer != null) {
+				if (!LabyrinthProvider.getInstance().isLegacy()) {
+					this.consumer.accept(new LegacyContainer.Impl(meta.getPersistentDataContainer()));
+				}
+			}
 
 			if (this.TITLE != null) {
 				meta.setDisplayName(this.TITLE);

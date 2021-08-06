@@ -1,10 +1,9 @@
-package com.github.sanctum.labyrinth.unity.impl.menu;
+package com.github.sanctum.labyrinth.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.unity.impl.inventory.AnvilInventory;
-import com.github.sanctum.labyrinth.unity.construct.Menu;
+import com.github.sanctum.labyrinth.unity.impl.PreProcessElement;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -16,9 +15,10 @@ public class PrintableMenu extends Menu {
 
 		AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
 		if (mechanics != null) {
-			addElement(new AnvilInventory(title, mechanics, this));
+			addElement(new InventoryElement.Printable(title, mechanics, this));
 		} else {
 			LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
+			addElement(new InventoryElement.Normal(title, this));
 		}
 
 	}
@@ -31,6 +31,10 @@ public class PrintableMenu extends Menu {
 
 	@Override
 	public void open(Player player) {
+		if (this.process != null) {
+			PreProcessElement element = new PreProcessElement(this, player, player.getOpenInventory());
+			this.process.apply(element);
+		}
 		getInventory().open(player);
 	}
 

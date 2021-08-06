@@ -1,9 +1,8 @@
-package com.github.sanctum.labyrinth.unity.impl.menu;
+package com.github.sanctum.labyrinth.unity.construct;
 
+import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.unity.impl.inventory.NormalInventory;
-import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.impl.inventory.SharedInventory;
+import com.github.sanctum.labyrinth.unity.impl.PreProcessElement;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -13,17 +12,19 @@ public class SingularMenu extends Menu {
 		super(host, title, rows, type, properties);
 		if (getProperties().contains(Property.SHAREABLE)) {
 			if (!getProperties().contains(Property.ANIMATED)) {
-				addElement(new SharedInventory(title, this));
+				addElement(new InventoryElement.Shared(title, this));
 			} else {
-				addElement(new NormalInventory(title, this));
+				addElement(new InventoryElement.Normal(title, this));
 			}
 		} else {
-			addElement(new NormalInventory(title, this));
+			addElement(new InventoryElement.Normal(title, this));
 		}
 
-		if (getProperties().contains(Property.SAVABLE)) {
-			retrieve();
-		}
+		Schedule.sync(() -> {
+			if (getProperties().contains(Property.SAVABLE)) {
+				retrieve();
+			}
+		}).waitReal(3);
 
 	}
 
@@ -36,6 +37,10 @@ public class SingularMenu extends Menu {
 
 	@Override
 	public void open(Player player) {
+		if (this.process != null) {
+			PreProcessElement element = new PreProcessElement(this, player, player.getOpenInventory());
+			this.process.apply(element);
+		}
 		getInventory().open(player);
 	}
 

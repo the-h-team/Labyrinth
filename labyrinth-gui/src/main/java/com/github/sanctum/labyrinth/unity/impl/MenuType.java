@@ -1,11 +1,9 @@
-package com.github.sanctum.labyrinth.unity.impl.menu.builder;
+package com.github.sanctum.labyrinth.unity.impl;
 
 import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
-import com.github.sanctum.labyrinth.unity.impl.menu.PrintableMenu;
-import com.github.sanctum.labyrinth.unity.impl.menu.SingularMenu;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import com.github.sanctum.labyrinth.unity.construct.PaginatedMenu;
+import com.github.sanctum.labyrinth.unity.construct.PrintableMenu;
+import com.github.sanctum.labyrinth.unity.construct.SingularMenu;
 
 public class MenuType<T extends Menu, V extends Menu.Builder<T>> {
 
@@ -19,10 +17,6 @@ public class MenuType<T extends Menu, V extends Menu.Builder<T>> {
 
 	MenuType(Menu.BuilderFactory<V, T> factory) {
 		this.factory = factory;
-	}
-
-	public <R extends Menu> R get(Predicate<Menu> pred, Function<Menu, R> function) {
-		return Menu.get(pred, function);
 	}
 
 	public Menu.Builder<T> build() {

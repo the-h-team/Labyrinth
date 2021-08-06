@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth;
 
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedHook;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
@@ -7,7 +8,6 @@ import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultHook;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
-import com.github.sanctum.labyrinth.data.service.MenuOverride;
 import com.github.sanctum.labyrinth.data.service.ServiceHandshake;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
@@ -19,7 +19,6 @@ import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
@@ -29,24 +28,19 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
 import com.github.sanctum.labyrinth.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.unity.impl.ListElement;
-import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
-import com.github.sanctum.labyrinth.unity.impl.menu.builder.MenuType;
+import com.github.sanctum.labyrinth.unity.impl.MenuType;
 import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -84,14 +78,14 @@ import org.jetbrains.annotations.NotNull;
  * </p>
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
-public final class Labyrinth extends JavaPlugin implements Listener, MenuOverride {
+public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI {
 
 	private static Labyrinth instance;
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
 	private final LinkedList<WrappedComponent> components = new LinkedList<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
-	// outer key = namespace; inner key = key
-	private final Map<String, Map<String, PersistentContainer>> containers = new ConcurrentHashMap<>();
+	// switched to set, the map wasnt allowing hardly any persistent data to persist..
+	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
 	private boolean cachedNeedsLegacyLocation;
@@ -106,8 +100,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
-		cachedIsLegacy = MenuOverride.super.isLegacy();
-		cachedNeedsLegacyLocation = MenuOverride.super.requiresLocationLibrary();
+		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
+		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 
 		FileManager copy = FileList.search(this).find("config");
 
@@ -133,8 +127,41 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 					String label = cmd.getText().orElse(null);
 
 					if (label == null) return;
+					Menu m = MenuType.PAGINATED.build()
+							.setTitle("Test {0}/{1}")
+							.setHost(this)
+							.setCloseEvent(cl -> cl.getParent().save())
+							.setProperty(Menu.Property.CACHEABLE, Menu.Property.SHAREABLE)
+							.setSize(Menu.Rows.SIX)
+							.setKey("labyrinth_test")
+							.setStock(i -> i.setLimit(2).addItem(b -> b.setElement(ed -> ed.setType(Material.STRING).setTitle("Next").build()).setNavigation(ItemElement.Navigation.Next).setClick(click -> {
 
-					if (HUID.fromString(label.replace("/", "")) != null) {
+								click.setConsumer((p, success) -> {
+									if (success) {
+										i.open(p);
+									}
+								});
+
+								click.setCancelled(true);
+
+							}).setSlot(45))
+									.addItem(b -> b.setElement(ed -> ed.setType(Material.STRING).setTitle("Back").build()).setNavigation(ItemElement.Navigation.Previous).setClick(click -> {
+
+										click.setConsumer((p, success) -> {
+											if (success) {
+												i.open(p);
+											}
+										});
+
+										click.setCancelled(true);
+
+									}).setSlot(46))
+									.addItem(new ListElement<>(CustomHead.Manager.getHeads().stream().map(CustomHead::get).collect(Collectors.toList())).setPopulate((value, element) -> element.setElement(value))))
+							.orGet(me -> me.getKey().isPresent() && me.getKey().get().equals("labyrinth_test"));
+
+					m.open(e.getPlayer());
+
+					if (HUID.fromString(label) != null) {
 						if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
 							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
 							e.setCancelled(true);
@@ -156,9 +183,9 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 			}
 		}).finish();
 
-		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-		getLogger().info("Labyrinth; copyright Sanctum 2021, Open-source spigot development tool.");
-		getLogger().info("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+		getLogger().info("===================================================================");
+		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
+		getLogger().info("===================================================================");
 		Schedule.sync(() -> new AdvancedHook(this)).applyAfter(() -> new VaultHook(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
@@ -178,15 +205,13 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 	@Override
 	public void onDisable() {
 
-		for (Map<String, PersistentContainer> namespaceMap : containers.values()) {
-			for (PersistentContainer component : namespaceMap.values()) {
-				for (String key : component.keySet()) {
-					try {
-						component.save(key);
-					} catch (IOException e) {
-						getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
-						e.printStackTrace();
-					}
+		for (PersistentContainer component : containers) {
+			for (String key : component.keySet()) {
+				try {
+					component.save(key);
+				} catch (IOException e) {
+					getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
+					e.printStackTrace();
 				}
 			}
 		}
@@ -209,6 +234,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 
 	}
 
+	@Override
 	public @NotNull VentMap getEventMap() {
 		return eventMap;
 	}
@@ -230,25 +256,17 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 
 	@Override
 	public @NotNull List<PersistentContainer> getContainers(Plugin plugin) {
-		final Map<String, PersistentContainer> namespaceMap = containers.get(NamespacedKey.toNamespace(plugin));
-		if (namespaceMap == null) return ImmutableList.of();
-		return ImmutableList.copyOf(namespaceMap.values());
+		final Set<PersistentContainer> set = containers.stream().filter(p -> p.getKey().getNamespace().equals(plugin.getName())).collect(Collectors.toSet());
+		return ImmutableList.copyOf(set);
 	}
 
 	@Override
 	public @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey) {
-		final String namespace = namespacedKey.getNamespace();
-		final String key = namespacedKey.getKey();
-		final Map<String, PersistentContainer> namespaceMap = Optional.ofNullable(containers.get(namespace)).orElseGet(ConcurrentHashMap::new);
-		if (containers.containsKey(namespace) && namespaceMap.containsKey(key)) {
-			return namespaceMap.get(key);
-		}
-		final PersistentContainer newContainer = new PersistentContainer(namespacedKey);
-		namespaceMap.put(key, newContainer);
-		if (containers.containsKey(namespace)) {
-			containers.put(namespace, namespaceMap);
-		}
-		return newContainer;
+		return containers.stream().sequential().filter(p -> p.getKey().equals(namespacedKey)).findFirst().orElseGet(() -> {
+			PersistentContainer container = new PersistentContainer(namespacedKey);
+			this.containers.add(container);
+			return container;
+		});
 	}
 
 	@Override
@@ -264,11 +282,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, MenuOverrid
 	@Override
 	public Plugin getPluginInstance() {
 		return this;
-	}
-
-	@Override
-	public <T extends Menu, R> R getMenu(Predicate<Menu> predicate, Function<T, R> function) {
-		return Menu.get(predicate, function);
 	}
 
 	@Override

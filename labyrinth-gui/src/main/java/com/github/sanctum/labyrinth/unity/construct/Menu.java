@@ -6,13 +6,11 @@ import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.unity.impl.ClickElement;
+import com.github.sanctum.labyrinth.unity.impl.ClosingElement;
 import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.unity.impl.OpeningElement;
-import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
-import com.github.sanctum.labyrinth.unity.impl.menu.PrintableMenu;
-import com.github.sanctum.labyrinth.unity.impl.menu.SingularMenu;
-import com.github.sanctum.labyrinth.unity.impl.ClosingElement;
+import com.github.sanctum.labyrinth.unity.impl.PreProcessElement;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -22,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -58,10 +55,12 @@ public abstract class Menu {
 	protected final Set<Property> properties;
 	protected Controller controller;
 	protected String key;
+	private boolean retrieved;
 
 	protected Open open;
 	protected Click click;
 	protected Close close;
+	protected Process process;
 
 	protected Menu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		this.rows = rows;
@@ -73,17 +72,6 @@ public abstract class Menu {
 		if (this.properties.contains(Property.CACHEABLE)) {
 			menus.add(this);
 		}
-	}
-
-
-	public static <T extends Menu, R> R get(Predicate<Menu> predicate, Function<T, R> function) {
-		R menu = null;
-		for (Menu m : menus) {
-			if (predicate.test(m)) {
-				menu = function.apply((T) m);
-			}
-		}
-		return menu;
 	}
 
 	/**
@@ -99,6 +87,10 @@ public abstract class Menu {
 	 */
 	public final Optional<String> getKey() {
 		return Optional.ofNullable(this.key);
+	}
+
+	public boolean isRetrieved() {
+		return retrieved;
 	}
 
 	/**
@@ -122,8 +114,13 @@ public abstract class Menu {
 		return properties;
 	}
 
-	protected final void registerController() {
+	protected final void registerController() throws InstantiationException {
 		if (this.controller == null) {
+
+			if (this.host == null) {
+				throw new InstantiationException("Menu host cannot be null!");
+			}
+
 			this.controller = new Controller();
 			Bukkit.getPluginManager().registerEvents(this.controller, host);
 		}
@@ -133,41 +130,42 @@ public abstract class Menu {
 	 * Retrieve all saved {@link ItemElement} storage space from an allotted {@link PersistentContainer} and load it into cache.
 	 */
 	public synchronized final void retrieve() {
-		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
-		if (getInventory().isPaginated()) {
-			Map<Integer, ItemStack[]> map = (Map<Integer, ItemStack[]>) container.get(Map.class, getInventory().getTitle());
-			if (map != null) {
+		if (!this.retrieved) {
+			this.retrieved = true;
+			PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
+			if (getInventory().isPaginated()) {
+				Map<Integer, ItemStack[]> map = (Map<Integer, ItemStack[]>) container.get(Map.class, getInventory().getTitle());
+				if (map != null) {
 
-				if (!getProperties().contains(Property.SHAREABLE)) {
+					if (!getProperties().contains(Property.SAVABLE)) {
+						container.delete(getInventory().getTitle());
+						return;
+					}
+
+					InventoryElement inv = getInventory();
+
+					for (Map.Entry<Integer, ItemStack[]> entry : map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toList())) {
+						for (ItemStack i : entry.getValue()) {
+							if (i != null && i.getType() != Material.AIR) {
+								inv.addItem(new ItemElement<>(container).setParent(getInventory()).setElement(i));
+							}
+						}
+					}
+				}
+				return;
+			}
+			ItemStack[] array = container.get(ItemStack[].class, getInventory().getTitle());
+			if (array != null) {
+
+				if (!getProperties().contains(Property.SAVABLE)) {
 					container.delete(getInventory().getTitle());
 					return;
 				}
 
-				InventoryElement inv = getInventory();
-
-				for (Map.Entry<Integer, ItemStack[]> entry : map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toList())) {
-					for (ItemStack i : entry.getValue()) {
-						if (i != null && i.getType() != Material.AIR) {
-							inv.addItem(new ItemElement<>(container).setElement(i));
-						}
+				for (ItemStack i : array) {
+					if (i != null && i.getType() != Material.AIR) {
+						getInventory().addItem(new ItemElement<>(container).setParent(getInventory()).setElement(i));
 					}
-				}
-			}
-			return;
-		}
-		ItemStack[] array = container.get(ItemStack[].class, getInventory().getTitle());
-		if (array != null) {
-
-			if (!getProperties().contains(Property.SHAREABLE)) {
-				container.delete(getInventory().getTitle());
-				return;
-			}
-
-			InventoryElement inv = getInventory();
-
-			for (ItemStack i : array) {
-				if (i != null && i.getType() != Material.AIR) {
-					inv.addItem(new ItemElement<>(container).setElement(i));
 				}
 			}
 		}
@@ -175,10 +173,8 @@ public abstract class Menu {
 
 	/**
 	 * Save all items from this menu's inventory into a pre-made {@link PersistentContainer} space.
-	 *
-	 * @throws IOException If the menu couldn't save due to invalid outsourced {@link ItemElement} storage.
 	 */
-	public synchronized final void save() throws IOException {
+	public synchronized final void save() {
 		if (!getProperties().contains(Property.SAVABLE)) return;
 		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 		if (getInventory().isPaginated()) {
@@ -190,15 +186,14 @@ public abstract class Menu {
 		} else {
 			container.attach(getInventory().getTitle(), getInventory().getElement().getContents());
 		}
-		container.save(getInventory().getTitle());
 	}
 
 	/**
 	 * Add custom elements to this inventories cache space.
 	 *
 	 * @param element The element inheritance to submit
-	 * @param <T> The primary element for this element
-	 * @param <R> The secondary element for this element
+	 * @param <T>     The primary element for this element
+	 * @param <R>     The secondary element for this element
 	 * @return The primary element from the submitted element.
 	 */
 	public final <T, R> T addElement(Element<T, R> element) {
@@ -211,7 +206,7 @@ public abstract class Menu {
 	 * you can find it by using this method.
 	 *
 	 * @param function The browsing function for element reducing.
-	 * @param <R> The resulting value.
+	 * @param <R>      The resulting value.
 	 * @return An element of desired type.
 	 */
 	public final <R> R getElement(Predicate<Element<?, ?>> function) {
@@ -227,7 +222,7 @@ public abstract class Menu {
 	 * Handle any miscellaneous click actions that need it.
 	 *
 	 * @param click The action to take.
-	 * @param <T> The type for this menu.
+	 * @param <T>   The type for this menu.
 	 * @return The same menu instance.
 	 */
 	public final <T extends Menu> T addAction(Click click) {
@@ -262,6 +257,16 @@ public abstract class Menu {
 	public interface Open {
 
 		void apply(OpeningElement element);
+
+	}
+
+	/**
+	 * An operation for deciding pre-processing menu results.
+	 */
+	@FunctionalInterface
+	public interface Process {
+
+		void apply(PreProcessElement element);
 
 	}
 
@@ -348,6 +353,8 @@ public abstract class Menu {
 		 */
 		REFILLABLE,
 
+		RECURSIVE,
+
 		/**
 		 * This menu's intention is to be shared with multiple player's in the same inventory instance, anything you give or take can be seen and interacted with by any other viewers.
 		 * This property doesn't play nice with animated GUI so we recommend you not trying it.. :)
@@ -364,27 +371,17 @@ public abstract class Menu {
 		/**
 		 * This menu type represents that of a multi-paged inventory space.
 		 */
-		PAGINATED(PaginatedMenu.class),
+		PAGINATED,
 
 		/**
 		 * This menu type represents that of an anvil inventory space.
 		 */
-		PRINTABLE(PrintableMenu.class),
+		PRINTABLE,
 
 		/**
 		 * This menu type represents that of a standard inventory space.
 		 */
-		SINGULAR(SingularMenu.class);
-
-		private final Class<?> parent;
-
-		Type(Class<?> parent) {
-			this.parent = parent;
-		}
-
-		public Class<?> getParent() {
-			return parent;
-		}
+		SINGULAR
 	}
 
 	/**
@@ -418,11 +415,15 @@ public abstract class Menu {
 		}
 	}
 
+	/**
+	 * A factory for passing generic values on runtime to a menu builder.
+	 *
+	 * @param <T> A type representative of a menu builder
+	 * @param <V> A type representative of a menu
+	 */
 	public interface BuilderFactory<T extends Builder<V>, V extends Menu> {
 
-
 		T createBuilder();
-
 
 	}
 
@@ -433,7 +434,7 @@ public abstract class Menu {
 	 */
 	public static abstract class Builder<T extends Menu> {
 
-		private final Class<?> tClass;
+		private final Type type;
 
 		private Plugin host;
 
@@ -445,6 +446,8 @@ public abstract class Menu {
 
 		private Open open;
 
+		private Process process;
+
 		private String key;
 
 		private final Set<Property> properties = new HashSet<>();
@@ -452,7 +455,7 @@ public abstract class Menu {
 		private Rows size;
 
 		public Builder(Type type) {
-			this.tClass = type.getParent();
+			this.type = type;
 		}
 
 
@@ -545,18 +548,39 @@ public abstract class Menu {
 			return this;
 		}
 
-		public T join() {
-			Menu menu = null;
-			if (PaginatedMenu.class.isAssignableFrom(tClass)) {
-				menu = new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
-			} else
-			if (PrintableMenu.class.isAssignableFrom(tClass)) {
-				menu = new PrintableMenu(this.host, this.title, this.size, Type.PRINTABLE, properties.toArray(new Property[0]));
-			} else
-			if (SingularMenu.class.isAssignableFrom(tClass)) {
-				menu = new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
+		/**
+		 * Set what happens right before a player views the menu.
+		 *
+		 * @param process The event taking place before menu open.
+		 * @return Our builder instance.
+		 */
+		public Builder<T> setProcessEvent(Process process) {
+			this.process = process;
+			return this;
+		}
+
+		public T orGet(Predicate<Menu> predicate) {
+
+			for (Menu m : Menu.menus) {
+				if (predicate.test(m)) {
+					return (T) m;
+				}
 			}
-			
+
+			Menu menu = null;
+
+			switch (type) {
+				case PAGINATED:
+					menu = new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
+					break;
+				case PRINTABLE:
+					menu = new PrintableMenu(this.host, this.title, this.size, Type.PRINTABLE, properties.toArray(new Property[0]));
+					break;
+				case SINGULAR:
+					menu = new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
+					break;
+			}
+
 			if (inventoryEdit != null) {
 				inventoryEdit.accept(menu.getInventory());
 			}
@@ -565,7 +589,42 @@ public abstract class Menu {
 			}
 			menu.close = close;
 			menu.open = open;
-			menu.registerController();
+			try {
+				menu.registerController();
+			} catch (InstantiationException ex) {
+				ex.printStackTrace();
+			}
+			return (T) menu;
+		}
+
+		public T join() {
+			Menu menu = null;
+
+			switch (type) {
+				case PAGINATED:
+					menu = new PaginatedMenu(this.host, this.title, this.size, Type.PAGINATED, properties.toArray(new Property[0]));
+					break;
+				case PRINTABLE:
+					menu = new PrintableMenu(this.host, this.title, this.size, Type.PRINTABLE, properties.toArray(new Property[0]));
+					break;
+				case SINGULAR:
+					menu = new SingularMenu(this.host, this.title, this.size, Type.SINGULAR, properties.toArray(new Property[0]));
+					break;
+			}
+
+			if (inventoryEdit != null) {
+				inventoryEdit.accept(menu.getInventory());
+			}
+			if (this.key != null) {
+				menu.key = this.key;
+			}
+			menu.close = close;
+			menu.open = open;
+			try {
+				menu.registerController();
+			} catch (InstantiationException ex) {
+				ex.printStackTrace();
+			}
 			return (T) menu;
 		}
 
@@ -575,7 +634,7 @@ public abstract class Menu {
 	private class Controller implements Listener {
 
 		@EventHandler(priority = EventPriority.NORMAL)
-		public void onClose(InventoryCloseEvent e) throws IOException {
+		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
 			if (getType() != Type.PRINTABLE) {
@@ -586,10 +645,6 @@ public abstract class Menu {
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
 				target = getInventory().getElement((Player) e.getPlayer());
-			}
-
-			if (getProperties().contains(Property.SAVABLE)) {
-				save();
 			}
 
 			if (e.getInventory().equals(target)) {
@@ -605,7 +660,7 @@ public abstract class Menu {
 				}
 
 				if (close != null) {
-					ClosingElement element = new ClosingElement((Player) e.getPlayer(), e.getView());
+					ClosingElement element = new ClosingElement(Menu.this, (Player) e.getPlayer(), e.getView());
 					close.apply(element);
 
 					if (element.isCancelled()) {
@@ -640,7 +695,7 @@ public abstract class Menu {
 				Player p = (Player) e.getPlayer();
 
 				if (open != null) {
-					OpeningElement element = new OpeningElement((Player) e.getPlayer(), e.getView());
+					OpeningElement element = new OpeningElement(Menu.this, (Player) e.getPlayer(), e.getView());
 
 					open.apply(element);
 
@@ -971,25 +1026,8 @@ public abstract class Menu {
 										break;
 								}
 							}
-
 							if (clickElement.isCancelled()) {
 								e.setCancelled(true);
-							}
-						} else {
-							if (getProperties().contains(Property.SHAREABLE)) {
-
-								// this is for shareable menu's, if an alien item is placed into the inventory our goal is to get get the players current page number and set the new item element to that page.
-								// currently this isnt working as for some reason the item element turns to AIR right after it set's itself ??
-
-								if (getProperties().contains(Property.SAVABLE)) {
-									if (item != null && item.getType() != Material.AIR && !getInventory().contains(item)) {
-										PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + key));
-										getInventory().addItem(new ItemElement<>(container).setPage(getInventory().getGlobalSlot()).setElement(e.getCursor()));
-
-									}
-								} else {
-									getInventory().addItem(new ItemElement<>().setPage(getInventory().getGlobalSlot()).setElement(e.getCursor()));
-								}
 							}
 						}
 					}
@@ -998,7 +1036,7 @@ public abstract class Menu {
 				if (!e.isCancelled()) {
 
 					if (Menu.this.click != null) {
-						ClickElement element = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), new ItemElement<>().setElement(e.getCurrentItem()), e.getView());
+						ClickElement element = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), new ItemElement<>().setParent(getInventory()).setElement(e.getCurrentItem()), e.getView());
 						Menu.this.click.apply(element);
 
 						if (element.getResult() != null) {

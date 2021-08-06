@@ -1,13 +1,12 @@
 package com.github.sanctum.labyrinth.unity.impl;
 
+import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.construct.PagedPlayer;
-import com.github.sanctum.labyrinth.unity.impl.inventory.SharedInventory;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -30,20 +29,19 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemElement<?>>> {
 
-	private final Map<Player, Asynchronous> tasks;
-	private final Set<ItemElement<?>> items;
-	private final Set<PagedPlayer> index;
-	private final String title;
-	private final Menu menu;
-	private final Map<Player, Inventory> invmap;
-	private ListElement<?> listElement;
-	private Inventory inventory;
-	private int page = 1;
-	private int limit = 5;
-	private Comparator<? super ItemElement<?>> comparator = Comparator.comparing(ItemElement::getName);
-	private Predicate<? super ItemElement<?>> predicate = itemElement -> true;
-	private boolean paginated;
-	private final boolean lazy;
+	protected final Map<Player, Asynchronous> tasks;
+	protected final Set<ItemElement<?>> items;
+	protected final Set<PagedPlayer> index;
+	protected final boolean lazy;
+	protected final String title;
+	protected final Menu menu;
+	protected final Map<Player, Inventory> invmap;
+	protected ListElement<?> listElement;
+	protected Inventory inventory;
+	protected int page = 1;
+	protected int limit = 5;
+	protected Comparator<? super ItemElement<?>> comparator = Comparator.comparing(ItemElement::getName);
+	protected Predicate<? super ItemElement<?>> predicate = itemElement -> true;
 
 	public InventoryElement(String title, Menu menu, boolean lazy) {
 		this.items = new HashSet<>();
@@ -56,11 +54,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		this.inventory = Bukkit.createInventory(null, menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
 	}
 
+	public synchronized void open(Player player) {}
+
 	@Override
 	public Inventory getElement() {
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (UniformedComponents.accept(Arrays.asList(this.inventory.getContents())).filter(i -> i != null).count() == 0) {
-				if (paginated) {
+				if (isPaginated()) {
 					for (ItemElement<?> element : new PaginatedList<>(getWorkflow()).limit(this.limit).compare(this.comparator).filter(this.predicate).get(page)) {
 						Optional<Integer> i = element.getSlot();
 						if (i.isPresent()) {
@@ -96,7 +96,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		Inventory inventory = this.invmap.computeIfAbsent(player, p -> Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate()));
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (UniformedComponents.accept(Arrays.asList(inventory.getContents())).filter(i -> i != null).count() == 0) {
-				if (paginated) {
+				if (isPaginated()) {
 					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 						Optional<Integer> i = element.getSlot();
 						if (i.isPresent()) {
@@ -207,7 +207,9 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public Set<ItemElement<?>> getWorkflow() {
 		Set<ItemElement<?>> items = this.items.stream().filter(i -> !i.getSlot().isPresent()).collect(Collectors.toSet());
 		if (isPaginated()) {
-			items.addAll(listElement.getAttachment());
+			if (this.listElement != null) {
+				items.addAll(listElement.getAttachment());
+			}
 		}
 		return items;
 	}
@@ -242,6 +244,27 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return this;
 	}
 
+	public InventoryElement setElement(Player target, Inventory inventory) {
+		this.invmap.put(target, inventory);
+		return this;
+	}
+
+	public <R> InventoryElement removeItem(ItemElement<R> item, boolean sincere) {
+		this.items.remove(item);
+		if (sincere) {
+			this.getElement().remove(item.getElement());
+		}
+		return this;
+	}
+
+	public <R> InventoryElement removeItem(Player target, ItemElement<R> item, boolean sincere) {
+		this.items.remove(item);
+		if (sincere) {
+			this.getElement(target).remove(item.getElement());
+		}
+		return this;
+	}
+
 	public <R> InventoryElement addItem(ItemElement<R> item) {
 		this.items.add(item.setParent(this));
 		return this;
@@ -264,7 +287,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	}
 
 	public InventoryElement addItem(ListElement<?> element) {
-		this.paginated = true;
 		this.listElement = element.setLimit(this.menu.getSize().getSlots()).setParent(this);
 		return this;
 	}
@@ -281,280 +303,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return addItem(element);
 	}
 
-	public synchronized void open(Player player) {
-		if (lazy) {
-			// This area dictates that our inventory is "lazy" and needs to be instantiated
-			this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
-			this.invmap.remove(player);
-		}
-		Schedule.sync(() -> {
-
-
-			switch (this.menu.getType()) {
-				case PRINTABLE:
-					for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-						Optional<Integer> in = element.getSlot();
-						if (in.isPresent()) {
-							getElement().setItem(in.get(), element.getElement());
-						} else {
-							if (!getElement().contains(element.getElement())) {
-								getElement().addItem(element.getElement());
-							}
-						}
-					}
-					for (ItemElement<?> element : items) {
-						Optional<Integer> in = element.getSlot();
-						in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
-					}
-					player.openInventory(getElement());
-					break;
-				case PAGINATED:
-					if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
-						getElement().setMaxStackSize(1);
-						if (this.tasks.containsKey(player)) {
-							this.tasks.get(player).cancelTask();
-						}
-
-						if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-							if (this.tasks.size() < 1) {
-								this.tasks.put(player, Schedule.async(() -> {
-									Schedule.sync(() -> {
-										InventoryElement.this.getElement().clear();
-										for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-											Optional<Integer> in = element.getSlot();
-											if (!element.getPage().equals(getGlobalSlot())) {
-												element.setPage(getGlobalSlot());
-											}
-											if (in.isPresent()) {
-												getElement().setItem(in.get(), element.getElement());
-											} else {
-												if (!getElement().contains(element.getElement())) {
-													getElement().addItem(element.getElement());
-												}
-											}
-										}
-										for (ItemElement<?> element : items) {
-											Optional<Integer> in = element.getSlot();
-											in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
-										}
-									}).run();
-								}));
-								this.tasks.get(player).repeat(0, 1);
-							}
-
-							SharedInventory inv = (SharedInventory) this;
-							for (Player p : inv.getViewers()) {
-								if (p.equals(player)) {
-									p.openInventory(getElement());
-								} else {
-									inv.open(p);
-								}
-							}
-
-						} else {
-							this.tasks.put(player, Schedule.async(() -> {
-								Schedule.sync(() -> {
-									InventoryElement.this.getElement(player).clear();
-									for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-										Optional<Integer> in = element.getSlot();
-										if (!element.getPage().equals(getPlayer(player).getPage())) {
-											element.setPage(getPlayer(player).getPage());
-										}
-										if (in.isPresent()) {
-											getElement(player).setItem(in.get(), element.getElement());
-										} else {
-											if (!getElement(player).contains(element.getElement())) {
-												getElement(player).addItem(element.getElement());
-											}
-										}
-									}
-									for (ItemElement<?> element : items) {
-										Optional<Integer> in = element.getSlot();
-										in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
-									}
-								}).run();
-							}));
-							this.tasks.get(player).repeat(0, 1);
-
-							player.openInventory(getElement(player));
-
-						}
-
-						Schedule.sync(() -> {
-							if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-								SharedInventory inv = (SharedInventory) this;
-								for (Player p : inv.getViewers()) {
-									if (p.equals(player)) {
-										player.openInventory(getElement());
-									} else {
-										inv.open(p);
-									}
-								}
-							} else {
-								player.openInventory(getElement(player));
-							}
-
-						}).waitReal(2);
-
-						return;
-					} else {
-
-						if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-								if (!element.getPage().equals(getGlobalSlot())) {
-									element.setPage(getGlobalSlot());
-								}
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement().setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement().contains(element.getElement())) {
-										getElement().addItem(element.getElement());
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
-							}
-
-							player.openInventory(getElement());
-						} else {
-							for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-								Optional<Integer> in = element.getSlot();
-								if (!element.getPage().equals(getPlayer(player).getPage())) {
-									element.setPage(getPlayer(player).getPage());
-								}
-								if (in.isPresent()) {
-									getElement(player).setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement(player).contains(element.getElement())) {
-										getElement(player).addItem(element.getElement());
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
-							}
-
-							player.openInventory(getElement(player));
-						}
-
-					}
-					break;
-				case SINGULAR:
-					if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
-						// TODO: setup animation slide stuff
-						return;
-					}
-					if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
-						if (this.tasks.containsKey(player)) {
-							this.tasks.get(player).cancelTask();
-						}
-
-						if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-							getElement().setMaxStackSize(1);
-							if (this.tasks.size() < 1) {
-								this.tasks.put(player, Schedule.async(() -> {
-									Schedule.sync(() -> {
-										InventoryElement.this.getElement().clear();
-										for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-											Optional<Integer> in = element.getSlot();
-											if (in.isPresent()) {
-												getElement().setItem(in.get(), element.getElement());
-											} else {
-												if (!getElement().contains(element.getElement())) {
-													getElement().addItem(element.getElement());
-												}
-											}
-										}
-										for (ItemElement<?> element : items) {
-											Optional<Integer> in = element.getSlot();
-											in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
-										}
-									}).run();
-								}));
-								this.tasks.get(player).repeat(0, 1);
-							}
-							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement().setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement().contains(element.getElement())) {
-										getElement().addItem(element.getElement());
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
-							}
-						} else {
-							getElement(player).setMaxStackSize(1);
-							this.tasks.put(player, Schedule.async(() -> {
-								Schedule.sync(() -> {
-									InventoryElement.this.getElement().clear();
-									for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-										Optional<Integer> in = element.getSlot();
-										if (in.isPresent()) {
-											getElement(player).setItem(in.get(), element.getElement());
-										} else {
-											if (!getElement(player).contains(element.getElement())) {
-												getElement(player).addItem(element.getElement());
-											}
-										}
-									}
-									for (ItemElement<?> element : items) {
-										Optional<Integer> in = element.getSlot();
-										in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
-									}
-								}).run();
-							}));
-							this.tasks.get(player).repeat(0, 1);
-
-							for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement(player).setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement(player).contains(element.getElement())) {
-										getElement(player).addItem(element.getElement());
-									}
-								}
-							}
-							for (ItemElement<?> element : items) {
-								Optional<Integer> in = element.getSlot();
-								in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
-							}
-
-						}
-						Schedule.sync(() -> {
-							if (this.menu.getProperties().contains(Menu.Property.SHAREABLE)) {
-								SharedInventory inv = (SharedInventory) this;
-								for (Player p : inv.getViewers()) {
-									if (p.equals(player)) {
-										p.openInventory(getElement());
-									} else {
-										inv.open(player);
-									}
-								}
-							} else {
-								player.openInventory(getElement());
-							}
-
-						}).waitReal(2);
-
-						return;
-					}
-					break;
-			}
-		}).run();
-	}
-
 	public boolean isPaginated() {
-		return paginated;
+		return this instanceof Paginated;
 	}
 
 	public static class Page extends Menu.Element<InventoryElement, Set<ItemElement<?>>> {
@@ -599,5 +349,403 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		public Set<ItemElement<?>> getAttachment() {
 			return new HashSet<>(new PaginatedList<>(getElement().getWorkflow()).limit(getElement().limit).compare(getElement().comparator).filter(getElement().predicate).get(toNumber()));
 		}
+	}
+
+	public static class Paginated extends InventoryElement {
+
+		public Paginated(String title, Menu menu) {
+			super(title, menu, true);
+		}
+
+		@Override
+		public synchronized void open(Player player) {
+			if (lazy) {
+				// This area dictates that our inventory is "lazy" and needs to be instantiated
+				this.invmap.remove(player);
+			}
+			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
+				getElement().setMaxStackSize(1);
+				if (this.tasks.containsKey(player)) {
+					this.tasks.get(player).cancelTask();
+				}
+
+				this.tasks.put(player, Schedule.async(() -> Schedule.sync(() -> {
+					getElement(player).clear();
+					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
+						Optional<Integer> in = element.getSlot();
+						if (!element.getPage().equals(getPlayer(player).getPage())) {
+							element.setPage(getPlayer(player).getPage());
+						}
+						if (in.isPresent()) {
+							getElement(player).setItem(in.get(), element.getElement());
+						} else {
+							if (!getElement(player).contains(element.getElement())) {
+								getElement(player).addItem(element.getElement());
+							}
+						}
+					}
+					for (ItemElement<?> element : items) {
+						Optional<Integer> in = element.getSlot();
+						in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+					}
+				}).run()));
+				this.tasks.get(player).repeat(0, 1);
+
+				Schedule.sync(() -> player.openInventory(getElement(player))).run();
+
+				Schedule.sync(() -> player.openInventory(getElement(player))).waitReal(2);
+
+			} else {
+
+				for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
+					Optional<Integer> in = element.getSlot();
+					if (!element.getPage().equals(getPlayer(player).getPage())) {
+						element.setPage(getPlayer(player).getPage());
+					}
+					if (in.isPresent()) {
+						getElement(player).setItem(in.get(), element.getElement());
+					} else {
+						if (!getElement(player).contains(element.getElement())) {
+							getElement(player).addItem(element.getElement());
+						}
+					}
+				}
+				for (ItemElement<?> element : items) {
+					Optional<Integer> in = element.getSlot();
+					in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+				}
+
+				Schedule.sync(() -> player.openInventory(getElement(player))).run();
+
+			}
+		}
+	}
+
+	public static class SharedPaginated extends Paginated {
+
+		private final Set<Player> viewers;
+
+		public SharedPaginated(String title, Menu menu) {
+			super(title, menu);
+			this.viewers = new HashSet<>();
+		}
+
+		public Set<Player> getViewers() {
+			return viewers;
+		}
+
+		@Override
+		public synchronized void open(Player player) {
+			viewers.add(player);
+
+			if (lazy) {
+				// This area dictates that our inventory is "lazy" and needs to be instantiated
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+			}
+			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
+				getElement().setMaxStackSize(1);
+				if (this.tasks.containsKey(player)) {
+					this.tasks.get(player).cancelTask();
+				}
+
+				if (this.tasks.size() < 1) {
+					this.tasks.put(player, Schedule.async(() -> {
+						Schedule.sync(() -> {
+							getElement().clear();
+							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
+								Optional<Integer> in = element.getSlot();
+								if (!element.getPage().equals(getGlobalSlot())) {
+									element.setPage(getGlobalSlot());
+								}
+								if (in.isPresent()) {
+									getElement().setItem(in.get(), element.getElement());
+								} else {
+									if (!getElement().contains(element.getElement())) {
+										getElement().addItem(element.getElement());
+									}
+								}
+							}
+							for (ItemElement<?> element : items) {
+								Optional<Integer> in = element.getSlot();
+								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+							}
+						}).run();
+					}));
+					this.tasks.get(player).repeat(0, 1);
+				}
+
+				Schedule.sync(() -> {
+					SharedPaginated inv = this;
+					for (Player p : inv.getViewers()) {
+						if (p.equals(player)) {
+							Schedule.sync(() -> player.openInventory(getElement())).run();
+						} else {
+							inv.open(p);
+						}
+					}
+				}).waitReal(2);
+
+				return;
+			} else {
+
+				for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
+					if (!element.getPage().equals(getGlobalSlot())) {
+						element.setPage(getGlobalSlot());
+					}
+					Optional<Integer> in = element.getSlot();
+					if (in.isPresent()) {
+						getElement().setItem(in.get(), element.getElement());
+					} else {
+						if (!getElement().contains(element.getElement())) {
+							getElement().addItem(element.getElement());
+						}
+					}
+				}
+				for (ItemElement<?> element : items) {
+					Optional<Integer> in = element.getSlot();
+					in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+				}
+
+				Schedule.sync(() -> player.openInventory(getElement())).run();
+
+			}
+
+			for (Player p : viewers) {
+				if (getElement() != null) {
+					if (!p.getOpenInventory().getTopInventory().equals(getElement())) {
+						Schedule.sync(() -> viewers.remove(p)).wait(1);
+					}
+				}
+			}
+		}
+	}
+
+	public static class Shared extends Normal {
+
+		private final Set<Player> viewers;
+
+		public Shared(String title, Menu menu) {
+			super(title, menu);
+			this.viewers = new HashSet<>();
+		}
+
+		public Set<Player> getViewers() {
+			return viewers;
+		}
+
+		@Override
+		public synchronized void open(Player player) {
+			viewers.add(player);
+
+			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
+				// This area dictates that our inventory is "lazy" and needs to be instantiated
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+			}
+
+			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
+				// TODO: setup animation slide stuff
+				return;
+			}
+			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
+				if (this.tasks.containsKey(player)) {
+					this.tasks.get(player).cancelTask();
+				}
+
+				getElement().setMaxStackSize(1);
+				if (this.tasks.size() < 1) {
+					this.tasks.put(player, Schedule.async(() -> {
+						Schedule.sync(() -> {
+							getElement().clear();
+							for (ItemElement<?> element : getWorkflow()) {
+								Optional<Integer> in = element.getSlot();
+								if (in.isPresent()) {
+									getElement().setItem(in.get(), element.getElement());
+								} else {
+									if (!getElement().contains(element.getElement())) {
+										getElement().addItem(element.getElement());
+									}
+								}
+							}
+							for (ItemElement<?> element : items) {
+								Optional<Integer> in = element.getSlot();
+								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+							}
+						}).run();
+					}));
+					this.tasks.get(player).repeat(0, 1);
+				}
+
+				Schedule.sync(() -> {
+					Shared inv = this;
+					for (Player p : inv.getViewers()) {
+						if (p.equals(player)) {
+							p.openInventory(getElement());
+						} else {
+							inv.open(player);
+						}
+					}
+				}).waitReal(2);
+
+				return;
+			} else {
+				for (ItemElement<?> element : getWorkflow()) {
+					Optional<Integer> in = element.getSlot();
+					if (in.isPresent()) {
+						getElement().setItem(in.get(), element.getElement());
+					} else {
+						if (!getElement().contains(element.getElement())) {
+							getElement().addItem(element.getElement());
+						}
+					}
+				}
+				for (ItemElement<?> element : items) {
+					Optional<Integer> in = element.getSlot();
+					in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+				} 
+
+				Schedule.sync(() -> player.openInventory(getElement())).run();
+			}
+
+			for (Player p : viewers) {
+				if (getElement() != null) {
+					if (!p.getOpenInventory().getTopInventory().equals(getElement())) {
+						Schedule.sync(() -> viewers.remove(p)).wait(1);
+					}
+				}
+			}
+		}
+	}
+
+	public static class Normal extends InventoryElement {
+
+		public Normal(String title, Menu menu) {
+			super(title, menu, true);
+		}
+
+		@Override
+		public synchronized void open(Player player) {
+
+			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
+				// This area dictates that our inventory is "lazy" and needs to be instantiated
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				this.invmap.remove(player);
+			}
+
+			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
+				// TODO: setup animation slide stuff
+				return;
+			}
+			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
+				if (this.tasks.containsKey(player)) {
+					this.tasks.get(player).cancelTask();
+				}
+
+				getElement(player).setMaxStackSize(1);
+				this.tasks.put(player, Schedule.async(() -> {
+					Schedule.sync(() -> {
+						getElement(player).clear();
+						for (ItemElement<?> element : getWorkflow()) {
+							Optional<Integer> in = element.getSlot();
+							if (in.isPresent()) {
+								getElement(player).setItem(in.get(), element.getElement());
+							} else {
+								if (!getElement(player).contains(element.getElement())) {
+									getElement(player).addItem(element.getElement());
+								}
+							}
+						}
+						for (ItemElement<?> element : items) {
+							Optional<Integer> in = element.getSlot();
+							in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+						}
+					}).run();
+				}));
+				this.tasks.get(player).repeat(0, 1);
+
+				Schedule.sync(() -> player.openInventory(getElement(player))).waitReal(2);
+
+			} else {
+				for (ItemElement<?> element : getWorkflow()) {
+					Optional<Integer> in = element.getSlot();
+					if (in.isPresent()) {
+						getElement(player).setItem(in.get(), element.getElement());
+					} else {
+						if (!getElement(player).contains(element.getElement())) {
+							getElement(player).addItem(element.getElement());
+						}
+					}
+				}
+				for (ItemElement<?> element : items) {
+					Optional<Integer> in = element.getSlot();
+					in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+				}
+
+				Schedule.sync(() -> player.openInventory(getElement(player))).run();
+			}
+		}
+	}
+
+	public static class Printable extends InventoryElement {
+
+		private final AnvilMechanics nms;
+
+		private int containerId;
+
+		private boolean visible;
+
+		public Printable(String title, AnvilMechanics mechanics, Menu menu) {
+			super(title, menu, true);
+			this.nms = mechanics;
+		}
+
+		public boolean isVisible() {
+			return visible;
+		}
+
+		@Override
+		public void open(Player player) {
+			nms.handleInventoryCloseEvent(player);
+			nms.setActiveContainerDefault(player);
+
+			final Object container = nms.newContainerAnvil(player, this.getTitle());
+
+			setElement(nms.toBukkitInventory(container));
+
+			for (ItemElement<?> it : getAttachment()) {
+				if (it.getSlot().isPresent()) {
+					int slot = it.getSlot().get();
+					if (slot == 0) {
+						getElement().setItem(0, it.getElement());
+					}
+					if (slot == 1) {
+						getElement().setItem(1, it.getElement());
+					}
+					if (slot == 2) {
+						getElement().setItem(2, it.getElement());
+					}
+				}
+			}
+
+			containerId = nms.getNextContainerId(player, container);
+			nms.sendPacketOpenWindow(player, containerId, this.getTitle());
+			nms.setActiveContainer(player, container);
+			nms.setActiveContainerId(container, containerId);
+			nms.addActiveContainerSlotListener(container, player);
+
+			visible = true;
+		}
+
+		public void close(Player player, boolean sendPacket) {
+			if (!visible)
+				throw new IllegalArgumentException("You can't close an inventory that isn't open!");
+			visible = false;
+
+			if (!sendPacket) {
+				nms.handleInventoryCloseEvent(player);
+			}
+			nms.setActiveContainerDefault(player);
+			nms.sendPacketCloseWindow(player, containerId);
+		}
+
 	}
 }

@@ -1,6 +1,5 @@
-package com.github.sanctum.labyrinth.unity.construct;
+package com.github.sanctum.labyrinth.unity.impl;
 
-import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

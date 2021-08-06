@@ -1,7 +1,7 @@
-package com.github.sanctum.labyrinth.unity.impl.menu.builder;
+package com.github.sanctum.labyrinth.unity.impl;
 
 import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.impl.menu.PaginatedMenu;
+import com.github.sanctum.labyrinth.unity.construct.PaginatedMenu;
 
 class PaginatedBuilder extends Menu.Builder<PaginatedMenu> {
 

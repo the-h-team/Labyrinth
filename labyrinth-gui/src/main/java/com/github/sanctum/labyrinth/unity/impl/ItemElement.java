@@ -121,8 +121,13 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		return this.page;
 	}
 
+	public final void remove(boolean sincere) {
+		Bukkit.broadcastMessage("gone");
+		getParent().removeItem(this, sincere);
+	}
+
 	public String getName() {
-		return getElement().getItemMeta() != null ? getElement().getItemMeta().getDisplayName() : getElement().getType().name();
+		return getElement().getItemMeta() != null && getElement().getItemMeta().hasDisplayName() ? getElement().getItemMeta().getDisplayName() : getElement().getType().name();
 	}
 
 	public enum Navigation {

@@ -378,7 +378,7 @@ public class DefaultEvent extends Vent {
 				e.setCancelled(true);
 			}
 
-			Communication.ChatMessage impl = (Communication.ChatMessage) c.getMessage().orElse(null);
+			Communication.ChatMessage impl = c.getMessage().orElse(null);
 
 			if (impl != null) {
 				if (impl.isChanged()) {
