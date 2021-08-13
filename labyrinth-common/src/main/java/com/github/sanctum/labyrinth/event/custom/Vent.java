@@ -379,7 +379,7 @@ public abstract class Vent {
 							for (RegisteredListener o : map.listeners) {
 								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 								for (Method m : discovery.methods()) {
-									for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+									for (Subscribe a : discovery.read(m)) {
 										if (a.priority() != priority) continue;
 										if (!m.isAccessible()) m.setAccessible(true);
 										try {
@@ -483,7 +483,7 @@ public abstract class Vent {
 								for (RegisteredListener o : map.listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 									for (Method m : discovery.methods()) {
-										for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
 											if (!m.isAccessible()) m.setAccessible(true);
 
@@ -584,7 +584,7 @@ public abstract class Vent {
 								for (RegisteredListener o : map.listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 									for (Method m : discovery.methods()) {
-										for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
 											if (!m.isAccessible()) m.setAccessible(true);
 
