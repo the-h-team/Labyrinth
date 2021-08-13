@@ -85,7 +85,7 @@ otherwise have been far more time-consuming.
 
 _API Table of Contents_:
 -- 
-### Spigot
+* ### Spigot
   - [AFK Player Utility]()
   - [Command Builder]()
   - [Command Utility]()
@@ -110,12 +110,12 @@ _API Table of Contents_:
   - [Template Creation]()
   - [TextComponent Builder]()
   - [Vault Permission Interface Wrapper]()
-### Library
+* ### Library
   - [Applicable Data]()
   - [Annotation Discovery]()
   - [Base64 Serialization]()
   - [Cuboid Generation]()
-  - [Custom Event Abstraction & Listening]()
+  - [Custom Event Abstraction & Listening](https://github.com/the-h-team/Labyrinth/wiki/Custom-Events)
   - [List Formatting Utility]()
   - [Math Formatting Utility]()
   - [Persistent Data Container]()
