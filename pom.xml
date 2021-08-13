@@ -17,6 +17,7 @@
     <packaging>pom</packaging>
 
     <name>Labyrinth</name>
+    <url>https://github.com/the-h-team/Labyrinth</url>
     <description>A Spigot development library</description>
     <inceptionYear>2020</inceptionYear>
 
