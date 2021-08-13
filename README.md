@@ -85,7 +85,7 @@ otherwise have been far more time-consuming.
 
 _API Table of Contents_:
 -- 
-### Spigot
+* ### Spigot
   - [AFK Player Utility]()
   - [Command Builder]()
   - [Command Utility]()
@@ -110,7 +110,7 @@ _API Table of Contents_:
   - [Template Creation]()
   - [TextComponent Builder]()
   - [Vault Permission Interface Wrapper]()
-### Library
+* ### Library
   - [Applicable Data]()
   - [Annotation Discovery]()
   - [Base64 Serialization]()
