@@ -115,7 +115,7 @@ _API Table of Contents_:
   - [Annotation Discovery]()
   - [Base64 Serialization]()
   - [Cuboid Generation]()
-  - [Custom Event Abstraction & Listening]()
+  - [Custom Event Abstraction & Listening](https://github.com/the-h-team/Labyrinth/wiki/Custom-Events)
   - [List Formatting Utility]()
   - [Math Formatting Utility]()
   - [Persistent Data Container]()
