@@ -89,7 +89,7 @@ _API Table of Contents_:
   - [AFK Player Utility]()
   - [Command Builder]()
   - [Command Utility]()
-  - [Complete GUI Builder]()
+  - [Complete GUI Builder](https://github.com/the-h-team/Labyrinth/wiki/Unity-Library)
   - [Complete Head Database/Locator]()
   - [Cooldown Abstraction](https://github.com/the-h-team/Labyrinth/wiki/Cooldowns)
   - [Custom Gradient Color Interface]()
