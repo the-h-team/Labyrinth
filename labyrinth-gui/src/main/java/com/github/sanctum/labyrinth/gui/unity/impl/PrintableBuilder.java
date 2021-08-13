@@ -1,7 +1,7 @@
-package com.github.sanctum.labyrinth.unity.impl;
+package com.github.sanctum.labyrinth.gui.unity.impl;
 
-import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.construct.PrintableMenu;
+import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+import com.github.sanctum.labyrinth.gui.unity.construct.PrintableMenu;
 
 class PrintableBuilder extends Menu.Builder<PrintableMenu> {
 

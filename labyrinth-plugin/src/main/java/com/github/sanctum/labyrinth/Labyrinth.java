@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
+import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.VaultImplementation;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -19,7 +20,6 @@ import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
@@ -108,36 +108,29 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		}
 
 		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
-
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 		Vent.Subscription.Builder.target(DefaultEvent.Communication.class).assign(Vent.Priority.HIGH).from(this).use((e, subscription) -> {
-			switch (e.getCommunicationType()) {
-				case CHAT:
-					break;
-				case COMMAND:
-					DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
-					if (cmd == null) return;
-					String label = cmd.getText().orElse(null);
-					if (label == null) return;
-					if (HUID.fromString(label) != null) {
-						if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
-							e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
-							e.setCancelled(true);
-							return;
-						}
+			if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
+				DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
+				if (cmd == null) return;
+				String label = cmd.getText();
+				if (HUID.fromString(label) != null) {
+					if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
+						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
+						e.setCancelled(true);
+						return;
 					}
-					for (WrappedComponent component : instance.components) {
-						if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
-							Schedule.sync(() -> component.action().apply()).run();
-							if (!component.isMarked()) {
-								component.setMarked(true);
-								Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
-							}
-							e.setCancelled(true);
+				}
+				for (WrappedComponent component : instance.components) {
+					if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
+						Schedule.sync(() -> component.action().apply()).run();
+						if (!component.isMarked()) {
+							component.setMarked(true);
+							Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
 						}
+						e.setCancelled(true);
 					}
-
-					break;
+				}
 			}
 		}).finish();
 

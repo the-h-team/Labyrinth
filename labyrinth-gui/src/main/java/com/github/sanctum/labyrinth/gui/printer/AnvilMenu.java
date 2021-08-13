@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
  *
  * @author Hempfest
  */
+@Deprecated
 public class AnvilMenu {
 
     private Player holder;

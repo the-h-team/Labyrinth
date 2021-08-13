@@ -49,6 +49,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 /**
  * A class representing a created Menu.
  */
+@Deprecated
 public final class Menu {
     private final JavaPlugin plugin;
     private final ItemStack[] initialContents;
@@ -169,6 +170,7 @@ public final class Menu {
                 .collect(Collectors.toSet());
     }
 
+    @Deprecated
     public static class Paginated<T> {
 
         private final PaginatedBuilder<T> builder;

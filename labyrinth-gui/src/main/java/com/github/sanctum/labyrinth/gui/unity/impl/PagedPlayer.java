@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.unity.impl;
+package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import java.util.UUID;
 import org.bukkit.Bukkit;

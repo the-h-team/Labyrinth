@@ -1,15 +1,20 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.github.sanctum.labyrinth.task.Schedule;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.bukkit.Tag;
+import java.util.stream.Collectors;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class Vent {
 
@@ -235,6 +240,16 @@ public abstract class Vent {
 
 	}
 
+	public static void register(@NotNull Plugin host, @NotNull Object listener) {
+		getMap().listeners.add(new RegisteredListener(host, listener));
+	}
+
+	public static void registerAll(@NotNull Plugin host, @NotNull Object... listener) {
+		for (Object o : listener) {
+			getMap().listeners.add(new RegisteredListener(host, o));
+		}
+	}
+
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
 		if (subscription == null) {
 			LabyrinthProvider.getInstance().getLogger().severe("Null subscription found from unknown source (Not labyrinth).");
@@ -262,16 +277,6 @@ public abstract class Vent {
 
 	}
 
-	public static <T extends Vent> void unsubscribeAll(Class<T> labyrinthEvent, Plugin user) {
-		for (Subscription<?> s : getMap().subscriptions) {
-			if (s.getEventType().isAssignableFrom(labyrinthEvent)) {
-				if (s.getUser().equals(user)) {
-					Schedule.sync(() -> getMap().subscriptions.remove(s)).run();
-				}
-			}
-		}
-	}
-
 	public enum CancelState {
 		ON, OFF
 	}
@@ -282,15 +287,15 @@ public abstract class Vent {
 
 	public enum Priority {
 
-		READ_ONLY(5),
-
 		LOW(1),
 
 		MEDIUM(2),
 
 		HIGH(3),
 
-		HIGHEST(4);
+		HIGHEST(4),
+
+		READ_ONLY(5);
 
 		private final int level;
 
@@ -332,7 +337,7 @@ public abstract class Vent {
 
 			switch (type) {
 				case Synchronous:
-					if (event.isAsynchronous()) throw new IllegalStateException("This event can only be run asynchronously");
+					if (event.isAsynchronous()) throw new SubscriptionRuntimeException("This event can only be run asynchronously!");
 
 					if (event.getHost() == null) {
 						event.setHost(plugin);
@@ -357,16 +362,67 @@ public abstract class Vent {
 									}
 									break;
 								case READ_ONLY:
-									((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
+									if (!copy.isCancelled()) {
+										((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
+										if (copy.isCancelled()) {
+											copy.setCancelled(false);
+										}
+									}
 									break;
 							}
 						}
 
 					});
+
+					if (!map.listeners.isEmpty()) {
+						for (Priority priority : Priority.values()) {
+							for (RegisteredListener o : map.listeners) {
+								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+								for (Method m : discovery.methods()) {
+									for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+										if (a.priority() != priority) continue;
+										if (!m.isAccessible()) m.setAccessible(true);
+										try {
+											switch (priority) {
+												case LOW:
+												case MEDIUM:
+												case HIGH:
+												case HIGHEST:
+													if (event.getState() == CancelState.ON) {
+														if (!event.isCancelled()) {
+															m.invoke(o.getListener(), event);
+															this.copy = event;
+														}
+													} else {
+														m.invoke(o.getListener(), event);
+														this.copy = event;
+													}
+													break;
+												case READ_ONLY:
+													if (!copy.isCancelled()) {
+														m.invoke(o.getListener(), copy);
+														if (copy.isCancelled()) {
+															copy.setCancelled(false);
+														}
+													}
+													break;
+											}
+										} catch (Exception ec) {
+											SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+											exception.setStackTrace(ec.getCause().getStackTrace());
+											throw exception;
+										}
+
+									}
+								}
+							}
+						}
+					}
+
 					return event;
 
 				case Asynchronous:
-					if (!event.isAsynchronous()) throw new IllegalStateException("This event can only be run synchronously");
+					if (!event.isAsynchronous()) throw new SubscriptionRuntimeException("This event can only be run synchronously!");
 
 					event.setHost(plugin);
 
@@ -410,17 +466,69 @@ public abstract class Vent {
 											LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
 											this.warned = true;
 										}
-										((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
+										if (!copy.isCancelled()) {
+											((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
+											if (copy.isCancelled()) {
+												copy.setCancelled(false);
+											}
+										}
 										break;
 								}
 							}
 
 						});
+
+						if (!map.listeners.isEmpty()) {
+							for (Priority priority : Priority.values()) {
+								for (RegisteredListener o : map.listeners) {
+									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+									for (Method m : discovery.methods()) {
+										for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+											if (a.priority() != priority) continue;
+											if (!m.isAccessible()) m.setAccessible(true);
+
+											try {
+												switch (priority) {
+													case LOW:
+													case MEDIUM:
+													case HIGH:
+													case HIGHEST:
+														if (event.getState() == CancelState.ON) {
+															if (!event.isCancelled()) {
+																m.invoke(o.getListener(), event);
+																this.copy = event;
+															}
+														} else {
+															m.invoke(o.getListener(), event);
+															this.copy = event;
+														}
+														break;
+													case READ_ONLY:
+														if (!copy.isCancelled()) {
+															m.invoke(o.getListener(), copy);
+															if (copy.isCancelled()) {
+																copy.setCancelled(false);
+															}
+														}
+														break;
+												}
+											} catch (Exception ec) {
+												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+												exception.setStackTrace(ec.getCause().getStackTrace());
+												throw exception;
+											}
+
+										}
+									}
+								}
+							}
+						}
+
 						return event;
 
 					}).join();
 				default:
-					throw new IllegalArgumentException("An invalid RunType was provided!");
+					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
 			}
 		}
 
@@ -459,19 +567,70 @@ public abstract class Vent {
 										}
 										break;
 									case READ_ONLY:
-										((SubscriberCall<T>) s.getAction()).accept(this.copy, (Subscription<T>) s);
+										if (!copy.isCancelled()) {
+											((SubscriberCall<T>) s.getAction()).accept(this.copy, (Subscription<T>) s);
+											if (copy.isCancelled()) {
+												copy.setCancelled(false);
+											}
+										}
 										break;
 								}
 							}
 
 						});
+
+						if (!map.listeners.isEmpty()) {
+							for (Priority priority : Priority.values()) {
+								for (RegisteredListener o : map.listeners) {
+									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+									for (Method m : discovery.methods()) {
+										for (Subscribe a : discovery.read(m, me -> Arrays.stream(me.getAnnotations()).filter(a -> a instanceof Subscribe).map(a -> (Subscribe)a).collect(Collectors.toSet()))) {
+											if (a.priority() != priority) continue;
+											if (!m.isAccessible()) m.setAccessible(true);
+
+											try {
+												switch (priority) {
+													case LOW:
+													case MEDIUM:
+													case HIGH:
+													case HIGHEST:
+														if (event.getState() == CancelState.ON) {
+															if (!event.isCancelled()) {
+																m.invoke(o.getListener(), event);
+																this.copy = event;
+															}
+														} else {
+															m.invoke(o.getListener(), event);
+															this.copy = event;
+														}
+														break;
+													case READ_ONLY:
+														if (!copy.isCancelled()) {
+															m.invoke(o.getListener(), copy);
+															if (copy.isCancelled()) {
+																copy.setCancelled(false);
+															}
+														}
+														break;
+												}
+											} catch (Exception ec) {
+												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+												exception.setStackTrace(ec.getCause().getStackTrace());
+												throw exception;
+											}
+
+										}
+									}
+								}
+							}
+						}
 						return event;
 
 					});
 
 				case Synchronous:
 				default:
-					throw new IllegalArgumentException("An invalid RunType was provided!");
+					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
 			}
 		}
 	}

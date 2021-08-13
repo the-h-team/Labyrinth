@@ -30,6 +30,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class DefaultEvent extends Vent {
@@ -155,8 +156,8 @@ public class DefaultEvent extends Vent {
 
 			public abstract T get();
 
-			public Optional<String> getText() {
-				return Optional.empty();
+			public String getText() {
+				return "null";
 			}
 
 			public Set<? extends org.bukkit.entity.Player> getRecipients() {
@@ -198,8 +199,8 @@ public class DefaultEvent extends Vent {
 			}
 
 			@Override
-			public Optional<String> getText() {
-				return Optional.of(this.text);
+			public String getText() {
+				return this.text;
 			}
 
 			public BaseComponent getMessage() {
@@ -251,8 +252,8 @@ public class DefaultEvent extends Vent {
 			}
 
 			@Override
-			public Optional<String> getText() {
-				return Optional.of(this.label.replace("/", ""));
+			public String getText() {
+				return this.label.replace("/", "");
 			}
 
 			public boolean isChanged() {
@@ -423,7 +424,6 @@ public class DefaultEvent extends Vent {
 		public void onBuild(BlockBreakEvent e) {
 
 			BlockBreak b = new Call<>(Runtime.Synchronous, new BlockBreak(e.getPlayer(), e.getBlock())).run();
-
 			if (b.isCancelled()) {
 				e.setCancelled(true);
 			}
@@ -435,8 +435,10 @@ public class DefaultEvent extends Vent {
 
 			Join e = new Call<>(Runtime.Synchronous, new Join(event.getPlayer())).run();
 
+
 			if (e.isCancelled()) {
 				event.getPlayer().kickPlayer(e.getKickMessage());
+				return;
 			}
 
 			if (LabyrinthOptions.IMPL_AFK.enabled()) {
@@ -448,7 +450,7 @@ public class DefaultEvent extends Vent {
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-		public void onLeave(PlayerJoinEvent event) {
+		public void onLeave(PlayerQuitEvent event) {
 
 			Leave e = new Call<>(Runtime.Synchronous, new Leave(event.getPlayer())).run();
 

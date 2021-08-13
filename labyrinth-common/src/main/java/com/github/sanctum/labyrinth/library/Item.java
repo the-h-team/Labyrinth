@@ -462,7 +462,7 @@ public class Item {
 		 */
 		public Edit setItem(ItemStack i) {
 			if (!LISTED) {
-				this.ITEM = i;
+				this.ITEM = new ItemStack(i);
 			}
 			return this;
 		}

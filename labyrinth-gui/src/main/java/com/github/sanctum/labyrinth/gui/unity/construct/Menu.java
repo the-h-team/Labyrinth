@@ -1,17 +1,16 @@
-package com.github.sanctum.labyrinth.unity.construct;
+package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.task.Asynchronous;
-import com.github.sanctum.labyrinth.unity.impl.ClickElement;
-import com.github.sanctum.labyrinth.unity.impl.ClosingElement;
-import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.unity.impl.ItemElement;
-import com.github.sanctum.labyrinth.unity.impl.OpeningElement;
-import com.github.sanctum.labyrinth.unity.impl.PreProcessElement;
-import java.io.IOException;
+import com.github.sanctum.labyrinth.gui.unity.impl.ClickElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.ClosingElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -114,6 +113,10 @@ public abstract class Menu {
 		return properties;
 	}
 
+	public final Optional<Close> getCloseEvent() {
+		return Optional.ofNullable(this.close);
+	}
+
 	protected final void registerController() throws InstantiationException {
 		if (this.controller == null) {
 
@@ -134,7 +137,7 @@ public abstract class Menu {
 			this.retrieved = true;
 			PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 			if (getInventory().isPaginated()) {
-				Map<Integer, ItemStack[]> map = (Map<Integer, ItemStack[]>) container.get(Map.class, getInventory().getTitle());
+				Map<Integer, UniformedComponents<ItemStack>> map = (Map<Integer, UniformedComponents<ItemStack>>) container.get(Map.class, getInventory().getTitle());
 				if (map != null) {
 
 					if (!getProperties().contains(Property.SAVABLE)) {
@@ -144,8 +147,8 @@ public abstract class Menu {
 
 					InventoryElement inv = getInventory();
 
-					for (Map.Entry<Integer, ItemStack[]> entry : map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toList())) {
-						for (ItemStack i : entry.getValue()) {
+					for (Map.Entry<Integer, UniformedComponents<ItemStack>> entry : map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toList())) {
+						for (ItemStack i : entry.getValue().array()) {
 							if (i != null && i.getType() != Material.AIR) {
 								inv.addItem(new ItemElement<>(container).setParent(getInventory()).setElement(i));
 							}
@@ -178,9 +181,9 @@ public abstract class Menu {
 		if (!getProperties().contains(Property.SAVABLE)) return;
 		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 		if (getInventory().isPaginated()) {
-			Map<Integer, ItemStack[]> s = new HashMap<>();
+			Map<Integer, UniformedComponents<ItemStack>> s = new HashMap<>();
 			for (InventoryElement.Page entry : getInventory().getAllPages()) {
-				s.put(entry.toNumber(), UniformedComponents.accept(entry.getAttachment().stream().map(ItemElement::getElement).collect(Collectors.toList())).array());
+				s.put(entry.toNumber(), UniformedComponents.accept(entry.getAttachment().stream().map(ItemElement::getElement).collect(Collectors.toList())));
 			}
 			container.attach(getInventory().getTitle(), s);
 		} else {
@@ -272,7 +275,7 @@ public abstract class Menu {
 
 	/**
 	 * An operation for setting up new item elements from a {@link java.util.List}
-	 * Primarily used in {@link com.github.sanctum.labyrinth.unity.impl.ListElement}
+	 * Primarily used in {@link com.github.sanctum.labyrinth.gui.unity.impl.ListElement}
 	 *
 	 * @param <T> The list value being fed during operation.
 	 */
@@ -353,6 +356,10 @@ public abstract class Menu {
 		 */
 		REFILLABLE,
 
+		/**
+		 * This menu will have a recursively updating inventory title, this option is best used with pagination to consistently display page placement
+		 * in your title using {0} {1} placeholders.
+		 */
 		RECURSIVE,
 
 		/**
@@ -385,20 +392,42 @@ public abstract class Menu {
 	}
 
 	/**
-	 * A utility used to determine an inventories size.
+	 * Define inventory size.
+	 * <p>
+	 * Helps enforce slot parameter contract of
+	 * {@link Bukkit#createInventory(InventoryHolder, int, String)}
+	 * (int must be divisible by 9)
 	 */
 	public enum Rows {
 
+		/**
+		 * Slots: 9
+		 */
 		ONE(9),
 
+		/**
+		 * Slots: 18
+		 */
 		TWO(18),
 
+		/**
+		 * Slots: 27
+		 */
 		THREE(27),
 
+		/**
+		 * Slots: 36
+		 */
 		FOUR(36),
 
+		/**
+		 * Slots: 45
+		 */
 		FIVE(45),
 
+		/**
+		 * Slots: 54
+		 */
 		SIX(54);
 
 		private final int slots;
@@ -408,7 +437,7 @@ public abstract class Menu {
 		}
 
 		/**
-		 * @return The size of the inventory in reference to {@link Bukkit#createInventory(InventoryHolder, int, String)}
+		 * @return The size of the inventory.
 		 */
 		public int getSlots() {
 			return slots;
@@ -750,7 +779,6 @@ public abstract class Menu {
 			if (!e.getInventory().equals(target)) return;
 
 			if (e.getClickedInventory() == e.getInventory()) {
-
 				Player p = (Player) e.getWhoClicked();
 
 				if (e.getCurrentItem() != null) {
@@ -897,9 +925,15 @@ public abstract class Menu {
 						ItemElement<?> element2 = getInventory().match(item);
 						if (element2 != null) {
 							Click click = element2.getAttachment();
-							if (click == null) return;
 							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), element2, e.getView());
-							click.apply(clickElement);
+							if (click == null) {
+								if (Menu.this.click != null) {
+									Menu.this.click.apply(clickElement);;
+								}
+								return;
+							} else {
+								click.apply(clickElement);
+							}
 
 							if (clickElement.getResult() != null) {
 								e.setResult(clickElement.getResult());
@@ -1031,26 +1065,69 @@ public abstract class Menu {
 							}
 						}
 					}
+
+					if (!e.isCancelled()) {
+
+						ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
+
+						if (getProperties().contains(Property.SHAREABLE)) {
+							el.setPage(getInventory().getGlobalSlot());
+
+						} else {
+							el.setPage(getInventory().getPlayer((Player) e.getWhoClicked()).getPage());
+						}
+
+						if (Menu.this.click != null) {
+							ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), el, e.getView());
+							Menu.this.click.apply(element3);
+
+							if (element3.getResult() != null) {
+								e.setResult(element3.getResult());
+							}
+
+							if (!element3.isHotbarAllowed()) {
+								if (e.getHotbarButton() != -1) {
+									e.setCancelled(true);
+									return;
+								}
+							}
+
+							if (element3.isCancelled()) {
+								e.setCancelled(true);
+							}
+						}
+
+					}
+
 				}
 
 				if (!e.isCancelled()) {
 
-					if (Menu.this.click != null) {
-						ClickElement element = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), new ItemElement<>().setParent(getInventory()).setElement(e.getCurrentItem()), e.getView());
-						Menu.this.click.apply(element);
+					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
 
-						if (element.getResult() != null) {
-							e.setResult(element.getResult());
+					if (getProperties().contains(Property.SHAREABLE)) {
+						el.setPage(getInventory().getGlobalSlot());
+
+					} else {
+						el.setPage(getInventory().getPlayer((Player) e.getWhoClicked()).getPage());
+					}
+
+					if (Menu.this.click != null) {
+						ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), el, e.getView());
+						Menu.this.click.apply(element3);
+
+						if (element3.getResult() != null) {
+							e.setResult(element3.getResult());
 						}
 
-						if (!element.isHotbarAllowed()) {
+						if (!element3.isHotbarAllowed()) {
 							if (e.getHotbarButton() != -1) {
 								e.setCancelled(true);
 								return;
 							}
 						}
 
-						if (element.isCancelled()) {
+						if (element3.isCancelled()) {
 							e.setCancelled(true);
 						}
 					}

@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 /**
  * Encapsulate custom data and feed it to an {@link AnvilMenu} to be provided to a player.
  */
+@Deprecated
 public class AnvilBuilder {
 
 	protected final String title;

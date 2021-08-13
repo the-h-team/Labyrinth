@@ -10,6 +10,7 @@ import org.bukkit.inventory.InventoryHolder;
  * {@link Bukkit#createInventory(InventoryHolder, int, String)}
  * (int must be divisible by 9)
  */
+@Deprecated
 public enum InventoryRows {
 	ONE(9),
 	TWO(18),

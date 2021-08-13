@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Fluid interface menu builder
  */
+@Deprecated
 public final class MenuBuilder {
 	/**
 	 * Describes the number of rows and slots in the final Menu.

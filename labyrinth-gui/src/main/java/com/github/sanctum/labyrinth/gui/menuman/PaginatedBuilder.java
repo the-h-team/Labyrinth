@@ -32,6 +32,7 @@ import org.bukkit.plugin.Plugin;
  * <p>
  * Use this to customize everything from click/close events to element specifications.
  */
+@Deprecated
 public final class PaginatedBuilder<T> {
 
 	final Map<Player, Asynchronous> task = new HashMap<>();

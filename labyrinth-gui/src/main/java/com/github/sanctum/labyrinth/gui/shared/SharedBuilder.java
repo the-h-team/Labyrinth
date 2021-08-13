@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A wrapper object for {@link SharedMenu} instantiation.
  */
+@Deprecated
 public class SharedBuilder {
 
 	/**

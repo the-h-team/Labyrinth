@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An object that encapsulates a size and title for a share-able player inventory.
  */
+@Deprecated
 public abstract class SharedMenu implements Listener {
 
 	protected final Plugin plugin;

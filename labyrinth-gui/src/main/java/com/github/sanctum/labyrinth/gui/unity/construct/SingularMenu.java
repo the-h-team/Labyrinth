@@ -1,26 +1,24 @@
-package com.github.sanctum.labyrinth.unity.construct;
+package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.unity.impl.PreProcessElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class PaginatedMenu extends Menu {
+public class SingularMenu extends Menu {
 
-	public PaginatedMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
+	public SingularMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		super(host, title, rows, type, properties);
 		if (getProperties().contains(Property.SHAREABLE)) {
 			if (!getProperties().contains(Property.ANIMATED)) {
-				addElement(new InventoryElement.SharedPaginated(title, this));
+				addElement(new InventoryElement.Shared(title, this));
 			} else {
-				addElement(new InventoryElement.Paginated(title, this));
+				addElement(new InventoryElement.Normal(title, this));
 			}
 		} else {
-			addElement(new InventoryElement.Paginated(title, this));
+			addElement(new InventoryElement.Normal(title, this));
 		}
-
-		this.properties.add(Property.REFILLABLE);
 
 		Schedule.sync(() -> {
 			if (getProperties().contains(Property.SAVABLE)) {
@@ -35,6 +33,8 @@ public class PaginatedMenu extends Menu {
 		return getElement(e -> e instanceof InventoryElement);
 	}
 
+
+
 	@Override
 	public void open(Player player) {
 		if (this.process != null) {
@@ -43,5 +43,7 @@ public class PaginatedMenu extends Menu {
 		}
 		getInventory().open(player);
 	}
+
+
 
 }

@@ -1,7 +1,7 @@
-package com.github.sanctum.labyrinth.unity.impl;
+package com.github.sanctum.labyrinth.gui.unity.impl;
 
-import com.github.sanctum.labyrinth.unity.construct.Menu;
-import com.github.sanctum.labyrinth.unity.construct.SingularMenu;
+import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+import com.github.sanctum.labyrinth.gui.unity.construct.SingularMenu;
 
 class SingularBuilder extends Menu.Builder<SingularMenu> {
 
