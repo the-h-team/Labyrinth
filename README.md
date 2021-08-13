@@ -90,7 +90,7 @@ _API Table of Contents_:
   - [Command Builder]()
   - [Command Utility]()
   - [Complete GUI Builder](https://github.com/the-h-team/Labyrinth/wiki/Unity-Library)
-  - [Complete Head Database/Locator]()
+  - [Complete Head Database/Locator](https://github.com/the-h-team/Labyrinth/wiki/Custom-Heads)
   - [Cooldown Abstraction](https://github.com/the-h-team/Labyrinth/wiki/Cooldowns)
   - [Custom Gradient Color Interface]()
   - [Custom ID Generation](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive#2-regex-matching)
