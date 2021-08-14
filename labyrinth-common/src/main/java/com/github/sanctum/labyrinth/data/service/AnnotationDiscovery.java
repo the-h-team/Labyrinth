@@ -98,7 +98,7 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 	 * @return A set of annotations only matching this discovery query.
 	 */
 	public Set<T> read(Method m) {
-		return Arrays.stream(m.getAnnotations()).filter(a -> a.getClass().isAssignableFrom(annotation)).map(a -> (T) a).collect(Collectors.toSet());
+		return Arrays.stream(m.getAnnotations()).filter(a -> annotation.isAssignableFrom(a.getClass())).map(a -> (T) a).collect(Collectors.toSet());
 	}
 
 	/**

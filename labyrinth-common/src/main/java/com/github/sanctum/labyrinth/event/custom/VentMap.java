@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -35,14 +34,14 @@ public abstract class VentMap {
 	/**
 	 * Unsubscribe every found subscription labeled under the specified namespace.
 	 *
-	 * @param key       The key namespace for the subscription.
+	 * @param key The key namespace for the subscription.
 	 */
 	public abstract void unsubscribeAll(@NotNull String key);
 
 	/**
 	 * Unsubscribe every found subscription labeled under the specified namespace.
 	 *
-	 * @param fun       The prerequisite to unsubscribing from a vent.
+	 * @param fun The prerequisite to unsubscribing from a vent.
 	 */
 	public abstract void unsubscribeAll(Predicate<Vent.Subscription<?>> fun);
 
