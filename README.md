@@ -93,20 +93,20 @@ otherwise have been far more time-consuming.
 
 _API Table of Contents_:
 -- 
-* ### Spigot
-  - [AFK Player Utility]()
-  - [Command Builder]()
-  - [Command Utility]()
+* ### Common Utilities
+  - [AFK Player Utility](https://github.com/the-h-team/Labyrinth/wiki/Have-i-been-gone-long-enough%3F)
+  - [Command Builder](https://github.com/the-h-team/Labyrinth/wiki/Commands)
+  - [Command Utility](https://github.com/the-h-team/Labyrinth/wiki/Commands)
   - [Complete GUI Builder](https://github.com/the-h-team/Labyrinth/wiki/Unity-Library)
   - [Complete Head Database/Locator](https://github.com/the-h-team/Labyrinth/wiki/Custom-Heads)
   - [Cooldown Abstraction](https://github.com/the-h-team/Labyrinth/wiki/Cooldowns)
-  - [Custom Gradient Color Interface]()
+  - [Custom Gradient Color Interface](https://github.com/the-h-team/Labyrinth/wiki/Custom-Gradients)
   - [Custom ID Generation](https://github.com/the-h-team/Labyrinth/wiki/StringUtils-first-dive#2-regex-matching)
-  - [Directional Enumeration]()
-  - [Economy Interface Wrapper]()
-  - [Entity Creation Tools]()
+  - [Directional Enumeration](https://github.com/the-h-team/Labyrinth/wiki/Directional-Enumeration)
+  - [Economy Interface Wrapper](https://github.com/the-h-team/Labyrinth/wiki/Economy-Bridge)
+  - [Entity Creation Tools](https://github.com/the-h-team/Labyrinth/wiki/Entity-Creation)
   - [File Management]()
-  - [Item Recipe Builder]()
+  - [Item Recipe Builder](https://github.com/the-h-team/Labyrinth/wiki/Item-Recipe-Builder)
   - [Item Modification Builder]()
   - [Legacy Safe NamespacedKey]()
   - [Listing Collections](https://github.com/the-h-team/Labyrinth/wiki/PaginatedList-Example)
@@ -118,7 +118,7 @@ _API Table of Contents_:
   - [Template Creation]()
   - [TextComponent Builder]()
   - [Vault Permission Interface Wrapper]()
-* ### Library
+* ### General-Purpose Utilities
   - [Applicable Data]()
   - [Annotation Discovery]()
   - [Base64 Serialization]()
