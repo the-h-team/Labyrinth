@@ -11,12 +11,14 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -219,7 +221,19 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
 		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
-		return this.items.stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(null))));
+		return this.items.stream().filter(i -> {
+			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+				return isSimilar(item, i.getElement());
+			} else return i.getElement().isSimilar(item);
+		}).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(i -> {
+			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+				return isSimilar(item, i.getElement());
+			} else return i.getElement().isSimilar(item);
+		}).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(i -> {
+			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+				return isSimilar(item, i.getElement());
+			} else return i.getElement().isSimilar(item);
+		}).findFirst().orElse(null))));
 	}
 
 	public @Nullable ItemElement<?> getItem(int slot) {
@@ -233,7 +247,26 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	public boolean contains(ItemStack item) {
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
-		return this.items.stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item)) || list != null && list.getAttachment().stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item));
+		return this.items.stream().map(ItemElement::getElement).anyMatch(i -> {
+			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+				return isSimilar(item, i);
+			} else return i.isSimilar(item);
+		}) || list != null && list.getAttachment().stream().map(ItemElement::getElement).anyMatch(i -> {
+			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+				return isSimilar(item, i);
+			} else return i.isSimilar(item);
+		});
+	}
+
+	public boolean isSimilar(@Nullable ItemStack stack, @Nullable ItemStack stack2) {
+		if (stack == null) {
+			return false;
+		}
+		if (stack == stack2) {
+			return true;
+		}
+		Material comparisonType = (stack2.getType().isLegacy()) ? Bukkit.getUnsafe().fromLegacy(stack2.getData(), true) : stack2.getType();
+		return comparisonType == stack.getType() && stack2.getDurability() == stack.getDurability() && stack2.hasItemMeta() == stack.hasItemMeta() && (Objects.equals(stack2.getItemMeta().getDisplayName(), stack.getItemMeta().getDisplayName()));
 	}
 
 	public InventoryElement setElement(Inventory inventory) {
@@ -314,6 +347,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		private final InventoryElement element;
 
+		private PaginatedList<ItemElement<?>> pagination;
+
 		private final int num;
 
 		private boolean full;
@@ -350,11 +385,21 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			return Objects.hash(getElement(), num);
 		}
 
+		private ListElement<?> init() {
+			ListElement<?> list = (ListElement<?>) element.getElement(e -> e instanceof ListElement);
+			if (list != null) {
+				if (this.pagination == null) {
+					this.pagination = new PaginatedList<>(element.getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate);
+				}
+			}
+			return list;
+		}
+
 		@Override
 		public Set<ItemElement<?>> getAttachment() {
-			ListElement<?> list = (ListElement<?>) getElement().getElement(e -> e instanceof ListElement);
+			ListElement<?> list = init();
 			if (list == null) return new HashSet<>();
-			Set<ItemElement<?>> set = new HashSet<>(new PaginatedList<>(getElement().getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate).get(toNumber()));
+			Set<ItemElement<?>> set = new HashSet<>(pagination.update(element.getWorkflow()).compare(list.comparator).get(toNumber())).stream().sorted(list.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
 			for (ItemElement<?> it : getElement().getAttachment()) {
 				if (!set.contains(it) && it.isPlayerAdded() && it.getPage().toNumber() == toNumber()) {
 					set.add(it);
@@ -389,13 +434,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				this.tasks.put(player, Schedule.async(() -> Schedule.sync(() -> {
 					getPlayer(player).getElement().clear();
 					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-						Optional<Integer> in = element.getSlot();
-						if (in.isPresent()) {
-							getPlayer(player).getElement().setItem(in.get(), element.getElement());
-						} else {
-							if (!getPlayer(player).getElement().contains(element.getElement())) {
-								getPlayer(player).getElement().addItem(element.getElement());
-							}
+						if (!getPlayer(player).getElement().contains(element.getElement())) {
+							getPlayer(player).getElement().addItem(element.getElement());
 						}
 					}
 					for (ItemElement<?> element : items) {
@@ -410,13 +450,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			} else {
 
 				for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-					Optional<Integer> in = element.getSlot();
-					if (in.isPresent()) {
-						getPlayer(player).getElement().setItem(in.get(), element.getElement());
-					} else {
-						if (!getPlayer(player).getElement().contains(element.getElement())) {
-							getPlayer(player).getElement().addItem(element.getElement());
-						}
+					if (!getPlayer(player).getElement().contains(element.getElement())) {
+						getPlayer(player).getElement().addItem(element.getElement());
 					}
 				}
 				for (ItemElement<?> element : items) {
@@ -462,13 +497,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 						Schedule.sync(() -> {
 							getElement().clear();
 							for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-								Optional<Integer> in = element.getSlot();
-								if (in.isPresent()) {
-									getElement().setItem(in.get(), element.getElement());
-								} else {
-									if (!getElement().contains(element.getElement())) {
-										getElement().addItem(element.getElement());
-									}
+								if (!getElement().contains(element.getElement())) {
+									getElement().addItem(element.getElement());
 								}
 							}
 							for (ItemElement<?> element : items) {
@@ -495,13 +525,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			} else {
 
 				for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
-					Optional<Integer> in = element.getSlot();
-					if (in.isPresent()) {
-						getElement().setItem(in.get(), element.getElement());
-					} else {
-						if (!getElement().contains(element.getElement())) {
-							getElement().addItem(element.getElement());
-						}
+					if (!getElement().contains(element.getElement())) {
+						getElement().addItem(element.getElement());
 					}
 				}
 				for (ItemElement<?> element : items) {

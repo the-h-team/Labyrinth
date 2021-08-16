@@ -21,7 +21,6 @@ import org.bukkit.Bukkit;
  */
 public class PaginatedList<T> {
 	private List<T> typeList;
-	private Comparator<? super T> comparable;
 	private ComponentCompliment<T> start;
 	private ComponentCompliment<T> finish;
 	private ComponentDecoration<T> decoration;
@@ -53,7 +52,7 @@ public class PaginatedList<T> {
 	 * @return this paginated list procedure
 	 */
 	public PaginatedList<T> compare(Comparator<? super T> comparable) {
-		this.comparable = comparable;
+		this.typeList.sort(comparable);
 		return this;
 	}
 
@@ -140,9 +139,6 @@ public class PaginatedList<T> {
 
 	public int getTotalPageCount() {
 		int totalPageCount = 1;
-		if (this.comparable != null) {
-			typeList.sort(this.comparable);
-		}
 		if ((this.typeList.size() % linesPerPage) == 0) {
 			if (this.typeList.size() > 0) {
 				totalPageCount = this.typeList.size() / linesPerPage;
@@ -151,6 +147,11 @@ public class PaginatedList<T> {
 			totalPageCount = (this.typeList.size() / linesPerPage) + 1;
 		}
 		return totalPageCount;
+	}
+
+	public PaginatedList<T> update(Collection<T> list) {
+		this.typeList = new LinkedList<>(list);
+		return this;
 	}
 
 	/**
