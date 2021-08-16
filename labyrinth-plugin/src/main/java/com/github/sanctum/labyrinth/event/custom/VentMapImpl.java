@@ -52,8 +52,8 @@ public final class VentMapImpl extends VentMap {
 
 	@Override
 	public void unregister(@NotNull Object listener) {
-		for (RegisteredListener l : listeners) {
-			if (listener.equals(l.getListener())) {
+		for (VentListener l : listeners) {
+			if (listener.equals(l) || listener.equals(l.getListener())) {
 				Schedule.sync(() -> listeners.remove(l)).run();
 				break;
 			}
@@ -62,7 +62,7 @@ public final class VentMapImpl extends VentMap {
 
 	@Override
 	public void unregisterAll(@NotNull Plugin host) {
-		for (RegisteredListener l : listeners) {
+		for (VentListener l : listeners) {
 			if (l.getHost().equals(host)) {
 				Schedule.sync(() -> listeners.remove(l)).run();
 			}
@@ -70,13 +70,23 @@ public final class VentMapImpl extends VentMap {
 	}
 
 	@Override
-	public List<RegisteredListener> list(@NotNull Plugin plugin) {
+	public List<VentListener> list(@NotNull Plugin plugin) {
 		return listeners.stream().filter(l -> l.getHost().equals(plugin)).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<Vent.Subscription<?>> narrow(@NotNull Plugin plugin) {
 		return subscriptions.stream().filter(s -> s.getUser().equals(plugin)).collect(Collectors.toList());
+	}
+
+	@Override
+	public VentListener get(String key) {
+		for (VentListener listener : listeners) {
+			if (listener.getKey() != null && listener.getKey().equals(key)) {
+				return listener;
+			}
+		}
+		return null;
 	}
 
 	@Override

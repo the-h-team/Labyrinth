@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +20,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 
 	private boolean slotted;
 
-	private Navigation navigation;
+	private ControlType type = ControlType.ITEM;
 
 	private int slot;
 
@@ -105,13 +106,13 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	}
 
 	/**
-	 * Set the navigation this item represents.
+	 * Set the type this item represents.
 	 *
-	 * @param navigation The navigation this item represents.
+	 * @param navigation The type this item represents.
 	 * @return The same item element.
 	 */
-	public ItemElement<V> setNavigation(Navigation navigation) {
-		this.navigation = navigation;
+	public ItemElement<V> setType(ControlType type) {
+		this.type = type;
 		return this;
 	}
 
@@ -138,8 +139,8 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 *
 	 * @return The navigation this item represents or null.
 	 */
-	public @Nullable Navigation getNavigation() {
-		return this.navigation;
+	public @Nullable ItemElement.ControlType getType() {
+		return this.type;
 	}
 
 	/**
@@ -227,6 +228,15 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	}
 
 	/**
+	 * Remove this item from player cache.
+	 *
+	 * @param sincere whether to delete from actual inventory or not
+	 */
+	public final void remove(Player player, boolean sincere) {
+		getParent().removeItem(player, this, sincere);
+	}
+
+	/**
 	 * Gets the item's display name if present, otherwise returning the items material type.
 	 *
 	 * @return The name of this item.
@@ -236,12 +246,40 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	}
 
 	/**
-	 * Designated navigation fields, used to tell the menu where to go next.
+	 * Designated navigation fields, used to tell the menu what this item represents.
 	 */
-	public enum Navigation {
-		Previous,
-		Next,
-		Back
+	public enum ControlType {
+
+		/**
+		 * Symbolizes an entry point backwards.
+		 */
+		BUTTON_BACK,
+
+		/**
+		 * Symbolizes an entry point forward.
+		 */
+		BUTTON_NEXT,
+
+		/**
+		 * Symbolizes an entry point exit.
+		 */
+		BUTTON_EXIT,
+
+		/**
+		 * Symbolizes a normal item.
+		 */
+		ITEM,
+
+		/**
+		 * Symbolizes a {@link BorderElement} item.
+		 */
+		ITEM_BORDER,
+
+		/**
+		 * Symbolizes a {} item.
+		 */
+		ITEM_FILLER
+
 	}
 
 	@Override
@@ -252,7 +290,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		return isSlotted() == that.isSlotted() &&
 				getSlot() == that.getSlot() &&
 				isPlayerAdded() == that.isPlayerAdded() &&
-				getNavigation() == that.getNavigation() &&
+				getType() == that.getType() &&
 				Objects.equals(getData(), that.getData()) &&
 				item.equals(that.item) &&
 				Objects.equals(getPage(), that.getPage()) &&
@@ -262,6 +300,6 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(isSlotted(), getNavigation(), getSlot(), getData(), item, getPage(), click, getParent(), isPlayerAdded());
+		return Objects.hash(isSlotted(), getType(), getSlot(), getData(), item, getPage(), click, getParent(), isPlayerAdded());
 	}
 }

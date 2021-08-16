@@ -10,7 +10,7 @@ public abstract class VentMap {
 
 	final LinkedList<Vent.Subscription<?>> subscriptions = new LinkedList<>();
 
-	final LinkedList<RegisteredListener> listeners = new LinkedList<>();
+	final LinkedList<VentListener> listeners = new LinkedList<>();
 
 	/**
 	 * Unsubscribe from an event by providing the key of the desired subscription if found.
@@ -65,7 +65,7 @@ public abstract class VentMap {
 	 * @param plugin The plugin providing the listeners.
 	 * @return A list of all linked listeners.
 	 */
-	public abstract List<RegisteredListener> list(@NotNull Plugin plugin);
+	public abstract List<VentListener> list(@NotNull Plugin plugin);
 
 	/**
 	 * Narrow down a list of all subscriptions provided by a single plugin.
@@ -74,6 +74,14 @@ public abstract class VentMap {
 	 * @return A list of all linked subscriptions.
 	 */
 	public abstract List<Vent.Subscription<?>> narrow(@NotNull Plugin plugin);
+
+	/**
+	 * Get a singular listener by its key.
+	 *
+	 * @param key The key for the listener.
+	 * @return The registered listener.
+	 */
+	public abstract VentListener get(String key);
 
 	/**
 	 * Get a singular subscription by its relative key if found.

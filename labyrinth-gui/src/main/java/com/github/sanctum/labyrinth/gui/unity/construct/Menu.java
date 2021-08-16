@@ -305,7 +305,7 @@ public abstract class Menu {
 			return element.getElement();
 		}
 
-		public final @Nullable Element<?, ?> findElement(Predicate<Element<?, ?>> predicate) {
+		public final @Nullable Element<?, ?> getElement(Predicate<Element<?, ?>> predicate) {
 			for (Element<?, ?> e : elements) {
 				if (predicate.test(e)) {
 					return e;
@@ -439,9 +439,127 @@ public abstract class Menu {
 		/**
 		 * @return The size of the inventory.
 		 */
-		public int getSlots() {
+		public int getSize() {
 			return slots;
 		}
+
+		public int[] getSlots(Panel layout) {
+			return layout.get(getSize());
+		}
+
+	}
+
+	/**
+	 * Get slots for a specific position within an inventory.
+	 */
+	public enum Panel {
+
+		/**
+		 * The top bar of slots within the inventory.
+		 */
+		TOP,
+
+		/**
+		 * The bottom bar of slots within the inventory.
+		 */
+		BOTTOM,
+
+		/**
+		 * The middle space of the inventory.
+		 */
+		MIDDLE,
+
+		/**
+		 * The left bar of slots within the inventory.
+		 */
+		LEFT,
+
+		/**
+		 * The right bar of slots within the inventory.
+		 */
+		RIGHT;
+
+		public int[] get(int slots) {
+			switch (slots) {
+				case 9:
+					switch (this) {
+						case MIDDLE:
+						case TOP:
+						case BOTTOM:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case LEFT:
+							return new int[]{0};
+						case RIGHT:
+							return new int[]{8};
+					}
+				case 18:
+					switch (this) {
+						case MIDDLE:
+						case TOP:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case BOTTOM:
+							return new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17};
+						case LEFT:
+							return new int[]{0, 9};
+						case RIGHT:
+							return new int[]{8, 17};
+					}
+				case 27:
+					switch (this) {
+						case MIDDLE:
+							return new int[]{10, 11, 12, 13, 14, 15, 16};
+						case TOP:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case BOTTOM:
+							return new int[]{18, 19, 20, 21, 22, 23, 24, 25, 26};
+						case LEFT:
+							return new int[]{0, 9, 18};
+						case RIGHT:
+							return new int[]{8, 17, 26};
+					}
+				case 36:
+					switch (this) {
+						case MIDDLE:
+							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25};
+						case TOP:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case BOTTOM:
+							return new int[]{27, 28, 29, 30, 31, 32, 33, 34, 35};
+						case LEFT:
+							return new int[]{0, 9, 18, 27};
+						case RIGHT:
+							return new int[]{8, 17, 26, 35};
+					}
+				case 45:
+					switch (this) {
+						case MIDDLE:
+							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
+						case TOP:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case BOTTOM:
+							return new int[]{36, 37, 38, 39, 40, 41, 42, 43, 45};
+						case LEFT:
+							return new int[]{0, 9, 18, 27, 36};
+						case RIGHT:
+							return new int[]{8, 17, 26, 35, 45};
+					}
+				case 54:
+					switch (this) {
+						case MIDDLE:
+							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
+						case TOP:
+							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
+						case BOTTOM:
+							return new int[]{45, 46, 47, 48, 49, 50, 51, 52, 53};
+						case LEFT:
+							return new int[]{0, 9, 18, 27, 36, 45};
+						case RIGHT:
+							return new int[]{8, 17, 26, 35, 45, 53};
+					}
+			}
+			return new int[0];
+		}
+
 	}
 
 	/**
@@ -673,7 +791,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getElement((Player) e.getPlayer());
+				target = getInventory().getPlayer((Player) e.getPlayer()).getElement();
 			}
 
 			if (e.getInventory().equals(target)) {
@@ -750,7 +868,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getElement((Player) e.getWhoClicked());
+				target = getInventory().getPlayer((Player) e.getWhoClicked()).getElement();
 			}
 
 			if (!e.getInventory().equals(target)) return;
@@ -772,7 +890,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getElement((Player) e.getWhoClicked());
+				target = getInventory().getPlayer((Player) e.getWhoClicked()).getElement();
 			}
 
 
@@ -784,33 +902,31 @@ public abstract class Menu {
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
 
-					ItemElement<?> element = getInventory().match(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType());
+					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType());
 					if (element != null) {
 						Click click = element.getAttachment();
 						if (click == null) return;
-						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), element, e.getView());
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getView());
 						click.apply(clickElement);
 
 						if (clickElement.getResult() != null) {
 							e.setResult(clickElement.getResult());
 						}
-
-						if (!clickElement.isHotbarAllowed()) {
-							if (e.getHotbarButton() != -1) {
+						if (e.getHotbarButton() != -1) {
+							if (!clickElement.isHotbarAllowed()) {
 								e.setCancelled(true);
-								return;
 							}
 						}
 
-						if (element.getNavigation() != null) {
+						if (element.getType() != null) {
 							ClickElement.Consumer consumer = clickElement.getConsumer();
-							switch (element.getNavigation()) {
-								case Back:
+							switch (element.getType()) {
+								case BUTTON_EXIT:
 									if (consumer != null) {
 										consumer.accept(clickElement.getElement(), false);
 									}
 									break;
-								case Next:
+								case BUTTON_NEXT:
 									if (Menu.this instanceof PaginatedMenu) {
 										PaginatedMenu m = (PaginatedMenu) Menu.this;
 
@@ -854,7 +970,7 @@ public abstract class Menu {
 										consumer.accept(clickElement.getElement(), false);
 									}
 									break;
-								case Previous:
+								case BUTTON_BACK:
 									if (Menu.this instanceof PaginatedMenu) {
 										PaginatedMenu m = (PaginatedMenu) Menu.this;
 
@@ -922,10 +1038,10 @@ public abstract class Menu {
 						}
 
 					} else {
-						ItemElement<?> element2 = getInventory().match(item);
+						ItemElement<?> element2 = getInventory().getItem(item);
 						if (element2 != null) {
 							Click click = element2.getAttachment();
-							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), element2, e.getView());
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getView());
 							if (click == null) {
 								if (Menu.this.click != null) {
 									Menu.this.click.apply(clickElement);;
@@ -939,22 +1055,21 @@ public abstract class Menu {
 								e.setResult(clickElement.getResult());
 							}
 
-							if (!clickElement.isHotbarAllowed()) {
-								if (e.getHotbarButton() != -1) {
+							if (e.getHotbarButton() != -1) {
+								if (!clickElement.isHotbarAllowed()) {
 									e.setCancelled(true);
-									return;
 								}
 							}
 
-							if (element2.getNavigation() != null) {
+							if (element2.getType() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
-								switch (element2.getNavigation()) {
-									case Back:
+								switch (element2.getType()) {
+									case BUTTON_EXIT:
 										if (consumer != null) {
 											consumer.accept(clickElement.getElement(), false);
 										}
 										break;
-									case Next:
+									case BUTTON_NEXT:
 										if (Menu.this instanceof PaginatedMenu) {
 											PaginatedMenu m = (PaginatedMenu) Menu.this;
 
@@ -998,7 +1113,7 @@ public abstract class Menu {
 											consumer.accept(clickElement.getElement(), false);
 										}
 										break;
-									case Previous:
+									case BUTTON_BACK:
 										if (Menu.this instanceof PaginatedMenu) {
 											PaginatedMenu m = (PaginatedMenu) Menu.this;
 
@@ -1078,17 +1193,16 @@ public abstract class Menu {
 						}
 
 						if (Menu.this.click != null) {
-							ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), el, e.getView());
+							ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
 							Menu.this.click.apply(element3);
 
 							if (element3.getResult() != null) {
 								e.setResult(element3.getResult());
 							}
 
-							if (!element3.isHotbarAllowed()) {
-								if (e.getHotbarButton() != -1) {
+							if (e.getHotbarButton() != -1) {
+								if (!element3.isHotbarAllowed()) {
 									e.setCancelled(true);
-									return;
 								}
 							}
 
@@ -1113,17 +1227,16 @@ public abstract class Menu {
 					}
 
 					if (Menu.this.click != null) {
-						ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), el, e.getView());
+						ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
 						Menu.this.click.apply(element3);
 
 						if (element3.getResult() != null) {
 							e.setResult(element3.getResult());
 						}
 
-						if (!element3.isHotbarAllowed()) {
-							if (e.getHotbarButton() != -1) {
+						if (e.getHotbarButton() != -1) {
+							if (!element3.isHotbarAllowed()) {
 								e.setCancelled(true);
-								return;
 							}
 						}
 

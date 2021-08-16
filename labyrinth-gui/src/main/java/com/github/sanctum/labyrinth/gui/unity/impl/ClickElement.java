@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
@@ -20,11 +21,14 @@ public class ClickElement extends PlayerElement{
 
 	private final int slot;
 
+	private final ClickType clickType;
+
 	private final InventoryAction action;
 
-	public ClickElement(Player clicker, int slot, InventoryAction action, ItemElement<?> element, InventoryView view) {
+	public ClickElement(Player clicker, int slot, InventoryAction action, ClickType type, ItemElement<?> element, InventoryView view) {
 		super(clicker, view);
 		this.action = action;
+		this.clickType = type;
 		this.slot = slot;
 		this.parent = element;
 	}
@@ -34,6 +38,13 @@ public class ClickElement extends PlayerElement{
 	 */
 	public InventoryAction getAction() {
 		return action;
+	}
+
+	/**
+	 * @return The type of click.
+	 */
+	public ClickType getClickType() {
+		return clickType;
 	}
 
 	/**
@@ -85,7 +96,7 @@ public class ClickElement extends PlayerElement{
 	}
 
 	/**
-	 * Set the state of cancellation for this events hotbar buttons.
+	 * Set the state of cancellation for this events hotkey buttons.
 	 *
 	 * @param hotbarAllowed The state of cancellation
 	 */

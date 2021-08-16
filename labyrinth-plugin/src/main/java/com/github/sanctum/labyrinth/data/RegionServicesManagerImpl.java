@@ -293,7 +293,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
                         e.setResult(Event.Result.DENY);
                     }
 
-                    // TODO: decide how to handle optional (ifPresent setPos1?)
+                    // TODO: decide how to handle optional (map setPos1?)
                     //noinspection OptionalGetWithoutIsPresent
                     selection.setPos1(e.getBlock().get().getLocation());
 
@@ -332,7 +332,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
                         e.setResult(Event.Result.DENY);
                     }
 
-                    // TODO: decide how to handle optional (ifPresent setPos2?)
+                    // TODO: decide how to handle optional (map setPos2?)
                     //noinspection OptionalGetWithoutIsPresent
                     selection.setPos2(e.getBlock().get().getLocation());
 

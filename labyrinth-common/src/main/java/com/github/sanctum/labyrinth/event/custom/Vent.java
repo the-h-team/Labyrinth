@@ -3,15 +3,12 @@ package com.github.sanctum.labyrinth.event.custom;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.github.sanctum.labyrinth.task.Schedule;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +78,10 @@ public abstract class Vent {
 
 	public <T extends Vent> Class<T> getType() {
 		return (Class<T>) getClass();
+	}
+
+	public VentMap getVentMap() {
+		return getMap();
 	}
 
 	public static class Link {
@@ -241,12 +242,12 @@ public abstract class Vent {
 	}
 
 	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		getMap().listeners.add(new RegisteredListener(host, listener));
+		getMap().listeners.add(new VentListener(host, listener));
 	}
 
 	public static void registerAll(@NotNull Plugin host, @NotNull Object... listener) {
 		for (Object o : listener) {
-			getMap().listeners.add(new RegisteredListener(host, o));
+			getMap().listeners.add(new VentListener(host, o));
 		}
 	}
 
@@ -376,11 +377,12 @@ public abstract class Vent {
 
 					if (!map.listeners.isEmpty()) {
 						for (Priority priority : Priority.values()) {
-							for (RegisteredListener o : map.listeners) {
+							for (VentListener o : map.listeners) {
 								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 								for (Method m : discovery.methods()) {
 									for (Subscribe a : discovery.read(m)) {
 										if (a.priority() != priority) continue;
+										if (a.ignore()) continue;;
 										if (!m.isAccessible()) m.setAccessible(true);
 										try {
 											switch (priority) {
@@ -480,11 +482,12 @@ public abstract class Vent {
 
 						if (!map.listeners.isEmpty()) {
 							for (Priority priority : Priority.values()) {
-								for (RegisteredListener o : map.listeners) {
+								for (VentListener o : map.listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 									for (Method m : discovery.methods()) {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
+											if (a.ignore()) continue;;
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {
@@ -581,11 +584,12 @@ public abstract class Vent {
 
 						if (!map.listeners.isEmpty()) {
 							for (Priority priority : Priority.values()) {
-								for (RegisteredListener o : map.listeners) {
+								for (VentListener o : map.listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 									for (Method m : discovery.methods()) {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
+											if (a.ignore()) continue;;
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {

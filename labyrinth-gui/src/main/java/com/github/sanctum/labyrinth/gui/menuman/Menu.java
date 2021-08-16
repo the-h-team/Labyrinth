@@ -119,7 +119,7 @@ public final class Menu {
     /**
      * Lazy initialization of inventory on first get.
      * <p>
-     * Added bonus: listener returns faster before getInventory is called.
+     * Added bonus: listener returns faster before getElement is called.
      *
      * @return generated Inventory
      */

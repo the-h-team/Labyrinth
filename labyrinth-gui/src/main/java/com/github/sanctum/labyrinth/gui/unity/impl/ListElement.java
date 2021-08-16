@@ -57,7 +57,7 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 	public Set<ItemElement<?>> getAttachment() {
 		Set<ItemElement<?>> elements = new HashSet<>();
 		for (T t : list) {
-			ItemElement<?> element = new ItemElement<>().setParent(getParent());
+			ItemElement<T> element = new ItemElement<>(t).setParent(getParent());
 			populator.accept(t, element);
 			elements.add(element);
 		}

@@ -54,34 +54,31 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 		return this;
 	}
 
+	public boolean isPresent() {
+		return methods.isEmpty() ? this.r.getClass().isAnnotationPresent(annotation) : count > 0;
+	}
 
-	/**
-	 * Run functions on the given methods.
-	 *
-	 * @param function The function to run on all methods.
-	 */
-	public void ifPresent(MethodConsumer<Method, T, R> function) {
-		if (methods.isEmpty()) {
-			for (Method m : r.getClass().getMethods()) {
-				if (m.isAnnotationPresent(annotation)) {
-					for (Annotation a : m.getAnnotations()) {
-						if (a.getClass().isAssignableFrom(annotation)) {
-							function.accept(m, (T) a, r);
-						}
-					}
-				}
-			}
-		} else {
+	public void ifPresent(AnnotativeConsumer<T, R, Void> function) {
+		if (isPresent()) {
 			for (Method m : methods) {
-				if (m.isAnnotationPresent(annotation)) {
-					for (Annotation a : m.getAnnotations()) {
-						if (a.getClass().isAssignableFrom(annotation)) {
-							function.accept(m, (T) a, r);
-						}
+				for (Annotation a : m.getAnnotations()) {
+					if (annotation.isAssignableFrom(a.annotationType())) {
+						function.accept((T) a, r);
 					}
 				}
 			}
 		}
+	}
+
+	public <U> U map(AnnotativeConsumer<T, R, U> function) {
+		if (isPresent()) {
+			for (Annotation a : r.getClass().getAnnotations()) {
+				if (annotation.isAssignableFrom(a.annotationType())) {
+					return function.accept((T) a, r);
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -109,9 +106,9 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 	}
 
 	@FunctionalInterface
-	public interface MethodConsumer<F extends Method, U extends Annotation, R> {
+	public interface AnnotativeConsumer<U extends Annotation, R, V> {
 
-		void accept(F f, U r, R u);
+		V accept(U r, R u);
 
 	}
 

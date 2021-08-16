@@ -3,10 +3,10 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
+import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,8 +33,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	protected final boolean lazy;
 	protected final String title;
 	protected final Menu menu;
-	protected final Map<Player, Inventory> invmap;
-	protected ListElement<?> listElement;
 	protected Inventory inventory;
 	protected int limit = 5;
 	protected int page = 1;
@@ -44,24 +42,59 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		this.menu = menu;
 		this.tasks = new HashMap<>();
 		this.index = new HashSet<>();
-		this.invmap = new HashMap<>();
 		this.title = title;
 		this.lazy = lazy;
 	}
 
-	public synchronized void open(Player player) {}
+	public synchronized void open(Player player) {
+	}
 
 	@Override
 	public Inventory getElement() {
 
 		if (this.inventory == null) {
-			this.inventory = Bukkit.createInventory(null, menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+			this.inventory = Bukkit.createInventory(null, menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
 		}
 
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (UniformedComponents.accept(Arrays.asList(this.inventory.getContents())).filter(i -> i != null).count() == 0) {
 				if (isPaginated()) {
-					for (ItemElement<?> element : new PaginatedList<>(getWorkflow()).limit(this.listElement.getLimit()).compare(this.listElement.comparator).filter(this.listElement.predicate).get(page)) {
+					BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+					if (border != null) {
+						for (ItemElement<?> element : border.getAttachment()) {
+							Optional<Integer> i = element.getSlot();
+							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
+						}
+					}
+					ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+					if (list == null) return this.inventory;
+					for (ItemElement<?> element : new PaginatedList<>(getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate).get(page)) {
+						if (!this.inventory.contains(element.getElement())) {
+							this.inventory.addItem(element.getElement());
+						}
+					}
+					for (ItemElement<?> element : items) {
+						Optional<Integer> i = element.getSlot();
+						i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
+					}
+					FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+					if (filler != null) {
+						for (ItemElement<?> el : filler.getAttachment()) {
+							int slot = el.getSlot().orElse(0);
+							if (this.inventory.getItem(slot) == null) {
+								this.inventory.setItem(slot, el.getElement());
+							}
+						}
+					}
+				} else {
+					BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+					if (border != null) {
+						for (ItemElement<?> element : border.getAttachment()) {
+							Optional<Integer> i = element.getSlot();
+							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
+						}
+					}
+					for (ItemElement<?> element : items) {
 						Optional<Integer> i = element.getSlot();
 						if (i.isPresent()) {
 							this.inventory.setItem(i.get(), element.getElement());
@@ -71,18 +104,12 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							}
 						}
 					}
-					for (ItemElement<?> element : items) {
-						Optional<Integer> i = element.getSlot();
-						i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
-					}
-				} else {
-					for (ItemElement<?> element : items) {
-						Optional<Integer> i = element.getSlot();
-						if (i.isPresent()) {
-							this.inventory.setItem(i.get(), element.getElement());
-						} else {
-							if (!this.inventory.contains(element.getElement())) {
-								this.inventory.addItem(element.getElement());
+					FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+					if (filler != null) {
+						for (ItemElement<?> el : filler.getAttachment()) {
+							int slot = el.getSlot().orElse(0);
+							if (this.inventory.getItem(slot) == null) {
+								this.inventory.setItem(slot, el.getElement());
 							}
 						}
 					}
@@ -92,59 +119,14 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return this.inventory;
 	}
 
-	public Inventory getElement(Player player) {
-		Inventory inventory = this.invmap.computeIfAbsent(player, p -> Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, getPlayer(player).getPage().toNumber(), getTotalPages())).translate()));
-		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
-			if (UniformedComponents.accept(Arrays.asList(inventory.getContents())).filter(i -> i != null).count() == 0) {
-				if (isPaginated()) {
-					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-						Optional<Integer> i = element.getSlot();
-						if (i.isPresent()) {
-							inventory.setItem(i.get(), element.getElement());
-						} else {
-							if (!inventory.contains(element.getElement())) {
-								inventory.addItem(element.getElement());
-							}
-						}
-					}
-					for (ItemElement<?> element : items) {
-						Optional<Integer> i = element.getSlot();
-						i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
-					}
-				} else {
-					for (ItemElement<?> element : items) {
-						Optional<Integer> i = element.getSlot();
-						if (i.isPresent()) {
-							inventory.setItem(i.get(), element.getElement());
-						} else {
-							if (!inventory.contains(element.getElement())) {
-								inventory.addItem(element.getElement());
-							}
-						}
-					}
-				}
-			}
-		}
-		return inventory;
-	}
-
 	public InventoryElement setGlobalSlot(int page) {
 		this.page = page;
 		return this;
 	}
 
-	public @Nullable ItemElement<?> getItem(Predicate<ItemElement<?>> predicate) {
-		for (ItemElement<?> it : getAttachment()) {
-			if (predicate.test(it)) {
-				return it;
-			}
-		}
-		return null;
-	}
-
 	public Page getPage(int page) {
-		if (findElement(e -> e instanceof Page && ((Page)e).toNumber() == page) != null) {
-			return (Page) findElement(e -> e instanceof Page && ((Page)e).toNumber() == page);
+		if (getElement(e -> e instanceof Page && ((Page) e).toNumber() == page) != null) {
+			return (Page) getElement(e -> e instanceof Page && ((Page) e).toNumber() == page);
 		} else {
 			Page p = new Page(page, this);
 			addElement(p);
@@ -182,7 +164,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	/**
 	 * Get a players page positioning.
-	 *
+	 * <p>
 	 * Only to be used when {@link com.github.sanctum.labyrinth.gui.unity.construct.Menu.Property#SHAREABLE} isn't present.
 	 *
 	 * @param player The player to use.
@@ -205,8 +187,9 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			}
 		}
 		if (isPaginated()) {
-			if (this.listElement != null) {
-				items.addAll(listElement.getAttachment());
+			ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+			if (list != null) {
+				items.addAll(list.getAttachment());
 			}
 		}
 		return items;
@@ -225,25 +208,36 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return this.menu;
 	}
 
-	public @Nullable ItemElement<?> match(Predicate<ItemElement<?>> item) {
-		return this.items.stream().filter(item).findFirst().orElse(null);
+	public @Nullable ItemElement<?> getItem(Predicate<ItemElement<?>> item) {
+		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+		return this.items.stream().filter(item).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(item).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(item).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(item).findFirst().orElse(null))));
 	}
 
-	public @Nullable ItemElement<?> match(ItemStack item) {
-		return this.items.stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(this.listElement == null ? null : this.listElement.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(null));
+	public @Nullable ItemElement<?> getItem(ItemStack item) {
+		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+		return this.items.stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(null))));
+	}
+
+	public @Nullable ItemElement<?> getItem(int slot) {
+		for (ItemElement<?> it : getAttachment()) {
+			if (it.getSlot().map(s -> s == slot).orElse(false)) {
+				return it;
+			}
+		}
+		return null;
 	}
 
 	public boolean contains(ItemStack item) {
-		return this.items.stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item)) || this.listElement != null && this.listElement.getAttachment().stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item));
+		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+		return this.items.stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item)) || list != null && list.getAttachment().stream().map(ItemElement::getElement).anyMatch(i -> i.isSimilar(item));
 	}
 
 	public InventoryElement setElement(Inventory inventory) {
 		this.inventory = inventory;
-		return this;
-	}
-
-	public InventoryElement setElement(Player target, Inventory inventory) {
-		this.invmap.put(target, inventory);
 		return this;
 	}
 
@@ -258,13 +252,23 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public <R> InventoryElement removeItem(Player target, ItemElement<R> item, boolean sincere) {
 		this.items.remove(item);
 		if (sincere) {
-			this.getElement(target).remove(item.getElement());
+			getPlayer(target).getElement().remove(item.getElement());
 		}
 		return this;
 	}
 
 	public <R> InventoryElement addItem(ItemElement<R> item) {
 		this.items.add(item.setParent(this));
+		return this;
+	}
+
+	public <R> InventoryElement addItem(BorderElement<R> element) {
+		addElement(element);
+		return this;
+	}
+
+	public <R> InventoryElement addItem(FillerElement<R> element) {
+		addElement(element);
 		return this;
 	}
 
@@ -285,7 +289,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	}
 
 	public InventoryElement addItem(ListElement<?> element) {
-		this.listElement = element.setParent(this);
+		addElement(element.setParent(this));
 		this.limit = element.getLimit();
 		return this;
 	}
@@ -348,13 +352,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public Set<ItemElement<?>> getAttachment() {
-			Set<ItemElement<?>> set = new HashSet<>(new PaginatedList<>(getElement().getWorkflow()).limit(getElement().listElement.getLimit()).compare(getElement().listElement.comparator).filter(getElement().listElement.predicate).get(toNumber()));
+			ListElement<?> list = (ListElement<?>) getElement().getElement(e -> e instanceof ListElement);
+			if (list == null) return new HashSet<>();
+			Set<ItemElement<?>> set = new HashSet<>(new PaginatedList<>(getElement().getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate).get(toNumber()));
 			for (ItemElement<?> it : getElement().getAttachment()) {
 				if (!set.contains(it) && it.isPlayerAdded() && it.getPage().toNumber() == toNumber()) {
 					set.add(it);
 				}
 			}
-			if (set.size() >= getElement().listElement.getLimit()) {
+			if (set.size() >= list.getLimit()) {
 				this.full = true;
 			}
 			return set;
@@ -372,53 +378,53 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.invmap.remove(player);
+				getPlayer(player).setElement(null);
 			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
-				getElement(player).setMaxStackSize(1);
+				getPlayer(player).getElement().setMaxStackSize(1);
 				if (this.tasks.containsKey(player)) {
 					this.tasks.get(player).cancelTask();
 				}
 
 				this.tasks.put(player, Schedule.async(() -> Schedule.sync(() -> {
-					getElement(player).clear();
+					getPlayer(player).getElement().clear();
 					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 						Optional<Integer> in = element.getSlot();
 						if (in.isPresent()) {
-							getElement(player).setItem(in.get(), element.getElement());
+							getPlayer(player).getElement().setItem(in.get(), element.getElement());
 						} else {
-							if (!getElement(player).contains(element.getElement())) {
-								getElement(player).addItem(element.getElement());
+							if (!getPlayer(player).getElement().contains(element.getElement())) {
+								getPlayer(player).getElement().addItem(element.getElement());
 							}
 						}
 					}
 					for (ItemElement<?> element : items) {
 						Optional<Integer> in = element.getSlot();
-						in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+						in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
 					}
 				}).run()));
 				this.tasks.get(player).repeat(0, 1);
 
-				Schedule.sync(() -> player.openInventory(getElement(player))).waitReal(2);
+				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).waitReal(2);
 
 			} else {
 
 				for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
-						getElement(player).setItem(in.get(), element.getElement());
+						getPlayer(player).getElement().setItem(in.get(), element.getElement());
 					} else {
-						if (!getElement(player).contains(element.getElement())) {
-							getElement(player).addItem(element.getElement());
+						if (!getPlayer(player).getElement().contains(element.getElement())) {
+							getPlayer(player).getElement().addItem(element.getElement());
 						}
 					}
 				}
 				for (ItemElement<?> element : items) {
 					Optional<Integer> in = element.getSlot();
-					in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+					in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getElement(player))).run();
+				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).run();
 
 			}
 		}
@@ -443,7 +449,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
 			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
 				getElement().setMaxStackSize(1);
@@ -536,7 +542,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
 			}
 
 			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
@@ -624,8 +630,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSlots(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
-				this.invmap.remove(player);
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				getPlayer(player).setElement(null);
 			}
 
 			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
@@ -637,47 +643,47 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					this.tasks.get(player).cancelTask();
 				}
 
-				getElement(player).setMaxStackSize(1);
+				getPlayer(player).getElement().setMaxStackSize(1);
 				this.tasks.put(player, Schedule.async(() -> {
 					Schedule.sync(() -> {
-						getElement(player).clear();
+						getPlayer(player).getElement().clear();
 						for (ItemElement<?> element : getWorkflow()) {
 							Optional<Integer> in = element.getSlot();
 							if (in.isPresent()) {
-								getElement(player).setItem(in.get(), element.getElement());
+								getPlayer(player).getElement().setItem(in.get(), element.getElement());
 							} else {
-								if (!getElement(player).contains(element.getElement())) {
-									getElement(player).addItem(element.getElement());
+								if (!getPlayer(player).getElement().contains(element.getElement())) {
+									getPlayer(player).getElement().addItem(element.getElement());
 								}
 							}
 						}
 						for (ItemElement<?> element : items) {
 							Optional<Integer> in = element.getSlot();
-							in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+							in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
 						}
 					}).run();
 				}));
 				this.tasks.get(player).repeat(0, 1);
 
-				Schedule.sync(() -> player.openInventory(getElement(player))).waitReal(2);
+				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).waitReal(2);
 
 			} else {
 				for (ItemElement<?> element : getWorkflow()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
-						getElement(player).setItem(in.get(), element.getElement());
+						getPlayer(player).getElement().setItem(in.get(), element.getElement());
 					} else {
-						if (!getElement(player).contains(element.getElement())) {
-							getElement(player).addItem(element.getElement());
+						if (!getPlayer(player).getElement().contains(element.getElement())) {
+							getPlayer(player).getElement().addItem(element.getElement());
 						}
 					}
 				}
 				for (ItemElement<?> element : items) {
 					Optional<Integer> in = element.getSlot();
-					in.ifPresent(integer -> getElement(player).setItem(integer, element.getElement()));
+					in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getElement(player))).run();
+				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).run();
 			}
 		}
 	}
