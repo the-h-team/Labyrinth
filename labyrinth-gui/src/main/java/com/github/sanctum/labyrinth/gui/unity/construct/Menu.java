@@ -19,8 +19,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -457,107 +460,43 @@ public abstract class Menu {
 		/**
 		 * The top bar of slots within the inventory.
 		 */
-		TOP,
+		TOP(i -> IntStream.range(0, 9).toArray()),
 
 		/**
 		 * The bottom bar of slots within the inventory.
 		 */
-		BOTTOM,
+		BOTTOM(i -> IntStream.range(i - 9, i).toArray()),
 
 		/**
 		 * The middle space of the inventory.
 		 */
-		MIDDLE,
+		MIDDLE(i -> {
+			if (i <= 18) {
+				return IntStream.range(0, 9).toArray();
+			}
+			return IntStream.range(10, i).filter(n -> n < i - 9 && n % 9 != 0 && n % 9 != 8).toArray();
+		}),
 
 		/**
 		 * The left bar of slots within the inventory.
 		 */
-		LEFT,
+		LEFT(i -> IntStream.iterate(0, n -> n + 9).limit(i / 9).toArray()),
 
 		/**
 		 * The right bar of slots within the inventory.
 		 */
-		RIGHT;
+		RIGHT(i -> IntStream.iterate(8, n -> n + 9).limit(i / 9).toArray());
+
+		private final Function<Integer, int[]> generatorFunction;
+		private final Map<Integer, int[]> cache = new HashMap<>();
+
+		Panel(final Function<Integer, int[]> generatorFunction) {
+			this.generatorFunction = generatorFunction;
+		}
 
 		public int[] get(int slots) {
-			switch (slots) {
-				case 9:
-					switch (this) {
-						case MIDDLE:
-						case TOP:
-						case BOTTOM:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case LEFT:
-							return new int[]{0};
-						case RIGHT:
-							return new int[]{8};
-					}
-				case 18:
-					switch (this) {
-						case MIDDLE:
-						case TOP:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case BOTTOM:
-							return new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17};
-						case LEFT:
-							return new int[]{0, 9};
-						case RIGHT:
-							return new int[]{8, 17};
-					}
-				case 27:
-					switch (this) {
-						case MIDDLE:
-							return new int[]{10, 11, 12, 13, 14, 15, 16};
-						case TOP:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case BOTTOM:
-							return new int[]{18, 19, 20, 21, 22, 23, 24, 25, 26};
-						case LEFT:
-							return new int[]{0, 9, 18};
-						case RIGHT:
-							return new int[]{8, 17, 26};
-					}
-				case 36:
-					switch (this) {
-						case MIDDLE:
-							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25};
-						case TOP:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case BOTTOM:
-							return new int[]{27, 28, 29, 30, 31, 32, 33, 34, 35};
-						case LEFT:
-							return new int[]{0, 9, 18, 27};
-						case RIGHT:
-							return new int[]{8, 17, 26, 35};
-					}
-				case 45:
-					switch (this) {
-						case MIDDLE:
-							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
-						case TOP:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case BOTTOM:
-							return new int[]{36, 37, 38, 39, 40, 41, 42, 43, 45};
-						case LEFT:
-							return new int[]{0, 9, 18, 27, 36};
-						case RIGHT:
-							return new int[]{8, 17, 26, 35, 45};
-					}
-				case 54:
-					switch (this) {
-						case MIDDLE:
-							return new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
-						case TOP:
-							return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
-						case BOTTOM:
-							return new int[]{45, 46, 47, 48, 49, 50, 51, 52, 53};
-						case LEFT:
-							return new int[]{0, 9, 18, 27, 36, 45};
-						case RIGHT:
-							return new int[]{8, 17, 26, 35, 45, 53};
-					}
-			}
-			return new int[0];
+			int[] result = cache.computeIfAbsent(slots, generatorFunction);
+			return Arrays.copyOf(result, result.length);
 		}
 
 	}
