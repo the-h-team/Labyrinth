@@ -2,9 +2,11 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -20,7 +22,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 
 	private boolean slotted;
 
-	private ControlType type = ControlType.ITEM;
+	private ControlType type;
 
 	private int slot;
 
@@ -37,11 +39,12 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	private boolean playerAdded;
 
 	public ItemElement() {
-		this.data = null;
+		this(null);
 	}
 
 	public ItemElement(V data) {
 		this.data = data;
+		setType(ControlType.DISPLAY);
 	}
 
 	/**
@@ -63,6 +66,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 * @return this item element
 	 */
 	public ItemElement<V> setClick(Menu.Click click) {
+		this.type = ControlType.CUSTOM;
 		this.click = click;
 		return this;
 	}
@@ -113,6 +117,29 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 */
 	public ItemElement<V> setType(ControlType type) {
 		this.type = type;
+		if (click == null) {
+			type.generateAndSetClick(parent, this);
+		}
+		return this;
+	}
+
+	/**
+	 * Generates a custom click out of the standard behaviour of the passed type and the given click.
+	 * Behaviour of the passed custom click may override the behaviour of the passed control type.
+	 *
+	 * @param type  the control type which provides the template
+	 * @param click the custom click action to be added to the template
+	 * @return this item element
+	 */
+	public ItemElement<V> setTypeAndAddAction(ControlType type, Menu.Click click) {
+		Menu.Click merged = c -> {
+			Menu.Click template = type.clickHandlerGenerator.apply(parent);
+			if (template != null) {
+				template.apply(c);
+			}
+			click.apply(c);
+		};
+		setClick(merged);
 		return this;
 	}
 
@@ -137,7 +164,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	/**
 	 * Get the navigation this item represents.
 	 *
-	 * @return the navigation this item represents or null
+	 * @return the control type this item represents or null
 	 */
 	public @Nullable ItemElement.ControlType getType() {
 		return this.type;
@@ -236,7 +263,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	/**
 	 * Remove this item from player cache.
 	 *
-	 * @param player the player
+	 * @param player  the player
 	 * @param sincere whether to delete from actual inventory or not
 	 */
 	public final void remove(Player player, boolean sincere) {
@@ -260,32 +287,81 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		/**
 		 * Symbolizes an entry point backwards.
 		 */
-		BUTTON_BACK,
+		BUTTON_BACK(ControlType::reloadInv),
 
 		/**
 		 * Symbolizes an entry point forward.
 		 */
-		BUTTON_NEXT,
+		BUTTON_NEXT(ControlType::reloadInv),
 
 		/**
 		 * Symbolizes an entry point exit.
 		 */
-		BUTTON_EXIT,
+		BUTTON_EXIT(i -> ControlType::close),
 
 		/**
 		 * Symbolizes a normal item.
 		 */
-		ITEM,
+		DISPLAY(i -> ControlType::cancelClicks),
+
+		/**
+		 * Symbolizes an item that can be taken out of the inventory
+		 */
+		TAKEAWAY(i -> null),
 
 		/**
 		 * Symbolizes a {@link BorderElement} item.
 		 */
-		ITEM_BORDER,
+		ITEM_BORDER(i -> ControlType::cancelClicks),
 
 		/**
 		 * Symbolizes a {} item.
 		 */
-		ITEM_FILLER
+		ITEM_FILLER(i -> ControlType::cancelClicks),
+
+		/**
+		 * Symbolizes a control button with special capabilities beyond the default implementations
+		 */
+		CUSTOM(i -> null);
+
+		private final Function<InventoryElement, Menu.Click> clickHandlerGenerator;
+
+		ControlType(final Function<InventoryElement, Menu.Click> clickHandlerGenerator) {
+			this.clickHandlerGenerator = clickHandlerGenerator;
+		}
+
+		public void generateAndSetClick(InventoryElement inventoryElement, ItemElement<?> itemElement) {
+			itemElement.click = clickHandlerGenerator.apply(inventoryElement);
+		}
+
+		public void generateAndSetClick(InventoryElement inventoryElement, ListElement<?> listElement) {
+			listElement.getAttachment().forEach(i -> i.setType(this));
+		}
+
+		private static void cancelClicks(ClickElement clickElement) {
+			clickElement.setHotbarAllowed(false);
+			clickElement.setCancelled(true);
+		}
+
+		private static Menu.Click reloadInv(InventoryElement inventoryElement) {
+			return c -> c.setConsumer((p, s) -> {
+				if (s) {
+					inventoryElement.open(p);
+				}
+			});
+		}
+
+		private static void close(ClickElement clickElement) {
+			clickElement.getElement().closeInventory();
+		}
+
+		public static Menu.Click combine(InventoryElement inventoryElement, ControlType... types) {
+			return c -> {
+				for (ControlType type : types) {
+					type.clickHandlerGenerator.apply(inventoryElement).apply(c);
+				}
+			};
+		}
 
 	}
 
