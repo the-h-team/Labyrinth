@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.bukkit.Material;
@@ -31,6 +32,8 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	private ItemStack item;
 
 	private InventoryElement.Page page;
+
+	private Consumer<InventoryElement> clickGenerator;
 
 	private Menu.Click click;
 
@@ -117,8 +120,9 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 */
 	public ItemElement<V> setType(ControlType type) {
 		this.type = type;
-		if (click == null) {
-			type.generateAndSetClick(parent, this);
+		this.clickGenerator = e -> type.generateAndSetClick(e, this);
+		if (parent != null) {
+			clickGenerator.accept(parent);
 		}
 		return this;
 	}
@@ -132,14 +136,21 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 * @return this item element
 	 */
 	public ItemElement<V> setTypeAndAddAction(ControlType type, Menu.Click click) {
-		Menu.Click merged = c -> {
-			Menu.Click template = type.clickHandlerGenerator.apply(parent);
-			if (template != null) {
-				template.apply(c);
+		this.type = type;
+		this.clickGenerator = e -> {
+			Menu.Click template = type.clickHandlerGenerator.apply(e);
+			if (template == null) {
+				this.click = click;
+			} else {
+				this.click = c -> {
+					template.apply(c);
+					click.apply(c);
+				};
 			}
-			click.apply(c);
 		};
-		setClick(merged);
+		if (parent != null) {
+			clickGenerator.accept(parent);
+		}
 		return this;
 	}
 
@@ -206,6 +217,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 */
 	public ItemElement<V> setParent(@NotNull InventoryElement parent) {
 		this.parent = parent;
+		clickGenerator.accept(parent);
 		return this;
 	}
 
@@ -371,14 +383,14 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		if (!(o instanceof ItemElement)) return false;
 		ItemElement<?> that = (ItemElement<?>) o;
 		return isSlotted() == that.isSlotted() &&
-				getSlot() == that.getSlot() &&
-				isPlayerAdded() == that.isPlayerAdded() &&
-				getType() == that.getType() &&
-				Objects.equals(getData(), that.getData()) &&
-				item.equals(that.item) &&
-				Objects.equals(getPage(), that.getPage()) &&
-				Objects.equals(click, that.click) &&
-				getParent().equals(that.getParent());
+			   getSlot() == that.getSlot() &&
+			   isPlayerAdded() == that.isPlayerAdded() &&
+			   getType() == that.getType() &&
+			   Objects.equals(getData(), that.getData()) &&
+			   item.equals(that.item) &&
+			   Objects.equals(getPage(), that.getPage()) &&
+			   Objects.equals(click, that.click) &&
+			   getParent().equals(that.getParent());
 	}
 
 	@Override
