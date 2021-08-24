@@ -124,6 +124,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		if (parent != null) {
 			clickGenerator.accept(parent);
 		}
+		type.generateAndSetClick(parent, this);
 		return this;
 	}
 
@@ -258,7 +259,9 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 */
 	public InventoryElement.Page getPage() {
 		if (this.page == null) {
-			return getParent().getPage(1);
+			if (getParent().isPaginated()) {
+				return ((InventoryElement.Paginated)getParent()).getPage(1);
+			}
 		}
 		return this.page;
 	}
@@ -312,7 +315,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		BUTTON_EXIT(i -> ControlType::close),
 
 		/**
-		 * Symbolizes a normal item.
+		 * Symbolizes a normal display item.
 		 */
 		DISPLAY(i -> ControlType::cancelClicks),
 
@@ -356,11 +359,14 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 		}
 
 		private static Menu.Click reloadInv(InventoryElement inventoryElement) {
-			return c -> c.setConsumer((p, s) -> {
-				if (s) {
-					inventoryElement.open(p);
-				}
-			});
+			return c -> {
+				cancelClicks(c);
+				c.setConsumer((p, s) -> {
+					if (s) {
+						inventoryElement.open(p);
+					}
+				});
+			};
 		}
 
 		private static void close(ClickElement clickElement) {

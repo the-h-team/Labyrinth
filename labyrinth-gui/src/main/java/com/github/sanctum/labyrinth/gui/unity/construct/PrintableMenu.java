@@ -24,7 +24,7 @@ public class PrintableMenu extends Menu {
 	}
 
 	@Override
-	public InventoryElement getInventory() {
+	public InventoryElement.Printable getInventory() {
 		return getElement(e -> e instanceof InventoryElement);
 	}
 

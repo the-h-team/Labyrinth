@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.lang.reflect.Method;
 import java.util.Comparator;
@@ -242,12 +243,17 @@ public abstract class Vent {
 	}
 
 	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		getMap().listeners.add(new VentListener(host, listener));
+		VentListener list = new VentListener(host, listener);
+		getMap().listeners.add(list);
+		//return list;
 	}
 
 	public static void registerAll(@NotNull Plugin host, @NotNull Object... listener) {
+		//Set<VentListener> set = new HashSet<>();
 		for (Object o : listener) {
-			getMap().listeners.add(new VentListener(host, o));
+			VentListener list = new VentListener(host, listener);
+			getMap().listeners.add(list);
+			//set.add(list);
 		}
 	}
 
@@ -379,10 +385,32 @@ public abstract class Vent {
 						for (Priority priority : Priority.values()) {
 							for (VentListener o : map.listeners) {
 								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+								AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
+								if (discov.isPresent()) {
+									String value = discov.map((r, u) -> r.value());
+									if (StringUtils.use(value).containsIgnoreCase("Test")) {
+										for (Method m : discovery.methods()) {
+											for (Subscribe a : discovery.read(m)) {
+												if (a.ignore()) {
+														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
+														continue;
+													}
+												if (!m.isAccessible()) m.setAccessible(true);
+
+												event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+												break;
+											}
+										}
+										return event;
+									}
+								}
 								for (Method m : discovery.methods()) {
 									for (Subscribe a : discovery.read(m)) {
 										if (a.priority() != priority) continue;
-										if (a.ignore()) continue;;
+										if (a.ignore()) {
+														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+														continue;
+													};
 										if (!m.isAccessible()) m.setAccessible(true);
 										try {
 											switch (priority) {
@@ -410,7 +438,7 @@ public abstract class Vent {
 													break;
 											}
 										} catch (Exception ec) {
-											SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+											SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
 											exception.setStackTrace(ec.getCause().getStackTrace());
 											throw exception;
 										}
@@ -484,10 +512,32 @@ public abstract class Vent {
 							for (Priority priority : Priority.values()) {
 								for (VentListener o : map.listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+									AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
+									if (discov.isPresent()) {
+										String value = discov.map((r, u) -> r.value());
+										if (StringUtils.use(value).containsIgnoreCase("Test")) {
+											for (Method m : discovery.methods()) {
+												for (Subscribe a : discovery.read(m)) {
+													if (a.ignore()) {
+														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
+														continue;
+													}
+													if (!m.isAccessible()) m.setAccessible(true);
+
+													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+													break;
+												}
+											}
+											return event;
+										}
+									}
 									for (Method m : discovery.methods()) {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
-											if (a.ignore()) continue;;
+											if (a.ignore()) {
+														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+														continue;
+													};
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {
@@ -516,7 +566,7 @@ public abstract class Vent {
 														break;
 												}
 											} catch (Exception ec) {
-												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
 												exception.setStackTrace(ec.getCause().getStackTrace());
 												throw exception;
 											}
@@ -585,11 +635,36 @@ public abstract class Vent {
 						if (!map.listeners.isEmpty()) {
 							for (Priority priority : Priority.values()) {
 								for (VentListener o : map.listeners) {
+
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+
+									AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
+									if (discov.isPresent()) {
+										String value = discov.map((r, u) -> r.value());
+										if (StringUtils.use(value).containsIgnoreCase("Test")) {
+											for (Method m : discovery.methods()) {
+												for (Subscribe a : discovery.read(m)) {
+													if (a.ignore()) {
+														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
+														continue;
+													}
+													if (!m.isAccessible()) m.setAccessible(true);
+
+													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+													break;
+												}
+											}
+											return event;
+										}
+									}
+
 									for (Method m : discovery.methods()) {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
-											if (a.ignore()) continue;;
+											if (a.ignore()) {
+														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+														continue;
+													}
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {
@@ -618,7 +693,7 @@ public abstract class Vent {
 														break;
 												}
 											} catch (Exception ec) {
-												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute.", ec.getCause());
+												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
 												exception.setStackTrace(ec.getCause().getStackTrace());
 												throw exception;
 											}

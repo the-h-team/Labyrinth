@@ -12,19 +12,21 @@ import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.LabeledAs;
+import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.test.TestList;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
@@ -37,7 +39,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -73,6 +74,7 @@ import org.jetbrains.annotations.NotNull;
  * </p>
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
+@LabeledAs("Core")
 public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI {
 
 	private static Labyrinth instance;
@@ -106,34 +108,9 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		if (!copy.exists()) {
 			FileManager.copy(stream, copy);
 		}
-
 		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
 		new EasyListener(DefaultEvent.Controller.class).call(this);
-		Vent.Subscription.Builder.target(DefaultEvent.Communication.class).assign(Vent.Priority.HIGH).from(this).use((e, subscription) -> {
-			if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
-				DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
-				if (cmd == null) return;
-				String label = cmd.getText();
-				if (HUID.fromString(label) != null) {
-					if (instance.components.stream().noneMatch(c -> c.toString().equals(label.replace("/", "")))) {
-						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 10, 1);
-						e.setCancelled(true);
-						return;
-					}
-				}
-				for (WrappedComponent component : instance.components) {
-					if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
-						Schedule.sync(() -> component.action().apply()).run();
-						if (!component.isMarked()) {
-							component.setMarked(true);
-							Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
-						}
-						e.setCancelled(true);
-					}
-				}
-			}
-		}).finish();
-
+		Vent.register(this, this);
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -154,6 +131,27 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
+		//Vent.register(this, new TestList());
+
+	}
+
+	@Subscribe
+	public void onComponent(DefaultEvent.Communication e) {
+		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
+			DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
+			if (cmd == null) return;
+			String label = cmd.getText();
+			for (WrappedComponent component : components) {
+				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
+					if (!component.isMarked()) {
+						Schedule.sync(() -> component.action().apply()).run();
+						component.setMarked(true);
+						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
+					}
+					e.setCancelled(true);
+				}
+			}
+		}
 	}
 
 	@Override

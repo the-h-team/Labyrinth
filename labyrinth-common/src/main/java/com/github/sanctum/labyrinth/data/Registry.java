@@ -29,7 +29,7 @@ public class Registry<T> {
 
 	private final Class<T> CLASS;
 	private Predicate<? super String> FILTER;
-	private Plugin PLUGIN = null;
+	private Object handle = null;
 	private String PACKAGE;
 
 	public Registry(Class<T> cl) {
@@ -50,11 +50,11 @@ public class Registry<T> {
 	/**
 	 * Source a plugin for the main jar file directory.
 	 *
-	 * @param plugin the plugin to source the classes from
+	 * @param loader the object to source-inject the classes from
 	 * @return this Registry instance
 	 */
-	public Registry<T> source(Plugin plugin) {
-		this.PLUGIN = plugin;
+	public Registry<T> source(Object loader) {
+		this.handle = loader;
 		return this;
 	}
 
@@ -78,9 +78,9 @@ public class Registry<T> {
 	public RegistryData<T> operate(Consumer<T> operation) {
 		Set<Class<T>> classes = Sets.newHashSet();
 		JarFile jarFile = null;
-		if (this.PLUGIN != null) {
+		if (this.handle != null) {
 			try {
-				jarFile = new JarFile(URLDecoder.decode(this.PLUGIN.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
+				jarFile = new JarFile(URLDecoder.decode(this.handle.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
 			} catch (IOException e) {
 				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
 			}
@@ -151,7 +151,7 @@ public class Registry<T> {
 				break;
 			}
 		}
-		return new RegistryData<>(additions, PLUGIN, PACKAGE);
+		return new RegistryData<>(additions, handle, PACKAGE);
 	}
 
 	public static class Loader<T> {
@@ -200,27 +200,13 @@ public class Registry<T> {
 			return new RegistryData<>(data, this.plugin, this.directory);
 		}
 
+
+		/**
+		 * @deprecated Use {@link this#confine(Consumer)} instead
+		 */
+		@Deprecated
 		public RegistryData<T> operate(Consumer<T> action) {
-
-			File file = FileList.search(this.plugin).find("Test", this.directory).getFile().getParentFile();
-
-			List<Class<?>> classes = AddonLoader.forPlugin(JavaPlugin.getProvidingPlugin(this.plugin.getClass()))
-					.loadFolder(file);
-
-			List<T> data = new LinkedList<>();
-
-			for (Class<?> cl : classes) {
-				if (this.type.isAssignableFrom(cl)) {
-					try {
-						T e = (T) cl.getDeclaredConstructor().newInstance();
-						action.accept(e);
-						data.add(e);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-			}
-			return new RegistryData<>(data, this.plugin, this.directory);
+			return confine(action);
 		}
 
 	}

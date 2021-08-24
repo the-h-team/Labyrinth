@@ -30,8 +30,8 @@ import org.jetbrains.annotations.Nullable;
 public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemElement<?>>> {
 
 	protected final Map<Player, Asynchronous> tasks;
+	protected final Set<MenuViewer> index;
 	protected final Set<ItemElement<?>> items;
-	protected final Set<PagedPlayer> index;
 	protected final boolean lazy;
 	protected final String title;
 	protected final Menu menu;
@@ -55,7 +55,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public Inventory getElement() {
 
 		if (this.inventory == null) {
-			this.inventory = Bukkit.createInventory(null, menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+			this.inventory = Bukkit.createInventory(null, menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 		}
 
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
@@ -121,45 +121,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return this.inventory;
 	}
 
-	public InventoryElement setGlobalSlot(int page) {
-		this.page = page;
-		return this;
-	}
-
-	public Page getPage(int page) {
-		if (getElement(e -> e instanceof Page && ((Page) e).toNumber() == page) != null) {
-			return (Page) getElement(e -> e instanceof Page && ((Page) e).toNumber() == page);
-		} else {
-			Page p = new Page(page, this);
-			addElement(p);
-			return p;
-		}
-	}
-
-	public Set<Page> getAllPages() {
-		Set<Page> set = new HashSet<>();
-		for (int i = 1; i < getTotalPages() + 1; i++) {
-			set.add(getPage(i));
-		}
-		return set;
-	}
-
-	public Page getGlobalSlot() {
-		return getPage(this.page);
-	}
-
-	public int getTotalPages() {
-		int totalPageCount = 1;
-		if ((getWorkflow().size() % this.limit) == 0) {
-			if (getWorkflow().size() > 0) {
-				totalPageCount = getWorkflow().size() / this.limit;
-			}
-		} else {
-			totalPageCount = (getWorkflow().size() / this.limit) + 1;
-		}
-		return totalPageCount;
-	}
-
 	public @Nullable Asynchronous getTask(Player player) {
 		return tasks.get(player);
 	}
@@ -172,10 +133,10 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	 * @param player The player to use.
 	 * @return A paged player.
 	 */
-	public PagedPlayer getPlayer(Player player) {
-		PagedPlayer pl = this.index.stream().filter(p -> player.getName().equals(p.getPlayer().getName())).findFirst().orElse(null);
+	public MenuViewer getViewer(Player player) {
+		MenuViewer pl = this.index.stream().filter(p -> player.getName().equals(p.getPlayer().getName())).findFirst().orElse(null);
 		if (pl == null) {
-			pl = new PagedPlayer(player.getUniqueId(), this);
+			pl = new MenuViewer(player.getUniqueId(), this);
 			this.index.add(pl);
 		}
 		return pl;
@@ -285,7 +246,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public <R> InventoryElement removeItem(Player target, ItemElement<R> item, boolean sincere) {
 		this.items.remove(item);
 		if (sincere) {
-			getPlayer(target).getElement().remove(item.getElement());
+			getViewer(target).getElement().remove(item.getElement());
 		}
 		return this;
 	}
@@ -418,48 +379,87 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			super(title, menu, true);
 		}
 
+		public Paginated setGlobalSlot(int page) {
+			this.page = page;
+			return this;
+		}
+
+		public Page getPage(int page) {
+			if (getElement(e -> e instanceof Page && ((Page) e).toNumber() == page) != null) {
+				return (Page) getElement(e -> e instanceof Page && ((Page) e).toNumber() == page);
+			} else {
+				Page p = new Page(page, this);
+				addElement(p);
+				return p;
+			}
+		}
+
+		public Set<Page> getAllPages() {
+			Set<Page> set = new HashSet<>();
+			for (int i = 1; i < getTotalPages() + 1; i++) {
+				set.add(getPage(i));
+			}
+			return set;
+		}
+
+		public Page getGlobalSlot() {
+			return getPage(this.page);
+		}
+
+		public int getTotalPages() {
+			int totalPageCount = 1;
+			if ((getWorkflow().size() % this.limit) == 0) {
+				if (getWorkflow().size() > 0) {
+					totalPageCount = getWorkflow().size() / this.limit;
+				}
+			} else {
+				totalPageCount = (getWorkflow().size() / this.limit) + 1;
+			}
+			return totalPageCount;
+		}
+
 		@Override
 		public synchronized void open(Player player) {
 
 			if (lazy) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				getPlayer(player).setElement(null);
+				getViewer(player).setElement(null);
 			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
-				getPlayer(player).getElement().setMaxStackSize(1);
+				getViewer(player).getElement().setMaxStackSize(1);
 				if (this.tasks.containsKey(player)) {
 					this.tasks.get(player).cancelTask();
 				}
 
 				this.tasks.put(player, Schedule.async(() -> Schedule.sync(() -> {
-					getPlayer(player).getElement().clear();
-					for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-						if (!getPlayer(player).getElement().contains(element.getElement())) {
-							getPlayer(player).getElement().addItem(element.getElement());
+					getViewer(player).getElement().clear();
+					for (ItemElement<?> element : getViewer(player).getPage().getAttachment()) {
+						if (!getViewer(player).getElement().contains(element.getElement())) {
+							getViewer(player).getElement().addItem(element.getElement());
 						}
 					}
 					for (ItemElement<?> element : items) {
 						Optional<Integer> in = element.getSlot();
-						in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
+						in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 					}
 				}).run()));
 				this.tasks.get(player).repeat(0, 1);
 
-				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).waitReal(2);
+				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).waitReal(2);
 
 			} else {
 
-				for (ItemElement<?> element : getPlayer(player).getPage().getAttachment()) {
-					if (!getPlayer(player).getElement().contains(element.getElement())) {
-						getPlayer(player).getElement().addItem(element.getElement());
+				for (ItemElement<?> element : getViewer(player).getPage().getAttachment()) {
+					if (!getViewer(player).getElement().contains(element.getElement())) {
+						getViewer(player).getElement().addItem(element.getElement());
 					}
 				}
 				for (ItemElement<?> element : items) {
 					Optional<Integer> in = element.getSlot();
-					in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
+					in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).run();
+				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).run();
 
 			}
 		}
@@ -567,7 +567,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 			}
 
 			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
@@ -655,8 +655,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
-				getPlayer(player).setElement(null);
+				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
+				getViewer(player).setElement(null);
 			}
 
 			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
@@ -668,47 +668,47 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					this.tasks.get(player).cancelTask();
 				}
 
-				getPlayer(player).getElement().setMaxStackSize(1);
+				getViewer(player).getElement().setMaxStackSize(1);
 				this.tasks.put(player, Schedule.async(() -> {
 					Schedule.sync(() -> {
-						getPlayer(player).getElement().clear();
+						getViewer(player).getElement().clear();
 						for (ItemElement<?> element : getWorkflow()) {
 							Optional<Integer> in = element.getSlot();
 							if (in.isPresent()) {
-								getPlayer(player).getElement().setItem(in.get(), element.getElement());
+								getViewer(player).getElement().setItem(in.get(), element.getElement());
 							} else {
-								if (!getPlayer(player).getElement().contains(element.getElement())) {
-									getPlayer(player).getElement().addItem(element.getElement());
+								if (!getViewer(player).getElement().contains(element.getElement())) {
+									getViewer(player).getElement().addItem(element.getElement());
 								}
 							}
 						}
 						for (ItemElement<?> element : items) {
 							Optional<Integer> in = element.getSlot();
-							in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
+							in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 						}
 					}).run();
 				}));
 				this.tasks.get(player).repeat(0, 1);
 
-				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).waitReal(2);
+				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).waitReal(2);
 
 			} else {
 				for (ItemElement<?> element : getWorkflow()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
-						getPlayer(player).getElement().setItem(in.get(), element.getElement());
+						getViewer(player).getElement().setItem(in.get(), element.getElement());
 					} else {
-						if (!getPlayer(player).getElement().contains(element.getElement())) {
-							getPlayer(player).getElement().addItem(element.getElement());
+						if (!getViewer(player).getElement().contains(element.getElement())) {
+							getViewer(player).getElement().addItem(element.getElement());
 						}
 					}
 				}
 				for (ItemElement<?> element : items) {
 					Optional<Integer> in = element.getSlot();
-					in.ifPresent(integer -> getPlayer(player).getElement().setItem(integer, element.getElement()));
+					in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getPlayer(player).getElement())).run();
+				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).run();
 			}
 		}
 	}

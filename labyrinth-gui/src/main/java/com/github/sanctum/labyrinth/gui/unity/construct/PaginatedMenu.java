@@ -31,7 +31,7 @@ public class PaginatedMenu extends Menu {
 	}
 
 	@Override
-	public InventoryElement getInventory() {
+	public InventoryElement.Paginated getInventory() {
 		return getElement(e -> e instanceof InventoryElement);
 	}
 

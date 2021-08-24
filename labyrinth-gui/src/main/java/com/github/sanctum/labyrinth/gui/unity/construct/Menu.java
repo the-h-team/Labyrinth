@@ -184,8 +184,9 @@ public abstract class Menu {
 		if (!getProperties().contains(Property.SAVABLE)) return;
 		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 		if (getInventory().isPaginated()) {
+			InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
 			Map<Integer, UniformedComponents<ItemStack>> s = new HashMap<>();
-			for (InventoryElement.Page entry : getInventory().getAllPages()) {
+			for (InventoryElement.Page entry : inv.getAllPages()) {
 				s.put(entry.toNumber(), UniformedComponents.accept(entry.getAttachment().stream().map(ItemElement::getElement).collect(Collectors.toList())));
 			}
 			container.attach(getInventory().getTitle(), s);
@@ -507,7 +508,7 @@ public abstract class Menu {
 	 * @param <T> A type representative of a menu builder
 	 * @param <V> A type representative of a menu
 	 */
-	public interface BuilderFactory<T extends Builder<V>, V extends Menu> {
+	public interface BuilderFactory<T extends Builder<V, K>, V extends Menu, K extends InventoryElement> {
 
 		T createBuilder();
 
@@ -518,7 +519,7 @@ public abstract class Menu {
 	 *
 	 * @param <T> A type representative of a menu.
 	 */
-	public static abstract class Builder<T extends Menu> {
+	public static abstract class Builder<T extends Menu, K extends InventoryElement> {
 
 		private final Type type;
 
@@ -528,7 +529,7 @@ public abstract class Menu {
 
 		private Close close;
 
-		private Consumer<InventoryElement> inventoryEdit;
+		private Consumer<K> inventoryEdit;
 
 		private Open open;
 
@@ -551,7 +552,7 @@ public abstract class Menu {
 		 * @param title The title of our menu.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setTitle(String title) {
+		public Builder<T, K> setTitle(String title) {
 			this.title = title;
 			return this;
 		}
@@ -562,7 +563,7 @@ public abstract class Menu {
 		 * @param plugin The host of the menu.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setHost(@NotNull Plugin plugin) {
+		public Builder<T, K> setHost(@NotNull Plugin plugin) {
 			this.host = plugin;
 			return this;
 		}
@@ -573,7 +574,7 @@ public abstract class Menu {
 		 * @param rows The amount of rows.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setSize(Rows rows) {
+		public Builder<T, K> setSize(Rows rows) {
 			this.size = rows;
 			return this;
 		}
@@ -585,7 +586,7 @@ public abstract class Menu {
 		 * @param key The optional namespace for the menu.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setKey(String key) {
+		public Builder<T, K> setKey(String key) {
 			this.key = key;
 			return this;
 		}
@@ -596,7 +597,7 @@ public abstract class Menu {
 		 * @param properties The menu properties.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setProperty(Property... properties) {
+		public Builder<T, K> setProperty(Property... properties) {
 			this.properties.addAll(Arrays.asList(properties));
 			return this;
 		}
@@ -607,7 +608,7 @@ public abstract class Menu {
 		 * @param edit The operation for editing inventory elements.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setStock(Consumer<InventoryElement> edit) {
+		public Builder<T, K> setStock(Consumer<K> edit) {
 			this.inventoryEdit = edit;
 			return this;
 		}
@@ -618,7 +619,7 @@ public abstract class Menu {
 		 * @param close The event taking place on menu close.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setCloseEvent(Close close) {
+		public Builder<T, K> setCloseEvent(Close close) {
 			this.close = close;
 			return this;
 		}
@@ -629,7 +630,7 @@ public abstract class Menu {
 		 * @param open The event taking place on menu open.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setOpenEvent(Open open) {
+		public Builder<T, K> setOpenEvent(Open open) {
 			this.open = open;
 			return this;
 		}
@@ -640,7 +641,7 @@ public abstract class Menu {
 		 * @param process The event taking place before menu open.
 		 * @return Our builder instance.
 		 */
-		public Builder<T> setProcessEvent(Process process) {
+		public Builder<T, K> setProcessEvent(Process process) {
 			this.process = process;
 			return this;
 		}
@@ -668,7 +669,7 @@ public abstract class Menu {
 			}
 
 			if (inventoryEdit != null) {
-				inventoryEdit.accept(menu.getInventory());
+				inventoryEdit.accept((K) menu.getInventory());
 			}
 			if (this.key != null) {
 				menu.key = this.key;
@@ -699,7 +700,7 @@ public abstract class Menu {
 			}
 
 			if (inventoryEdit != null) {
-				inventoryEdit.accept(menu.getInventory());
+				inventoryEdit.accept((K) menu.getInventory());
 			}
 			if (this.key != null) {
 				menu.key = this.key;
@@ -730,7 +731,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getPlayer((Player) e.getPlayer()).getElement();
+				target = getInventory().getViewer((Player) e.getPlayer()).getElement();
 			}
 
 			if (e.getInventory().equals(target)) {
@@ -738,7 +739,6 @@ public abstract class Menu {
 				Player p = (Player) e.getPlayer();
 
 				if (getProperties().contains(Property.LIVE_META) || getProperties().contains(Property.ANIMATED)) {
-					// TODO: Shutdown logic for running tasks
 					Asynchronous task = getInventory().getTask(p);
 					if (task != null) {
 						task.cancelTask();
@@ -807,7 +807,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getPlayer((Player) e.getWhoClicked()).getElement();
+				target = getInventory().getViewer((Player) e.getWhoClicked()).getElement();
 			}
 
 			if (!e.getInventory().equals(target)) return;
@@ -829,7 +829,7 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (!getProperties().contains(Property.SHAREABLE)) {
-				target = getInventory().getPlayer((Player) e.getWhoClicked()).getElement();
+				target = getInventory().getViewer((Player) e.getWhoClicked()).getElement();
 			}
 
 
@@ -871,7 +871,7 @@ public abstract class Menu {
 
 										if (getProperties().contains(Property.SAVABLE)) {
 											if (!getProperties().contains(Property.SHAREABLE)) {
-												m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
 											} else {
 												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
 											}
@@ -880,8 +880,8 @@ public abstract class Menu {
 											}
 										} else {
 											if (!getProperties().contains(Property.SHAREABLE)) {
-												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
-													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
 													if (consumer != null) {
 														consumer.accept(clickElement.getElement(), true);
 													}
@@ -916,8 +916,8 @@ public abstract class Menu {
 										if (getProperties().contains(Property.SAVABLE)) {
 
 											if (!getProperties().contains(Property.SHAREABLE)) {
-												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
-													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
 													if (consumer != null) {
 														consumer.accept(clickElement.getElement(), true);
 													}
@@ -940,8 +940,8 @@ public abstract class Menu {
 											}
 										} else {
 											if (!getProperties().contains(Property.SHAREABLE)) {
-												if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
-													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
 													if (consumer != null) {
 														consumer.accept(clickElement.getElement(), true);
 													}
@@ -1014,7 +1014,7 @@ public abstract class Menu {
 
 											if (getProperties().contains(Property.SAVABLE)) {
 												if (!getProperties().contains(Property.SHAREABLE)) {
-													m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
 												} else {
 													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
 												}
@@ -1023,8 +1023,8 @@ public abstract class Menu {
 												}
 											} else {
 												if (!getProperties().contains(Property.SHAREABLE)) {
-													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
-														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() + 1);
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
 														if (consumer != null) {
 															consumer.accept(clickElement.getElement(), true);
 														}
@@ -1059,8 +1059,8 @@ public abstract class Menu {
 											if (getProperties().contains(Property.SAVABLE)) {
 
 												if (!getProperties().contains(Property.SHAREABLE)) {
-													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
-														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
 														if (consumer != null) {
 															consumer.accept(clickElement.getElement(), true);
 														}
@@ -1083,8 +1083,8 @@ public abstract class Menu {
 												}
 											} else {
 												if (!getProperties().contains(Property.SHAREABLE)) {
-													if ((m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
-														m.getInventory().getPlayer(clickElement.getElement()).setPage(m.getInventory().getPlayer(clickElement.getElement()).getPage().toNumber() - 1);
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
 														if (consumer != null) {
 															consumer.accept(clickElement.getElement(), true);
 														}
@@ -1125,10 +1125,13 @@ public abstract class Menu {
 						ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
 
 						if (getProperties().contains(Property.SHAREABLE)) {
-							el.setPage(getInventory().getGlobalSlot());
+							if (getInventory().isPaginated()) {
+								InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
+								el.setPage(inv.getGlobalSlot());
+							}
 
 						} else {
-							el.setPage(getInventory().getPlayer((Player) e.getWhoClicked()).getPage());
+							el.setPage(getInventory().getViewer((Player) e.getWhoClicked()).getPage());
 						}
 
 						if (Menu.this.click != null) {
@@ -1159,10 +1162,13 @@ public abstract class Menu {
 					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
 
 					if (getProperties().contains(Property.SHAREABLE)) {
-						el.setPage(getInventory().getGlobalSlot());
+						if (getInventory().isPaginated()) {
+							InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
+							el.setPage(inv.getGlobalSlot());
+						}
 
 					} else {
-						el.setPage(getInventory().getPlayer((Player) e.getWhoClicked()).getPage());
+						el.setPage(getInventory().getViewer((Player) e.getWhoClicked()).getPage());
 					}
 
 					if (Menu.this.click != null) {

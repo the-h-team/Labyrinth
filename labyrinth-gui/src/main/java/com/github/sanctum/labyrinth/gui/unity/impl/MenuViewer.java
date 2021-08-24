@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
 
-public class PagedPlayer {
+public class MenuViewer {
 
 	private int page;
 
@@ -21,7 +21,7 @@ public class PagedPlayer {
 
 	private final InventoryElement element;
 
-	public PagedPlayer(UUID id, InventoryElement element) {
+	public MenuViewer(UUID id, InventoryElement element) {
 		this.element = element;
 		this.page = 1;
 		this.id = id;
@@ -37,7 +37,11 @@ public class PagedPlayer {
 
 	public Inventory getElement() {
 		if (inventory == null) {
-			this.inventory = Bukkit.createInventory(null, getInventory().getParent().getSize().getSize(), StringUtils.use(MessageFormat.format(getInventory().title, getPage().toNumber(), getInventory().getTotalPages())).translate());
+			int total = 0;
+			if (getInventory().isPaginated()) {
+				total = ((InventoryElement.Paginated)getInventory()).getTotalPages();
+			}
+			this.inventory = Bukkit.createInventory(null, getInventory().getParent().getSize().getSize(), StringUtils.use(MessageFormat.format(getInventory().title, getPage().toNumber(), total)).translate());
 		}
 		if (getInventory().getParent().getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (UniformedComponents.accept(Arrays.asList(inventory.getContents())).filter(i -> i != null).count() == 0) {
@@ -105,7 +109,11 @@ public class PagedPlayer {
 	}
 
 	public InventoryElement.Page getPage() {
-		return getInventory().getPage(page);
+		if (getInventory().isPaginated()) {
+			InventoryElement.Paginated i = (InventoryElement.Paginated) getInventory();
+			return i.getPage(page);
+		}
+		return new InventoryElement.Page(1, getInventory());
 	}
 
 	public void setPage(int page) {

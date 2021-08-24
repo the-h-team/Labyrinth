@@ -29,7 +29,7 @@ public class SingularMenu extends Menu {
 	}
 
 	@Override
-	public InventoryElement getInventory() {
+	public InventoryElement.Normal getInventory() {
 		return getElement(e -> e instanceof InventoryElement);
 	}
 

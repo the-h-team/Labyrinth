@@ -1,25 +1,23 @@
 package com.github.sanctum.labyrinth.data;
 
-import org.bukkit.plugin.Plugin;
-
 import java.util.List;
 
 public class RegistryData<T> {
 
 	private final List<T> list;
 
-	private final Plugin plugin;
+	private final Object loader;
 
 	private final String location;
 
-	protected RegistryData(List<T> list, Plugin plugin, String location) {
+	protected RegistryData(List<T> list, Object loader, String location) {
 		this.list = list;
-		this.plugin = plugin;
+		this.loader = loader;
 		this.location = location;
 	}
 
-	public Plugin getPlugin() {
-		return this.plugin;
+	public Object getLoader() {
+		return this.loader;
 	}
 
 	public String getLocation() {
