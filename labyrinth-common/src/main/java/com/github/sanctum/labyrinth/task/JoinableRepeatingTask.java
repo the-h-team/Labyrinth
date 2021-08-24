@@ -71,7 +71,7 @@ public abstract class JoinableRepeatingTask<T> {
 	 * The task will be repeated after the same time while there are objects to perform this task on.
 	 */
 	private void start() {
-		task = Bukkit.getScheduler().runTaskTimerAsynchronously(host, this::run, runInterval, runInterval);
+		task = Bukkit.getScheduler().runTaskTimer(host, this::run, runInterval, runInterval);
 	}
 
 	/**
