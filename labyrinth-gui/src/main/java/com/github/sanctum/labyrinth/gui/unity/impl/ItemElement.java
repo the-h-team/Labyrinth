@@ -71,6 +71,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	public ItemElement<V> setClick(Menu.Click click) {
 		this.type = ControlType.CUSTOM;
 		this.click = click;
+		this.clickGenerator = e -> this.click = click;
 		return this;
 	}
 
@@ -260,7 +261,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	public InventoryElement.Page getPage() {
 		if (this.page == null) {
 			if (getParent().isPaginated()) {
-				return ((InventoryElement.Paginated)getParent()).getPage(1);
+				return ((InventoryElement.Paginated) getParent()).getPage(1);
 			}
 		}
 		return this.page;
