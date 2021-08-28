@@ -79,15 +79,14 @@ public class MenuViewer {
 							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
 						}
 					}
+					for (ItemElement<?> element : getInventory().getWorkflow()) {
+						if (!inventory.contains(element.getElement())) {
+							inventory.addItem(element.getElement());
+						}
+					}
 					for (ItemElement<?> element : getInventory().getAttachment()) {
 						Optional<Integer> i = element.getSlot();
-						if (i.isPresent()) {
-							inventory.setItem(i.get(), element.getElement());
-						} else {
-							if (!inventory.contains(element.getElement())) {
-								inventory.addItem(element.getElement());
-							}
-						}
+						i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
 					}
 					FillerElement<?> filler = (FillerElement<?>) getInventory().getElement(e -> e instanceof FillerElement);
 					if (filler != null) {

@@ -96,15 +96,14 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
 						}
 					}
+					for (ItemElement<?> element : getWorkflow()) {
+						if (!this.inventory.contains(element.getElement())) {
+							this.inventory.addItem(element.getElement());
+						}
+					}
 					for (ItemElement<?> element : items) {
 						Optional<Integer> i = element.getSlot();
-						if (i.isPresent()) {
-							this.inventory.setItem(i.get(), element.getElement());
-						} else {
-							if (!this.inventory.contains(element.getElement())) {
-								this.inventory.addItem(element.getElement());
-							}
-						}
+						i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
 					}
 					FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
 					if (filler != null) {
@@ -175,7 +174,11 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
 		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
-		return this.items.stream().filter(item).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(item).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(item).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(item).findFirst().orElse(null))));
+		if (isPaginated()) {
+			return this.items.stream().filter(item).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(item).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(item).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(item).findFirst().orElse(null))));
+		} else {
+			return this.items.stream().filter(item).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(item).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(item).findFirst().orElse(null)));
+		}
 	}
 
 	public @Nullable ItemElement<?> getItem(ItemStack item) {
@@ -201,6 +204,22 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		for (ItemElement<?> it : getAttachment()) {
 			if (it.getSlot().map(s -> s == slot).orElse(false)) {
 				return it;
+			}
+		}
+		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+		if (border != null) {
+			for (ItemElement<?> it : border.getAttachment()) {
+				if (it.getSlot().map(s -> s == slot).orElse(false)) {
+					return it;
+				}
+			}
+		}
+		if (filler != null) {
+			for (ItemElement<?> it : filler.getAttachment()) {
+				if (it.getSlot().map(s -> s == slot).orElse(false)) {
+					return it;
+				}
 			}
 		}
 		return null;
@@ -584,6 +603,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					this.tasks.put(player, Schedule.async(() -> {
 						Schedule.sync(() -> {
 							getElement().clear();
+							BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+							if (border != null) {
+								for (ItemElement<?> element : border.getAttachment()) {
+									Optional<Integer> i = element.getSlot();
+									i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
+								}
+							}
 							for (ItemElement<?> element : getWorkflow()) {
 								Optional<Integer> in = element.getSlot();
 								if (in.isPresent()) {
@@ -597,6 +623,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							for (ItemElement<?> element : items) {
 								Optional<Integer> in = element.getSlot();
 								in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+							}
+							FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+							if (filler != null) {
+								for (ItemElement<?> el : filler.getAttachment()) {
+									int slot = el.getSlot().orElse(0);
+									if (getElement().getItem(slot) == null) {
+										getElement().setItem(slot, el.getElement());
+									}
+								}
 							}
 						}).run();
 					}));
@@ -616,6 +651,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 				return;
 			} else {
+				BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+				if (border != null) {
+					for (ItemElement<?> element : border.getAttachment()) {
+						Optional<Integer> i = element.getSlot();
+						i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
+					}
+				}
 				for (ItemElement<?> element : getWorkflow()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
@@ -629,6 +671,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				for (ItemElement<?> element : items) {
 					Optional<Integer> in = element.getSlot();
 					in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+				}
+				FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+				if (filler != null) {
+					for (ItemElement<?> el : filler.getAttachment()) {
+						int slot = el.getSlot().orElse(0);
+						if (getElement().getItem(slot) == null) {
+							getElement().setItem(slot, el.getElement());
+						}
+					}
 				}
 
 				Schedule.sync(() -> player.openInventory(getElement())).run();
@@ -672,6 +723,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				this.tasks.put(player, Schedule.async(() -> {
 					Schedule.sync(() -> {
 						getViewer(player).getElement().clear();
+						BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+						if (border != null) {
+							for (ItemElement<?> element : border.getAttachment()) {
+								Optional<Integer> i = element.getSlot();
+								i.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
+							}
+						}
 						for (ItemElement<?> element : getWorkflow()) {
 							Optional<Integer> in = element.getSlot();
 							if (in.isPresent()) {
@@ -686,6 +744,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							Optional<Integer> in = element.getSlot();
 							in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 						}
+						FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+						if (filler != null) {
+							for (ItemElement<?> el : filler.getAttachment()) {
+								int slot = el.getSlot().orElse(0);
+								if (getViewer(player).getElement().getItem(slot) == null) {
+									getViewer(player).getElement().setItem(slot, el.getElement());
+								}
+							}
+						}
 					}).run();
 				}));
 				this.tasks.get(player).repeat(0, 1);
@@ -693,6 +760,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).waitReal(2);
 
 			} else {
+				BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+				if (border != null) {
+					for (ItemElement<?> element : border.getAttachment()) {
+						Optional<Integer> i = element.getSlot();
+						i.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
+					}
+				}
 				for (ItemElement<?> element : getWorkflow()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
@@ -707,7 +781,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					Optional<Integer> in = element.getSlot();
 					in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 				}
-
+				FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+				if (filler != null) {
+					for (ItemElement<?> el : filler.getAttachment()) {
+						int slot = el.getSlot().orElse(0);
+						if (getViewer(player).getElement().getItem(slot) == null) {
+							getViewer(player).getElement().setItem(slot, el.getElement());
+						}
+					}
+				}
 				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).run();
 			}
 		}

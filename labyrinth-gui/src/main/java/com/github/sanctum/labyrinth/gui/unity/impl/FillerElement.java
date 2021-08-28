@@ -4,11 +4,11 @@ import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class FillerElement<T> extends Menu.Element<InventoryElement, Set<ItemElement<?>>> {
 
 	private T t;
-	private final Set<ItemElement<?>> elements = new HashSet<>();
 	private final InventoryElement element;
 
 	public FillerElement(InventoryElement element) {
@@ -23,9 +23,9 @@ public class FillerElement<T> extends Menu.Element<InventoryElement, Set<ItemEle
 
 	public FillerElement<T> add(Consumer<ItemElement<?>> edit) {
 		for (int i : getElement().getParent().getSize().getSlots(Menu.Panel.MIDDLE)) {
-			ItemElement<T> e = new ItemElement<>(t).setType(ItemElement.ControlType.ITEM_BORDER).setParent(element).setSlot(i);
+			ItemElement<T> e = new ItemElement<>(t).setType(ItemElement.ControlType.ITEM_FILLER).setParent(element).setSlot(i);
 			edit.accept(e);
-			elements.add(e);
+			addElement(e);
 		}
 		return this;
 	}
@@ -38,7 +38,7 @@ public class FillerElement<T> extends Menu.Element<InventoryElement, Set<ItemEle
 
 	@Override
 	public Set<ItemElement<?>> getAttachment() {
-		return this.elements;
+		return this.getElements().stream().filter(e -> e instanceof ItemElement).map(element1 -> (ItemElement<?>)element1).collect(Collectors.toSet());
 	}
 
 }

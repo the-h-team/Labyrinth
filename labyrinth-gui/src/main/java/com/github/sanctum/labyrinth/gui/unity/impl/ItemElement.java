@@ -179,7 +179,7 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 *
 	 * @return the control type this item represents or null
 	 */
-	public @Nullable ItemElement.ControlType getType() {
+	public ItemElement.ControlType getType() {
 		return this.type;
 	}
 

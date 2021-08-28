@@ -1,14 +1,13 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class BorderElement<T> extends Menu.Element<InventoryElement, Set<ItemElement<?>>> {
 
 	private T t;
-	private final Set<ItemElement<?>> elements = new HashSet<>();
 	private final InventoryElement element;
 
 	public BorderElement(InventoryElement element) {
@@ -25,7 +24,7 @@ public class BorderElement<T> extends Menu.Element<InventoryElement, Set<ItemEle
 		for (int i : getElement().getParent().getSize().getSlots(position)) {
 			ItemElement<T> e = new ItemElement<>(t).setType(ItemElement.ControlType.ITEM_BORDER).setParent(element).setSlot(i);
 			edit.accept(e);
-			elements.add(e);
+			addElement(e);
 		}
 		return this;
 	}
@@ -38,7 +37,7 @@ public class BorderElement<T> extends Menu.Element<InventoryElement, Set<ItemEle
 
 	@Override
 	public Set<ItemElement<?>> getAttachment() {
-		return this.elements;
+		return this.getElements().stream().filter(e -> e instanceof ItemElement).map(element1 -> (ItemElement<?>) element1).collect(Collectors.toSet());
 	}
 
 }

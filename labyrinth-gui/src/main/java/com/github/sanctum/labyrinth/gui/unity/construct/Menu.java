@@ -3,6 +3,8 @@ package com.github.sanctum.labyrinth.gui.unity.construct;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
+import com.github.sanctum.labyrinth.gui.unity.impl.BorderElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.FillerElement;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClickElement;
@@ -760,7 +762,7 @@ public abstract class Menu {
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
-		public void onClose(InventoryOpenEvent e) {
+		public void onOpen(InventoryOpenEvent e) {
 			if (!(e.getPlayer() instanceof Player))
 				return;
 			if (getType() != Type.PRINTABLE) {
@@ -770,13 +772,6 @@ public abstract class Menu {
 			Inventory target = getInventory().getElement();
 
 			if (e.getInventory().equals(target)) {
-
-				switch (getType()) {
-					case SINGULAR:
-
-					case PAGINATED:
-					case PRINTABLE:
-				}
 
 				Player p = (Player) e.getPlayer();
 
@@ -840,8 +835,7 @@ public abstract class Menu {
 
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
-
-					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType());
+					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
 					if (element != null) {
 						Click click = element.getAttachment();
 						if (click == null) return;
@@ -975,8 +969,144 @@ public abstract class Menu {
 						if (clickElement.isCancelled()) {
 							e.setCancelled(true);
 						}
-
 					} else {
+
+						ItemElement<?> el = getInventory().getItem(e.getRawSlot());
+						if (el != null) {
+							Click click = el.getAttachment();
+							if (click == null) return;
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
+							click.apply(clickElement);
+
+							if (clickElement.getResult() != null) {
+								e.setResult(clickElement.getResult());
+							}
+							if (e.getHotbarButton() != -1) {
+								if (!clickElement.isHotbarAllowed()) {
+									e.setCancelled(true);
+								}
+							}
+
+							if (el.getType() != null) {
+								ClickElement.Consumer consumer = clickElement.getConsumer();
+								switch (el.getType()) {
+									case BUTTON_EXIT:
+										if (consumer != null) {
+											consumer.accept(clickElement.getElement(), false);
+										}
+										break;
+									case BUTTON_NEXT:
+										if (Menu.this instanceof PaginatedMenu) {
+											PaginatedMenu m = (PaginatedMenu) Menu.this;
+
+											if (getProperties().contains(Property.SAVABLE)) {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+												} else {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+												}
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
+											}
+											break;
+										}
+										if (consumer != null) {
+											consumer.accept(clickElement.getElement(), false);
+										}
+										break;
+									case BUTTON_BACK:
+										if (Menu.this instanceof PaginatedMenu) {
+											PaginatedMenu m = (PaginatedMenu) Menu.this;
+
+											if (getProperties().contains(Property.SAVABLE)) {
+
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
+											} else {
+												if (!getProperties().contains(Property.SHAREABLE)) {
+													if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+														m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												} else {
+													if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 1) {
+														m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), true);
+														}
+													} else {
+														if (consumer != null) {
+															consumer.accept(clickElement.getElement(), false);
+														}
+													}
+												}
+											}
+											break;
+										}
+										if (consumer != null) {
+											consumer.accept(clickElement.getElement(), false);
+										}
+										break;
+								}
+							}
+
+							if (clickElement.isCancelled()) {
+								e.setCancelled(true);
+							}
+						}
+
 						ItemElement<?> element2 = getInventory().getItem(item);
 						if (element2 != null) {
 							Click click = element2.getAttachment();
@@ -1117,40 +1247,41 @@ public abstract class Menu {
 							if (clickElement.isCancelled()) {
 								e.setCancelled(true);
 							}
-						}
-					}
-
-					if (!e.isCancelled()) {
-
-						ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
-
-						if (getProperties().contains(Property.SHAREABLE)) {
-							if (getInventory().isPaginated()) {
-								InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
-								el.setPage(inv.getGlobalSlot());
-							}
-
-						} else {
-							el.setPage(getInventory().getViewer((Player) e.getWhoClicked()).getPage());
+							return;
 						}
 
-						if (Menu.this.click != null) {
-							ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
-							Menu.this.click.apply(element3);
+						if (!e.isCancelled()) {
 
-							if (element3.getResult() != null) {
-								e.setResult(element3.getResult());
+							ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
+							if (getProperties().contains(Property.SHAREABLE)) {
+								if (getInventory().isPaginated()) {
+									InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
+									element1.setPage(inv.getGlobalSlot());
+								}
+
+							} else {
+								element1.setPage(getInventory().getViewer((Player) e.getWhoClicked()).getPage());
 							}
 
-							if (e.getHotbarButton() != -1) {
-								if (!element3.isHotbarAllowed()) {
+							if (Menu.this.click != null) {
+								ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), element1, e.getView());
+								Menu.this.click.apply(element3);
+
+								if (element3.getResult() != null) {
+									e.setResult(element3.getResult());
+								}
+
+								if (e.getHotbarButton() != -1) {
+									if (!element3.isHotbarAllowed()) {
+										e.setCancelled(true);
+									}
+								}
+
+								if (element3.isCancelled()) {
 									e.setCancelled(true);
 								}
 							}
 
-							if (element3.isCancelled()) {
-								e.setCancelled(true);
-							}
 						}
 
 					}
@@ -1160,7 +1291,6 @@ public abstract class Menu {
 				if (!e.isCancelled()) {
 
 					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
-
 					if (getProperties().contains(Property.SHAREABLE)) {
 						if (getInventory().isPaginated()) {
 							InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
