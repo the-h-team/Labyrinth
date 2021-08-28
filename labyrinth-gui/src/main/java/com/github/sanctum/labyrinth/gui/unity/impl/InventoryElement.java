@@ -804,7 +804,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		private boolean visible;
 
 		public Printable(String title, AnvilMechanics mechanics, Menu menu) {
-			super(title, menu, true);
+			super(StringUtils.use(title).translate(), menu, true);
 			this.nms = mechanics;
 		}
 
@@ -817,7 +817,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			nms.handleInventoryCloseEvent(player);
 			nms.setActiveContainerDefault(player);
 
-			final Object container = nms.newContainerAnvil(player, StringUtils.use(this.getTitle()).translate());
+			final Object container = nms.newContainerAnvil(player, this.getTitle());
 
 			setElement(nms.toBukkitInventory(container));
 
