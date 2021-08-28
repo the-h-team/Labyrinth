@@ -4,12 +4,14 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
+
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -112,6 +114,7 @@ public abstract class Vent {
 
 	}
 
+	//FIXME
 	public static class Subscription<T extends Vent> {
 
 		private final Class<T> eventType;
@@ -239,49 +242,39 @@ public abstract class Vent {
 		}
 
 
-
 	}
 
+	/**
+	 * @deprecated use {@link VentMap#register(Plugin, Object)} instead!
+	 */
+	@Deprecated
 	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		VentListener list = new VentListener(host, listener);
-		getMap().listeners.add(list);
-		//return list;
+		getMap().register(host, listener);
 	}
 
-	public static void registerAll(@NotNull Plugin host, @NotNull Object... listener) {
-		//Set<VentListener> set = new HashSet<>();
-		for (Object o : listener) {
-			VentListener list = new VentListener(host, listener);
-			getMap().listeners.add(list);
-			//set.add(list);
-		}
+	/**
+	 * @deprecated use {@link VentMap#registerAll(Plugin, Object...)} instead!
+	 */
+	@Deprecated
+	public static void registerAll(@NotNull Plugin host, @NotNull Object... listeners) {
+		getMap().registerAll(host, listeners);
+
 	}
 
+	/**
+	 * @deprecated use {@link VentMap#subscribe(Subscription)} instead!
+	 */
+	@Deprecated
 	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
-		if (subscription == null) {
-			LabyrinthProvider.getInstance().getLogger().severe("Null subscription found from unknown source (Not labyrinth).");
-			return;
-		}
-		getMap().subscriptions.add(subscription);
+		getMap().subscribe(subscription);
 	}
 
+	/**
+	 * @deprecated use {@link VentMap#chain(Link)} instead!
+	 */
+	@Deprecated
 	public static void chain(Link link) {
-		if (link == null) {
-			LabyrinthProvider.getInstance().getLogger().severe("Null subscription link found from unknown source (Not labyrinth).");
-			return;
-		}
-		Subscription<?> parent = null;
-		for (Subscription<?> sub : link.subscriptions) {
-			if (sub.getParent() != null) {
-				parent = sub.getParent();
-			}
-			getMap().subscriptions.add(sub);
-		}
-
-		if (parent != null) {
-			getMap().subscriptions.add(parent);
-		}
-
+		getMap().chain(link);
 	}
 
 	public enum CancelState {
@@ -344,7 +337,8 @@ public abstract class Vent {
 
 			switch (type) {
 				case Synchronous:
-					if (event.isAsynchronous()) throw new SubscriptionRuntimeException("This event can only be run asynchronously!");
+					if (event.isAsynchronous())
+						throw new SubscriptionRuntimeException("This event can only be run asynchronously!");
 
 					if (event.getHost() == null) {
 						event.setHost(plugin);
@@ -392,12 +386,12 @@ public abstract class Vent {
 										for (Method m : discovery.methods()) {
 											for (Subscribe a : discovery.read(m)) {
 												if (a.ignore()) {
-														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
-														continue;
-													}
+													event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
+													continue;
+												}
 												if (!m.isAccessible()) m.setAccessible(true);
 
-												event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+												event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
 												break;
 											}
 										}
@@ -408,9 +402,10 @@ public abstract class Vent {
 									for (Subscribe a : discovery.read(m)) {
 										if (a.priority() != priority) continue;
 										if (a.ignore()) {
-														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-														continue;
-													};
+											event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+											continue;
+										}
+										;
 										if (!m.isAccessible()) m.setAccessible(true);
 										try {
 											switch (priority) {
@@ -452,7 +447,8 @@ public abstract class Vent {
 					return event;
 
 				case Asynchronous:
-					if (!event.isAsynchronous()) throw new SubscriptionRuntimeException("This event can only be run synchronously!");
+					if (!event.isAsynchronous())
+						throw new SubscriptionRuntimeException("This event can only be run synchronously!");
 
 					event.setHost(plugin);
 
@@ -524,7 +520,7 @@ public abstract class Vent {
 													}
 													if (!m.isAccessible()) m.setAccessible(true);
 
-													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
 													break;
 												}
 											}
@@ -535,9 +531,10 @@ public abstract class Vent {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
 											if (a.ignore()) {
-														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-														continue;
-													};
+												event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+												continue;
+											}
+											;
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {
@@ -593,7 +590,8 @@ public abstract class Vent {
 			switch (this.type) {
 				case Asynchronous:
 
-					if (!event.isAsynchronous()) throw new IllegalStateException("This event can only be run synchronously");
+					if (!event.isAsynchronous())
+						throw new IllegalStateException("This event can only be run synchronously");
 
 					if (event.getHost() == null) {
 						event.setHost(plugin);
@@ -650,7 +648,7 @@ public abstract class Vent {
 													}
 													if (!m.isAccessible()) m.setAccessible(true);
 
-													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName() );
+													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
 													break;
 												}
 											}
@@ -662,9 +660,9 @@ public abstract class Vent {
 										for (Subscribe a : discovery.read(m)) {
 											if (a.priority() != priority) continue;
 											if (a.ignore()) {
-														event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-														continue;
-													}
+												event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
+												continue;
+											}
 											if (!m.isAccessible()) m.setAccessible(true);
 
 											try {
