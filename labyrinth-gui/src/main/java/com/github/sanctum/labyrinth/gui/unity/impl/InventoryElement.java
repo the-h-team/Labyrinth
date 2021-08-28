@@ -817,7 +817,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			nms.handleInventoryCloseEvent(player);
 			nms.setActiveContainerDefault(player);
 
-			final Object container = nms.newContainerAnvil(player, this.getTitle());
+			final Object container = nms.newContainerAnvil(player, StringUtils.use(this.getTitle()).translate());
 
 			setElement(nms.toBukkitInventory(container));
 
