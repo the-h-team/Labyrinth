@@ -1,12 +1,19 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+//FIXME
 public abstract class VentMap {
+	//TODO
+	final Map<Class<? extends Vent>, Set<Vent.Subscription<?>>> subscriptionMap = new HashMap<>();
 
 	final LinkedList<Vent.Subscription<?>> subscriptions = new LinkedList<>();
 
@@ -92,5 +99,36 @@ public abstract class VentMap {
 	 * @return The desired subscription if found otherwise null.
 	 */
 	public abstract <T extends Vent> Vent.Subscription<T> get(@NotNull Class<T> eventType, @NotNull String key);
+
+	/**
+	 * Registers a listener for the given plugin
+	 *
+	 * @param host     the plugin to set for the listeners
+	 * @param listener the listener to be registered
+	 */
+	public abstract void register(@NotNull Plugin host, @NotNull Object listener);
+
+	/**
+	 * Registers multiple listeners at once for the given plugin
+	 *
+	 * @param host      the plugin to set for the listeners
+	 * @param listeners the listeners to be registered
+	 */
+	public abstract void registerAll(@NotNull Plugin host, @NotNull Object... listeners);
+
+	/**
+	 * Adds a subscription to this mapping.
+	 *
+	 * @param subscription the subscription to be added
+	 * @param <T>          the vent type of the subscription
+	 */
+	public abstract <T extends Vent> void subscribe(Vent.Subscription<T> subscription);
+
+	/**
+	 * Adds chained subscriptions to this map
+	 *
+	 * @param link the subscription container
+	 */
+	public abstract void chain(Vent.Link link);
 
 }
