@@ -3,7 +3,11 @@ package com.github.sanctum.labyrinth.event.custom;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.task.Schedule;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -12,6 +16,12 @@ import org.jetbrains.annotations.NotNull;
 
 //FIXME
 public final class VentMapImpl extends VentMap {
+
+	final LinkedList<Vent.Subscription<?>> subscriptions = new LinkedList<>();
+
+	final LinkedList<VentListener> listeners = new LinkedList<>();
+
+	final Map<Class<? extends Vent>, Set<Vent.Subscription<?>>> subscriptionMap = new HashMap<>();
 
 	@Override //TODO
 	public <T extends Vent> void unsubscribe(@NotNull Class<T> eventType, @NotNull String key) {
@@ -142,5 +152,15 @@ public final class VentMapImpl extends VentMap {
 			subscriptions.add(parent);
 		}
 
+	}
+
+	@Override
+	public LinkedList<Vent.Subscription<?>> getSubscriptions() {
+		return subscriptions;
+	}
+
+	@Override
+	public LinkedList<VentListener> getListeners() {
+		return listeners;
 	}
 }
