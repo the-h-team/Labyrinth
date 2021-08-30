@@ -115,7 +115,7 @@ public abstract class Vent {
 
 	}
 
-	//FIXME
+
 	public static class Subscription<T extends Vent> {
 
 		private final Class<T> eventType;
@@ -139,7 +139,7 @@ public abstract class Vent {
 			this.priority = priority;
 			this.action = action;
 		}
-
+		//FIXME
 		public void remove() {
 			if (key != null) {
 				getMap().unsubscribe(eventType, key);
@@ -379,7 +379,9 @@ public abstract class Vent {
 					if (!listeners.isEmpty()) {
 						for (Priority priority : Priority.values()) {
 							for (VentListener o : listeners) {
-								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
+								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener())
+										.filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType())
+													 && m.isAnnotationPresent(Subscribe.class));
 								AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
 								if (discov.isPresent()) {
 									String value = discov.map((r, u) -> r.value());
