@@ -12,12 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 //FIXME
 public abstract class VentMap {
-	//TODO
-	final Map<Class<? extends Vent>, Set<Vent.Subscription<?>>> subscriptionMap = new HashMap<>();
-
-	final LinkedList<Vent.Subscription<?>> subscriptions = new LinkedList<>();
-
-	final LinkedList<VentListener> listeners = new LinkedList<>();
 
 	/**
 	 * Unsubscribe from an event by providing the key of the desired subscription if found.
@@ -131,4 +125,7 @@ public abstract class VentMap {
 	 */
 	public abstract void chain(Vent.Link link);
 
+	public abstract List<Vent.Subscription<?>> getSubscriptions();
+
+	public abstract List<VentListener> getListeners();
 }

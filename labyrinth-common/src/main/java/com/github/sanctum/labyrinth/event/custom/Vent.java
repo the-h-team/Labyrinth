@@ -8,6 +8,7 @@ import com.github.sanctum.labyrinth.task.Schedule;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -143,25 +144,25 @@ public abstract class Vent {
 			if (key != null) {
 				getMap().unsubscribe(eventType, key);
 
-				getMap().subscriptions.forEach(s -> {
+				getMap().getSubscriptions().forEach(s -> {
 
 					if (s.getParent().equals(this)) {
-						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
+						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
 					}
 
 				});
 
 			} else {
-				getMap().subscriptions.forEach(s -> {
+				getMap().getSubscriptions().forEach(s -> {
 
 					if (s.getParent().equals(this)) {
-						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
+						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
 					}
 
 				});
-				getMap().subscriptions.forEach(s -> {
+				getMap().getSubscriptions().forEach(s -> {
 					if (s.equals(this)) {
-						Schedule.sync(() -> getMap().subscriptions.remove(this)).waitReal(1);
+						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
 					}
 				});
 			}
@@ -235,7 +236,7 @@ public abstract class Vent {
 			}
 
 			public Subscription<T> finish() {
-				getMap().subscriptions.add(this.subscription);
+				getMap().getSubscriptions().add(this.subscription);
 				return this.subscription;
 			}
 
@@ -334,7 +335,7 @@ public abstract class Vent {
 
 			JavaPlugin plugin = JavaPlugin.getProvidingPlugin(event.getClass());
 			VentMap map = getMap();
-
+			List<VentListener> listeners = map.getListeners();
 			switch (type) {
 				case Synchronous:
 					if (event.isAsynchronous())
@@ -344,7 +345,7 @@ public abstract class Vent {
 						event.setHost(plugin);
 					}
 
-					map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+					map.getSubscriptions().stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 						if (s.getEventType().isAssignableFrom(event.getType())) {
 							switch (s.getPriority()) {
@@ -375,9 +376,9 @@ public abstract class Vent {
 
 					});
 
-					if (!map.listeners.isEmpty()) {
+					if (!listeners.isEmpty()) {
 						for (Priority priority : Priority.values()) {
-							for (VentListener o : map.listeners) {
+							for (VentListener o : listeners) {
 								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 								AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
 								if (discov.isPresent()) {
@@ -458,7 +459,7 @@ public abstract class Vent {
 							event.setHost(plugin);
 						}
 
-						map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+						map.getSubscriptions().stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
@@ -504,9 +505,9 @@ public abstract class Vent {
 
 						});
 
-						if (!map.listeners.isEmpty()) {
+						if (!listeners.isEmpty()) {
 							for (Priority priority : Priority.values()) {
-								for (VentListener o : map.listeners) {
+								for (VentListener o : listeners) {
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 									AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
 									if (discov.isPresent()) {
@@ -586,7 +587,7 @@ public abstract class Vent {
 
 			JavaPlugin plugin = JavaPlugin.getProvidingPlugin(event.getClass());
 			VentMap map = getMap();
-
+			List<VentListener> listeners = map.getListeners();
 			switch (this.type) {
 				case Asynchronous:
 
@@ -599,7 +600,7 @@ public abstract class Vent {
 
 					return CompletableFuture.supplyAsync(() -> {
 
-						map.subscriptions.stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
+						map.getSubscriptions().stream().sorted(Comparator.comparing(Subscription::getPriority, Priority::compareTo)).forEach(s -> {
 
 							if (s.getEventType().isAssignableFrom(event.getType())) {
 								switch (s.getPriority()) {
@@ -630,9 +631,9 @@ public abstract class Vent {
 
 						});
 
-						if (!map.listeners.isEmpty()) {
+						if (!listeners.isEmpty()) {
 							for (Priority priority : Priority.values()) {
-								for (VentListener o : map.listeners) {
+								for (VentListener o : listeners) {
 
 									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
 
