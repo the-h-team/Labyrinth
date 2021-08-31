@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.api.Service;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 //FIXME
-public abstract class VentMap {
+public abstract class VentMap implements Service {
 
 	/**
 	 * Unsubscribe from an event by providing the key of the desired subscription if found.
