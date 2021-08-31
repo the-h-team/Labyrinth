@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Provides access to the VentMap.
  */
-public interface VentService {
+public interface VentService extends Service {
     /**
      * Get the main VentMap instance.
      *

@@ -1,8 +1,10 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
+import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.task.Schedule;
 
 import java.util.Objects;
@@ -180,38 +182,12 @@ public abstract class Cooldown {
 	 * Get a native cooldown object by its set delimiter-id.
 	 *
 	 * @param id the custom delimiter to search for
+	 * @deprecated use {@link com.github.sanctum.labyrinth.api.CooldownService#getCooldown(String)} instead!
 	 * @return a cooldown based object retaining original values from save
 	 */
+	@Deprecated
 	public static Cooldown getById(String id) {
-		return LabyrinthProvider.getInstance().getCooldowns().stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
-			FileManager library = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Cooldowns", "Persistent");
-			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
-
-				long time = library.getConfig().getLong("Library." + id + ".expiration");
-				Long a = time;
-				Long b = System.currentTimeMillis();
-				int compareNum = a.compareTo(b);
-				if (!(compareNum <= 0)) {
-					Cooldown toMake = new Cooldown() {
-						@Override
-						public String getId() {
-							return id;
-						}
-
-						@Override
-						public long getCooldown() {
-							return time;
-						}
-					};
-					toMake.save();
-					return toMake;
-				} else {
-					library.getConfig().set("Library." + id, null);
-					library.saveConfig();
-				}
-			}
-			return null;
-		});
+		return LabyrinthProvider.getService(Service.COOLDOWNS).getCooldown(id);
 	}
 
 	/**

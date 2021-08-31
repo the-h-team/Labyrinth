@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
+import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.VaultImplementation;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
@@ -14,10 +16,10 @@ import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
-import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
+import com.github.sanctum.labyrinth.formatting.string.RandomHex;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
@@ -38,11 +40,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * ▄▄▌***▄▄▄·*▄▄▄▄·**▄·*▄▌▄▄▄**▪***▐*▄*▄▄▄▄▄*▄*.▄
@@ -74,13 +79,12 @@ import org.jetbrains.annotations.NotNull;
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
 @LabeledAs("Core")
-public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI {
+public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 
-	private static Labyrinth instance;
+	private ServiceManager serviceManager;
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
 	private final LinkedList<WrappedComponent> components = new LinkedList<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
-	// switched to set, the map wasnt allowing hardly any persistent data to persist..
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
@@ -90,18 +94,24 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	@Override
 	public void onEnable() {
-		instance = this;
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
-
+		serviceManager = new ServiceManager();
+		serviceManager.load(Service.VENT);
+		serviceManager.load(Service.TASK);
+		serviceManager.load(Service.RECORDING);
+		serviceManager.load(Service.DATA);
+		serviceManager.load(Service.MESSENGER);
+		serviceManager.load(Service.LEGACY);
+		serviceManager.load(Service.COOLDOWNS);
+		serviceManager.load(Service.COMPONENTS);
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 
 		FileManager copy = FileList.search(this).find("config");
 		InputStream stream = getResource("config.yml");
-
 		assert stream != null;
 
 		if (!copy.exists()) {
@@ -109,7 +119,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		}
 		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
 		new EasyListener(DefaultEvent.Controller.class).call(this);
-		Vent.register(this, this);
+		getEventMap().register(this, this);
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -130,8 +140,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
-		//Vent.register(this, new TestList());
-
 	}
 
 	@Subscribe
@@ -140,6 +148,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
 			if (cmd == null) return;
 			String label = cmd.getText();
+
 			for (WrappedComponent component : components) {
 				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
 					if (!component.isMarked()) {
@@ -201,6 +210,39 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	}
 
 	@Override
+	public @Nullable Cooldown getCooldown(String id) {
+		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
+			FileManager library = FileList.search(this).find("Cooldowns", "Persistent");
+			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
+
+				long time = library.getConfig().getLong("Library." + id + ".expiration");
+				Long a = time;
+				Long b = System.currentTimeMillis();
+				int compareNum = a.compareTo(b);
+				if (!(compareNum <= 0)) {
+					Cooldown toMake = new Cooldown() {
+						@Override
+						public String getId() {
+							return id;
+						}
+
+						@Override
+						public long getCooldown() {
+							return time;
+						}
+					};
+					toMake.save();
+					return toMake;
+				} else {
+					library.getConfig().set("Library." + id, null);
+					library.saveConfig();
+				}
+			}
+			return null;
+		});
+	}
+
+	@Override
 	public @NotNull LinkedList<WrappedComponent> getComponents() {
 		return components;
 	}
@@ -211,7 +253,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	}
 
 	@Override
-	public @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey) {
+	public @NotNull PersistentContainer getContainer(@NotNull NamespacedKey namespacedKey) {
 		return containers.stream().filter(p -> p.getKey().equals(namespacedKey)).findFirst().orElseGet(() -> {
 			PersistentContainer container = new PersistentContainer(namespacedKey);
 			this.containers.add(container);
@@ -227,6 +269,11 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Override
 	public boolean requiresLocationLibrary() {
 		return cachedNeedsLegacyLocation;
+	}
+
+	@Override
+	public ServiceManager getServiceManager() {
+		return serviceManager;
 	}
 
 	@Override

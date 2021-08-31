@@ -11,6 +11,7 @@ public enum DefaultColor implements CustomColor {
 
 	MANGO("#269947", "#e69f12"),
 	VELVET("#e62012", "#8c0b10"),
+	RANDOM(new RandomHex().toString(), new RandomHex().toString()),
 	GALAXY("#1f1c4d", "#991c4e");
 
 	protected final CharSequence start;

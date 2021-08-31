@@ -9,9 +9,16 @@ import java.io.Serializable;
  * @author Hempfest
  */
 @FunctionalInterface
-public interface Applicable extends Serializable {
+public interface Applicable extends Runnable, Serializable {
+
+	@Override
+	void run();
+
 	/**
 	 * Execute any information applied within reference.
 	 */
-	void apply();
+	@Deprecated
+	default void apply() {
+		run();
+	}
 }

@@ -1,14 +1,11 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.HashMap;
-import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,10 +25,16 @@ public final class Items {
 	 * Query for a material by its name ignoring case and underscores.
 	 *
 	 * @param name the material to search for disregarding caps and underscores
+	 * @deprecated Use {@link Items#findMaterial(String)} instead!
 	 * @return a material from query or null
 	 */
+	@Deprecated
 	public static @Nullable Material getMaterial(String name) {
-		return MATERIAL_ALIAS.get(name.toLowerCase().replaceAll("_", ""));
+		return findMaterial(name);
+	}
+
+	public static @Nullable Material findMaterial(String name) {
+		return Optional.ofNullable(MATERIAL_ALIAS.get(name.toLowerCase().replaceAll("_", ""))).orElseGet(() -> MATERIAL_ALIAS.entrySet().stream().filter(e -> StringUtils.use(e.getKey()).containsIgnoreCase(name)).map(Map.Entry::getValue).findFirst().orElse(null));
 	}
 
 	/**
@@ -61,6 +64,7 @@ public final class Items {
 	 * @param value the material alias or base64 value
 	 * @return an improvised item based on demand
 	 */
+	@Deprecated
 	public static @NotNull ItemStack improvise(String value) {
 		Material mat = getMaterial(value);
 		if (mat != null) {

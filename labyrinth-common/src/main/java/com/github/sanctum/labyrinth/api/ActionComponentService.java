@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Exposes cached action-wrapped components.
  */
-public interface ActionComponentService {
+public interface ActionComponentService extends Service {
     /**
      * Get a list of all action-wrapped text components.
      *

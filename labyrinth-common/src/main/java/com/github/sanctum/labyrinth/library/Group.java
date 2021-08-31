@@ -1,17 +1,20 @@
 package com.github.sanctum.labyrinth.library;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.permissions.Permission;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * @author Hempfest
  */
 public class Group {
+
+	public static final List<Group> LIST;
 
 	private final String name;
 	private final String world;
@@ -19,6 +22,10 @@ public class Group {
 	protected Group(String name, String world) {
 		this.name = name;
 		this.world = world;
+	}
+
+	static {
+		LIST = Arrays.stream(VaultPlayer.PERMS.getGroups()).map(s -> new Group(s, Bukkit.getWorlds().get(0).getName())).collect(Collectors.toList());
 	}
 
 	public String getName() {

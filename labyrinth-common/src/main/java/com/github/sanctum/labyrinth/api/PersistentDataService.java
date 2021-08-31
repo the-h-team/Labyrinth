@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Manages persistent data container access.
  */
-public interface PersistentDataService {
+public interface PersistentDataService extends Service {
     /**
      * Get a list of all containers associated with a specified plugin.
      * <p>
@@ -27,5 +27,6 @@ public interface PersistentDataService {
      * @param namespacedKey the namespaced key for this component
      * @return the existing data container or a new instance
      */
-    @NotNull PersistentContainer getContainer(NamespacedKey namespacedKey);
+    @NotNull PersistentContainer getContainer(@NotNull NamespacedKey namespacedKey);
+
 }

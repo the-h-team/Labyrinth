@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 // TODO: description; elaborate on "most" in getTasks
-public interface TaskService {
+public interface TaskService extends Service {
     /**
      * Get a queued list of running task ids
      *

@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.ServiceType;
 
 public abstract class LabyrinthProvider {
 	static LabyrinthAPI instance;
@@ -16,6 +18,31 @@ public abstract class LabyrinthProvider {
 	 */
 	public static LabyrinthAPI getInstance() {
 		return instance;
+	}
+
+	/**
+	 * Get a service from cache.
+	 *
+	 * <p>
+	 *     Example services are:
+	 *
+	 *     {@link Service#COMPONENTS}
+	 *     {@link Service#COOLDOWNS}
+	 *     {@link Service#LEGACY}
+	 *     {@link Service#MESSENGER}
+	 *     {@link Service#DATA}
+	 *     {@link Service#RECORDING}
+	 *     {@link Service#TASK}
+	 *     {@link Service#VENT}
+	 *
+	 *     <p/>
+	 *
+	 * @param type The service to use.
+	 * @param <T> The type of service.
+	 * @return The service.
+	 */
+	public static  <T extends Service> T getService(ServiceType<T> type) {
+		return getInstance().getServiceManager().get(type);
 	}
 
 }

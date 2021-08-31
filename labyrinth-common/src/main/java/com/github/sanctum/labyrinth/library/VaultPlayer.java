@@ -1,14 +1,12 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.google.common.base.Preconditions;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Encapsulate a player object and get the properties of the permissible inheritance.
@@ -28,7 +26,6 @@ public class VaultPlayer {
 	}
 
 	protected VaultPlayer(OfflinePlayer player) {
-		Preconditions.checkArgument(PERMS != null, "No vault permission implementation found.");
 		this.player = player;
 	}
 

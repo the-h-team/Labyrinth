@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 /**
  * Detects legacy server environments.
  */
-public interface LegacyCheckService {
+public interface LegacyCheckService extends Service {
     /**
      * Check if the environment of the server is legacy.
      *

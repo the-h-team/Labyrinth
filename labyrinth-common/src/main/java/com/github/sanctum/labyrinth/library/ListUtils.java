@@ -130,12 +130,12 @@ public class ListUtils<T> {
 		return this;
 	}
 
-	public List<T> first(T value) {
+	public List<T> addFirst(T value) {
 		this.list.addFirst(value);
 		return this.list;
 	}
 
-	public List<T> last(T value) {
+	public List<T> addLast(T value) {
 		this.list.addLast(value);
 		return this.list;
 	}

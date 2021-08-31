@@ -1,17 +1,13 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import com.github.sanctum.labyrinth.api.Service;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
-
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 //FIXME
-public abstract class VentMap {
+public abstract class VentMap implements Service {
 
 	/**
 	 * Unsubscribe from an event by providing the key of the desired subscription if found.

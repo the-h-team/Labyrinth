@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TextLib;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -15,12 +16,12 @@ import org.bukkit.OfflinePlayer;
  */
 public class NewComponent extends TextLib {
 
-	private static String color(String text) {
-		return StringUtils.use(text).translate();
+	private static BaseComponent[] color(String text) {
+		return TextComponent.fromLegacyText(StringUtils.use(text).translate());
 	}
 
-	private static String color(OfflinePlayer source, String text) {
-		return StringUtils.use(text).translate(source);
+	private static BaseComponent[] color(OfflinePlayer source, String text) {
+		return TextComponent.fromLegacyText(StringUtils.use(text).translate(source));
 	}
 
 	@Override

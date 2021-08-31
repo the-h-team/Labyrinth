@@ -8,14 +8,24 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.intellij.lang.annotations.MagicConstant;
 
 /**
  * @author Hempfest
  */
 public abstract class UpdateChecker {
 
+	/**
+	 * Format: X.X.X
+	 */
 	public static final int STANDARD = 3;
+	/**
+	 * Format: X.X
+	 */
 	public static final int SIMPLE = 2;
+	/**
+	 * Format: X
+	 */
 	public static final int BASIC = 1;
 
 	private final int PROJECT_ID;
@@ -50,7 +60,7 @@ public abstract class UpdateChecker {
 		return "https://www.spigotmc.org/resources/" + PROJECT_ID;
 	}
 
-	public boolean hasUpdate(int precision) {
+	public boolean hasUpdate(@MagicConstant(intValues = {STANDARD, SIMPLE, BASIC}) int precision) {
 		try {
 			String latest = getLatest();
 			String version = PLUGIN.getDescription().getVersion();

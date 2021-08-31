@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Used to keep track of time-span's
  */
-public interface RecordingService {
+public interface RecordingService extends Service {
 
 	/**
 	 * Get's the amount of time the plugin has been active.
