@@ -1,11 +1,10 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
-import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +71,10 @@ public abstract class Vent {
 
 	public final boolean isAsynchronous() {
 		return this.async;
+	}
+
+	public final Runtime getRuntime() {
+		return async ? Runtime.Asynchronous : Runtime.Synchronous;
 	}
 
 	protected final boolean isDefault() {
@@ -286,7 +289,19 @@ public abstract class Vent {
 	}
 
 	public enum Runtime {
-		Synchronous, Asynchronous
+		Synchronous, Asynchronous;
+
+		public void validate(Vent vent) throws SubscriptionRuntimeException {
+			if (vent.getRuntime() != this) {
+				throw new SubscriptionRuntimeException("Vent was tried to run " + this +
+													   " but only can be run " + vent.getRuntime());
+			}
+		}
+
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
 	}
 
 	public enum Priority {
@@ -302,7 +317,7 @@ public abstract class Vent {
 		READ_ONLY(5);
 
 		private static final List<Priority> writeAccessing =
-				Stream.of(LOW, MEDIUM, HIGH, HIGHEST).collect(Collectors.toList());
+				Collections.unmodifiableList(Stream.of(LOW, MEDIUM, HIGH, HIGHEST).collect(Collectors.toList()));
 
 		private final int level;
 
@@ -343,14 +358,14 @@ public abstract class Vent {
 
 		public T run() {
 
+			type.validate(event);
+
 			JavaPlugin plugin = JavaPlugin.getProvidingPlugin(event.getClass());
 			VentMap map = getMap();
 			List<VentListener> listeners = map.getListeners();
+
 			switch (type) {
 				case Synchronous:
-					if (event.isAsynchronous())
-						throw new SubscriptionRuntimeException("This event can only be run asynchronously!");
-
 					if (event.getHost() == null) {
 						event.setHost(plugin);
 					}
@@ -386,40 +401,11 @@ public abstract class Vent {
 
 					});
 
-					if (!listeners.isEmpty()) {
-						for (Priority priority : Priority.getWriteAccessing()) {
-							for (VentListener o : listeners) {
-								o.getHandlers(event.getType(), priority).forEachOrdered(c -> {
-									if (event.getState() == CancelState.ON) {
-										if (!event.isCancelled()) {
-											c.accept(event, null);
-											this.copy = event;
-										}
-									} else {
-										c.accept(event, null);
-										this.copy = event;
-									}
-								});
-							}
-						}
-					}
-					listeners.forEach(l -> l.getHandlers(event.getType(), Priority.READ_ONLY)
-							.forEachOrdered(c -> {
-										if (!copy.isCancelled()) {
-											c.accept(event, null);
-											if (copy.isCancelled()) {
-												copy.setCancelled(false);
-											}
-										}
-									}
-							));
-
+					runListenerCalls(listeners);
 
 					return event;
 
 				case Asynchronous:
-					if (!event.isAsynchronous())
-						throw new SubscriptionRuntimeException("This event can only be run synchronously!");
 
 					event.setHost(plugin);
 
@@ -475,75 +461,7 @@ public abstract class Vent {
 
 						});
 
-						if (!listeners.isEmpty()) {
-							for (Priority priority : Priority.values()) {
-								for (VentListener o : listeners) {
-									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
-									AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
-									if (discov.isPresent()) {
-										String value = discov.map((r, u) -> r.value());
-										if (StringUtils.use(value).containsIgnoreCase("Test")) {
-											for (Method m : discovery.methods()) {
-												for (Subscribe a : discovery.read(m)) {
-													if (a.ignore()) {
-														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
-														continue;
-													}
-													if (!m.isAccessible()) m.setAccessible(true);
-
-													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
-													break;
-												}
-											}
-											return event;
-										}
-									}
-									for (Method m : discovery.methods()) {
-										for (Subscribe a : discovery.read(m)) {
-											if (a.priority() != priority) continue;
-											if (a.ignore()) {
-												event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-												continue;
-											}
-											;
-											if (!m.isAccessible()) m.setAccessible(true);
-
-											try {
-												switch (priority) {
-													case LOW:
-													case MEDIUM:
-													case HIGH:
-													case HIGHEST:
-														if (event.getState() == CancelState.ON) {
-															if (!event.isCancelled()) {
-																m.invoke(o.getListener(), event);
-																this.copy = event;
-															}
-														} else {
-															m.invoke(o.getListener(), event);
-															this.copy = event;
-														}
-														break;
-													case READ_ONLY:
-														if (!copy.isCancelled()) {
-															m.invoke(o.getListener(), copy);
-															if (copy.isCancelled()) {
-																copy.setCancelled(false);
-															}
-														}
-														break;
-												}
-											} catch (Exception ec) {
-												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
-												exception.setStackTrace(ec.getCause().getStackTrace());
-												throw exception;
-											}
-
-										}
-									}
-								}
-							}
-						}
+						runListenerCalls(listeners);
 
 						return event;
 
@@ -552,6 +470,7 @@ public abstract class Vent {
 					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
 			}
 		}
+
 
 		public CompletableFuture<T> complete() {
 
@@ -601,77 +520,7 @@ public abstract class Vent {
 
 						});
 
-						if (!listeners.isEmpty()) {
-							for (Priority priority : Priority.values()) {
-								for (VentListener o : listeners) {
-
-									AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener()).filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType()) && m.isAnnotationPresent(Subscribe.class));
-
-									AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
-									if (discov.isPresent()) {
-										String value = discov.map((r, u) -> r.value());
-										if (StringUtils.use(value).containsIgnoreCase("Test")) {
-											for (Method m : discovery.methods()) {
-												for (Subscribe a : discovery.read(m)) {
-													if (a.ignore()) {
-														event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
-														continue;
-													}
-													if (!m.isAccessible()) m.setAccessible(true);
-
-													event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
-													break;
-												}
-											}
-											return event;
-										}
-									}
-
-									for (Method m : discovery.methods()) {
-										for (Subscribe a : discovery.read(m)) {
-											if (a.priority() != priority) continue;
-											if (a.ignore()) {
-												event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-												continue;
-											}
-											if (!m.isAccessible()) m.setAccessible(true);
-
-											try {
-												switch (priority) {
-													case LOW:
-													case MEDIUM:
-													case HIGH:
-													case HIGHEST:
-														if (event.getState() == CancelState.ON) {
-															if (!event.isCancelled()) {
-																m.invoke(o.getListener(), event);
-																this.copy = event;
-															}
-														} else {
-															m.invoke(o.getListener(), event);
-															this.copy = event;
-														}
-														break;
-													case READ_ONLY:
-														if (!copy.isCancelled()) {
-															m.invoke(o.getListener(), copy);
-															if (copy.isCancelled()) {
-																copy.setCancelled(false);
-															}
-														}
-														break;
-												}
-											} catch (Exception ec) {
-												SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
-												exception.setStackTrace(ec.getCause().getStackTrace());
-												throw exception;
-											}
-
-										}
-									}
-								}
-							}
-						}
+						runListenerCalls(listeners);
 						return event;
 
 					});
@@ -681,6 +530,53 @@ public abstract class Vent {
 					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
 			}
 		}
+
+		@SuppressWarnings("unchecked")
+		private void runListenerCalls(List<VentListener> listeners) {
+			List<Class<? extends Vent>> callingClasses = new ArrayList<>();
+			Class<? extends Vent> temp = event.getType();
+			do {
+				callingClasses.add(temp);
+				temp = (Class<? extends Vent>) temp.getSuperclass();
+			} while (Vent.class.isAssignableFrom(temp));
+
+			if (!listeners.isEmpty()) {
+				for (Priority priority : Priority.getWriteAccessing()) {
+					for (VentListener o : listeners) {
+						callingClasses.forEach(ventClass -> runEvents(o, ventClass, priority));
+					}
+				}
+			}
+			callingClasses.forEach(aClass -> listeners.forEach(l -> runReadOnly(l, aClass)));
+		}
+
+		private <E extends Vent> void runEvents(VentListener listener, Class<E> eventSuperClass, Priority priority) {
+			E vent = eventSuperClass.cast(event);
+			listener.getHandlers(eventSuperClass, priority).forEachOrdered(e -> {
+				if (vent.getState() == CancelState.ON) {
+					if (!vent.isCancelled()) {
+						e.accept(vent, null);
+						this.copy = event;
+					}
+				} else {
+					e.accept(vent, null);
+					this.copy = event;
+				}
+			});
+
+		}
+
+		private <E extends Vent> void runReadOnly(VentListener listener, Class<E> eventSuperClass) {
+			listener.getHandlers(eventSuperClass, Priority.READ_ONLY).forEachOrdered(e -> {
+				if (!copy.isCancelled()) {
+					e.accept(eventSuperClass.cast(copy), null);
+					if (copy.isCancelled()) {
+						copy.setCancelled(false);
+					}
+				}
+			});
+		}
+
 	}
 
 	private static VentMap getMap() {
