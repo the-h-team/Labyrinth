@@ -1,13 +1,15 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.api.Service;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 //FIXME
-public abstract class VentMap implements Service {
+public abstract class VentMap {
 
 	/**
 	 * Unsubscribe from an event by providing the key of the desired subscription if found.
@@ -15,7 +17,11 @@ public abstract class VentMap implements Service {
 	 * @param eventType The {@link Vent} to unsubscribe from.
 	 * @param key       The key namespace for the subscription.
 	 * @param <T>       The inheritance of vent.
+	 * @deprecated As there could be multiple entries for one key, you cannot be sure to remove the right listener!
+	 * And in the only case where it would always remove the right key,
+	 * the method is equivalent to {{@link #unsubscribeAll(Class, String)}}
 	 */
+	@Deprecated
 	public abstract <T extends Vent> void unsubscribe(@NotNull Class<T> eventType, @NotNull String key);
 
 	/**
@@ -36,6 +42,13 @@ public abstract class VentMap implements Service {
 	public abstract void unsubscribeAll(@NotNull String key);
 
 	/**
+	 * The most preferred way to remove subscriptions.
+	 *
+	 * @param subscription the subscription instance to remove;
+	 */
+	public abstract void unsubscribe(Vent.Subscription<?> subscription);
+
+	/**
 	 * Unsubscribe every found subscription labeled under the specified namespace.
 	 *
 	 * @param fun The prerequisite to unsubscribing from a vent.
@@ -46,8 +59,17 @@ public abstract class VentMap implements Service {
 	 * Remove a registered subscription listener from cache.
 	 *
 	 * @param listener The listener to remove.
+	 * @deprecated Takes long O(n) to find the listener. Use {{@link #unregister(Plugin, String, Object)}} for O(1)!
 	 */
 	public abstract void unregister(@NotNull Object listener);
+
+	/**
+	 * Removes a registered subscription listener by specification.
+	 *
+	 * @param host the plugin providing the listener
+	 * @param key  the key associated with the listener or null if none was specified
+	 */
+	public abstract void unregister(Plugin host, @Nullable String key, Object listener);
 
 	/**
 	 * Remove all registered subscription listeners for a plugin from cache.
@@ -77,6 +99,7 @@ public abstract class VentMap implements Service {
 	 *
 	 * @param key The key for the listener.
 	 * @return The registered listener.
+	 * @deprecated A key can hold multiple listeners. Will be disabled in the future.
 	 */
 	public abstract VentListener get(String key);
 
@@ -122,6 +145,9 @@ public abstract class VentMap implements Service {
 	public abstract void chain(Vent.Link link);
 
 	public abstract List<Vent.Subscription<?>> getSubscriptions();
+
+	public abstract <T extends Vent> Stream<Vent.Subscription<T>> getSubscriptions(Class<T> tClass,
+																				   Vent.Priority priority);
 
 	public abstract List<VentListener> getListeners();
 }
