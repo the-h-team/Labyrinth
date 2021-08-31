@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -139,6 +141,7 @@ public abstract class Vent {
 			this.priority = priority;
 			this.action = action;
 		}
+
 		//FIXME
 		public void remove() {
 			if (key != null) {
@@ -298,6 +301,9 @@ public abstract class Vent {
 
 		READ_ONLY(5);
 
+		private static final List<Priority> writeAccessing =
+				Stream.of(LOW, MEDIUM, HIGH, HIGHEST).collect(Collectors.toList());
+
 		private final int level;
 
 		Priority(int level) {
@@ -306,6 +312,10 @@ public abstract class Vent {
 
 		public int getLevel() {
 			return level;
+		}
+
+		public static List<Priority> getWriteAccessing() {
+			return writeAccessing;
 		}
 	}
 
@@ -377,75 +387,33 @@ public abstract class Vent {
 					});
 
 					if (!listeners.isEmpty()) {
-						for (Priority priority : Priority.values()) {
+						for (Priority priority : Priority.getWriteAccessing()) {
 							for (VentListener o : listeners) {
-								AnnotationDiscovery<Subscribe, Object> discovery = AnnotationDiscovery.of(Subscribe.class, o.getListener())
-										.filter(m -> m.getParameters().length == 1 && m.getParameters()[0].getType().isAssignableFrom(event.getType())
-													 && m.isAnnotationPresent(Subscribe.class));
-								AnnotationDiscovery<LabeledAs, Object> discov = AnnotationDiscovery.of(LabeledAs.class, o.getListener());
-								if (discov.isPresent()) {
-									String value = discov.map((r, u) -> r.value());
-									if (StringUtils.use(value).containsIgnoreCase("Test")) {
-										for (Method m : discovery.methods()) {
-											for (Subscribe a : discovery.read(m)) {
-												if (a.ignore()) {
-													event.getHost().getLogger().warning("- [" + value + "] Skipping ignored handle " + m.getName());
-													continue;
-												}
-												if (!m.isAccessible()) m.setAccessible(true);
-
-												event.getHost().getLogger().warning("- [" + value + "] Found handle " + '"' + m.getName() + '"' + " for event " + m.getParameters()[0].getType().getSimpleName());
-												break;
-											}
+								o.getHandlers(event.getType(), priority).forEachOrdered(c -> {
+									if (event.getState() == CancelState.ON) {
+										if (!event.isCancelled()) {
+											c.accept(event, null);
+											this.copy = event;
 										}
-										return event;
+									} else {
+										c.accept(event, null);
+										this.copy = event;
 									}
-								}
-								for (Method m : discovery.methods()) {
-									for (Subscribe a : discovery.read(m)) {
-										if (a.priority() != priority) continue;
-										if (a.ignore()) {
-											event.getHost().getLogger().warning("- Skipping ignored handle " + m.getName());
-											continue;
-										}
-										;
-										if (!m.isAccessible()) m.setAccessible(true);
-										try {
-											switch (priority) {
-												case LOW:
-												case MEDIUM:
-												case HIGH:
-												case HIGHEST:
-													if (event.getState() == CancelState.ON) {
-														if (!event.isCancelled()) {
-															m.invoke(o.getListener(), event);
-															this.copy = event;
-														}
-													} else {
-														m.invoke(o.getListener(), event);
-														this.copy = event;
-													}
-													break;
-												case READ_ONLY:
-													if (!copy.isCancelled()) {
-														m.invoke(o.getListener(), copy);
-														if (copy.isCancelled()) {
-															copy.setCancelled(false);
-														}
-													}
-													break;
-											}
-										} catch (Exception ec) {
-											SubscriptionRuntimeException exception = new SubscriptionRuntimeException("Subscription failed to execute: " + ec.getCause().getMessage());
-											exception.setStackTrace(ec.getCause().getStackTrace());
-											throw exception;
-										}
-
-									}
-								}
+								});
 							}
 						}
 					}
+					listeners.forEach(l -> l.getHandlers(event.getType(), Priority.READ_ONLY)
+							.forEachOrdered(c -> {
+										if (!copy.isCancelled()) {
+											c.accept(event, null);
+											if (copy.isCancelled()) {
+												copy.setCancelled(false);
+											}
+										}
+									}
+							));
+
 
 					return event;
 

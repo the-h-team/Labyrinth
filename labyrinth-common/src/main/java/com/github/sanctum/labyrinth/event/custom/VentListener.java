@@ -79,6 +79,9 @@ public class VentListener {
 			} catch (IllegalAccessException | InvocationTargetException e) {
 				Bukkit.getLogger().severe("Internal error hindered the " + listener.getClass().getName() + "#"
 										  + method.getName() + " to handle events. Check method accessibility");
+			} catch (Exception e) {
+				Bukkit.getLogger().severe("Could not pass event " + tClass.getName() + " to " + host);
+				e.printStackTrace();
 			}
 		};
 		eventMap.computeIfAbsent(tClass, c -> new HashMap<>())
