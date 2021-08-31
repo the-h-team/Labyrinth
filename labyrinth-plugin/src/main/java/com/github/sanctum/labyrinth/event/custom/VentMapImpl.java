@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.event.EasyListener;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -127,6 +129,9 @@ public final class VentMapImpl extends VentMap {
 
 	@Override
 	public void register(@NotNull Plugin host, @NotNull Object listener) {
+		if (listener.getClass().isAssignableFrom(Listener.class)) {
+			EasyListener.call(host, (Listener)listener);
+		}
 		VentListener list = new VentListener(host, listener);
 		listeners.computeIfAbsent(host, h -> new HashMap<>()).computeIfAbsent(list.getKey(), s -> new HashSet<>())
 				.add(list);
