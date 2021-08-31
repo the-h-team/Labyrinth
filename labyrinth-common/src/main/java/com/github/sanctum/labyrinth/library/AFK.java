@@ -1,18 +1,21 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
-import com.github.sanctum.labyrinth.event.custom.SubscriberCall;
-import com.github.sanctum.labyrinth.event.custom.Vent;
-import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.task.Synchronous;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.custom.SubscriberCall;
+import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.custom.VentMap;
+import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.Synchronous;
 
 /**
  * A class entirely responsible for handling away from keyboard users.
@@ -157,8 +160,9 @@ public class AFK {
 	 * @param link The subscription link to override with
 	 */
 	public static void override(Vent.Link link) {
-		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(c -> !c.getEventType().getSimpleName().equalsIgnoreCase("statuschange") && c.getKey().isPresent() && c.getKey().get().equals("afk-default"));
-		Vent.chain(link);
+		VentMap ventMap = LabyrinthProvider.getInstance().getEventMap();
+		ventMap.unsubscribeAll(c -> !c.getEventType().getSimpleName().equalsIgnoreCase("statuschange") && c.getKey().isPresent() && c.getKey().get().equals("afk-default"));
+		ventMap.chain(link);
 	}
 
 	/**
@@ -269,8 +273,9 @@ public class AFK {
 		 * @return this builder
 		 */
 		public Initializer next(SubscriberCall<StatusChange> subscriberCall) {
-			if (LabyrinthProvider.getInstance().getEventMap().get(DefaultEvent.Communication.class, "afk-default") == null) {
-				Vent.chain(new Vent.Link(new Vent.Subscription<>(StatusChange.class, "afk-default", plugin, Vent.Priority.MEDIUM, subscriberCall))
+			VentMap ventMap = LabyrinthProvider.getInstance().getEventMap();
+			if (ventMap.get(DefaultEvent.Communication.class, "afk-default") == null) {
+				ventMap.chain(new Vent.Link(new Vent.Subscription<>(StatusChange.class, "afk-default", plugin, Vent.Priority.MEDIUM, subscriberCall))
 						.next(new Vent.Subscription<>(DefaultEvent.Leave.class, "afk-default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
 
 							AFK afk = supply(e.getPlayer());

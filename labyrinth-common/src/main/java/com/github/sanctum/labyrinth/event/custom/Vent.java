@@ -1,22 +1,23 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.task.Schedule;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 
 public abstract class Vent {
 
@@ -85,8 +86,12 @@ public abstract class Vent {
 		return this.plugin;
 	}
 
-	public <T extends Vent> Class<T> getType() {
-		return (Class<T>) getClass();
+	/**
+	 * @deprecated use {@link VentMap#register(Plugin, Object)} instead!
+	 */
+	@Deprecated
+	public static void register(@NotNull Plugin host, @NotNull Object listener) {
+		getMap().register(host, listener);
 	}
 
 	public VentMap getVentMap() {
@@ -120,6 +125,99 @@ public abstract class Vent {
 
 	}
 
+	/**
+	 * @deprecated use {@link VentMap#registerAll(Plugin, Object...)} instead!
+	 */
+	@Deprecated
+	public static void registerAll(@NotNull Plugin host, @NotNull Object... listeners) {
+		getMap().registerAll(host, listeners);
+
+	}
+
+	/**
+	 * @deprecated use {@link VentMap#subscribe(Subscription)} instead!
+	 */
+	@Deprecated
+	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
+		getMap().subscribe(subscription);
+	}
+
+	/**
+	 * @deprecated use {@link VentMap#chain(Link)} instead!
+	 */
+	@Deprecated
+	public static void chain(Link link) {
+		getMap().chain(link);
+	}
+
+	//Check if #getClass also works, this method may be deprecated soon™
+	@SuppressWarnings("unchecked")
+	public <T extends Vent> Class<T> getType() {
+		return (Class<T>) getClass();
+	}
+
+	public enum Runtime {
+		Synchronous, Asynchronous;
+
+		/**
+		 * use this on a given runtime to validate that it is able to run the passed event
+		 *
+		 * @param vent the event that could be run
+		 * @throws SubscriptionRuntimeException if the events runtime mismatches this runtime
+		 */
+		public void validate(Vent vent) throws SubscriptionRuntimeException {
+			if (vent.getRuntime() != this) {
+				throw new SubscriptionRuntimeException("Vent was tried to run " + this +
+													   " but only can be run " + vent.getRuntime());
+			}
+		}
+
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
+	}
+
+	public enum CancelState {
+		ON, OFF
+	}
+
+	/**
+	 * Event handler priority.
+	 * LOWER means that it will be run earlier.
+	 */
+	public enum Priority {
+
+		LOW(1),
+
+		MEDIUM(2),
+
+		HIGH(3),
+
+		HIGHEST(4),
+
+		READ_ONLY(5);
+
+		/**
+		 * A list containing all priorities that have write-access to events.
+		 */
+		private static final List<Priority> writeAccessing =
+				Collections.unmodifiableList(Stream.of(LOW, MEDIUM, HIGH, HIGHEST).collect(Collectors.toList()));
+
+		private final int level;
+
+		Priority(int level) {
+			this.level = level;
+		}
+
+		public static List<Priority> getWriteAccessing() {
+			return writeAccessing;
+		}
+
+		public int getLevel() {
+			return level;
+		}
+	}
 
 	public static class Subscription<T extends Vent> {
 
@@ -145,33 +243,8 @@ public abstract class Vent {
 			this.action = action;
 		}
 
-		//FIXME
 		public void remove() {
-			if (key != null) {
-				getMap().unsubscribe(eventType, key);
-
-				getMap().getSubscriptions().forEach(s -> {
-
-					if (s.getParent().equals(this)) {
-						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
-					}
-
-				});
-
-			} else {
-				getMap().getSubscriptions().forEach(s -> {
-
-					if (s.getParent().equals(this)) {
-						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
-					}
-
-				});
-				getMap().getSubscriptions().forEach(s -> {
-					if (s.equals(this)) {
-						Schedule.sync(() -> getMap().getSubscriptions().remove(this)).waitReal(1);
-					}
-				});
-			}
+			getMap().unsubscribe(this);
 		}
 
 		public Subscription<?> getParent() {
@@ -206,6 +279,7 @@ public abstract class Vent {
 
 			private final Class<T> tClass;
 			private Subscription<T> subscription;
+			private SubscriberCall<T> subscriberCall;
 			private String key;
 			private Plugin plugin;
 			private Priority priority;
@@ -234,111 +308,45 @@ public abstract class Vent {
 			}
 
 			public Builder<T> use(SubscriberCall<T> call) {
-				if (this.key != null) {
-					this.subscription = new Subscription<>(tClass, key, plugin, priority, call);
-				}
-				this.subscription = new Subscription<>(tClass, plugin, priority, call);
+				this.subscriberCall = call;
 				return this;
 			}
 
-			public Subscription<T> finish() {
-				getMap().getSubscriptions().add(this.subscription);
+			/**
+			 * Builds the subscription and registers at the VentMap service, if not done previously.
+			 * Otherwise, it just returns the built subscription.
+			 *
+			 * @return the built subscription
+			 */
+			public Subscription<T> finish() throws IllegalStateException {
+				boolean register = subscription == null;
+				if (register) {
+					validate();
+					if (this.key != null) {
+						this.subscription = new Subscription<>(tClass, key, plugin, priority, subscriberCall);
+					} else {
+						this.subscription = new Subscription<>(tClass, plugin, priority, subscriberCall);
+					}
+					getMap().subscribe(this.subscription);
+				}
 				return this.subscription;
 			}
 
-		}
-
-
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#register(Plugin, Object)} instead!
-	 */
-	@Deprecated
-	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		getMap().register(host, listener);
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#registerAll(Plugin, Object...)} instead!
-	 */
-	@Deprecated
-	public static void registerAll(@NotNull Plugin host, @NotNull Object... listeners) {
-		getMap().registerAll(host, listeners);
-
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#subscribe(Subscription)} instead!
-	 */
-	@Deprecated
-	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
-		getMap().subscribe(subscription);
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#chain(Link)} instead!
-	 */
-	@Deprecated
-	public static void chain(Link link) {
-		getMap().chain(link);
-	}
-
-	public enum CancelState {
-		ON, OFF
-	}
-
-	public enum Runtime {
-		Synchronous, Asynchronous;
-
-		public void validate(Vent vent) throws SubscriptionRuntimeException {
-			if (vent.getRuntime() != this) {
-				throw new SubscriptionRuntimeException("Vent was tried to run " + this +
-													   " but only can be run " + vent.getRuntime());
+			private void validate() throws IllegalStateException {
+				if (Stream.of(plugin, priority).anyMatch(Objects::isNull)) {
+					throw new IllegalStateException("There are still unassigned builds needed " +
+													"to build a Subscription!");
+				}
 			}
+
 		}
 
-		@Override
-		public String toString() {
-			return name().toLowerCase();
-		}
-	}
 
-	public enum Priority {
-
-		LOW(1),
-
-		MEDIUM(2),
-
-		HIGH(3),
-
-		HIGHEST(4),
-
-		READ_ONLY(5);
-
-		private static final List<Priority> writeAccessing =
-				Collections.unmodifiableList(Stream.of(LOW, MEDIUM, HIGH, HIGHEST).collect(Collectors.toList()));
-
-		private final int level;
-
-		Priority(int level) {
-			this.level = level;
-		}
-
-		public int getLevel() {
-			return level;
-		}
-
-		public static List<Priority> getWriteAccessing() {
-			return writeAccessing;
-		}
 	}
 
 	public static class Call<T extends Vent> {
 
 		private final T event;
-
-		private boolean warned;
 
 		private T copy;
 
@@ -356,53 +364,39 @@ public abstract class Vent {
 			this.type = type;
 		}
 
+		public Supplier<T> run(Runtime runtime) {
+			runtime.validate(event);
+			switch (runtime) {
+				case Synchronous: {
+					T result = run();
+					return () -> result;
+				}
+				case Asynchronous: {
+					final CompletableFuture<T> complete = complete();
+					return () -> {
+						try {
+							return complete.get();
+						} catch (InterruptedException | ExecutionException e) {
+							e.printStackTrace();
+							return event;
+						}
+					};
+				}
+				default:
+					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
+
+			}
+		}
+
 		public T run() {
-
 			type.validate(event);
-
 			JavaPlugin plugin = JavaPlugin.getProvidingPlugin(event.getClass());
-			VentMap map = getMap();
-			List<VentListener> listeners = map.getListeners();
-
 			switch (type) {
 				case Synchronous:
 					if (event.getHost() == null) {
 						event.setHost(plugin);
 					}
-
-					map.getSubscriptions().stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
-
-						if (s.getEventType().isAssignableFrom(event.getType())) {
-							switch (s.getPriority()) {
-								case LOW:
-								case MEDIUM:
-								case HIGH:
-								case HIGHEST:
-									if (event.getState() == CancelState.ON) {
-										if (!event.isCancelled()) {
-											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-											this.copy = event;
-										}
-									} else {
-										((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-										this.copy = event;
-									}
-									break;
-								case READ_ONLY:
-									if (!copy.isCancelled()) {
-										((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
-										if (copy.isCancelled()) {
-											copy.setCancelled(false);
-										}
-									}
-									break;
-							}
-						}
-
-					});
-
-					runListenerCalls(listeners);
-
+					notifySubscribersAndListeners();
 					return event;
 
 				case Asynchronous:
@@ -410,59 +404,15 @@ public abstract class Vent {
 					event.setHost(plugin);
 
 					return CompletableFuture.supplyAsync(() -> {
-
 						if (event.getHost() == null) {
 							event.setHost(plugin);
 						}
-
-						map.getSubscriptions().stream().sorted(Comparator.comparingInt(value -> value.getPriority().getLevel())).forEach(s -> {
-
-							if (s.getEventType().isAssignableFrom(event.getType())) {
-								switch (s.getPriority()) {
-									case LOW:
-									case MEDIUM:
-									case HIGH:
-									case HIGHEST:
-										if (event.getState() == CancelState.ON) {
-											if (!event.isCancelled()) {
-												if (!warned) {
-													LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-													LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
-													this.warned = true;
-												}
-												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-												this.copy = event;
-											}
-										} else {
-											if (!warned) {
-												LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-												LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
-												this.warned = true;
-											}
-											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-											this.copy = event;
-										}
-										break;
-									case READ_ONLY:
-										if (!warned) {
-											LabyrinthProvider.getInstance().getLogger().warning("- Illegal asynchronous task call from plugin " + s.getUser().getName() + " for event " + event.getName());
-											LabyrinthProvider.getInstance().getLogger().warning("- Recommended use is via Vent#complete()");
-											this.warned = true;
-										}
-										if (!copy.isCancelled()) {
-											((SubscriberCall<T>) s.getAction()).accept(copy, (Subscription<T>) s);
-											if (copy.isCancelled()) {
-												copy.setCancelled(false);
-											}
-										}
-										break;
-								}
-							}
-
-						});
-
-						runListenerCalls(listeners);
-
+						LabyrinthProvider.getInstance().getLogger()
+								.warning("- Illegal asynchronous event call from plugin " + plugin.getName()
+										 + " for event " + event.getName());
+						LabyrinthProvider.getInstance().getLogger()
+								.warning("- Recommended use is via Vent#complete()");
+						notifySubscribersAndListeners();
 						return event;
 
 					}).join();
@@ -473,84 +423,41 @@ public abstract class Vent {
 
 
 		public CompletableFuture<T> complete() {
-
+			if (type == Runtime.Synchronous)
+				throw new SubscriptionRuntimeException("An invalid runtime was provided!");
+			type.validate(event);
 			JavaPlugin plugin = JavaPlugin.getProvidingPlugin(event.getClass());
-			VentMap map = getMap();
-			List<VentListener> listeners = map.getListeners();
-			switch (this.type) {
-				case Asynchronous:
-
-					if (!event.isAsynchronous())
-						throw new IllegalStateException("This event can only be run synchronously");
-
-					if (event.getHost() == null) {
-						event.setHost(plugin);
-					}
-
-					return CompletableFuture.supplyAsync(() -> {
-
-						map.getSubscriptions().stream().sorted(Comparator.comparing(Subscription::getPriority, Priority::compareTo)).forEach(s -> {
-
-							if (s.getEventType().isAssignableFrom(event.getType())) {
-								switch (s.getPriority()) {
-									case LOW:
-									case MEDIUM:
-									case HIGH:
-									case HIGHEST:
-										if (event.getState() == CancelState.ON) {
-											if (!event.isCancelled()) {
-												((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-												this.copy = event;
-											}
-										} else {
-											((SubscriberCall<T>) s.getAction()).accept(event, (Subscription<T>) s);
-											this.copy = event;
-										}
-										break;
-									case READ_ONLY:
-										if (!copy.isCancelled()) {
-											((SubscriberCall<T>) s.getAction()).accept(this.copy, (Subscription<T>) s);
-											if (copy.isCancelled()) {
-												copy.setCancelled(false);
-											}
-										}
-										break;
-								}
-							}
-
-						});
-
-						runListenerCalls(listeners);
-						return event;
-
-					});
-
-				case Synchronous:
-				default:
-					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
+			if (event.getHost() == null) {
+				event.setHost(plugin);
 			}
+			return CompletableFuture.supplyAsync(() -> {
+				notifySubscribersAndListeners();
+				return event;
+
+			});
+
 		}
 
 		@SuppressWarnings("unchecked")
-		private void runListenerCalls(List<VentListener> listeners) {
-			List<Class<? extends Vent>> callingClasses = new ArrayList<>();
-			Class<? extends Vent> temp = event.getType();
-			do {
-				callingClasses.add(temp);
-				temp = (Class<? extends Vent>) temp.getSuperclass();
-			} while (Vent.class.isAssignableFrom(temp));
-
-			if (!listeners.isEmpty()) {
-				for (Priority priority : Priority.getWriteAccessing()) {
-					for (VentListener o : listeners) {
-						callingClasses.forEach(ventClass -> runEvents(o, ventClass, priority));
-					}
-				}
-			}
-			callingClasses.forEach(aClass -> listeners.forEach(l -> runReadOnly(l, aClass)));
+		private void notifySubscribersAndListeners() {
+			VentMap map = getMap();
+			List<VentListener> listeners = map.getListeners();
+			List<Class<? extends Vent>> assignableClasses = generateAssignableClasses(event.getClass());
+			Priority.getWriteAccessing().forEach(p -> assignableClasses.forEach(c -> {
+				map.getSubscriptions(c, p).map(s -> (Subscription<? super T>) s)
+						.forEachOrdered(subscription -> runSubscription(subscription, event));
+				listeners.forEach(l -> notifyListeners(l, c, p));
+			}));
+			assignableClasses.forEach(c -> {
+				map.getSubscriptions(c, Priority.READ_ONLY)
+						.map(s -> (Subscription<? super T>) s)
+						.forEachOrdered(s -> runSubscriptionReadOnly(s, copy));
+				listeners.forEach(listener -> runReadOnly(listener, c));
+			});
 		}
 
-		private <E extends Vent> void runEvents(VentListener listener, Class<E> eventSuperClass, Priority priority) {
+		private <E extends Vent> void notifyListeners(VentListener listener, Class<E> eventSuperClass,
+													  Priority priority) {
 			E vent = eventSuperClass.cast(event);
 			listener.getHandlers(eventSuperClass, priority).forEachOrdered(e -> {
 				if (vent.getState() == CancelState.ON) {
@@ -575,6 +482,37 @@ public abstract class Vent {
 					}
 				}
 			});
+		}
+
+		private void runSubscription(Subscription<? super T> subscription, T event) {
+			if (event.getState() != CancelState.ON || !event.isCancelled()) {
+				if (!event.isCancelled()) {
+					runSub(subscription, event);
+				}
+			}
+		}
+
+		private void runSubscriptionReadOnly(Subscription<? super T> subscription, T event) {
+			if (!event.isCancelled()) {
+				runSub(subscription, event);
+				if (event.isCancelled())
+					event.setCancelled(false);
+			}
+		}
+
+		private <S extends Vent> void runSub(Subscription<S> subscription, S event) {
+			subscription.getAction().accept(event, subscription);
+		}
+
+		@SuppressWarnings("unchecked")
+		private List<Class<? extends Vent>> generateAssignableClasses(Class<? extends Vent> ventClass) {
+			List<Class<? extends Vent>> callingClasses = new ArrayList<>();
+			Class<? extends Vent> temp = event.getType();
+			do {
+				callingClasses.add(temp);
+				temp = (Class<? extends Vent>) temp.getSuperclass();
+			} while (Vent.class.isAssignableFrom(temp));
+			return callingClasses;
 		}
 
 	}
