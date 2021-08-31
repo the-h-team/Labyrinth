@@ -56,7 +56,6 @@ public class VentListener {
 				}
 
 		);
-
 	}
 
 	public @Nullable String getKey() {
