@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.event.EasyListener;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,9 +28,12 @@ public final class VentMapImpl extends VentMap {
 
 	final Map<Plugin, Map<Class<? extends Vent>, Map<Vent.Priority, Set<Vent.Subscription<?>>>>> subscriptions;
 
+	final Map<String, Set<VentListener.VentExtender<?>>> extenders;
+
 	public VentMapImpl() {
 		listeners = new HashMap<>();
 		subscriptions = new HashMap<>();
+		extenders = new HashMap<>();
 	}
 
 	@Override
@@ -130,7 +134,7 @@ public final class VentMapImpl extends VentMap {
 	@Override
 	public void register(@NotNull Plugin host, @NotNull Object listener) {
 		if (listener.getClass().isAssignableFrom(Listener.class)) {
-			EasyListener.call(host, (Listener)listener);
+			EasyListener.call(host, (Listener) listener);
 		}
 		VentListener list = new VentListener(host, listener);
 		listeners.computeIfAbsent(host, h -> new HashMap<>()).computeIfAbsent(list.getKey(), s -> new HashSet<>())
@@ -198,5 +202,20 @@ public final class VentMapImpl extends VentMap {
 	public List<VentListener> getListeners() {
 		return listeners.values().stream().map(Map::values).flatMap(Collection::stream).flatMap(Set::stream)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void registerExtender(final VentListener.VentExtender<?> extender) {
+		extenders.computeIfAbsent(extender.getKey(), s -> new HashSet<>()).add(extender);
+	}
+
+	@Override
+	public void unregisterExtender(final VentListener.VentExtender<?> extender) {
+		Optional.ofNullable(extenders.get(extender.getKey())).ifPresent(s -> s.remove(extender));
+	}
+
+	@Override
+	public Stream<VentListener.VentExtender<?>> getExtenders(final String key) {
+		return extenders.computeIfAbsent(key, s -> new HashSet<>()).stream();
 	}
 }
