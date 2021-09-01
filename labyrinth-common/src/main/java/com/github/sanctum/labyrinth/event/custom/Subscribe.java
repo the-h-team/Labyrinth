@@ -13,4 +13,5 @@ public @interface Subscribe {
 
 	boolean ignore() default false;
 
+	String[] resultProcessors() default {};
 }

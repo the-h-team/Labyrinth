@@ -13,18 +13,19 @@ import java.lang.annotation.Target;
 public @interface Extend {
 
 	/**
-	 * Sets the key for this annotation to be recognised by other Extend annotations
+	 * Sets the key for this annotation.
+	 * The key will be used to pass return values from methods with this key in their result processor list.
+	 * Works for other {@link Extend} annotated methods and for {@link Subscribe}
 	 *
 	 * @return the key of the marked method
 	 */
 	String identifier();
 
 	/**
-	 * Sets the target methods of this extension. If any of these targets gets called, the result will be passed
-	 * to the annotated method.
+	 * Sets the keys of methods where the results of this method will be passed to.
 	 *
-	 * @return the keys of the parameter-supplying methods
+	 * @return the keys of the return-result-consuming methods
 	 */
-	String[] targets();
+	String[] resultProcessors() default {};
 
 }
