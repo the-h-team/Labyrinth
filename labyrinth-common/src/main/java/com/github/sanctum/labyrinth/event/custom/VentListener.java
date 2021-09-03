@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.api.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -103,9 +104,10 @@ public class VentListener {
 			try {
 				method.invoke(listener, t);
 			} catch (IllegalAccessException | InvocationTargetException e) {
-				Bukkit.getLogger().severe("Internal error hindered the " + listener.getClass().getName() + "#"
-										  + method.getName() + " to handle events. Check method accessibility" +
+				LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Internal error hindered " + listener.getClass().getName() + "#"
+										  + method.getName() + " from handling properly. Check method accessibility" +
 										  " and parameters");
+				e.printStackTrace();
 			} catch (Exception e) {
 				Bukkit.getLogger().severe("Could not pass event " + tClass.getName() + " to " + host);
 				e.printStackTrace();

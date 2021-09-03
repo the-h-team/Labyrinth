@@ -43,6 +43,11 @@ public enum DefaultColor implements CustomColor {
 	}
 
 	@Override
+	public CustomColor context(String context) {
+		return this;
+	}
+
+	@Override
 	public TextColor[] colors() {
 		return new TextColor[]{new TextColor(this.start.toString()), new TextColor(this.end.toString())};
 	}

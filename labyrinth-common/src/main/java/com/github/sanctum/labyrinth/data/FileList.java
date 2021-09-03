@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableList;
+import java.io.InputStream;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +12,9 @@ import java.util.*;
 import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Encapsulates a plugin for quick and easy file locating/management.
+ */
 public class FileList {
 	// Outer key = plugin name. Inner key = "d;n" where d and n represent the respective fields
 	static final Map<String, Map<String, FileManager>> CACHE = new ConcurrentHashMap<>();
@@ -58,6 +63,26 @@ public class FileList {
 		return plugin;
 	}
 
+	public List<FileManager> getFiles() {
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(Map::values)
+				.map(ImmutableList::copyOf)
+				.orElse(ImmutableList.of());
+	}
+
+	/**
+	 * Inject a custom implementation of configuration into cache for global use.
+	 *
+	 * @param configurable The implementation of configurable to inject.
+	 */
+	public void inject(@NotNull Configurable configurable) {
+		cacheFileManager(new FileManager(plugin, configurable));
+	}
+
+	public void copyCustom(InputStream source, File location) {
+		FileManager.copy(source, location);
+	}
+
 	/**
 	 * Copy a file of any type from this listings plugin.
 	 *
@@ -98,11 +123,12 @@ public class FileList {
 	 * main class passed through the initial search query.
 	 *
 	 * @param name name of config file
-	 * @param desc description of config file (designate subdirectory)
+	 * @param desc description of config file (designate subdirectory
+	 * @param type Whether or not to use JSON or YML
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
+	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc, final FileType type) throws IllegalArgumentException {
 		// move up to fail fast
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
@@ -110,11 +136,27 @@ public class FileList {
 		// See CACHE declaration above for new key strategy
 		return Optional.ofNullable(CACHE.get(plugin.getName()))
 				.map(m -> m.get(desc + ';' + name))
-				.orElseGet(() -> cacheFileManager(new FileManager(plugin, name, desc)));
+				.filter(m -> m.getChild().getClass().isAssignableFrom(type.getImplementation()))
+				.orElseGet(() -> cacheFileManager(new FileManager(plugin, null, name, desc, type)));
+	}
+
+	/**
+	 * Retrieve a Config instance via its name and description.
+	 * <p>
+	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
+	 * main class passed through the initial search query.
+	 *
+	 * @param name name of config file
+	 * @param desc description of config file (designate subdirectory)
+	 * @return existing instance or create new Config
+	 * @throws IllegalArgumentException if name is empty
+	 */
+	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
+		return find(name, desc, FileType.YAML);
 	}
 
 	private static FileManager cacheFileManager(FileManager fileManager) {
-		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.d + ';' + fileManager.n, fileManager);
+		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.configuration.getDirectory() + ';' + fileManager.configuration.getName(), fileManager);
 		return fileManager;
 	}
 
@@ -129,7 +171,22 @@ public class FileList {
 	 * @throws IllegalArgumentException if name is empty
 	 */
 	public @NotNull FileManager find(@NotNull final String name) throws IllegalArgumentException {
-		return find(name, null);
+		return find(name, (String) null);
+	}
+
+	/**
+	 * Retrieve a Config instance via its name and description.
+	 * <p>
+	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
+	 * main class passed through the initial search query.
+	 *
+	 * @param name name of config file
+	 * @param data Whether or not to use JSON or YML, true = JSON
+	 * @return existing instance or create new Config
+	 * @throws IllegalArgumentException if name is empty
+	 */
+	public @NotNull FileManager find(@NotNull final String name, final FileType data) throws IllegalArgumentException {
+		return find(name, null, data);
 	}
 
 }

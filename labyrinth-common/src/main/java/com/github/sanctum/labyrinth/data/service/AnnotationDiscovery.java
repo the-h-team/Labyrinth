@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
@@ -54,10 +55,18 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 		return this;
 	}
 
+	/**
+	 * @return true if the desired annotation is present at all.
+	 */
 	public boolean isPresent() {
 		return methods.isEmpty() ? this.r.getClass().isAnnotationPresent(annotation) : count > 0;
 	}
 
+	/**
+	 * Run an operation with every annotation found.
+	 *
+	 * @param function The function.
+	 */
 	public void ifPresent(AnnotativeConsumer<T, R, Void> function) {
 		if (isPresent()) {
 			for (Method m : methods) {
@@ -70,6 +79,15 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 		}
 	}
 
+	/**
+	 * Map a value from an annotation if present.
+	 *
+	 * This method gives you access to an annotation and the source object itself.
+	 *
+	 * @param function The function.
+	 * @param <U> The desired return value.
+	 * @return A value from an annotation.
+	 */
 	public <U> U map(AnnotativeConsumer<T, R, U> function) {
 		if (isPresent()) {
 			for (Annotation a : r.getClass().getAnnotations()) {
@@ -79,6 +97,17 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Run an operation for each relative method found.
+	 *
+	 * @param consumer The method function.
+	 */
+	public void forEach(Consumer<Method> consumer) {
+		for (Method m : methods) {
+			consumer.accept(m);
+		}
 	}
 
 	/**

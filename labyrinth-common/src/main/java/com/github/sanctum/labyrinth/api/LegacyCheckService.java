@@ -18,6 +18,15 @@ public interface LegacyCheckService extends Service {
     }
 
     /**
+     * Check if the environment of the server is newer.
+     *
+     * @return true if the server version is 1.16 or higher
+     */
+    default boolean isNew() {
+        return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17");
+    }
+
+    /**
      * Check if due to the environment of the server
      * the LegacyConfigLocation utility must be loaded.
      *

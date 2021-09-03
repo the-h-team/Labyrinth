@@ -9,6 +9,11 @@ public class RandomID {
 
     private final String assortment;
 
+
+    public RandomID() {
+        this(6);
+    }
+
     /**
      * Generate random IDs.
      *

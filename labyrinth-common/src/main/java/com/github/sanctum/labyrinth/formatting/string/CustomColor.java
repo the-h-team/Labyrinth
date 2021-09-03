@@ -16,6 +16,8 @@ public interface CustomColor {
 
 	BaseComponent[] build();
 
+	CustomColor context(String context);
+
 	TextColor[] colors();
 
 }

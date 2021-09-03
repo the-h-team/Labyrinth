@@ -14,11 +14,11 @@ public enum  LabyrinthOptions {
 
 		switch (this) {
 			case HEAD_PRE_CACHE:
-				return conf.getConfig().getBoolean("automatic-head-cache");
+				return conf.read(f -> f.getBoolean("automatic-head-cache"));
 			case IMPL_REGION_SERVICES:
-				return conf.getConfig().getBoolean("region-service-impl");
+				return conf.read(f -> f.getBoolean("region-service-impl"));
 			case IMPL_AFK:
-				return conf.getConfig().getBoolean("labyrinth-provided-afk");
+				return conf.read(f -> f.getBoolean("labyrinth-provided-afk"));
 			default:
 				return false;
 		}

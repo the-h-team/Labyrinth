@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
+import org.intellij.lang.annotations.MagicConstant;
+
 /**
  * Encapsulate a string and convert it into paragraphs using a specified regex pattern.
  *
@@ -32,7 +34,7 @@ public class Paragraph {
 	 * @param regex the pattern regex to match
 	 * @return this paragraph object
 	 */
-	public Paragraph setRegex(String regex) {
+	public Paragraph setRegex(@MagicConstant(stringValues = {SEPARATE_COMMA_ONLY, SEPARATE_PERIOD_ONLY, COMMA_AND_PERIOD}) String regex) {
 		this.regex = regex;
 		return this;
 	}
