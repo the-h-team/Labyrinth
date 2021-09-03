@@ -3,9 +3,12 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
+import com.github.sanctum.labyrinth.data.Configurable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
+import com.github.sanctum.labyrinth.data.ItemStackSerializable;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
+import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.VaultImplementation;
@@ -40,9 +43,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -96,8 +96,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	public void onEnable() {
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
-		ConfigurationSerialization.registerClass(Template.class);
-		ConfigurationSerialization.registerClass(MetaTemplate.class);
 		serviceManager = new ServiceManager();
 		serviceManager.load(Service.VENT);
 		serviceManager.load(Service.TASK);
@@ -109,12 +107,18 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		serviceManager.load(Service.COMPONENTS);
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
+		Configurable.registerClass(ItemStackSerializable.class);
+		Configurable.registerClass(LocationSerializable.class);
+		Configurable.registerClass(RandomHex.class);
+		ConfigurationSerialization.registerClass(RandomHex.class);
+		ConfigurationSerialization.registerClass(Template.class);
+		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
 		FileManager copy = FileList.search(this).find("config");
 		InputStream stream = getResource("config.yml");
 		assert stream != null;
 
-		if (!copy.exists()) {
+		if (!copy.getChild().exists()) {
 			FileManager.copy(stream, copy);
 		}
 		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));

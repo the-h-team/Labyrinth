@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.DataMap;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
@@ -49,10 +50,10 @@ public class PersistentContainer extends PersistentData {
 	 */
 	protected synchronized boolean found(String key) {
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		boolean f = manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key);
+		boolean f = manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 		if (f && !this.dataMap.containsKey(key)) {
 			try {
-				Object o = new HFEncoded(manager.getConfig().getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)).deserialized();
+				Object o = new HFEncoded(manager.read(fi -> fi.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))).deserialized();
 				this.dataMap.put(key, o);
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
@@ -70,13 +71,14 @@ public class PersistentContainer extends PersistentData {
 	public synchronized boolean delete(String key) {
 		this.dataMap.remove(key);
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)) {
-			manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
-			manager.saveConfig();
-			final ConfigurationSection section = manager.getConfig().getConfigurationSection(this.key.getNamespace() + "." + this.key.getKey());
+		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
+			DataMap inquiry = DataMap.newMap();
+			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
+			manager.write(inquiry);
+			final ConfigurationSection section = manager.read(c -> c.getNode(this.key.getNamespace() + "." + this.key.getKey()).get(ConfigurationSection.class));
 			if (section != null && section.getKeys(false).isEmpty()) {
-				manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey(), null);
-				manager.saveConfig();
+				inquiry.set(this.key.getNamespace() + "." + this.key.getKey(), null);
+				manager.write(inquiry);
 			}
 			return true;
 		}
@@ -95,15 +97,16 @@ public class PersistentContainer extends PersistentData {
 	public synchronized void save(String key) throws IOException {
 		if (this.persistenceMap.get(key)) {
 			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-			manager.getConfig().set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
-			manager.saveConfig();
+			DataMap inquiry = DataMap.newMap();
+			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
+			manager.write(inquiry);
 		}
 	}
 
 	protected synchronized <R> R load(Class<R> type, String key) {
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)) {
-			R value = deserialize(type, manager.getConfig().getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
+		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
+			R value = deserialize(type, manager.read(f -> f.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)));
 			return attach(key, value);
 		}
 		return null;
@@ -187,9 +190,9 @@ public class PersistentContainer extends PersistentData {
 	public synchronized List<String> persistentKeySet() {
 		List<String> list = new LinkedList<>();
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-		if (manager.getConfig().isConfigurationSection(this.key.getNamespace() + "." + this.key.getKey())) {
+		if (manager.read(c -> c.isNode(this.key.getNamespace() + "." + this.key.getKey()))) {
 			//noinspection ConstantConditions
-			list.addAll(manager.getConfig().getConfigurationSection(this.key.getNamespace() + "." + this.key.getKey()).getKeys(false));
+			list.addAll(manager.read(f -> f.getNode(this.key.getNamespace() + "." + this.key.getKey()).getKeys(false)));
 		}
 		for (String cached : keySet()) {
 			if (!list.contains(cached)) {
@@ -234,7 +237,7 @@ public class PersistentContainer extends PersistentData {
 	 * handled internally for normal object use from containers.
 	 *
 	 * @param type  the type this object represents
-	 * @param value the serialized object to deserialize
+	 * @param value the serialized object to read
 	 * @param <R>   the type this object represents
 	 * @return the deserialized object otherwise null
 	 */

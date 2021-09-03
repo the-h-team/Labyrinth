@@ -1,0 +1,100 @@
+package com.github.sanctum.labyrinth.data;
+
+import com.github.sanctum.labyrinth.annotation.NodePointer;
+import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.Items;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.util.List;
+import java.util.Map;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+@NodePointer("com.github.sanctum.labyrinth.data.JsonItemStack")
+public class ItemStackSerializable implements JsonAdapter<JsonItemStack> {
+
+	private final Gson gson = new GsonBuilder().create();
+
+	@Experimental("We need to find a way to make pdc data persistent too, otherwise item serialization/deserialization works flawlessly")
+	@Override
+	public JsonElement write(JsonItemStack l) {
+		JsonObject o = new JsonObject();
+		o.addProperty("type", l.getType().name());
+		o.addProperty("amount", l.getAmount());
+
+		ItemMeta meta = l.getItemMeta();
+		JsonObject metaObj = new JsonObject();
+		if (!Bukkit.getItemFactory().equals(meta, null)) {
+			JsonObject enchants = new JsonObject();
+			for (Map.Entry<Enchantment, Integer> entry : meta.getEnchants().entrySet()) {
+				enchants.addProperty(entry.getKey().getKey().toString(), entry.getValue());
+			}
+			JsonArray flags = new JsonArray();
+			for (ItemFlag flag : meta.getItemFlags()) {
+				flags.add(flag.name());
+			}
+			if (meta.hasDisplayName()) {
+				metaObj.addProperty("displayname", meta.getDisplayName());
+			}
+			if (meta.hasLore()) {
+				metaObj.add("lore", gson.toJsonTree(meta.getLore()));
+			}
+			if (meta.getItemFlags().size() > 0) {
+				metaObj.add("flags", flags);
+			}
+			metaObj.add("enchantments", enchants);
+
+			o.add("meta", metaObj);
+		}
+
+		return o;
+	}
+
+	@Override
+	public JsonItemStack read(Map<String, Object> o) {
+		JSONObject ob = (JSONObject) o.get("meta");
+		Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
+
+		int amount = Integer.parseInt(String.valueOf(o.get("amount")));
+		Material type = Material.valueOf((String) o.get("type"));
+		Item.Edit edit = Items.edit();
+		enchants.forEach((label, l) -> {
+			int integer = Integer.parseInt(String.valueOf(l));
+			String key = label.split(":")[0];
+			String space = label.split(":")[1];
+			edit.addEnchantment(Enchantment.getByKey(new NamespacedKey(key, space)), integer);
+		});
+		if (ob.get("displayname") != null) {
+			String name = (String) ob.get("displayname");
+			edit.setTitle(name);
+		}
+		if (ob.get("lore") != null) {
+			List<String> name = (JSONArray) ob.get("lore");
+			edit.setLore(name);
+		}
+		if (ob.get("flags") != null) {
+			List<String> flags = (JSONArray) ob.get("flags");
+			for (String f : flags) {
+				edit.setFlags(ItemFlag.valueOf(f));
+			}
+		}
+		edit.setType(type);
+		edit.setAmount(amount);
+		return new JsonItemStack(edit.build());
+	}
+
+	@Override
+	public Class<JsonItemStack> getClassType() {
+		return JsonItemStack.class;
+	}
+}

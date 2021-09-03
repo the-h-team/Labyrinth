@@ -12,6 +12,14 @@
     <artifactId>labyrinth-common</artifactId>
     <name>Labyrinth-common</name>
     <description>Common libraries of all Labyrinth modules</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.16.2-R0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 
 </project>

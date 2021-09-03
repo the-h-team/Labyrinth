@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.api.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

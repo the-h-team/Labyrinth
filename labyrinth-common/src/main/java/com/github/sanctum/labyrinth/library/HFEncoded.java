@@ -63,7 +63,7 @@ public class HFEncoded {
 	 * The original stored object retaining all values converted to a string.
 	 *
 	 * @return a serialized, encoded form of this object with retained values
-	 * @throws NotSerializableException if unable to serialize the object
+	 * @throws NotSerializableException if unable to write the object
 	 */
 	public String serialize() throws NotSerializableException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();

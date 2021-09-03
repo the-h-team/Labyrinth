@@ -59,6 +59,7 @@ public class GradientColor implements CustomColor {
 	 * @param context the context to wrap
 	 * @return this GradientColor object
 	 */
+	@Override
 	public GradientColor context(String context) {
 		this.context = context;
 		return this;

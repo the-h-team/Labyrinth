@@ -99,7 +99,7 @@ public final class CustomHeadLoader {
 			if (result != null) {
 				this.additions.put(entry.getKey(), result);
 			} else {
-				LabyrinthProvider.getInstance().getLogger().severe("- Custom named head '" + entry.getKey() + "' unable to load.");
+				LabyrinthProvider.getInstance().getLogger().severe("- Custom named head '" + entry.getKey().getName() + "' unable to load.");
 			}
 		}
 		return this;
