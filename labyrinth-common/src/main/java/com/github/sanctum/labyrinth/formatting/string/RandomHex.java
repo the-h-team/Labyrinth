@@ -12,8 +12,10 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;
 import org.bukkit.Color;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.jetbrains.annotations.NotNull;
 
+@SerializableAs("com.github.sanctum.labyrinth.formatting.string.RandomHex")
 @NodePointer("com.github.sanctum.labyrinth.formatting.string.RandomHex")
 public class RandomHex extends Number implements JsonAdapter<RandomHex>, ConfigurationSerializable, CustomColor {
 
