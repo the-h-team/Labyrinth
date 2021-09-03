@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.api.Service;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -151,4 +152,10 @@ public abstract class VentMap implements Service {
 																				   Vent.Priority priority);
 
 	public abstract List<VentListener> getListeners();
+
+	public abstract void registerExtender(VentListener.VentExtender<?> extender);
+
+	public abstract void unregisterExtender(VentListener.VentExtender<?> extender);
+
+	public abstract Stream<VentListener.VentExtender<?>> getExtenders(String key);
 }
