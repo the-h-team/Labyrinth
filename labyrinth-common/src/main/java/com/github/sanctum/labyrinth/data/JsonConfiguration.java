@@ -151,10 +151,6 @@ public class JsonConfiguration extends Configurable {
 			ob.remove(k);
 			return;
 		}
-		if (o instanceof ItemStack) {
-			ob.put(k, new JsonItemStack((ItemStack) o));
-			return;
-		}
 		if (o instanceof Map) {
 			ob.put(k, new JSONObject((Map<?, ?>) o));
 			return;
@@ -171,7 +167,7 @@ public class JsonConfiguration extends Configurable {
 	@SuppressWarnings("unchecked")
 	private Object checkObject(Type type, Object object) {
 		Object target = object;
-		if (type == ItemStack.class) type = JsonItemStack.class;
+		//if (type == ItemStack.class) type = JsonItemStack.class;
 		if (type == CustomColor.class) type = RandomHex.class;
 		if (target instanceof JSONObject) {
 			JSONObject j = (JSONObject) object;

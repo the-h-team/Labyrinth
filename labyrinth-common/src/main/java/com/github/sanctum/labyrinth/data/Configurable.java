@@ -61,8 +61,8 @@ public abstract class Configurable implements MemorySpace, Removable {
 	 * @param <T> The adapter type.
 	 * @return The desired Json element adapter or null if non existent.
 	 */
-	public static <T extends JsonAdapter<T>> @Nullable JsonAdapter<T> getAdapter(@NotNull Class<T> type) {
-		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName())).map(Map.Entry::getValue).map(c -> (JsonAdapter<T>)c).findFirst().orElse(null);
+	public static <V> @Nullable JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
+		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>)c).findFirst().orElse(null);
 	}
 
 	protected abstract Object get(String key);
