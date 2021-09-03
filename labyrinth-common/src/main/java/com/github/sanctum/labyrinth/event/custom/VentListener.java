@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.api.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -51,7 +50,7 @@ public class VentListener {
 	/**
 	 * A mapping for retrieving all methods to call easily
 	 */
-	private final Map<Class<? extends Vent>, Map<Vent.Priority, Set<SubscriberCall<?>>>> eventMap = new HashMap<>();
+	private final Map<Class<? extends Vent>, Map<Vent.Priority, Set<ListenerCall<?, ?>>>> eventMap = new HashMap<>();
 
 	private final List<VentExtender<?>> extenders = new LinkedList<>();
 
@@ -119,12 +118,13 @@ public class VentListener {
 	private <T> void registerExtender(final Method m, final Class<T> parameterClass, Extend extend) {
 		VentExtender<?> extender;
 		String key = extend.identifier();
-		if (m.getReturnType().equals(Void.TYPE)) {
+		if (m.getReturnType().equals(Void.TYPE) || extend.resultProcessors().length == 0) {
 			extender = new VentExtender<>(parameterClass, t -> invokeAsExtender(m, Object.class, t),
 					key, this);
 		} else {
-			extender = new LinkingVentExtender<>(parameterClass, t -> invokeAsExtender(m, m.getReturnType(), t),
-					key, this, extend.resultProcessors());
+			extender = new VentExtender<>(parameterClass,
+					buildExtender(t -> invokeAsExtender(m, m.getReturnType(), t), extend.resultProcessors()),
+					key, this);
 		}
 		extenders.add(extender);
 		LabyrinthProvider.getInstance().getEventMap().registerExtender(extender);
@@ -141,15 +141,16 @@ public class VentListener {
 	 * @param <T>       the type parameter of tClass
 	 */
 	private <T extends Vent> void registerSubscription(Method method, Class<T> tClass, Subscribe subscribe) {
-		SubscriberCall<T> call;
-		if (method.getReturnType().equals(Void.TYPE)) {
+		ListenerCall<?, T> call;
+		boolean useCancelled = subscribe.processCancelled();
+		if (method.getReturnType().equals(Void.TYPE) || subscribe.resultProcessors().length == 0) {
 			//register as SubscriberCall lambda
-			call = (t, s) -> invokeAsListener(method, tClass.getName(), Object.class, t);
+			call = new ListenerCall<>(t -> invokeAsListener(method, tClass.getName(), Object.class, t), useCancelled);
 		} else {
 			//register as linking object
 			Class<?> resultClass = method.getReturnType();
-			call = new ListenerCall<>(subscribe.resultProcessors(),
-					t -> invokeAsListener(method, tClass.getName(), resultClass, t));
+			call = new ListenerCall<>(buildExtender(t -> invokeAsListener(method, tClass.getName(), resultClass, t),
+					subscribe.resultProcessors()), useCancelled);
 		}
 		eventMap.computeIfAbsent(tClass, c -> new HashMap<>())
 				.computeIfAbsent(subscribe.priority(), p -> new HashSet<>())
@@ -189,17 +190,18 @@ public class VentListener {
 	/**
 	 * Method used to retrieve all handling subscriber calls of one specific type and priority.
 	 *
+	 * @param <T>        type parameter of the eventClass
 	 * @param eventClass the type the subscribers should accept
 	 * @param priority   the priority the subscribers should have
-	 * @param <T>        type parameter of the eventClass
 	 * @return a Stream containing subscriber calls which meet the requirements
 	 * @see Vent.Call#run()
 	 * @see Vent.Call#complete()
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Vent> Stream<SubscriberCall<T>> getHandlers(Class<T> eventClass, Vent.Priority priority) {
+	public <T extends Vent> Stream<? extends ListenerCall<?, T>> getHandlers(Class<T> eventClass,
+																			 Vent.Priority priority) {
 		return Optional.ofNullable(eventMap.get(eventClass)).map(m -> m.get(priority)).map(Set::stream)
-				.map(s -> s.map(c -> (SubscriberCall<T>) c)).orElse(Stream.empty());
+				.map(s -> s.map(c -> (ListenerCall<?, T>) c)).orElse(Stream.empty());
 	}
 
 	/**
@@ -258,22 +260,22 @@ public class VentListener {
 
 	public static class ListenerCall<S, T extends Vent> implements SubscriberCall<T> {
 
-		private final String[] extenders;
+		private final Consumer<T> eventHandler;
 
-		private final Function<T, CallInfo<S>> eventHandler;
+		private final boolean handleCancelled;
 
-		public ListenerCall(final String[] extenders, final Function<T, CallInfo<S>> eventHandler) {
-			this.extenders = extenders;
+		public ListenerCall(Consumer<T> eventHandler, final boolean handleCancelled) {
 			this.eventHandler = eventHandler;
+			this.handleCancelled = handleCancelled;
 		}
 
 		@Override
 		public void accept(final T event, final Vent.Subscription<T> unused) {
-			CallInfo<S> callInfo = eventHandler.apply(event);
-			if (callInfo.success) {
-				for (String target : extenders)
-					VentExtender.runExtensions(target, callInfo.result);
-			}
+			eventHandler.accept(event);
+		}
+
+		public boolean handlesCancelled() {
+			return handleCancelled;
 		}
 	}
 
@@ -317,23 +319,15 @@ public class VentListener {
 		}
 	}
 
-	static final class LinkingVentExtender<S, T> extends VentExtender<T> {
-
-		LinkingVentExtender(final Class<T> type, Function<T, CallInfo<S>> base, final String key,
-							final Object parent, String[] targets) {
-			super(type, buildExtender(base, targets), key, parent);
-		}
-
-		private static <T, S> Consumer<T> buildExtender(Function<T, CallInfo<S>> base, String[] targets) {
-			return t -> {
-				CallInfo<S> callInfo = base.apply(t);
-				if (callInfo.success) {
-					for (String target : targets) {
-						VentExtender.runExtensions(target, callInfo.result);
-					}
+	private static <T, S> Consumer<T> buildExtender(Function<T, CallInfo<S>> base, String[] targets) {
+		return t -> {
+			CallInfo<S> callInfo = base.apply(t);
+			if (callInfo.success) {
+				for (String target : targets) {
+					VentExtender.runExtensions(target, callInfo.result);
 				}
-			};
-		}
+			}
+		};
 	}
 
 	static final class CallInfo<T> {
