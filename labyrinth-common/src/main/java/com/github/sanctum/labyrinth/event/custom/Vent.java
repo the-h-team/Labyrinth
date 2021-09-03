@@ -460,7 +460,7 @@ public abstract class Vent {
 													  Priority priority) {
 			E vent = eventSuperClass.cast(event);
 			listener.getHandlers(eventSuperClass, priority).forEachOrdered(e -> {
-				if (vent.getState() == CancelState.ON) {
+				if (vent.getState() == CancelState.ON && !e.handlesCancelled()) {
 					if (!vent.isCancelled()) {
 						e.accept(vent, null);
 						this.copy = event;
@@ -475,10 +475,11 @@ public abstract class Vent {
 
 		private <E extends Vent> void runReadOnly(VentListener listener, Class<E> eventSuperClass) {
 			listener.getHandlers(eventSuperClass, Priority.READ_ONLY).forEachOrdered(e -> {
-				if (!copy.isCancelled()) {
+				boolean cancelled = copy.isCancelled();
+				if (!cancelled || e.handlesCancelled()) {
 					e.accept(eventSuperClass.cast(copy), null);
 					if (copy.isCancelled()) {
-						copy.setCancelled(false);
+						copy.setCancelled(cancelled);
 					}
 				}
 			});
