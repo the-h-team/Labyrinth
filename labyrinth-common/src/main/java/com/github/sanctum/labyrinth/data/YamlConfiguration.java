@@ -114,9 +114,6 @@ public class YamlConfiguration extends Configurable {
 
 	@Override
 	public void set(String key, Object o) {
-		if (LabyrinthProvider.getService(Service.LEGACY).requiresLocationLibrary()) {
-			if (o instanceof Location) o = new LegacyConfigLocation((Location) o);
-		}
 		getConfig().set(key, o);
 	}
 
@@ -154,7 +151,6 @@ public class YamlConfiguration extends Configurable {
 
 	@Override
 	public Location getLocation(String key) {
-		if (!isLocation(key)) return null;
 		if (LabyrinthProvider.getInstance().requiresLocationLibrary()) {
 			final Object o = getConfig().get(key);
 			if (!(o instanceof LegacyConfigLocation)) return null;
@@ -180,7 +176,7 @@ public class YamlConfiguration extends Configurable {
 
 	@Override
 	public boolean isLocation(String key) {
-		return getConfig().isLocation(key);
+		return getLocation(key) != null;
 	}
 
 	@Override

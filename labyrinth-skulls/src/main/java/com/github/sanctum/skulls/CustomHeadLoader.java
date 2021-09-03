@@ -53,8 +53,9 @@ public final class CustomHeadLoader {
 			//noinspection ConstantConditions
 			for (String id : manager.getConfigurationSection(section).getKeys(false)) {
 				boolean custom = manager.getBoolean(section + "." + id + ".custom");
+				String name = manager.getString(section + "." + id + ".name");
+				if (name == null) continue;
 				if (custom) {
-					String name = manager.getString(section + "." + id + ".name");
 					String category = manager.getString(section + "." + id + ".category");
 					String value = null;
 
@@ -70,7 +71,6 @@ public final class CustomHeadLoader {
 
 
 				} else {
-					String name = manager.getString(section + "." + id + ".name");
 					String category = manager.getString(section + "." + id + ".category");
 					String user = manager.getString(section + "." + id + ".user");
 

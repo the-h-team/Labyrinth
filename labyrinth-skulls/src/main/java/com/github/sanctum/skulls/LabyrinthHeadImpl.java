@@ -13,13 +13,13 @@ final class LabyrinthHeadImpl extends CustomHead {
 
 	private final ItemStack item;
 
-	LabyrinthHeadImpl(String name, String category, ItemStack item) {
+	LabyrinthHeadImpl(@NotNull String name, @NotNull String category, @NotNull ItemStack item) {
 		this.name = name;
 		this.category = category;
 		this.item = item;
 	}
 
-	LabyrinthHeadImpl(String name, String category, ItemStack item, UUID owner) {
+	LabyrinthHeadImpl(@NotNull String name,@NotNull  String category, @NotNull ItemStack item, @NotNull UUID owner) {
 		super(owner);
 		this.category = category;
 		this.name = name;

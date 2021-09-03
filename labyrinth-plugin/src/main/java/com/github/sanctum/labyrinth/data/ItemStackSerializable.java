@@ -16,18 +16,19 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-@NodePointer("com.github.sanctum.labyrinth.data.JsonItemStack")
-public class ItemStackSerializable implements JsonAdapter<JsonItemStack> {
+@NodePointer("org.bukkit.inventory.ItemStack")
+public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 
 	private final Gson gson = new GsonBuilder().create();
 
 	@Experimental("We need to find a way to make pdc data persistent too, otherwise item serialization/deserialization works flawlessly")
 	@Override
-	public JsonElement write(JsonItemStack l) {
+	public JsonElement write(ItemStack l) {
 		JsonObject o = new JsonObject();
 		o.addProperty("type", l.getType().name());
 		o.addProperty("amount", l.getAmount());
@@ -61,7 +62,7 @@ public class ItemStackSerializable implements JsonAdapter<JsonItemStack> {
 	}
 
 	@Override
-	public JsonItemStack read(Map<String, Object> o) {
+	public ItemStack read(Map<String, Object> o) {
 		JSONObject ob = (JSONObject) o.get("meta");
 		Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
 
@@ -90,11 +91,11 @@ public class ItemStackSerializable implements JsonAdapter<JsonItemStack> {
 		}
 		edit.setType(type);
 		edit.setAmount(amount);
-		return new JsonItemStack(edit.build());
+		return edit.build();
 	}
 
 	@Override
-	public Class<JsonItemStack> getClassType() {
-		return JsonItemStack.class;
+	public Class<ItemStack> getClassType() {
+		return ItemStack.class;
 	}
 }

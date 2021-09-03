@@ -109,6 +109,7 @@ public class HFEncoded {
 	public <R> @Nullable R deserialize(Class<R> type) {
 		try {
 			Object o = deserialized();
+			if (o == null) return null;
 			if (type.isAssignableFrom(o.getClass())) {
 				return (R) o;
 			} else {
