@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.api.Service;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -119,7 +120,7 @@ public class VentListener {
 	private <T> void registerExtender(final Method m, final Class<T> parameterClass, Extend extend) {
 		VentExtender<?> extender;
 		String key = extend.identifier();
-		if (m.getReturnType().equals(Void.TYPE)) {
+		if (m.getReturnType().equals(Void.TYPE) || extend.resultProcessors().length == 0) {
 			extender = new VentExtender<>(parameterClass, t -> invokeAsExtender(m, Object.class, t),
 					key, this);
 		} else {
@@ -142,7 +143,7 @@ public class VentListener {
 	 */
 	private <T extends Vent> void registerSubscription(Method method, Class<T> tClass, Subscribe subscribe) {
 		SubscriberCall<T> call;
-		if (method.getReturnType().equals(Void.TYPE)) {
+		if (method.getReturnType().equals(Void.TYPE) || subscribe.resultProcessors().length == 0) {
 			//register as SubscriberCall lambda
 			call = (t, s) -> invokeAsListener(method, tClass.getName(), Object.class, t);
 		} else {
