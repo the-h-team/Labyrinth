@@ -11,7 +11,7 @@ public @interface Subscribe {
 
 	Vent.Priority priority() default Vent.Priority.MEDIUM;
 
-	boolean ignore() default false;
+	boolean processCancelled() default false;
 
 	String[] resultProcessors() default {};
 }
