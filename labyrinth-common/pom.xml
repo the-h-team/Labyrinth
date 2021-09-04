@@ -14,11 +14,11 @@
     <description>Common libraries of all Labyrinth modules</description>
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.16.2-R0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
         </dependency>
+
     </dependencies>
 
 

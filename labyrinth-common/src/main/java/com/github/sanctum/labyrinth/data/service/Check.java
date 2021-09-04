@@ -7,7 +7,7 @@ import com.github.sanctum.labyrinth.library.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class Check {
 
