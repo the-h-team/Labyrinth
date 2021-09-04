@@ -298,7 +298,7 @@ public class VentListener {
 
 		public static void runExtensions(String key, Object toProcess) {
 			LabyrinthProvider.getInstance().getEventMap().getExtenders(key)
-					.filter(e -> e.getType().isAssignableFrom(toProcess.getClass()))
+					.filter(e -> toProcess == null || e.getType().isAssignableFrom(toProcess.getClass()))
 					.forEach(e -> runFinisher(e, toProcess));
 		}
 
