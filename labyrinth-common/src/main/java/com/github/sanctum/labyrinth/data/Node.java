@@ -1,17 +1,15 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.NodePointer;
-import java.util.List;
-import java.util.Map;
-
 /**
  * An object that encapsulates data storage services.
  * Save, delete, read or modify existing data in multi-dimensional spaces.
  *
+ * <p>The end of this specific node could imply that its an object or another node so parsing or knowledge of locations is needed.</p>
+ *
  * @author Hempfest
  * @version 1.0
  */
-public interface Node extends MemorySpace, Removable {
+public interface Node extends MemorySpace {
 
 	/**
 	 * Get the object attached to this node if present.
@@ -21,168 +19,26 @@ public interface Node extends MemorySpace, Removable {
 	Object get();
 
 	/**
-	 * Get the string attached to this node if present.
+	 * If the following node represents that of an object not another node
+	 * use this method to parse information in the case of primitive data.
 	 *
-	 * @return The string under this node or null.
+	 * @return The primitive object parser for this node.
 	 */
-	String getString();
+	Primitive toPrimitive();
 
 	/**
-	 * Get the int attached to this node if present.
+	 * If the following node represents that of an object not another node
+	 * use this method to parse information in the case of bukkit primitive data.
 	 *
-	 * @return The int under this node or 0.
+	 * @return The bukkit primitive object parser for this node.
 	 */
-	int getInt();
-
-	/**
-	 * Get the boolean attached to this node if present.
-	 *
-	 * @return The boolean under this node or false.
-	 */
-	boolean getBoolean();
-
-	/**
-	 * Get the double attached to this node if present.
-	 *
-	 * @return The double under this node or 0.0.
-	 */
-	double getDouble();
-
-	/**
-	 * Get the float attached to this node if present.
-	 *
-	 * @return The float under this node or 0.0f.
-	 */
-	float getFloat();
-
-	/**
-	 * Get the long attached to this node if present.
-	 *
-	 * @return The long under this node or 0L.
-	 */
-	long getLong();
-
-	/**
-	 * Get the list attached to this node if present.
-	 *
-	 * @return The list under this node or a new empty one.
-	 */
-	List<?> getList();
-
-	/**
-	 * Get the map attached to this node if present.
-	 *
-	 * @return The map under this node or a new empty one.
-	 */
-	Map<?, ?> getMap();
-
-	/**
-	 * Get the string list attached to this node if present.
-	 *
-	 * @return The string list under this node or a new empty one.
-	 */
-	List<String> getStringList();
-
-	/**
-	 * Get the int list attached to this node if present.
-	 *
-	 * @return The int list under this node or a new empty one.
-	 */
-	List<Integer> getIntegerList();
-
-	/**
-	 * Get the double list attached to this node if present.
-	 *
-	 * @return The double list under this node or a new empty one.
-	 */
-	List<Double> getDoubleList();
-
-	/**
-	 * Get the float list attached to this node if present.
-	 *
-	 * @return The float list under this node or a new empty one.
-	 */
-	List<Float> getFloatList();
-
-	/**
-	 * Get the long list attached to this node if present.
-	 *
-	 * @return The long list under this node or a new empty one.
-	 */
-	List<Long> getLongList();
-
-	/**
-	 * @return true if the object under this node is a string.
-	 */
-	boolean isString();
-
-	/**
-	 * @return true if the object under this node is a boolean
-	 */
-	boolean isBoolean();
-
-	/**
-	 * @return true if the object under this node is an integer.
-	 */
-	boolean isInt();
-
-	/**
-	 * @return true if the object under this node is a double.
-	 */
-	boolean isDouble();
-
-	/**
-	 * @return true if the object under this node is a float.
-	 */
-	boolean isFloat();
-
-	/**
-	 * @return true if the object under this node is a long.
-	 */
-	boolean isLong();
-
-	/**
-	 * @return true if the object under this node is a list.
-	 */
-	boolean isList();
-
-	/**
-	 * @return true if the object under this node is a string list.
-	 */
-	boolean isStringList();
-
-	/**
-	 * @return true if the object under this node is a float list.
-	 */
-	boolean isFloatList();
-
-	/**
-	 * @return true if the object under this node is a double list.
-	 */
-	boolean isDoubleList();
-
-	/**
-	 * @return true if the object under this node is an integer list.
-	 */
-	boolean isIntegerList();
-
-	/**
-	 * @return true if the object under this node is a long list.
-	 */
-	boolean isLongList();
-
-	/**
-	 * @return The full key for this node.
-	 */
-	String getName();
-
-	/**
-	 * @return The configuration this node belongs to.
-	 */
-	Configurable getParent();
+	Primitive.Bukkit toBukkit();
 
 	/**
 	 * If the result of this node ends in an object instead of another node parse its type here.
+	 *
+	 * <p>The use of this method implies the targeted value is not a primitive but of a custom object type.</p>
+	 *
 	 *
 	 * @param type The object type.
 	 * @param <T>  The type.
@@ -200,6 +56,18 @@ public interface Node extends MemorySpace, Removable {
 	 * @param o The object to add.
 	 */
 	void set(Object o);
+
+	/**
+	 * Get the node this node stem's from if present, may return itself.
+	 *
+	 * @return The parent node to this current node.
+	 */
+	Node getParent();
+
+	/**
+	 * @return The configuration this node belongs to.
+	 */
+	Configurable getRoot();
 
 	/**
 	 * Convert all known data from this node to json text.

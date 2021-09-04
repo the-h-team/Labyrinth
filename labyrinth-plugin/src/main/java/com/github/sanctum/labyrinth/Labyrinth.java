@@ -4,8 +4,10 @@ import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.Configurable;
+import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
+import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.data.ItemStackSerializable;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
@@ -118,10 +120,10 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		InputStream stream = getResource("config.yml");
 		assert stream != null;
 
-		if (!copy.getChild().exists()) {
+		if (!copy.getRoot().exists()) {
 			FileManager.copy(stream, copy);
 		}
-		this.cachedComponentRemoval = copy.readValue(f -> f.getInt("interactive-component-removal"));
+		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 		new EasyListener(DefaultEvent.Controller.class).call(this);
 		getEventMap().register(this, this);
 		getLogger().info("===================================================================");
@@ -216,10 +218,10 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	@Override
 	public @Nullable Cooldown getCooldown(String id) {
 		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
-			FileManager library = FileList.search(this).find("Cooldowns", "Persistent");
-			if (library.getConfig().getConfigurationSection("Library." + id) != null) {
+			FileManager library = FileList.search(this).find("cooldowns", "Persistent", FileType.JSON);
+			if (library.read(f -> f.isNode("Library." + id))) {
 
-				long time = library.getConfig().getLong("Library." + id + ".expiration");
+				long time = library.read(f -> f.getLong("Library." + id + ".expiration"));
 				Long a = time;
 				Long b = System.currentTimeMillis();
 				int compareNum = a.compareTo(b);
@@ -238,8 +240,9 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 					toMake.save();
 					return toMake;
 				} else {
-					library.getConfig().set("Library." + id, null);
-					library.saveConfig();
+					DataTable table = DataTable.newTable();
+					table.set("Library." + id, null);
+					library.write(table);
 				}
 			}
 			return null;

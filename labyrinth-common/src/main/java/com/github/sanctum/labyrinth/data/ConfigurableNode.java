@@ -2,19 +2,22 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 
 /**
  * @author Hempfest
  * @version 1.0
  */
-final class ConfigurableNode implements Node {
+final class ConfigurableNode implements Node, Root, Primitive, Primitive.Bukkit {
 
 	private final Configurable config;
 	private final String key;
@@ -31,9 +34,9 @@ final class ConfigurableNode implements Node {
 
 	@Override
 	public Node getNode(String node) {
-		return config.nodes.stream().filter(n -> n.getName().equals(key + "." + node)).findFirst().orElseGet(() -> {
+		return (Node) config.memory.entrySet().stream().filter(n -> n.getKey().equals(key + "." + node)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
 			ConfigurableNode n = new ConfigurableNode(key + "." + node, config);
-			config.nodes.add(n);
+			config.memory.put(n.getPath(), n);
 			return n;
 		});
 	}
@@ -41,6 +44,16 @@ final class ConfigurableNode implements Node {
 	@Override
 	public Object get() {
 		return config.get(key);
+	}
+
+	@Override
+	public Primitive toPrimitive() {
+		return this;
+	}
+
+	@Override
+	public Bukkit toBukkit() {
+		return this;
 	}
 
 	@Override
@@ -171,8 +184,8 @@ final class ConfigurableNode implements Node {
 	@Override
 	public <T> T get(Class<T> type) {
 		if (type.isAssignableFrom(ConfigurationSection.class)) {
-			if (getParent() instanceof YamlConfiguration) {
-				YamlConfiguration conf = (YamlConfiguration) getParent();
+			if (getRoot() instanceof YamlConfiguration) {
+				YamlConfiguration conf = (YamlConfiguration) getRoot();
 				return (T) conf.getConfig().getConfigurationSection(this.key);
 			}
 		}
@@ -184,7 +197,7 @@ final class ConfigurableNode implements Node {
 	}
 
 	@Override
-	public String getName() {
+	public String getPath() {
 		return this.key;
 	}
 
@@ -192,11 +205,31 @@ final class ConfigurableNode implements Node {
 	public boolean delete() {
 		if (config.isNode(this.key)) {
 			config.set(this.key, null);
-			Schedule.sync(() -> config.nodes.remove(this)).run();
+			Schedule.sync(() -> config.memory.remove(this)).run();
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void reload() {
+		config.reload();
+	}
+
+	@Override
+	public boolean create() {
+		if (!exists()) {
+			set(new Object());
+			save();
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean exists() {
+		return isNode(this.key) || get() != null;
 	}
 
 	@Override
@@ -205,7 +238,7 @@ final class ConfigurableNode implements Node {
 	}
 
 	@Override
-	public Configurable getParent() {
+	public Configurable getRoot() {
 		return config;
 	}
 
@@ -215,9 +248,24 @@ final class ConfigurableNode implements Node {
 	}
 
 	@Override
+	public Node getParent() {
+		String[] k = this.key.split("//.");
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < k.length - 1; i++) {
+			builder.append(k[i]).append(".");
+		}
+		String key = builder.toString();
+		if (key.endsWith(".")) {
+			key = key.substring(0, builder.length() - 1);
+		}
+		if (key.equals(this.key)) return this;
+		return getNode(key);
+	}
+
+	@Override
 	public String toJson() {
 		GsonBuilder builder = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().serializeNulls().setLenient().serializeSpecialFloatingPointValues();
-		for (Map.Entry<String, JsonAdapterContext<?>> en : Configurable.serializers.entrySet()) {
+		for (Map.Entry<String, JsonAdapterInput<?>> en : Configurable.serializers.entrySet()) {
 			builder.registerTypeAdapter(en.getValue().getType(), en.getValue());
 		}
 		return builder.create().toJson(get());
@@ -225,11 +273,11 @@ final class ConfigurableNode implements Node {
 
 	@Override
 	public Set<String> getKeys(boolean deep) {
-		if (getParent() instanceof YamlConfiguration) {
+		if (getRoot() instanceof YamlConfiguration) {
 			return get(ConfigurationSection.class).getKeys(deep);
 		} else {
 			Set<String> keys = new HashSet<>();
-			JsonConfiguration json = (JsonConfiguration) getParent();
+			JsonConfiguration json = (JsonConfiguration) getRoot();
 			for (Object o : json.json.entrySet()) {
 				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
 				if (deep) {
@@ -268,11 +316,11 @@ final class ConfigurableNode implements Node {
 
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
-		if (getParent() instanceof YamlConfiguration) {
+		if (getRoot() instanceof YamlConfiguration) {
 			return get(ConfigurationSection.class).getValues(deep);
 		} else {
 			Map<String, Object> map = new HashMap<>();
-			JsonConfiguration json = (JsonConfiguration) getParent();
+			JsonConfiguration json = (JsonConfiguration) getRoot();
 			for (Object o : json.json.entrySet()) {
 				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
 				if (deep) {
@@ -307,5 +355,25 @@ final class ConfigurableNode implements Node {
 			}
 			return map;
 		}
+	}
+
+	@Override
+	public boolean isLocation() {
+		return config.isLocation(this.key);
+	}
+
+	@Override
+	public boolean isItemStack() {
+		return config.isItemStack(this.key);
+	}
+
+	@Override
+	public Location getLocation() {
+		return config.getLocation(this.key);
+	}
+
+	@Override
+	public ItemStack getItemStack() {
+		return config.getItemStack(this.key);
 	}
 }

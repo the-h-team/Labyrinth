@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Native;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -14,6 +16,7 @@ import java.lang.annotation.Target;
  * if the declaration belongs to an external library such usages may lead to problems when the library will be updated to another version.</p>
  *
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 public @interface Experimental {
@@ -22,5 +25,10 @@ public @interface Experimental {
 	 * @return The developer comment for this experiment.
 	 */
 	String value() default "no comment";
+
+	/**
+	 * @return Whether or not the type this annotation belongs too is set for removal.
+	 */
+	boolean atRisk() default false;
 
 }

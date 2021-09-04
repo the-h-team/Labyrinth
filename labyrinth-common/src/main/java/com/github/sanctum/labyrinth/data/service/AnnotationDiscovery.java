@@ -1,10 +1,13 @@
 package com.github.sanctum.labyrinth.data.service;
 
+import com.github.sanctum.labyrinth.data.WideConsumer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> A type of annotation.
  * @param <R> A listener to use.
  */
-public class AnnotationDiscovery<T extends Annotation, R> {
+public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Method>{
 
 	private final int count;
 	private final Class<T> annotation;
@@ -67,12 +70,12 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 	 *
 	 * @param function The function.
 	 */
-	public void ifPresent(AnnotativeConsumer<T, R, Void> function) {
+	public void ifPresent(WideConsumer<T, Method> function) {
 		if (isPresent()) {
 			for (Method m : methods) {
 				for (Annotation a : m.getAnnotations()) {
 					if (annotation.isAssignableFrom(a.annotationType())) {
-						function.accept((T) a, r);
+						function.accept((T) a, m);
 					}
 				}
 			}
@@ -100,17 +103,6 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 	}
 
 	/**
-	 * Run an operation for each relative method found.
-	 *
-	 * @param consumer The method function.
-	 */
-	public void forEach(Consumer<Method> consumer) {
-		for (Method m : methods) {
-			consumer.accept(m);
-		}
-	}
-
-	/**
 	 * @return List's all filtered methods.
 	 */
 	public Set<Method> methods() {
@@ -132,6 +124,29 @@ public class AnnotationDiscovery<T extends Annotation, R> {
 	 */
 	public int count() {
 		return count;
+	}
+
+	/**
+	 * Run an operation for each relative method found.
+	 *
+	 * @param consumer The method function.
+	 */
+	@Override
+	public void forEach(Consumer<? super Method> consumer) {
+		for (Method m : methods) {
+			consumer.accept(m);
+		}
+	}
+
+	@NotNull
+	@Override
+	public Iterator<Method> iterator() {
+		return methods().iterator();
+	}
+
+	@Override
+	public Spliterator<Method> spliterator() {
+		return methods().spliterator();
 	}
 
 	@FunctionalInterface

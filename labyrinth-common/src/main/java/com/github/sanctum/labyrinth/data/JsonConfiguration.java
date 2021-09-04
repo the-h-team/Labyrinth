@@ -86,7 +86,7 @@ public class JsonConfiguration extends Configurable {
 		try {
 			Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 			GsonBuilder gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().setLenient();
-			for (JsonAdapterContext<?> serializer : serializers.values()) {
+			for (JsonAdapterInput<?> serializer : serializers.values()) {
 				gson.registerTypeAdapter(serializer.getType(), serializer);
 			}
 			Gson g = gson.create();
@@ -138,9 +138,9 @@ public class JsonConfiguration extends Configurable {
 		JSONObject ob = json;
 		for (int i = 0; i < a.length - 1; i++) {
 			String pathKey = a[i];
-			JSONObject j = (JSONObject) ob.get(pathKey);
-			if (j != null) {
-				ob = j;
+			Object os = ob.get(pathKey);
+			if (os instanceof JSONObject) {
+				ob = (JSONObject) os;
 			} else {
 				JSONObject n = new JSONObject();
 				ob.put(pathKey, n);
@@ -173,7 +173,7 @@ public class JsonConfiguration extends Configurable {
 			JSONObject j = (JSONObject) object;
 			Gson g = new GsonBuilder().create();
 			Type finalType = type;
-			Map.Entry<String, JsonAdapterContext<?>> d = serializers.entrySet().stream().filter(de -> de.getValue().getType().getTypeName().equals(finalType.getTypeName())).findFirst().orElse(null);
+			Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getValue().getType().getTypeName().equals(finalType.getTypeName())).findFirst().orElse(null);
 			if (d != null) {
 				if (j.containsKey(d.getKey())) {
 					Object ob = j.get(d.getKey());
@@ -244,10 +244,10 @@ public class JsonConfiguration extends Configurable {
 
 	@Override
 	public Node getNode(String key) {
-		return nodes.stream().filter(n -> n.getName().equals(key)).findFirst().orElseGet(() -> {
-			ConfigurableNode node = new ConfigurableNode(key, this);
-			nodes.add(node);
-			return node;
+		return (Node) memory.entrySet().stream().filter(n -> n.getKey().equals(key)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
+			ConfigurableNode n = new ConfigurableNode(key, this);
+			memory.put(n.getPath(), n);
+			return n;
 		});
 	}
 
@@ -420,11 +420,21 @@ public class JsonConfiguration extends Configurable {
 	}
 
 	@Override
+	public String getPath() {
+		String s = "/" + getName() + "/";
+		if (getDirectory() != null) {
+			s = s + getDirectory();
+		}
+		return s;
+	}
+
+	@Override
 	public boolean isNode(String key) {
 		String[] a = key.split("\\.");
 		String k = a[Math.max(0, a.length - 1)];
 		JSONObject o = json;
-		for (String pathKey : a) {
+		for (int i = 0; i < a.length - 1; i++) {
+			String pathKey = a[i];
 			Object obj = o.get(pathKey);
 			if (obj instanceof JSONObject) {
 				JSONObject js = (JSONObject) obj;

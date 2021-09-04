@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -132,10 +131,10 @@ public class YamlConfiguration extends Configurable {
 
 	@Override
 	public Node getNode(String key) {
-		return nodes.stream().filter(n -> n.getName().equals(key)).findFirst().orElseGet(() -> {
-			ConfigurableNode node = new ConfigurableNode(key, this);
-			nodes.add(node);
-			return node;
+		return (Node) memory.entrySet().stream().filter(n -> n.getKey().equals(key)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
+			ConfigurableNode n = new ConfigurableNode(key, this);
+			memory.put(n.getPath(), n);
+			return n;
 		});
 	}
 
@@ -242,6 +241,15 @@ public class YamlConfiguration extends Configurable {
 	@Override
 	public boolean isString(String key) {
 		return getConfig().isString(key);
+	}
+
+	@Override
+	public String getPath() {
+		String s = "/" + getName() + "/";
+		if (getDirectory() != null) {
+			s = s + getDirectory();
+		}
+		return s;
 	}
 
 	@Override

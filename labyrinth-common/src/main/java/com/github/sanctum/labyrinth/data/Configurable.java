@@ -1,31 +1,32 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.NodePointer;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
- * A utility reserved for delegating either {@link FileType#JSON} files or {@link FileType#YAML} files into a singular abstraction for familiar use.
+ * A utility reserved for delegating either {@link FileType#JSON} files
+ * or {@link FileType#YAML} files into a singular abstraction for familiar use.
+ *
+ * <p>Much like bukkit's {@link org.bukkit.configuration.file.FileConfiguration} abstraction
+ * use this environment to manipulate data sent to / read from a particular file location.</p>
+ *
  * @author Hempfest
  * @version 1.0
  */
-public abstract class Configurable implements MemorySpace, Removable {
+public abstract class Configurable implements MemorySpace, Root {
 
-	protected static final Map<String, JsonAdapterContext<?>> serializers = new HashMap<>();
-	protected final Set<Node> nodes = new HashSet<>();
+	protected static final Map<String, JsonAdapterInput<?>> serializers = new HashMap<>();
+	protected final Map<String, MemorySpace> memory = new HashMap<>();
 
 
 	/**
@@ -47,7 +48,7 @@ public abstract class Configurable implements MemorySpace, Removable {
 			String key = AnnotationDiscovery.of(NodePointer.class, d).map((r, u) -> r.value());
 			if (key == null)
 				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
-			serializers.put(key, new JsonAdapterContext.Impl<>(d));
+			serializers.put(key, new JsonAdapterInput.Impl<>(d));
 		} catch (Exception e) {
 			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.");
 			e.printStackTrace();
@@ -58,11 +59,11 @@ public abstract class Configurable implements MemorySpace, Removable {
 	 * Search for the desired element adapter for quick use.
 	 *
 	 * @param type The type of adapter to get.
-	 * @param <T> The adapter type.
+	 * @param <V>  The adapter type.
 	 * @return The desired Json element adapter or null if non existent.
 	 */
-	public static <V> @Nullable JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
-		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>)c).findFirst().orElse(null);
+	public static <V> JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
+		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
 	}
 
 	protected abstract Object get(String key);
@@ -73,7 +74,7 @@ public abstract class Configurable implements MemorySpace, Removable {
 	 * Store an object under a specified path. Any current relative information to the path will be over-written.
 	 *
 	 * @param key The path to save the object under.
-	 * @param o The object to store.
+	 * @param o   The object to store.
 	 */
 	public abstract void set(String key, Object o);
 
@@ -310,36 +311,6 @@ public abstract class Configurable implements MemorySpace, Removable {
 	public abstract boolean isString(String key);
 
 	/**
-	 * Reload the file from disk.
-	 * <p>
-	 * If the backing file has been deleted, this method assigns a fresh,
-	 * blank configuration internally to this object. Otherwise, the file
-	 * is read from, directly replacing the existing configuration with
-	 * its values. No attempt is made to save the existing configuration
-	 * state, so keep that in mind when running this call.
-	 */
-	public abstract void reload();
-
-	/**
-	 * Attempt creating the file location.
-	 * <p>
-	 * If the parent location doesn't exist (The backing location for our file)
-	 * One will be created before attempting file creation.
-	 *
-	 * @return true if creation was successful
-	 */
-	public abstract boolean create() throws IOException;
-
-	/**
-	 * Check if the backing file is currently existent.
-	 * <p>
-	 * Does not interact whatsoever with the internal YamlConfiguration.
-	 *
-	 * @return true if file found
-	 */
-	public abstract boolean exists();
-
-	/**
 	 * Get the name of this Config.
 	 *
 	 * @return name of Config
@@ -358,8 +329,8 @@ public abstract class Configurable implements MemorySpace, Removable {
 	/**
 	 * Get the backing file for this Config.
 	 * <p>
-	 * A mandatory {@link FileManager#exists()} check should also be used before
-	 * accessing a file directly following the {@link FileManager#create()} method.
+	 * A mandatory {@link Configurable#exists()} check should also be used before
+	 * accessing a file directly following the {@link Configurable#create()} method.
 	 *
 	 * @return backing file File object
 	 */
@@ -378,13 +349,14 @@ public abstract class Configurable implements MemorySpace, Removable {
 		if (obj instanceof Configurable) {
 			Configurable c = (Configurable) obj;
 			return Objects.equals(getName(), c.getName()) &&
-					Objects.equals(getDirectory(), c.getDirectory());
+					Objects.equals(getDirectory(), c.getDirectory())
+					&& getType() == c.getType();
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getName(), getDirectory());
+		return Objects.hash(getName(), getDirectory(), getType().name());
 	}
 }

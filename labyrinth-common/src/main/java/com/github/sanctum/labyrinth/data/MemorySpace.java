@@ -12,6 +12,11 @@ import java.util.Set;
 public interface MemorySpace {
 
 	/**
+	 * @return The full path for this memory space.
+	 */
+	String getPath();
+
+	/**
 	 * Checks if a node exists under the specified name space.
 	 *
 	 * @param key the name space.
@@ -21,6 +26,8 @@ public interface MemorySpace {
 
 	/**
 	 * Get's a child node to this current node under the specified name space.
+	 *
+	 * <p>Nodes of nodes will automatically append each others key paths</p>
 	 *
 	 * @param key the name space.
 	 * @return The existing node or a new one depending on implementation.

@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.NodePointer;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,13 +21,13 @@ import java.util.Map;
  * @author Hempfest
  * @version 1.0
  */
-abstract class JsonAdapterContext<T> implements JsonAdapter<T>, JsonSerializer<T>, JsonDeserializer<T> {
+abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>, JsonDeserializer<T> {
 
 	protected final JsonAdapter<T> serializer;
 
 	private final Gson gson = new GsonBuilder().create();
 
-	protected JsonAdapterContext(JsonAdapter<T> serializer) {
+	protected JsonAdapterInput(JsonAdapter<T> serializer) {
 		this.serializer = serializer;
 	}
 
@@ -67,7 +66,7 @@ abstract class JsonAdapterContext<T> implements JsonAdapter<T>, JsonSerializer<T
 		return serializer.getClassType();
 	}
 
-	static final class Impl<T> extends JsonAdapterContext<T> {
+	static final class Impl<T> extends JsonAdapterInput<T> {
 
 		protected Impl(JsonAdapter<T> serializer) {
 			super(serializer);

@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.annotation.Experimental;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -57,6 +59,7 @@ public class FileManager {
 	 * @throws IllegalArgumentException if the file describes a directory
 	 * @throws IllegalStateException    if write is unsuccessful
 	 */
+	@Note("Access to this method will isolate to FileList only")
 	public static void copy(InputStream in, File file) {
 		try {
 			OutputStream out = new FileOutputStream(file);
@@ -85,9 +88,10 @@ public class FileManager {
 	 * @throws IllegalArgumentException if the file describes a directory
 	 * @throws IllegalStateException    if write is unsuccessful
 	 */
+	@Note("Access to this method will isolate to FileList only")
 	public static void copy(InputStream in, FileManager manager) {
 		try {
-			OutputStream out = new FileOutputStream(manager.getChild().getParent());
+			OutputStream out = new FileOutputStream(manager.getRoot().getParent());
 			byte[] buf = new byte[1024];
 			int len;
 			while ((len = in.read(buf)) > 0) {
@@ -102,7 +106,12 @@ public class FileManager {
 		}
 	}
 
-	public Configurable getChild() {
+	/**
+	 * Get the configurable root for this file manager.
+	 *
+	 * @return The configurable root for this manager.
+	 */
+	public Configurable getRoot() {
 		return configuration;
 	}
 
@@ -122,25 +131,42 @@ public class FileManager {
 	}
 
 	/**
-	 * Set & save multiple keyed value spaces within this file.
-	 * After all inquires have been transferred the inquiry object is cleared and discarded due to
-	 * being of no further importance.
+	 * A functional delegation to data table consumption
+	 * @see FileManager#write(DataTable)
 	 *
-	 * Takes all 2d declarations and forms them into multi-layered nodes.
-	 *
-	 * @param map The file writer to use when setting values.
+	 * @param table The data consumption to take place.
 	 */
-	@Experimental("Is this something we should stick with? Seems creative to me :) -Hemp")
-	public void write(DataMap map) {
-		write(map, true);
+	public void write(Consumer<? super DataTable> table) {
+		DataTable t = DataTable.newTable();
+		table.accept(t);
+		write(t);
 	}
 
 	/**
-	 * @see FileManager#write(DataMap)
+	 * Set & save multiple keyed value spaces within this file.
+	 *
+	 * <p>After all inquires have been transferred the inquiry object is cleared and discarded due to
+	 * being of no further importance.</p>
+	 *
+	 * <p>Takes all 2d declarations and forms them into multi-layered nodes.</p>
+	 *
+	 * <p>By default this method is set to override any already existing nodes store
+	 * within the configurable</p>
+	 *
+	 * @param table The data table to use when setting values.
 	 */
-	@Experimental("Is this something we should stick with? Seems creative to me :) -Hemp")
-	public void write(DataMap map, boolean replace) {
-		for (Map.Entry<String, Object> entry : map.get().entrySet()) {
+	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
+	public void write(@Note("Custom implementations will work here!") DataTable table) {
+		write(table, true);
+	}
+
+	/**
+	 * @param replace Whether to replace already set values from file with ones from the table
+	 * @see FileManager#write(DataTable)
+	 */
+	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
+	public void write(@Note("Custom implementations will work here!") DataTable table, boolean replace) {
+		for (Map.Entry<String, Object> entry : table.values().entrySet()) {
 			if (replace) {
 				if (entry.getValue().equals("NULL")) {
 					configuration.set(entry.getKey(), null);
@@ -156,52 +182,87 @@ public class FileManager {
 			}
 		}
 		// instantly clear up space (help GC)
-		map.get().clear();
+		table.clear();
 		configuration.save();
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation
+	 * @see Configurable#getName()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public String getName() {
 		return configuration.getName();
 	}
 
 
+	/**
+	 * @deprecated Replaced by new delegation
+	 * @see Configurable#getDirectory()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public Optional<String> getDescription() {
 		return Optional.ofNullable(configuration.getDirectory());
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Root#delete()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public boolean delete() {
 		return configuration.delete();
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Root#exists()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public boolean exists() {
 		return configuration.exists();
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Root#create()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public boolean create() throws IOException {
 		return configuration.create();
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Configurable#getParent()
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	public File getFile() {
 		return configuration.getParent();
 	}
 
 	/**
-	 * Get the FileConfiguration managed by this Config object.
-	 *
-	 * @return a File (Yaml) FileManager object
+	 * @deprecated Replaced by new abstraction {@link Configurable}
+	 * @see FileManager#getRoot()
 	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	synchronized public FileConfiguration getConfig() {
 		return configuration instanceof YamlConfiguration ? ((YamlConfiguration) configuration).getConfig() : null;
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see FileManager#read(Function)
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	synchronized public <R> R readValue(Function<FileConfiguration, R> function) {
 		return function.apply(getConfig());
 	}
@@ -210,37 +271,51 @@ public class FileManager {
 	 * Get a Location from config safely (including legacy).
 	 *
 	 * @param node node of the location
+	 * @deprecated Replaced by new delegations {@link Configurable#getLocation(String)}, {@link Node#toBukkit()} or {@link Node#get(Class)}
+	 * where legacy support is automatically implied.
 	 * @return the stored location
 	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	synchronized public @Nullable Location getLegacySafeLocation(String node) {
 		return configuration.getLocation(node);
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Root#reload();
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	synchronized public void reload() {
 		configuration.reload();
 	}
 
+	/**
+	 * @deprecated Replaced by new delegation.
+	 * @see Root#save();
+	 */
 	@Deprecated
+	@Note("Replaced entirely")
 	synchronized public void saveConfig() {
 		configuration.save();
 	}
 
 
 	@Deprecated
+	@Note("To be removed completely")
 	synchronized public void refreshConfig() {
 		saveConfig();
 		reload();
 	}
 
 
-	@Experimental("Still being tested")
+	@Experimental("Tested working but not guaranteed stable")
 	public @NotNull FileManager toJSON(String name, String dir) {
 		FileManager n = FileList.search(plugin).find(name, dir, FileType.JSON);
-		Configurable c = getChild();
+		Configurable c = getRoot();
 		if (c instanceof YamlConfiguration) {
-			DataMap inquiry = DataMap.newMap();
+			DataTable inquiry = DataTable.newTable();
 			for (String entry : c.getKeys(true)) {
 				if (c.isNode(entry)) {
 					ConfigurationSection s = c.getNode(entry).get(ConfigurationSection.class);
@@ -262,33 +337,9 @@ public class FileManager {
 		return this;
 	}
 
-	@Experimental("Still being tested")
+	@Experimental("Tested working but not guaranteed stable")
 	public @NotNull FileManager toJSON() {
-		String name = getChild().getName();
-		String dir = getChild().getDirectory();
-		FileManager n = FileList.search(plugin).find(name, dir, FileType.JSON);
-		Configurable c = getChild();
-		if (c instanceof YamlConfiguration) {
-			DataMap inquiry = DataMap.newMap();
-			for (String entry : c.getKeys(true)) {
-				if (c.isNode(entry)) {
-					ConfigurationSection s = c.getNode(entry).get(ConfigurationSection.class);
-					for (String e : s.getKeys(false)) {
-						if (s.isConfigurationSection(e)) {
-							ConfigurationSection a = s.getConfigurationSection(e);
-							inquiry.set(e, a.get(e));
-						} else {
-							inquiry.set(e, s.get(e));
-						}
-					}
-				} else {
-					inquiry.set(entry, c.getNode(entry).get());
-				}
-			}
-			n.write(inquiry, false);
-			return n;
-		}
-		return this;
+		return toJSON(getRoot().getName(), getRoot().getDirectory());
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.NodePointer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Map;

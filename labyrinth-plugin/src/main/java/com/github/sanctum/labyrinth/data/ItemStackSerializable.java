@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.NodePointer;
 import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;

@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.DataMap;
+import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
@@ -72,7 +72,7 @@ public class PersistentContainer extends PersistentData {
 		this.dataMap.remove(key);
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
-			DataMap inquiry = DataMap.newMap();
+			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
 			manager.write(inquiry);
 			final ConfigurationSection section = manager.read(c -> c.getNode(this.key.getNamespace() + "." + this.key.getKey()).get(ConfigurationSection.class));
@@ -97,7 +97,7 @@ public class PersistentContainer extends PersistentData {
 	public synchronized void save(String key) throws IOException {
 		if (this.persistenceMap.get(key)) {
 			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
-			DataMap inquiry = DataMap.newMap();
+			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
 			manager.write(inquiry);
 		}

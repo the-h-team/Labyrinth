@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.event.EasyListener;
 
 import java.util.Collection;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.task.Schedule;
 
-public final class VentMapImpl extends VentMap {
+public final class VentMapImpl extends VentMap implements Service {
 
 	final Map<Plugin, Map<String, Set<VentListener>>> listeners;
 

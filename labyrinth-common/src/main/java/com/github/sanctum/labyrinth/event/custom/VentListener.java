@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -15,13 +18,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 
 /**
  * Core class for internal listener implementation
@@ -50,7 +49,7 @@ public class VentListener {
 	/**
 	 * A mapping for retrieving all methods to call easily
 	 */
-	private final Map<Class<? extends Vent>, Map<Vent.Priority, Set<ListenerCall<?, ?>>>> eventMap = new HashMap<>();
+	private final Map<Class<? extends Vent>, Map<Vent.Priority, Set<ListenerCall<?>>>> eventMap = new HashMap<>();
 
 	private final List<VentExtender<?>> extenders = new LinkedList<>();
 
@@ -65,7 +64,7 @@ public class VentListener {
 		this.host = host;
 		this.label = readKey();
 		buildEventHandlers();
-		buildExtensors();
+		buildExtensions();
 	}
 
 	/**
@@ -84,8 +83,7 @@ public class VentListener {
 	private void buildEventHandlers() {
 		AnnotationDiscovery<Subscribe, ?> discovery = AnnotationDiscovery.of(Subscribe.class, listener);
 		discovery.filter(m -> m.getParameters().length == 1 && Vent.class.isAssignableFrom(m.getParameters()[0].getType())
-							  && m.isAnnotationPresent(Subscribe.class) && Modifier.isPublic(m.getModifiers()));
-		discovery.methods().forEach(m -> {
+				&& m.isAnnotationPresent(Subscribe.class) && Modifier.isPublic(m.getModifiers())).forEach(m -> {
 					Optional<Subscribe> subscribe = discovery.read(m).stream().findAny();
 					@SuppressWarnings("unchecked")
 					Class<? extends Vent> mClass = (Class<? extends Vent>) m.getParameters()[0].getType();
@@ -93,18 +91,17 @@ public class VentListener {
 						registerSubscription(m, mClass, subscribe.get());
 					} else {
 						Bukkit.getLogger().severe("Error registering " + m.getDeclaringClass() + "#" +
-												  m.getName());
+								m.getName());
 					}
 				}
 
 		);
 	}
 
-	private void buildExtensors() {
+	private void buildExtensions() {
 		AnnotationDiscovery<Extend, ?> discovery = AnnotationDiscovery.of(Extend.class, listener);
 		discovery.filter(m -> m.getParameters().length == 1 && m.isAnnotationPresent(Extend.class)
-							  && Modifier.isPublic(m.getModifiers()));
-		discovery.methods().forEach(m -> {
+				&& Modifier.isPublic(m.getModifiers())).forEach(m -> {
 			Optional<Extend> extend = discovery.read(m).stream().findAny();
 			if (extend.isPresent()) {
 				Class<?> parameterClass = m.getParameters()[0].getType();
@@ -141,7 +138,7 @@ public class VentListener {
 	 * @param <T>       the type parameter of tClass
 	 */
 	private <T extends Vent> void registerSubscription(Method method, Class<T> tClass, Subscribe subscribe) {
-		ListenerCall<?, T> call;
+		ListenerCall<T> call;
 		boolean useCancelled = subscribe.processCancelled();
 		if (method.getReturnType().equals(Void.TYPE) || subscribe.resultProcessors().length == 0) {
 			//register as SubscriberCall lambda
@@ -159,8 +156,8 @@ public class VentListener {
 
 	private <T> CallInfo<T> invokeAsListener(Method method, String eventName, Class<T> resultClass, Object... params) {
 		String reflectionError = "Internal error hindered the " + listener.getClass().getName() + "#"
-								 + method.getName() + " to handle events. Check method accessibility" +
-								 " and parameters!";
+				+ method.getName() + " to handle events. Check method accessibility" +
+				" and parameters!";
 		String callError = "Could not pass event " + eventName + " to " + host;
 		return invoke(method, reflectionError, callError, resultClass, params);
 	}
@@ -168,8 +165,8 @@ public class VentListener {
 	private <T> CallInfo<T> invokeAsExtender(Method method, Class<T> resultClass, Object... params) {
 		String passed = "passed elements " + Arrays.toString(params);
 		String reflectionError = "Internal error hindered the " + listener.getClass().getName() + "#"
-								 + method.getName() + " to further process " + passed +
-								 ". Check method accessibility and parameters!";
+				+ method.getName() + " to further process " + passed +
+				". Check method accessibility and parameters!";
 		String callError = "Could not process" + passed + " at " + host;
 		return invoke(method, reflectionError, callError, resultClass, params);
 	}
@@ -179,7 +176,7 @@ public class VentListener {
 			return new CallInfo<>(true, retC.cast(method.invoke(listener, params)));
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			Bukkit.getLogger().severe(refError);
-			e.printStackTrace();
+			e.getCause().printStackTrace();
 		} catch (Exception e) {
 			Bukkit.getLogger().severe(callError);
 			e.printStackTrace();
@@ -198,10 +195,10 @@ public class VentListener {
 	 * @see Vent.Call#complete()
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Vent> Stream<? extends ListenerCall<?, T>> getHandlers(Class<T> eventClass,
-																			 Vent.Priority priority) {
+	public <T extends Vent> Stream<? extends ListenerCall<T>> getHandlers(Class<T> eventClass,
+	                                                                      Vent.Priority priority) {
 		return Optional.ofNullable(eventMap.get(eventClass)).map(m -> m.get(priority)).map(Set::stream)
-				.map(s -> s.map(c -> (ListenerCall<?, T>) c)).orElse(Stream.empty());
+				.map(s -> s.map(c -> (ListenerCall<T>) c)).orElse(Stream.empty());
 	}
 
 	/**
@@ -251,14 +248,14 @@ public class VentListener {
 	@Override
 	public String toString() {
 		return "VentListener{" +
-			   "listener=" + listener +
-			   ", host=" + host +
-			   ", label='" + label + '\'' +
-			   ", eventMap=" + eventMap +
-			   '}';
+				"listener=" + listener +
+				", host=" + host +
+				", label='" + label + '\'' +
+				", eventMap=" + eventMap +
+				'}';
 	}
 
-	public static class ListenerCall<S, T extends Vent> implements SubscriberCall<T> {
+	public static class ListenerCall<T extends Vent> implements SubscriberCall<T> {
 
 		private final Consumer<T> eventHandler;
 
@@ -296,6 +293,7 @@ public class VentListener {
 			this.parent = parent;
 		}
 
+		@Experimental("Do we need/want this public? - Hemp")
 		public static void runExtensions(String key, Object toProcess) {
 			LabyrinthProvider.getInstance().getEventMap().getExtenders(key)
 					.filter(e -> toProcess == null || e.getType().isAssignableFrom(toProcess.getClass()))

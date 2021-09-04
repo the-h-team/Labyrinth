@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.annotation.NodePointer;
+import com.github.sanctum.labyrinth.data.NodePointer;
 import com.github.sanctum.labyrinth.data.JsonAdapter;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

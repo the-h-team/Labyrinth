@@ -1,5 +1,6 @@
-package com.github.sanctum.labyrinth.annotation;
+package com.github.sanctum.labyrinth.data;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * <p> Naming the value under this annotation anything other than the class it represents will result in
  * failure to to read.</p>
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface NodePointer {

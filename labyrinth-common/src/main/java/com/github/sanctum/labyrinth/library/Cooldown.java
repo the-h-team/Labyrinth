@@ -2,9 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.data.DataMap;
 import com.github.sanctum.labyrinth.data.FileList;
-import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Objects;
@@ -135,8 +133,9 @@ public abstract class Cooldown {
 	 * Note: If a cooldown is already saved with the same id, it will be overwritten.
 	 */
 	public synchronized final void save() {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("cooldowns", "Persistent", FileType.JSON);
-		manager.write(DataMap.newMap().set("Library." + getId() + ".expiration", getCooldown()));
+		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
+				.find("cooldowns", "Persistent", FileType.JSON)
+				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));
 		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).applyAfter(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).run();
 	}
 
@@ -148,8 +147,9 @@ public abstract class Cooldown {
 	 * <em>Primarily to be used on plugin disable.</em>
 	 */
 	public synchronized final void update() {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("cooldowns", "Persistent", FileType.JSON);
-		manager.write(DataMap.newMap().set("Library." + getId() + ".expiration", abv(getTimeLeft())));
+		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
+				.find("cooldowns", "Persistent", FileType.JSON)
+				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimeLeft())));
 		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).applyAfter(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).run();
 
 	}
@@ -195,8 +195,9 @@ public abstract class Cooldown {
 	 * @param c the cooldown representative to remove from cache
 	 */
 	public static void remove(Cooldown c) {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("cooldowns", "Persistent", FileType.JSON);
-		manager.write(DataMap.newMap().set("Library." + c.getId(), null));
+		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
+				.find("cooldowns", "Persistent", FileType.JSON)
+				.write(t -> t.set("Library." + c.getId(), null));
 		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(c)).run();
 	}
 

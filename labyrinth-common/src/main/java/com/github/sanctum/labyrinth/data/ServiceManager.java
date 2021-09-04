@@ -16,9 +16,9 @@ public class ServiceManager {
 	}
 
 	public <T extends Service> T get(ServiceType<T> serviceType) {
-		T service = (T) services.entrySet().stream().filter(t -> t.getKey().getType().isAssignableFrom(serviceType.getType())).findFirst().map(Map.Entry::getValue).orElse(null);
+		Object service = services.entrySet().stream().filter(t -> serviceType.getType().isAssignableFrom(t.getKey().getType())).findFirst().map(Map.Entry::getValue).orElse(null);
 		if (service != null) {
-			return service;
+			return (T) service;
 		}
 		return serviceType.getLoader().get();
 	}

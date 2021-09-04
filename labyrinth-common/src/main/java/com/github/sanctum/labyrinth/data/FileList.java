@@ -1,9 +1,11 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableList;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import java.io.OutputStream;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,8 +81,21 @@ public class FileList {
 		cacheFileManager(new FileManager(plugin, configurable));
 	}
 
-	public void copyCustom(InputStream source, File location) {
-		FileManager.copy(source, location);
+	public void copy(InputStream in, File file) {
+		try {
+			OutputStream out = new FileOutputStream(file);
+			byte[] buf = new byte[1024];
+			int len;
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+			out.close();
+			in.close();
+		} catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("File is a directory!", e);
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to write to file! See log:", e);
+		}
 	}
 
 	/**
@@ -90,30 +105,31 @@ public class FileList {
 	 * @param fileManager the FileManager instance to copy to
 	 */
 	public void copy(String fileName, FileManager fileManager) {
-		//noinspection ConstantConditions
-		FileManager.copy(this.plugin.getResource(fileName), fileManager);
+		InputStream stream = this.plugin.getResource(fileName);
+		if (stream == null) throw new RuntimeException("Non existent resources cannot be copied to file managers!");
+		copy(stream, fileManager.getRoot().getParent());
 	}
 
 	/**
 	 * Copy a yml file from this listings plugin to a manager of specification.
 	 *
-	 * @param fileName the file name only
+	 * @param ymlName the file name only
 	 * @param fileManager the FileManager instance to copy to
 	 */
-	public void copyYML(String fileName, FileManager fileManager) {
-		//noinspection ConstantConditions
-		FileManager.copy(this.plugin.getResource(fileName + ".yml"), fileManager);
+	public void copyYML(String ymlName, FileManager fileManager) {
+		copy(ymlName + ".yml", fileManager);
 	}
 
 	/**
 	 * Copy a yml file from this listings plugin to a file of specification.
 	 *
-	 * @param fileName the file name only
+	 * @param ymlName the file name only
 	 * @param file the file instance to copy to
 	 */
-	public void copyYML(String fileName, File file) {
-		//noinspection ConstantConditions
-		FileManager.copy(this.plugin.getResource(fileName + ".yml"), file);
+	public void copyYML(String ymlName, File file) {
+		InputStream stream = this.plugin.getResource(ymlName + ".yml");
+		if (stream == null) throw new RuntimeException("Non existent resources cannot be copied to file locations!");
+		copy(stream, file);
 	}
 
 	/**
@@ -136,7 +152,7 @@ public class FileList {
 		// See CACHE declaration above for new key strategy
 		return Optional.ofNullable(CACHE.get(plugin.getName()))
 				.map(m -> m.get(desc + ';' + name))
-				.filter(m -> m.getChild().getClass().isAssignableFrom(type.getImplementation()))
+				.filter(m -> m.getRoot().getType() == type)
 				.orElseGet(() -> cacheFileManager(new FileManager(plugin, null, name, desc, type)));
 	}
 
