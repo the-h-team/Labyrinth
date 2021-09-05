@@ -16,6 +16,11 @@ otherwise have been far more time-consuming.
             <id>s01-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+        <!-- For stable release builds. -->
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
         <!-- No repository needed for Maven Central versions! :D -->
     </repositories>
     <dependencies>
