@@ -6,8 +6,6 @@ public interface Root {
 
 	/**
 	 * Save the following memory space to its backing file.
-	 *
-	 * @throws java.io.IOException if an error is encountered while saving
 	 */
 	boolean save();
 
