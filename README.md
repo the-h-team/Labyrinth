@@ -28,35 +28,35 @@ otherwise have been far more time-consuming.
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skulls</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for region related services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-regions</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-plugin</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
