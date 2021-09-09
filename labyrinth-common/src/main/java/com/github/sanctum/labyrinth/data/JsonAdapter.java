@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.google.gson.InstanceCreator;
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -11,7 +14,7 @@ import java.util.Map;
  * @author Hempfest
  * @version 1.0
  */
-public interface JsonAdapter<T> {
+public interface JsonAdapter<T> extends InstanceCreator<T> {
 
 	/**
 	 * Serialize the corresponding element for json.
@@ -41,4 +44,17 @@ public interface JsonAdapter<T> {
 		return getClassType();
 	}
 
+	@Override
+	default T createInstance(Type type) {
+		Class<?> c = TypeToken.get(type).getRawType();
+		if (getClassType().isAssignableFrom(c)) {
+			try {
+				Object o = c.getDeclaredConstructor().newInstance();
+				return (T) o;
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 }

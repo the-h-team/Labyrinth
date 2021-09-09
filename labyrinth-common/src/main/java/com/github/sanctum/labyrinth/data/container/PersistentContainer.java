@@ -49,7 +49,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return true if the key value has been stored persistently
 	 */
 	protected synchronized boolean found(String key) {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
+		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 		boolean f = manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 		if (f && !this.dataMap.containsKey(key)) {
 			try {
@@ -70,7 +70,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized boolean delete(String key) {
 		this.dataMap.remove(key);
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
+		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
 			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
@@ -96,7 +96,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized void save(String key) throws IOException {
 		if (this.persistenceMap.get(key)) {
-			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
+			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
 			manager.write(inquiry);
@@ -104,7 +104,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	protected synchronized <R> R load(Class<R> type, String key) {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
+		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
 			R value = deserialize(type, manager.read(f -> f.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)));
 			return attach(key, value);
@@ -189,7 +189,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized List<String> persistentKeySet() {
 		List<String> list = new LinkedList<>();
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Components", "Persistent");
+		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 		if (manager.read(c -> c.isNode(this.key.getNamespace() + "." + this.key.getKey()))) {
 			//noinspection ConstantConditions
 			list.addAll(manager.read(f -> f.getNode(this.key.getNamespace() + "." + this.key.getKey()).getKeys(false)));

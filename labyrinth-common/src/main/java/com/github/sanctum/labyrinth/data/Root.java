@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.data;
 
 import java.io.IOException;
 
+/**
+ * An object dictating the management of a chunk of memory.
+ */
 public interface Root {
 
 	/**
@@ -24,7 +27,7 @@ public interface Root {
 	boolean delete();
 
 	/**
-	 * Reload the file from disk.
+	 * Reload the root from disk.
 	 * <p>
 	 * If the backing file has been deleted, this method assigns a fresh,
 	 * blank configuration internally to this object. Otherwise, the file

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,7 @@ import org.json.simple.JSONObject;
  * @author Hempfest
  * @version 1.0
  */
-final class ConfigurableNode implements Node, Root, Primitive, Primitive.Bukkit {
+final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	private final Configurable config;
 	private final String key;
@@ -218,12 +219,16 @@ final class ConfigurableNode implements Node, Root, Primitive, Primitive.Bukkit 
 	}
 
 	@Override
-	public boolean create() {
-		if (!exists()) {
-			set(new Object());
-			save();
-			return true;
+	public boolean create() throws IOException {
+		if (!getRoot().exists()) {
+			getRoot().create();
 		}
+		if (getRoot().getType() == FileType.JSON) {
+			set(new Object());
+		} else {
+			((YamlConfiguration)getRoot()).getConfig().createSection(this.key);
+		}
+		save();
 		return false;
 	}
 
@@ -278,37 +283,39 @@ final class ConfigurableNode implements Node, Root, Primitive, Primitive.Bukkit 
 		} else {
 			Set<String> keys = new HashSet<>();
 			JsonConfiguration json = (JsonConfiguration) getRoot();
-			for (Object o : json.json.entrySet()) {
-				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+			if (json.get(this.key) instanceof Map) {
+				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
 				if (deep) {
-					if (entry.getValue() instanceof JSONObject) {
-						JSONObject obj = (JSONObject) entry.getValue();
-						for (Object ob : obj.entrySet()) {
-							Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-							if (en.getValue() instanceof JSONObject) {
-								JSONObject j = (JSONObject) entry.getValue();
-								for (Object e : j.entrySet()) {
-									Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-									if (ent.getValue() instanceof JSONObject) {
-										JSONObject ja = (JSONObject) ent.getValue();
-										for (Object ex : ja.entrySet()) {
-											Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-											keys.add(key + "." + entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey());
+					for (Map.Entry<String, Object> entry : map1.entrySet()) {
+						if (entry.getValue() instanceof Map) {
+							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
+								if (entry2.getValue() instanceof Map) {
+									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
+										if (entry3.getValue() instanceof Map) {
+											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
+												keys.add(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey());
+											}
+										} else {
+											keys.add(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey());
 										}
-									} else {
-										keys.add(key + "." + entry.getKey() + "." + en.getKey() + "." + ent.getKey());
 									}
+								} else {
+									keys.add(entry.getKey() + "." + entry2.getKey());
 								}
-							} else {
-								keys.add(key + "." + entry.getKey() + "." + en.getKey());
 							}
 						}
-					} else {
-						keys.add(key + "." + entry.getKey());
+						keys.add(entry.getKey());
 					}
 				} else {
-					keys.add(key + "." + entry.getKey());
+					for (Map.Entry<String, Object> entry : map1.entrySet()) {
+						keys.add(entry.getKey());
+					}
 				}
+			} else {
+				keys.add(this.key);
 			}
 			return keys;
 		}
@@ -321,37 +328,60 @@ final class ConfigurableNode implements Node, Root, Primitive, Primitive.Bukkit 
 		} else {
 			Map<String, Object> map = new HashMap<>();
 			JsonConfiguration json = (JsonConfiguration) getRoot();
-			for (Object o : json.json.entrySet()) {
-				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+			if (json.get(this.key) instanceof Map) {
+				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
 				if (deep) {
-					if (entry.getValue() instanceof JSONObject) {
-						JSONObject obj = (JSONObject) entry.getValue();
-						for (Object ob : obj.entrySet()) {
-							Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-							if (en.getValue() instanceof JSONObject) {
-								JSONObject j = (JSONObject) entry.getValue();
-								for (Object e : j.entrySet()) {
-									Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-									if (ent.getValue() instanceof JSONObject) {
-										JSONObject ja = (JSONObject) ent.getValue();
-										for (Object ex : ja.entrySet()) {
-											Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-											map.put(key + "." + entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey(), entr.getValue());
+					for (Map.Entry<String, Object> entry : map1.entrySet()) {
+						if (entry.getValue() instanceof Map) {
+							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
+								if (entry2.getValue() instanceof Map) {
+									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
+										if (entry3.getValue() instanceof Map) {
+											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
+												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
+											}
+										} else {
+											map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
 										}
-									} else {
-										map.put(key + "." + entry.getKey() + "." + en.getKey() + "." + ent.getKey(), ent.getValue());
 									}
+								} else {
+									map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
 								}
-							} else {
-								map.put(key + "." + entry.getKey() + "." + en.getKey(), en.getValue());
 							}
 						}
-					} else {
-						map.put(key + "." + entry.getKey(), entry.getValue());
+						map.put(entry.getKey(), entry.getValue());
 					}
 				} else {
-					 map.put(key + "." + entry.getKey(), entry.getValue());
+					for (Map.Entry<String, Object> entry : map1.entrySet()) {
+						if (entry.getValue() instanceof Map) {
+							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
+								if (entry2.getValue() instanceof Map) {
+									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
+										if (entry3.getValue() instanceof Map) {
+											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
+												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
+											}
+										} else {
+											map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
+										}
+									}
+								} else {
+									map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
+								}
+							}
+						} else {
+							map.put(entry.getKey(), entry.getValue());
+						}
+					}
 				}
+			} else {
+				map.put(this.key, get());
 			}
 			return map;
 		}

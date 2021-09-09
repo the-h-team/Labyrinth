@@ -3,7 +3,6 @@ package com.github.sanctum.labyrinth.data.service;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.Registry;
-import com.github.sanctum.labyrinth.gui.printer.AnvilBuilder;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -11,7 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 
 /**
- * Used solely to load {@link AnvilMechanics} for use with {@link AnvilBuilder} on RUNTIME.
+ * Used solely to load {@link AnvilMechanics} for use with {@link com.github.sanctum.labyrinth.gui.unity.construct.Menu} on RUNTIME.
  */
 public abstract class ExternalDataService {
 

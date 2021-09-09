@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.formatting.string.RandomHex;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -62,7 +62,19 @@ public class JsonConfiguration extends Configurable {
 		this.parent = parent;
 		if (fileType == null) fileType = "data";
 		this.file = new File(parent, name.concat("." + fileType));
-		reload();
+		try {
+			if (file.exists()) {
+				FileInputStream fileInputStream = new FileInputStream(file);
+				InputStreamReader reader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+				json = (JSONObject) parser.parse(reader);
+				reader.close();
+				fileInputStream.close();
+			} else {
+				json = new JSONObject();
+			}
+		} catch (Exception ex) {
+			json = new JSONObject();
+		}
 	}
 
 	@Override
@@ -75,7 +87,11 @@ public class JsonConfiguration extends Configurable {
 				writer.flush();
 				writer.close();
 			}
-			json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			FileInputStream fileInputStream = new FileInputStream(file);
+			InputStreamReader reader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+			json = (JSONObject) parser.parse(reader);
+			reader.close();
+			fileInputStream.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -95,6 +111,7 @@ public class JsonConfiguration extends Configurable {
 			writer.close();
 			return true;
 		} catch (Exception ex) {
+			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An object of unknown origin was attempted to be saved and failed.");
 			ex.printStackTrace();
 			return false;
 		}
@@ -107,7 +124,15 @@ public class JsonConfiguration extends Configurable {
 
 	@Override
 	public boolean create() throws IOException {
-		return parent.exists() ? file.createNewFile() : parent.mkdir() && file.createNewFile();
+		if (parent.exists()) {
+			if (!file.exists()) {
+				reload();
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return parent.mkdir() && file.createNewFile();
 	}
 
 	@Override
@@ -168,12 +193,10 @@ public class JsonConfiguration extends Configurable {
 	private Object checkObject(Type type, Object object) {
 		Object target = object;
 		//if (type == ItemStack.class) type = JsonItemStack.class;
-		if (type == CustomColor.class) type = RandomHex.class;
 		if (target instanceof JSONObject) {
 			JSONObject j = (JSONObject) object;
 			Gson g = new GsonBuilder().create();
-			Type finalType = type;
-			Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getValue().getType().getTypeName().equals(finalType.getTypeName())).findFirst().orElse(null);
+			Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> type.getTypeName().contains(de.getKey())).findFirst().orElse(null);
 			if (d != null) {
 				if (j.containsKey(d.getKey())) {
 					Object ob = j.get(d.getKey());
@@ -209,6 +232,8 @@ public class JsonConfiguration extends Configurable {
 				} else {
 					o = js;
 				}
+			} else {
+				return obj;
 			}
 		}
 		return o.get(k);
@@ -232,6 +257,9 @@ public class JsonConfiguration extends Configurable {
 				} else {
 					o = js;
 				}
+			} else {
+				ob = checkObject(type, obj);
+				stop = true;
 			}
 		}
 		if (!stop) {
@@ -341,7 +369,8 @@ public class JsonConfiguration extends Configurable {
 
 	@Override
 	public String getString(String key) {
-		return get(key).toString();
+		Object o = get(key);
+		return String.valueOf(o);
 	}
 
 	@Override
@@ -506,6 +535,7 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public List<String> getStringList(String key) {
 		List<?> l = getList(key);
+		if (l.isEmpty()) return new ArrayList<>();
 		if (!(l.get(0) instanceof String)) return new ArrayList<>();
 		return (List<String>) l;
 	}
@@ -514,6 +544,7 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public List<Integer> getIntegerList(String key) {
 		List<?> l = getList(key);
+		if (l.isEmpty()) return new ArrayList<>();
 		if (!(l.get(0) instanceof Integer) || !(l.get(0) instanceof Long)) return new ArrayList<>();
 		return (List<Integer>) l;
 	}
@@ -522,6 +553,7 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public List<Double> getDoubleList(String key) {
 		List<?> l = getList(key);
+		if (l.isEmpty()) return new ArrayList<>();
 		if (!(l.get(0) instanceof Double) || !(l.get(0) instanceof Float)) return new ArrayList<>();
 		return (List<Double>) l;
 	}
@@ -530,6 +562,7 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public List<Float> getFloatList(String key) {
 		List<?> l = getList(key);
+		if (l.isEmpty()) return new ArrayList<>();
 		if (!(l.get(0) instanceof Float) || !(l.get(0) instanceof Double)) return new ArrayList<>();
 		return (List<Float>) l;
 	}
@@ -538,12 +571,13 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public List<Long> getLongList(String key) {
 		List<?> l = getList(key);
+		if (l.isEmpty()) return new ArrayList<>();
 		if (!(l.get(0) instanceof Long)) return new ArrayList<>();
 		return (List<Long>) l;
 	}
 
 	@Override
-	public FileType getType() {
+	public FileExtension getType() {
 		return FileType.JSON;
 	}
 }

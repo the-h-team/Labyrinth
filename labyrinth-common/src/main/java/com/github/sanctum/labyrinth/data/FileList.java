@@ -56,6 +56,23 @@ public class FileList {
 				.orElse(ImmutableList.of());
 	}
 
+	public static void copy(InputStream in, File file) {
+		try {
+			OutputStream out = new FileOutputStream(file);
+			byte[] buf = new byte[1024];
+			int len;
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+			out.close();
+			in.close();
+		} catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("File is a directory!", e);
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to write to file! See log:", e);
+		}
+	}
+
 	/**
 	 * Get the plugin attached to the search.
 	 *
@@ -79,23 +96,6 @@ public class FileList {
 	 */
 	public void inject(@NotNull Configurable configurable) {
 		cacheFileManager(new FileManager(plugin, configurable));
-	}
-
-	public void copy(InputStream in, File file) {
-		try {
-			OutputStream out = new FileOutputStream(file);
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			out.close();
-			in.close();
-		} catch (FileNotFoundException e) {
-			throw new IllegalArgumentException("File is a directory!", e);
-		} catch (IOException e) {
-			throw new IllegalStateException("Unable to write to file! See log:", e);
-		}
 	}
 
 	/**
@@ -132,6 +132,34 @@ public class FileList {
 		copy(stream, file);
 	}
 
+	public @NotNull CustomFileOptional check(String name, String desc, FileExtension extension) {
+		return new CustomFileOptional(this, name, desc, extension);
+	}
+
+	/**
+	 * @deprecated Use {@link FileList#get(String)} instead!!
+	 */
+	@Deprecated
+	public FileManager find(String n) {
+		return get(n);
+	}
+
+	/**
+	 * @deprecated Use {@link FileList#get(String,String,FileExtension)} instead!!
+	 */
+	@Deprecated
+	public FileManager find(String n, String d, FileType t) {
+		return get(n , d, t);
+	}
+
+	/**
+	 * @deprecated Use {@link FileList#get(String,FileExtension)} instead!!
+	 */
+	@Deprecated
+	public FileManager find(String n, FileType t) {
+		return get(n, t);
+	}
+
 	/**
 	 * Retrieve a Config instance via its name and description.
 	 * <p>
@@ -139,21 +167,11 @@ public class FileList {
 	 * main class passed through the initial search query.
 	 *
 	 * @param name name of config file
-	 * @param desc description of config file (designate subdirectory
-	 * @param type Whether or not to use JSON or YML
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc, final FileType type) throws IllegalArgumentException {
-		// move up to fail fast
-		if (name.isEmpty()) {
-			throw new IllegalArgumentException("Name cannot be empty!");
-		}
-		// See CACHE declaration above for new key strategy
-		return Optional.ofNullable(CACHE.get(plugin.getName()))
-				.map(m -> m.get(desc + ';' + name))
-				.filter(m -> m.getRoot().getType() == type)
-				.orElseGet(() -> cacheFileManager(new FileManager(plugin, null, name, desc, type)));
+	public @NotNull FileManager get(@NotNull final String name) throws IllegalArgumentException {
+		return get(name, (String) null);
 	}
 
 	/**
@@ -167,27 +185,8 @@ public class FileList {
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager find(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
-		return find(name, desc, FileType.YAML);
-	}
-
-	private static FileManager cacheFileManager(FileManager fileManager) {
-		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.configuration.getDirectory() + ';' + fileManager.configuration.getName(), fileManager);
-		return fileManager;
-	}
-
-	/**
-	 * Retrieve a Config instance via its name and description.
-	 * <p>
-	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
-	 * main class passed through the initial search query.
-	 *
-	 * @param name name of config file
-	 * @return existing instance or create new Config
-	 * @throws IllegalArgumentException if name is empty
-	 */
-	public @NotNull FileManager find(@NotNull final String name) throws IllegalArgumentException {
-		return find(name, (String) null);
+	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
+		return get(name, desc, FileType.YAML);
 	}
 
 	/**
@@ -201,8 +200,72 @@ public class FileList {
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager find(@NotNull final String name, final FileType data) throws IllegalArgumentException {
-		return find(name, null, data);
+	public @NotNull FileManager get(@NotNull final String name, final FileExtension data) throws IllegalArgumentException {
+		return get(name, null, data);
+	}
+
+	/**
+	 * Retrieve a Config instance via its name and description.
+	 * <p>
+	 * This method resolves config objects for any {@link org.bukkit.plugin.java.JavaPlugin}
+	 * main class passed through the initial search query.
+	 *
+	 * @param name name of config file
+	 * @param desc description of config file (designate subdirectory
+	 * @param type The file type extension.
+	 * @return existing instance or create new Config
+	 * @throws IllegalArgumentException if name is empty
+	 */
+	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc, final FileExtension type) throws IllegalArgumentException {
+		// move up to fail fast
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Name cannot be empty!");
+		}
+		// See CACHE declaration above for new key strategy
+		return Optional.ofNullable(CACHE.get(plugin.getName()))
+				.map(m -> m.get(desc + ';' + name))
+				.filter(m -> Objects.equals(m.getRoot().getType(), type))
+				.orElseGet(() -> cacheFileManager(new FileManager(plugin, name, desc, type)));
+	}
+
+	/**
+	 * This method checks if the desired backing file exists without creating necessary parent locations.
+	 *
+	 * Do not use this method if the desired file type is not a yml file.
+	 *
+	 * @param name The name of the file.
+	 * @param desc The directory the file belongs to.
+	 * @return true if the target file exists. false if either the parent or target file location doesn't exist.
+	 */
+
+	public boolean exists(@NotNull final String name, @Nullable final String desc) {
+		return exists(name, desc, FileType.YAML);
+	}
+
+	/**
+	 * This method checks if the desired backing file exists without creating necessary parent locations.
+	 *
+	 * @param name The name of the file.
+	 * @param desc The directory the file belongs to.
+	 * @param extension The file extension to use, Ex: "data" or "yml"
+	 * @return true if the target file exists. false if either the parent or target file location doesn't exist.
+	 */
+	public boolean exists(@NotNull final String name, @Nullable final String desc, @NotNull FileExtension extension) {
+		// move up to fail fast
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Name cannot be empty!");
+		}
+		final File parent = (desc == null || desc.isEmpty()) ? plugin.getDataFolder() : new File(plugin.getDataFolder(), desc);
+		if (!parent.exists()) {
+			return false;
+		}
+		File test = new File(parent, name.concat(extension.getExtension()));
+		return test.exists();
+	}
+
+	private static FileManager cacheFileManager(FileManager fileManager) {
+		CACHE.computeIfAbsent(fileManager.plugin.getName(), s -> new ConcurrentHashMap<>()).put(fileManager.configuration.getDirectory() + ';' + fileManager.configuration.getName(), fileManager);
+		return fileManager;
 	}
 
 }

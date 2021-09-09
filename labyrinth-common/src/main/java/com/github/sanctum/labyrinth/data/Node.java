@@ -9,7 +9,7 @@ package com.github.sanctum.labyrinth.data;
  * @author Hempfest
  * @version 1.0
  */
-public interface Node extends MemorySpace {
+public interface Node extends Root, MemorySpace {
 
 	/**
 	 * Get the object attached to this node if present.

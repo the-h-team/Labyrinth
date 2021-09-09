@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
  * @author Hempfest
  * @version 1.0
  */
-public enum FileType {
+public enum FileType implements FileExtension {
 
 	/**
 	 * A file responsible for standard config operations.
@@ -41,6 +41,20 @@ public enum FileType {
 		return FileList.search(plugin).find(name, directory, this);
 	}
 
+	@Override
+	public String getExtension() {
+		switch (this) {
+			case JSON:
+				return ".data";
+			case YAML:
+				return ".yml";
+			case CUSTOM:
+			case UNKNOWN:
+			default:
+				throw new IllegalArgumentException("Unknown file extension!");
+		}
+	}
+
 	/**
 	 * Attempts to get the super class type.
 	 *
@@ -48,6 +62,7 @@ public enum FileType {
 	 *
 	 * @return The possible super class for this type.
 	 */
+	@Override
 	public Class<? extends Configurable> getImplementation() {
 		return c;
 	}

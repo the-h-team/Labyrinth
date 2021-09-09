@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.event.custom;
 
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.event.EasyListener;
 
 import java.util.Collection;
@@ -134,7 +135,8 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void register(@NotNull Plugin host, @NotNull Object listener) {
-		if (listener.getClass().isAssignableFrom(Listener.class)) {
+		Check.forWarnings(listener);
+		if (Listener.class.isAssignableFrom(listener.getClass())) {
 			EasyListener.call(host, (Listener) listener);
 		}
 		VentListener list = new VentListener(host, listener);

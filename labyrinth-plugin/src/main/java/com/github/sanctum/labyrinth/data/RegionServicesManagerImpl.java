@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.api.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,40 +51,40 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.BREAK));
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.BUILD));
 			manager.load(manager.getFlagManager().getDefault(Cuboid.FlagManager.FlagType.PVP));
-			if (Region.DATA.exists()) {
-				if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn")) {
-					//noinspection ConstantConditions
-					for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.spawn").getKeys(false)) {
-						Location o = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".pos1");
+			if (Region.DATA.getRoot().exists()) {
+				if (Region.DATA.getRoot().isNode("Markers.spawn")) {
+					
+					for (String id : Region.DATA.getRoot().getNode("Markers.spawn").getKeys(false)) {
+						Location o = Region.DATA.getRoot().getLocation("Markers.spawn." + id + ".pos1");
 
-						Location t = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".pos2");
-						Location s = Region.DATA.getLegacySafeLocation("Markers.spawn." + id + ".start");
+						Location t = Region.DATA.getRoot().getLocation("Markers.spawn." + id + ".pos2");
+						Location s = Region.DATA.getRoot().getLocation("Markers.spawn." + id + ".start");
 						HUID d = HUID.fromString(id);
-						//noinspection ConstantConditions
-						UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.spawn." + id + ".owner"));
-						List<UUID> members = Region.DATA.getConfig().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+						
+						UUID owner = UUID.fromString(Region.DATA.getRoot().getString("Markers.spawn." + id + ".owner"));
+						List<UUID> members = Region.DATA.getRoot().getStringList("Markers.spawn." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 						List<Region.Flag> flags = new ArrayList<>();
-						if (Region.DATA.getConfig().isConfigurationSection("Markers.spawn." + id + ".flags")) {
-							//noinspection ConstantConditions
-							for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.spawn." + id + ".flags").getKeys(false)) {
+						if (Region.DATA.getRoot().isNode("Markers.spawn." + id + ".flags")) {
+							
+							for (String flag : Region.DATA.getRoot().getNode("Markers.spawn." + id + ".flags").getKeys(false)) {
 								Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
 								if (f != null) {
 									RegionFlag copy = new RegionFlag(f);
-									copy.setMessage(Region.DATA.getConfig().getString("Markers.spawn." + id + ".flags." + flag + ".message"));
-									copy.setAllowed(Region.DATA.getConfig().getBoolean("Markers.spawn." + id + ".flags." + flag + ".allowed"));
+									copy.setMessage(Region.DATA.getRoot().getString("Markers.spawn." + id + ".flags." + flag + ".message"));
+									copy.setAllowed(Region.DATA.getRoot().getBoolean("Markers.spawn." + id + ".flags." + flag + ".allowed"));
 									flags.add(copy);
 								}
 							}
 						}
 						Region.Spawning spawn = new Region.Spawning(o, t, d);
-						spawn.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.spawn." + id + ".pass"));
+						spawn.setPassthrough(Region.DATA.getRoot().getBoolean("Markers.spawn." + id + ".pass"));
 						spawn.setLocation(s);
 						spawn.setOwner(owner);
-						if (Region.DATA.getConfig().getString("Markers.spawn." + id + ".name") != null) {
-							spawn.setName(Region.DATA.getConfig().getString("Markers.spawn." + id + ".name"));
+						if (Region.DATA.getRoot().getString("Markers.spawn." + id + ".name") != null) {
+							spawn.setName(Region.DATA.getRoot().getString("Markers.spawn." + id + ".name"));
 						}
-						//noinspection ConstantConditions
-						Schedule.sync(() -> spawn.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.spawn." + id + ".plugin")))).run();
+						
+						Schedule.sync(() -> spawn.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getRoot().getString("Markers.spawn." + id + ".plugin")))).run();
 						spawn.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 						spawn.addFlag(flags.toArray(new Region.Flag[0]));
 						if (!spawn.load()) {
@@ -91,37 +92,37 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 						}
 					}
 				}
-				if (Region.DATA.getConfig().isConfigurationSection("Markers.region")) {
-					//noinspection ConstantConditions
-					for (String id : Region.DATA.getConfig().getConfigurationSection("Markers.region").getKeys(false)) {
-						Location o = Region.DATA.getLegacySafeLocation("Markers.region." + id + ".pos1");
-						Location t = Region.DATA.getLegacySafeLocation("Markers.region." + id + ".pos2");
+				if (Region.DATA.getRoot().isNode("Markers.region")) {
+					
+					for (String id : Region.DATA.getRoot().getNode("Markers.region").getKeys(false)) {
+						Location o = Region.DATA.getRoot().getLocation("Markers.region." + id + ".pos1");
+						Location t = Region.DATA.getRoot().getLocation("Markers.region." + id + ".pos2");
 						HUID d = HUID.fromString(id);
-						//noinspection ConstantConditions
-						UUID owner = UUID.fromString(Region.DATA.getConfig().getString("Markers.region." + id + ".owner"));
-						List<UUID> members = Region.DATA.getConfig().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
+						
+						UUID owner = UUID.fromString(Region.DATA.getRoot().getString("Markers.region." + id + ".owner"));
+						List<UUID> members = Region.DATA.getRoot().getStringList("Markers.region." + id + ".members").stream().map(UUID::fromString).collect(Collectors.toList());
 						List<Region.Flag> flags = new ArrayList<>();
-						if (Region.DATA.getConfig().isConfigurationSection("Markers.region." + id + ".flags")) {
-							//noinspection ConstantConditions
-							for (String flag : Region.DATA.getConfig().getConfigurationSection("Markers.region." + id + ".flags").getKeys(false)) {
+						if (Region.DATA.getRoot().isNode("Markers.region." + id + ".flags")) {
+							
+							for (String flag : Region.DATA.getRoot().getNode("Markers.region." + id + ".flags").getKeys(false)) {
 								Cuboid.Flag f = manager.getFlagManager().getFlag(flag).orElse(null);
 								if (f != null) {
 									RegionFlag copy = new RegionFlag(f);
-									copy.setMessage(Region.DATA.getConfig().getString("Markers.region." + id + ".flags." + flag + ".message"));
-									copy.setAllowed(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".flags." + flag + ".allowed"));
+									copy.setMessage(Region.DATA.getRoot().getString("Markers.region." + id + ".flags." + flag + ".message"));
+									copy.setAllowed(Region.DATA.getRoot().getBoolean("Markers.region." + id + ".flags." + flag + ".allowed"));
 									flags.add(copy);
 								}
 							}
 						}
 						Region.Loading region = new Region.Loading(o, t, d);
-						region.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".pass"));
+						region.setPassthrough(Region.DATA.getRoot().getBoolean("Markers.region." + id + ".pass"));
 						region.setOwner(owner);
-						if (Region.DATA.getConfig().getString("Markers.region." + id + ".name") != null) {
-							region.setName(Region.DATA.getConfig().getString("Markers.region." + id + ".name"));
+						if (Region.DATA.getRoot().getString("Markers.region." + id + ".name") != null) {
+							region.setName(Region.DATA.getRoot().getString("Markers.region." + id + ".name"));
 						}
-						region.setPassthrough(Region.DATA.getConfig().getBoolean("Markers.region." + id + ".pass"));
-						//noinspection ConstantConditions
-						Schedule.sync(() -> region.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getConfig().getString("Markers.region." + id + ".plugin")))).run();
+						region.setPassthrough(Region.DATA.getRoot().getBoolean("Markers.region." + id + ".pass"));
+						
+						Schedule.sync(() -> region.setPlugin(Bukkit.getPluginManager().getPlugin(Region.DATA.getRoot().getString("Markers.region." + id + ".plugin")))).run();
 						region.addMember(members.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
 						region.addFlag(flags.toArray(new Region.Flag[0]));
 						if (!region.load()) {
@@ -168,7 +169,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		})).repeat(5, 2 * 20);
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
 			if (r.isPresent()) {
@@ -180,7 +181,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.BlockPlace.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockPlace.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Region.match(e.getBlock().getLocation())).join();
 			if (r.isPresent()) {
@@ -192,7 +193,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, "region-spawn", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, "region-spawn", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
 
 			Region.Resident r = Region.Resident.get(event.getPlayer());
 			if (!event.getPlayer().hasPlayedBefore()) {
@@ -209,7 +210,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", instance, Vent.Priority.MEDIUM, (e, subscription) -> {
+		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", instance, Vent.Priority.MEDIUM, (e, subscription) -> {
 
 			if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(Region::match)).join();
@@ -231,10 +232,10 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 				boolean isOld = instance.isLegacy();
 
-				Material mat = Items.getMaterial("WOODEN_AXE");
+				Material mat = Items.findMaterial("WOODEN_AXE");
 
 				if (isOld) {
-					mat = Items.getMaterial("WOOD_AXE");
+					mat = Items.findMaterial("WOOD_AXE");
 				}
 
 				if (e.getItem().getType() == mat) {
@@ -270,10 +271,10 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 				boolean isOld = LabyrinthProvider.getInstance().isLegacy();
 
-				Material mat = Items.getMaterial("WOODEN_AXE");
+				Material mat = Items.findMaterial("WOODEN_AXE");
 
 				if (isOld) {
-					mat = Items.getMaterial("WOOD_AXE");
+					mat = Items.findMaterial("WOOD_AXE");
 				}
 
 				if (e.getItem().getType() == mat) {
@@ -292,7 +293,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		Vent.subscribe(new Vent.Subscription<>(DefaultEvent.PlayerDamagePlayer.class, "region-pvp", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.PlayerDamagePlayer.class, "region-pvp", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
 
 			Player p = event.getPlayer();
 			Player target = event.getVictim();
@@ -385,7 +386,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 	@Override
 	public boolean register(Cuboid.Flag flag) {
 		if (flag == null) return false;
-		if (getFlagManager().getFlags().stream().noneMatch(f -> f.getId().equals(flag.getId()))) {
+		if (!getFlagManager().getFlag(flag.getId()).isPresent()) {
 			getFlagManager().getFlags().add(flag);
 			return true;
 		}
@@ -401,7 +402,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 	@Override
 	public void load(Vent.Subscription<?> subscription) {
-		Vent.subscribe(subscription);
+		LabyrinthProvider.getService(Service.VENT).subscribe(subscription);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
@@ -100,7 +101,7 @@ public abstract class CustomHead implements SkullObject {
 		}
 
 		/**
-		 * Using {@link CustomHead.Manager#newLoader(FileConfiguration)} or {@link CustomHead.Manager#newLoader(Plugin, String, String)} load configured head values
+		 * Using {@link CustomHead.Manager#newLoader(MemorySpace)} or {@link CustomHead.Manager#newLoader(Plugin, String, String)} load configured head values
 		 * from your specified file location.
 		 *
 		 * @param loader the head loader instance
@@ -290,13 +291,13 @@ public abstract class CustomHead implements SkullObject {
 		}
 
 		/**
-		 * Assign the loading of additional configured head elements.
+		 * Assign the loading of additional head elements.
 		 *
-		 * @param configuration the config to source the additions from
+		 * @param memory the memory space to source the additions from
 		 * @return a new head loader instance
 		 */
-		public static CustomHeadLoader newLoader(FileConfiguration configuration) {
-			return new CustomHeadLoader(configuration);
+		public static CustomHeadLoader newLoader(MemorySpace memory) {
+			return new CustomHeadLoader(memory);
 		}
 
 		/**
@@ -327,7 +328,7 @@ public abstract class CustomHead implements SkullObject {
 		 */
 		public static ItemStack modifyItemStack(ItemStack item, String name) {
 			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 
 			if (item.getType() != type)
 				throw new IllegalStateException(item.getType().name() + " is not a direct representation of " + type.name());

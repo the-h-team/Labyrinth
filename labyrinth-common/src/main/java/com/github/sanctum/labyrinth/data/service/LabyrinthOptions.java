@@ -10,7 +10,7 @@ public enum  LabyrinthOptions {
 
 	public boolean enabled() {
 
-		FileManager conf = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("config");
+		FileManager conf = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("config");
 
 		switch (this) {
 			case HEAD_PRE_CACHE:

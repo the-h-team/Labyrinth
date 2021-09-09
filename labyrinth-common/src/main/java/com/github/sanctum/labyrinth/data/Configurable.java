@@ -4,7 +4,6 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -339,7 +338,7 @@ public abstract class Configurable implements MemorySpace, Root {
 	/**
 	 * @return The type this file represents.
 	 */
-	public FileType getType() {
+	public FileExtension getType() {
 		return FileType.UNKNOWN;
 	}
 
@@ -357,6 +356,6 @@ public abstract class Configurable implements MemorySpace, Root {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getName(), getDirectory(), getType().name());
+		return Objects.hash(getName(), getDirectory(), getType().toString());
 	}
 }

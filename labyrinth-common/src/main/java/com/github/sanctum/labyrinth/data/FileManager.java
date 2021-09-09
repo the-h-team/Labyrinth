@@ -32,20 +32,20 @@ public class FileManager {
 		this.configuration = configuration;
 	}
 
-	protected FileManager(@NotNull Plugin plugin, @NotNull final String n, @Nullable final String d, FileType type) {
-		this(plugin, null, n, d, type);
-	}
-
-	protected FileManager(@NotNull Plugin plugin, @Nullable final String type, @NotNull final String n, @Nullable final String d, FileType data) {
-		if (data == FileType.JSON) {
-			JsonConfiguration c = new JsonConfiguration(plugin, type, n, d);
+	protected FileManager(@NotNull Plugin plugin, @NotNull final String n, @Nullable final String d, FileExtension data) {
+		if (data.getExtension().endsWith("data")) {
+			JsonConfiguration c = new JsonConfiguration(plugin, null, n, d);
 			this.plugin = c.plugin;
 			this.configuration = c;
-		} else {
+			return;
+		}
+		if (data.getExtension().endsWith("yml")) {
 			YamlConfiguration c = new YamlConfiguration(plugin, n, d);
 			this.plugin = c.plugin;
 			this.configuration = c;
+			return;
 		}
+		throw new IllegalArgumentException(data.getExtension() + " files cannot be instantiated through file manager, injection required!");
 	}
 
 	/**
@@ -60,6 +60,7 @@ public class FileManager {
 	 * @throws IllegalStateException    if write is unsuccessful
 	 */
 	@Note("Access to this method will isolate to FileList only")
+	@Deprecated
 	public static void copy(InputStream in, File file) {
 		try {
 			OutputStream out = new FileOutputStream(file);
@@ -89,6 +90,7 @@ public class FileManager {
 	 * @throws IllegalStateException    if write is unsuccessful
 	 */
 	@Note("Access to this method will isolate to FileList only")
+	@Deprecated
 	public static void copy(InputStream in, FileManager manager) {
 		try {
 			OutputStream out = new FileOutputStream(manager.getRoot().getParent());
@@ -319,12 +321,10 @@ public class FileManager {
 			for (String entry : c.getKeys(true)) {
 				if (c.isNode(entry)) {
 					ConfigurationSection s = c.getNode(entry).get(ConfigurationSection.class);
-					for (String e : s.getKeys(false)) {
+					for (String e : s.getKeys(true)) {
 						if (s.isConfigurationSection(e)) {
 							ConfigurationSection a = s.getConfigurationSection(e);
 							inquiry.set(e, a.get(e));
-						} else {
-							inquiry.set(e, s.get(e));
 						}
 					}
 				} else {

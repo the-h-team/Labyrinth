@@ -313,7 +313,7 @@ public class YamlConfiguration extends Configurable {
 	}
 
 	@Override
-	public FileType getType() {
+	public FileExtension getType() {
 		return FileType.YAML;
 	}
 

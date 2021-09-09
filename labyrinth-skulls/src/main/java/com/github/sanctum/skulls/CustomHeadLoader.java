@@ -2,6 +2,7 @@ package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -14,27 +15,26 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 public final class CustomHeadLoader {
 
-	private final FileConfiguration manager;
+	private final MemorySpace memory;
 	private boolean loaded;
 
 	private final Map<HeadText, OnlineHeadSearch> que;
 	private final Map<HeadText, ItemStack> additions;
 
-	protected CustomHeadLoader(FileConfiguration configuration) {
-		this.manager = configuration;
+	protected CustomHeadLoader(MemorySpace memory) {
+		this.memory = memory;
 		this.que = new HashMap<>();
 		this.additions = new HashMap<>();
 	}
 
 	protected CustomHeadLoader(Plugin plugin, String fileName, String directory) {
-		this.manager = FileList.search(plugin).find(fileName, directory).getConfig();
+		this.memory = FileList.search(plugin).get(fileName, directory).getRoot();
 		this.que = new HashMap<>();
 		this.additions = new HashMap<>();
 	}
@@ -49,18 +49,17 @@ public final class CustomHeadLoader {
 	 * @return this head loader instance with attempted values
 	 */
 	public CustomHeadLoader look(String section) {
-		if (manager.isConfigurationSection(section)) {
-			//noinspection ConstantConditions
-			for (String id : manager.getConfigurationSection(section).getKeys(false)) {
-				boolean custom = manager.getBoolean(section + "." + id + ".custom");
-				String name = manager.getString(section + "." + id + ".name");
+		if (memory.isNode(section)) {
+			for (String id : memory.getNode(section).getKeys(false)) {
+				boolean custom = memory.getNode(section).getNode(id).getNode("custom").toPrimitive().getBoolean();
+				String name = memory.getNode(section).getNode(id).getNode("name").toPrimitive().getString();
 				if (name == null) continue;
 				if (custom) {
-					String category = manager.getString(section + "." + id + ".category");
+					String category = memory.getNode(section).getNode(id).getNode("category").toPrimitive().getString();
 					String value = null;
 
-					if (manager.isString(section + "." + id + ".value")) {
-						value = manager.getString(section + "." + id + ".value");
+					if (memory.getNode(section).getNode(id).getNode("value").toPrimitive().isString()) {
+						value = memory.getNode(section).getNode(id).getNode("value").toPrimitive().getString();
 					}
 
 					if (value != null) {
@@ -71,8 +70,8 @@ public final class CustomHeadLoader {
 
 
 				} else {
-					String category = manager.getString(section + "." + id + ".category");
-					String user = manager.getString(section + "." + id + ".user");
+					String category = memory.getNode(section).getNode(id).getNode("category").toPrimitive().getString();
+					String user = memory.getNode(section).getNode(id).getNode("user").toPrimitive().getString();
 
 					boolean isID = user != null && user.contains("-");
 
@@ -82,8 +81,6 @@ public final class CustomHeadLoader {
 						que.put(new HeadText(name, category), new OnlineHeadSearch(user));
 					}
 				}
-
-
 			}
 		}
 		return this;
@@ -112,7 +109,7 @@ public final class CustomHeadLoader {
 		if (!getHeads().isEmpty()) {
 			CustomHead.Manager.load(this);
 		} else {
-			LabyrinthProvider.getInstance().getLogger().warning("- No heads were loaded from configuration " + manager.toString());
+			LabyrinthProvider.getInstance().getLogger().warning("- No heads were loaded from memory space " + memory.getPath());
 		}
 	}
 

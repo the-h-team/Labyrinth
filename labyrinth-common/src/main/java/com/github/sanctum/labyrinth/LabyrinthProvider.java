@@ -4,6 +4,9 @@ import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.ServiceType;
 
+/**
+ * @author ms5984
+ */
 public abstract class LabyrinthProvider {
 	static LabyrinthAPI instance;
 

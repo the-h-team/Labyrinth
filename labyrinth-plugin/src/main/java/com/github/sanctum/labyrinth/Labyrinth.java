@@ -25,6 +25,7 @@ import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
 import com.github.sanctum.labyrinth.formatting.string.RandomHex;
+import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
@@ -90,6 +91,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
 	private boolean cachedIsLegacy;
+	private boolean cachedIsNew;
 	private boolean cachedNeedsLegacyLocation;
 	private int cachedComponentRemoval;
 	private long time;
@@ -108,6 +110,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		serviceManager.load(Service.COOLDOWNS);
 		serviceManager.load(Service.COMPONENTS);
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
+		cachedIsNew = LabyrinthAPI.super.isNew();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 		Configurable.registerClass(ItemStackSerializable.class);
 		Configurable.registerClass(LocationSerializable.class);
@@ -116,12 +119,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
-		FileManager copy = FileList.search(this).find("config");
+		FileManager copy = FileList.search(this).get("config");
 		InputStream stream = getResource("config.yml");
 		assert stream != null;
-
 		if (!copy.getRoot().exists()) {
-			FileManager.copy(stream, copy);
+			FileList.copy(stream, copy.getRoot().getParent());
 		}
 		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 		new EasyListener(DefaultEvent.Controller.class).call(this);
@@ -129,12 +131,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
-		Schedule.sync(() -> new AdvancedEconomyImplementation(this)).applyAfter(() -> new VaultImplementation(this)).wait(2);
+		Schedule.sync(() -> new AdvancedEconomyImplementation(this))
+				.applyAfter(() -> new VaultImplementation(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
-		// legacy check (FileConfiguration missing getLocation) (Hemp)
 		if (isLegacy() || getServer().getVersion().contains("1.14")) {
-			// Load our Location util
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
 
@@ -146,26 +147,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
-	}
-
-	@Subscribe
-	public void onComponent(DefaultEvent.Communication e) {
-		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
-			DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
-			if (cmd == null) return;
-			String label = cmd.getText();
-
-			for (WrappedComponent component : components) {
-				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
-					if (!component.isMarked()) {
-						Schedule.sync(() -> component.action().apply()).run();
-						component.setMarked(true);
-						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
-					}
-					e.setCancelled(true);
-				}
-			}
-		}
 	}
 
 	@Override
@@ -200,23 +181,62 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 
 	}
 
+	@Subscribe
+	public void onComponent(DefaultEvent.Communication e) {
+		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
+			DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
+			if (cmd == null) return;
+			String label = cmd.getText();
+
+			for (WrappedComponent component : components) {
+				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
+					if (!component.isMarked()) {
+						Schedule.sync(() -> component.action().apply()).run();
+						component.setMarked(true);
+						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
+					}
+					e.setCancelled(true);
+				}
+			}
+		}
+	}
+
 	@Override
-	public @NotNull VentMap getEventMap() {
+	@NotNull
+	public VentMap getEventMap() {
 		return eventMap;
 	}
 
 	@Override
-	public @NotNull ConcurrentLinkedQueue<Integer> getTasks() {
+	@NotNull
+	public ConcurrentLinkedQueue<Integer> getTasks() {
 		return tasks;
 	}
 
 	@Override
-	public @NotNull LinkedList<Cooldown> getCooldowns() {
+	public void scheduleNext(Applicable applicable) {
+		Schedule.sync(applicable).run();
+	}
+
+	@Override
+	public void scheduleLater(Applicable applicable, int ticks) {
+		Schedule.sync(applicable).waitReal(ticks);
+	}
+
+	@Override
+	public void scheduleAlways(Applicable applicable, int delay, int period) {
+		Schedule.sync(applicable).repeatReal(delay, period);
+	}
+
+	@Override
+	@NotNull
+	public LinkedList<Cooldown> getCooldowns() {
 		return cooldowns;
 	}
 
 	@Override
-	public @Nullable Cooldown getCooldown(String id) {
+	@Nullable
+	public Cooldown getCooldown(String id) {
 		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
 			FileManager library = FileList.search(this).find("cooldowns", "Persistent", FileType.JSON);
 			if (library.read(f -> f.isNode("Library." + id))) {
@@ -250,17 +270,20 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	}
 
 	@Override
-	public @NotNull LinkedList<WrappedComponent> getComponents() {
+	@NotNull
+	public LinkedList<WrappedComponent> getComponents() {
 		return components;
 	}
 
 	@Override
-	public @NotNull List<PersistentContainer> getContainers(Plugin plugin) {
+	@NotNull
+	public List<PersistentContainer> getContainers(Plugin plugin) {
 		return ImmutableList.copyOf(containers.stream().filter(p -> p.getKey().getNamespace().equals(plugin.getName())).collect(Collectors.toSet()));
 	}
 
 	@Override
-	public @NotNull PersistentContainer getContainer(@NotNull NamespacedKey namespacedKey) {
+	@NotNull
+	public PersistentContainer getContainer(@NotNull NamespacedKey namespacedKey) {
 		return containers.stream().filter(p -> p.getKey().equals(namespacedKey)).findFirst().orElseGet(() -> {
 			PersistentContainer container = new PersistentContainer(namespacedKey);
 			this.containers.add(container);
@@ -271,6 +294,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	@Override
 	public boolean isLegacy() {
 		return cachedIsLegacy;
+	}
+
+	@Override
+	public boolean isNew() {
+		return cachedIsNew;
 	}
 
 	@Override
@@ -289,22 +317,26 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	}
 
 	@Override
-	public @NotNull Message getNewMessage() {
+	@NotNull
+	public Message getNewMessage() {
 		return Message.loggedFor(this);
 	}
 
 	@Override
-	public @NotNull TimeWatch.Recording getTimeActive() {
+	@NotNull
+	public TimeWatch.Recording getTimeActive() {
 		return TimeWatch.Recording.subtract(this.time);
 	}
 
 	@Override
-	public @NotNull TimeWatch.Recording getTimeFrom(Date date) {
+	@NotNull
+	public TimeWatch.Recording getTimeFrom(Date date) {
 		return getTimeFrom(date.getTime());
 	}
 
 	@Override
-	public @NotNull TimeWatch.Recording getTimeFrom(long l) {
+	@NotNull
+	public TimeWatch.Recording getTimeFrom(long l) {
 		return TimeWatch.Recording.subtract(l);
 	}
 

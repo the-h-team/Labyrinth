@@ -178,7 +178,7 @@ public class Registry<T> {
 
 		public RegistryData<T> confine(Consumer<T> action) {
 
-			File file = FileList.search(this.plugin).find("Test", this.directory).getFile().getParentFile();
+			File file = FileList.search(this.plugin).get("Test", this.directory).getRoot().getParent().getParentFile();
 
 			List<Class<?>> classes = AddonLoader.forPlugin(JavaPlugin.getProvidingPlugin(this.plugin.getClass()))
 					.loadFolder(file);

@@ -15,8 +15,8 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.jetbrains.annotations.NotNull;
 
-@SerializableAs("com.github.sanctum.labyrinth.formatting.string.RandomHex")
-@NodePointer("com.github.sanctum.labyrinth.formatting.string.RandomHex")
+@SerializableAs("com.github.sanctum.labyrinth.formatting.string.CustomColor")
+@NodePointer("com.github.sanctum.labyrinth.formatting.string.CustomColor")
 public class RandomHex extends Number implements JsonAdapter<RandomHex>, ConfigurationSerializable, CustomColor {
 
 	private static final long serialVersionUID = -7282478033342958031L;
@@ -52,7 +52,7 @@ public class RandomHex extends Number implements JsonAdapter<RandomHex>, Configu
 
 	@Override
 	public String toString() {
-		return hex + "";
+		return c1;
 	}
 
 	public GradientColor toGradient() {

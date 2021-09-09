@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.library.Message;
 import java.lang.annotation.Annotation;
@@ -26,17 +27,31 @@ public class Check {
 		if (t == null) throw new IllegalArgumentException("Value cannot be null!");
 		AnnotationDiscovery<Experimental, Object> discovery = AnnotationDiscovery.of(Experimental.class, t);
 		discovery.filter(m -> Arrays.stream(m.getParameters()).anyMatch(p -> p.isAnnotationPresent(Experimental.class)) || m.isAnnotationPresent(Experimental.class));
+		AnnotationDiscovery<Note, Object> discovery2 = AnnotationDiscovery.of(Note.class, t);
+		discovery2.filter(m -> Arrays.stream(m.getParameters()).anyMatch(p -> p.isAnnotationPresent(Note.class)) || m.isAnnotationPresent(Note.class));
 		if (discovery.isPresent()) {
 			Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
-			message.warn("- Warning scan found (" + discovery.count() + ") methods at checkout.");
+			message.warn("- Warning scan found (" + discovery.count() + ") methods at checkout for object '" + t.getClass().getSimpleName() + "'");
+			if (t.getClass().isAnnotationPresent(Experimental.class)) {
+				Experimental e = t.getClass().getAnnotation(Experimental.class);
+				message.warn("- Entire class " + t.getClass().getSimpleName() + " found with warning '" + e.value() + "'");
+			}
 			discovery.ifPresent((r, m) -> {
 				message.warn("- Method " + m.getName() + " found with warning '" + r.value() + "'");
+			});
+			discovery2.ifPresent((r, m) -> {
+				message.info("- Method " + m.getName() + " found with note '" + r.value() + "'");
 			});
 		} else {
 			if (t.getClass().isAnnotationPresent(Experimental.class)) {
 				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
 				Experimental e = t.getClass().getAnnotation(Experimental.class);
 				message.warn("- Class " + t.getClass().getSimpleName() + " found with warning '" + e.value() + "'");
+			}
+			if (t.getClass().isAnnotationPresent(Note.class)) {
+				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
+				Note e = t.getClass().getAnnotation(Note.class);
+				message.info("- Class " + t.getClass().getSimpleName() + " found with note '" + e.value() + "'");
 			}
 		}
 		return t;
