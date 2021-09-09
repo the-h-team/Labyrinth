@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("UnusedReturnValue")
 public abstract class Region implements Cuboid, Cloneable {
 
-	public static final FileManager DATA = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).find("Regions", "Persistent");
+	public static final FileManager DATA = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Regions", "Persistent");
 
 	private static final List<Region> RECORD = new LinkedList<>();
 
