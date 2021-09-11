@@ -54,6 +54,8 @@ public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 			}
 			metaObj.add("enchantments", enchants);
 
+			metaObj.addProperty("data", l.getData().getData());
+
 			o.add("meta", metaObj);
 		}
 
@@ -63,6 +65,7 @@ public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 	@Override
 	public ItemStack read(Map<String, Object> o) {
 		JSONObject ob = (JSONObject) o.get("meta");
+		byte data = (byte) ob.get("data");
 		Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
 
 		int amount = Integer.parseInt(String.valueOf(o.get("amount")));
@@ -88,7 +91,9 @@ public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 				edit.setFlags(ItemFlag.valueOf(f));
 			}
 		}
-		edit.setType(type);
+		ItemStack stack = new ItemStack(type);
+		stack.getData().setData(data);
+		edit.setItem(stack);
 		edit.setAmount(amount);
 		return edit.build();
 	}
