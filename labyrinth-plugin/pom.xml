@@ -59,6 +59,12 @@
                                         <exclude>examples.yml</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:json-simple</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
@@ -110,7 +116,12 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>templates</artifactId>
-            <version>1.0.0</version>
+            <version>${templates.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
             <scope>compile</scope>
         </dependency>
     </dependencies>
