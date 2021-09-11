@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
+import com.github.sanctum.labyrinth.data.service.DummyAdapter;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -48,14 +49,22 @@ public abstract class Configurable implements MemorySpace, Root {
 				if (alias != null) {
 					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
 					if (n != null) {
-						d = n.getDeclaredConstructor().newInstance();
+						if (!DummyAdapter.class.isAssignableFrom(n)) {
+							d = n.getDeclaredConstructor().newInstance();
+						} else {
+							d = c.getDeclaredConstructor().newInstance();
+						}
 					} else {
 						d = c.getDeclaredConstructor().newInstance();
 					}
 				} else {
 					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
 					if (n != null) {
-						d = n.getDeclaredConstructor().newInstance();
+						if (!DummyAdapter.class.isAssignableFrom(n)) {
+							d = n.getDeclaredConstructor().newInstance();
+						} else {
+							d = c.getDeclaredConstructor().newInstance();
+						}
 					}
 				}
 				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
@@ -88,14 +97,20 @@ public abstract class Configurable implements MemorySpace, Root {
 				if (alias != null) {
 					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
 					if (n != null) {
-						d = n;
+						if (!DummyAdapter.class.isAssignableFrom(n)) {
+							d = n;
+						} else {
+							d = c;
+						}
 					} else {
 						d = c;
 					}
 				} else {
 					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
-					if (n != null) {
+					if (!DummyAdapter.class.isAssignableFrom(n)) {
 						d = n;
+					} else {
+						d = c;
 					}
 				}
 				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
