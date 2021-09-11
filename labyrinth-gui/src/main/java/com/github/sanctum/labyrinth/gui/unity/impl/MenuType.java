@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PaginatedMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PrintableMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.SingularMenu;
+import java.util.function.Predicate;
 
 public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu.Builder<T, K>> {
 
@@ -21,6 +22,19 @@ public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu
 
 	public Menu.Builder<T, K> build() {
 		return factory.createBuilder();
+	}
+
+	public boolean exists(String key) {
+		return Menu.getHistory().stream().anyMatch(m -> m.getKey().map(key::equals).orElse(false));
+	}
+
+	public T get(Predicate<Menu> predicate) {
+		for (Menu m : Menu.getHistory()) {
+			if (predicate.test(m)) {
+				return (T) m;
+			}
+		}
+		return null;
 	}
 
 }

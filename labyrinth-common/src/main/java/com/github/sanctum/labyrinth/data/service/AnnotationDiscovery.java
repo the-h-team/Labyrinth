@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Discover methods from objects that are annotated with a specific class.
+ * Discover target annotations from either methods or classes.
  *
  * @param <T> A type of annotation.
  * @param <R> A listener to use.
@@ -24,15 +24,31 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 	private final int count;
 	private final Class<T> annotation;
 	private final R r;
+	private final Class<R> rClass;
 	private final Set<Method> methods = new HashSet<>();
 
 	protected AnnotationDiscovery(Class<T> annotation, R r) {
 		this.annotation = annotation;
 		this.r = r;
-
+		this.rClass = (Class<R>) r.getClass();
 		int annotated = 0;
 
-		for (Method method : r.getClass().getMethods()) {
+		for (Method method : rClass.getMethods()) {
+			if (method.isAnnotationPresent(annotation)) {
+				annotated++;
+			}
+		}
+		this.count = annotated;
+
+	}
+
+	protected AnnotationDiscovery(Class<T> annotation, Class<R> r) {
+		this.annotation = annotation;
+		this.r = null;
+		this.rClass = r;
+		int annotated = 0;
+
+		for (Method method : r.getMethods()) {
 			if (method.isAnnotationPresent(annotation)) {
 				annotated++;
 			}
@@ -45,6 +61,10 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 		return new AnnotationDiscovery<>(c, listener);
 	}
 
+	public static @NotNull <T extends Annotation, R> AnnotationDiscovery<T, R> of(@NotNull Class<T> c, @NotNull Class<R> listener) {
+		return new AnnotationDiscovery<>(c, listener);
+	}
+
 	/**
 	 * Filter the methods and only work with ones of interest.
 	 *
@@ -53,7 +73,7 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 	 */
 	public AnnotationDiscovery<T, R> filter(Predicate<? super Method> predicate) {
 		if (methods.isEmpty()) {
-			methods.addAll(Arrays.stream(r.getClass().getMethods()).filter(predicate).collect(Collectors.toList()));
+			methods.addAll(Arrays.stream(this.rClass.getMethods()).filter(predicate).collect(Collectors.toList()));
 		}
 		return this;
 	}
@@ -62,11 +82,11 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 	 * @return true if the desired annotation is present at all.
 	 */
 	public boolean isPresent() {
-		return methods.isEmpty() ? this.r.getClass().isAnnotationPresent(annotation) : count > 0;
+		return methods.isEmpty() ? this.rClass.isAnnotationPresent(annotation) : count > 0;
 	}
 
 	/**
-	 * Run an operation with every annotation found.
+	 * Run an operation with every annotated method found.
 	 *
 	 * @param function The function.
 	 */
@@ -83,7 +103,7 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 	}
 
 	/**
-	 * Map a value from an annotation if present.
+	 * Get information from the leading source objects located annotation.
 	 *
 	 * This method gives you access to an annotation and the source object itself.
 	 *
@@ -93,7 +113,7 @@ public class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Me
 	 */
 	public <U> U map(AnnotativeConsumer<T, R, U> function) {
 		if (isPresent()) {
-			for (Annotation a : r.getClass().getAnnotations()) {
+			for (Annotation a : rClass.getAnnotations()) {
 				if (annotation.isAssignableFrom(a.annotationType())) {
 					return function.accept((T) a, r);
 				}

@@ -39,13 +39,13 @@ public class ListElement<T> extends Menu.Element<Menu.Populate<?>, Set<ItemEleme
 		return this;
 	}
 
-	public ListElement<T> setFilter(Predicate<? super ItemElement<?>> predicate) {
-		this.predicate = predicate;
+	public ListElement<T> setFilter(Predicate<? super ItemElement<T>> predicate) {
+		this.predicate = (Predicate<? super ItemElement<?>>) predicate;
 		return this;
 	}
 
-	public ListElement<T> setComparator(Comparator<? super ItemElement<?>> comparator) {
-		this.comparator = comparator;
+	public ListElement<T> setComparator(Comparator<? super ItemElement<T>> comparator) {
+		this.comparator = (Comparator<? super ItemElement<?>>) comparator;
 		return this;
 	}
 

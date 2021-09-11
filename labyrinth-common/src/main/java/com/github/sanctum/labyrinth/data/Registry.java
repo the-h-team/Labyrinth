@@ -1,11 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.Sets;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.bukkit.plugin.Plugin;
 
 /**
  * This class is used explicitly for searching for specific class types through an optionally given package
@@ -154,6 +153,11 @@ public class Registry<T> {
 		return new RegistryData<>(additions, handle, PACKAGE);
 	}
 
+	/**
+	 * Using {@link AddonLoader} internally delegate information to instantiate loaded jar classes.
+	 *
+	 * @param <T> The type of class to load.
+	 */
 	public static class Loader<T> {
 
 		private final Class<T> type;
@@ -176,11 +180,34 @@ public class Registry<T> {
 			return this;
 		}
 
+		public RegistryData<T> confine() {
+
+			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
+
+			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
+					.loadFolder(file);
+
+			List<T> data = new LinkedList<>();
+
+			for (Class<?> cl : classes) {
+				if (this.type.isAssignableFrom(cl)) {
+					try {
+						T e = (T) cl.getDeclaredConstructor().newInstance();
+						data.add(e);
+						break;
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			return new RegistryData<>(data, this.plugin, this.directory);
+		}
+
 		public RegistryData<T> confine(Consumer<T> action) {
 
-			File file = FileList.search(this.plugin).get("Test", this.directory).getRoot().getParent().getParentFile();
+			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
 
-			List<Class<?>> classes = AddonLoader.forPlugin(JavaPlugin.getProvidingPlugin(this.plugin.getClass()))
+			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
 					.loadFolder(file);
 
 			List<T> data = new LinkedList<>();
@@ -200,14 +227,47 @@ public class Registry<T> {
 			return new RegistryData<>(data, this.plugin, this.directory);
 		}
 
+		public RegistryData<T> construct(Object... o) {
+			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
+			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
+					.loadFolder(file);
+			List<T> data = new LinkedList<>();
 
-		/**
-		 * @deprecated Use {@link this#confine(Consumer)} instead
-		 */
-		@Deprecated
-		public RegistryData<T> operate(Consumer<T> action) {
-			return confine(action);
+			Constructor<T> constructor = null;
+			for (Constructor<?> con : this.type.getConstructors()) {
+				if (o.length == con.getParameters().length) {
+					int success = 0;
+					for (int i = 0; i < o.length; i++) {
+						Class<?> objectClass = o[i].getClass();
+						Class<?> typeClass = con.getParameters()[i].getType();
+						if (objectClass.isAssignableFrom(typeClass)) {
+							success++;
+						}
+						if (success == o.length) {
+							constructor = (Constructor<T>) con;
+							break;
+						}
+					}
+				}
+			}
+			for (Class<?> cl : classes) {
+				if (this.type.isAssignableFrom(cl)) {
+					try {
+						T e;
+						if (constructor != null) {
+							e = (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o);
+						} else {
+							e = (T) cl.getDeclaredConstructor().newInstance();
+						}
+						data.add(e);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			return new RegistryData<>(data, this.plugin, this.directory);
 		}
+
 
 	}
 

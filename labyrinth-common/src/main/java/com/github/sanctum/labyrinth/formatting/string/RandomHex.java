@@ -1,7 +1,5 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.data.NodePointer;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
@@ -12,12 +10,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;
 import org.bukkit.Color;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.jetbrains.annotations.NotNull;
 
-@SerializableAs("com.github.sanctum.labyrinth.formatting.string.CustomColor")
-@NodePointer("com.github.sanctum.labyrinth.formatting.string.CustomColor")
-public class RandomHex extends Number implements JsonAdapter<RandomHex>, ConfigurationSerializable, CustomColor {
+public class RandomHex extends Number implements ConfigurationSerializable, CustomColor {
 
 	private static final long serialVersionUID = -7282478033342958031L;
 	private final int hex;
@@ -80,16 +75,16 @@ public class RandomHex extends Number implements JsonAdapter<RandomHex>, Configu
 	}
 
 	@Override
-	public JsonElement write(RandomHex randomHex) {
+	public JsonElement write(CustomColor randomHex) {
 		JsonObject o = new JsonObject();
-		o.addProperty("color1", randomHex.c1);
-		o.addProperty("color2", randomHex.c2);
-		o.addProperty("name", randomHex.id);
+		o.addProperty("color1", randomHex.getStart());
+		o.addProperty("color2", randomHex.getEnd());
+		o.addProperty("name", randomHex.name());
 		return o;
 	}
 
 	@Override
-	public RandomHex read(Map<String, Object> object) {
+	public CustomColor read(Map<String, Object> object) {
 		String start = (String) object.get("color1");
 		String end = (String) object.get("color2");
 		String name = (String) object.get("name");
@@ -97,8 +92,8 @@ public class RandomHex extends Number implements JsonAdapter<RandomHex>, Configu
 	}
 
 	@Override
-	public Class<RandomHex> getClassType() {
-		return RandomHex.class;
+	public Class<CustomColor> getClassType() {
+		return CustomColor.class;
 	}
 
 	@Override
@@ -128,12 +123,22 @@ public class RandomHex extends Number implements JsonAdapter<RandomHex>, Configu
 	}
 
 	@Override
+	public String getStart() {
+		return this.c1;
+	}
+
+	@Override
+	public String getEnd() {
+		return this.c2;
+	}
+
+	@Override
 	public TextColor[] colors() {
 		return new TextColor[]{new TextColor(c1), new TextColor(c2)};
 	}
 
 	public static RandomHex deserialize(Map<String, Object> map) {
-		return new RandomHex((String)map.get("color1"), (String)map.get("color2"), (String)map.get("name"));
+		return new RandomHex((String) map.get("color1"), (String) map.get("color2"), (String) map.get("name"));
 	}
 
 	@Override

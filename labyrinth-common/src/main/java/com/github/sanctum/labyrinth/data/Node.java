@@ -57,17 +57,15 @@ public interface Node extends Root, MemorySpace {
 	 */
 	void set(Object o);
 
+	@Override
+	boolean create();
+
 	/**
 	 * Get the node this node stem's from if present, may return itself.
 	 *
 	 * @return The parent node to this current node.
 	 */
 	Node getParent();
-
-	/**
-	 * @return The configuration this node belongs to.
-	 */
-	Configurable getRoot();
 
 	/**
 	 * Convert all known data from this node to json text.

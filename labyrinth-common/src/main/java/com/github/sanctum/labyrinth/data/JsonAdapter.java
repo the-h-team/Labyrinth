@@ -10,6 +10,8 @@ import java.util.Map;
 /**
  * An object capable of Json serialization & deserialization.
  *
+ * Annotated with {@link NodePointer} location information.
+ *
  * @param <T> The object type this serializer represents.
  * @author Hempfest
  * @version 1.0
@@ -36,6 +38,10 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	 * @return The class this serializer represents.
 	 */
 	Class<T> getClassType();
+
+	default String getObjective() {
+		return getClassType().getSimpleName();
+	}
 
 	/**
 	 * @return The type this serializer represents.

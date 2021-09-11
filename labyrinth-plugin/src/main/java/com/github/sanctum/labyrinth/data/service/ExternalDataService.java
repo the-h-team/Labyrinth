@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.data.FileManager;
+import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.Registry;
 import java.io.File;
 import java.io.InputStream;
@@ -77,7 +77,7 @@ public abstract class ExternalDataService {
 
 				if (!file.exists()) {
 					this.located = true;
-					FileManager.copy(stream, file);
+					FileList.copy(stream, file);
 					instance.getLogger().info("===================================================================");
 					instance.getLogger().info("- Compiling version " + version + ".");
 					instance.getLogger().info("===================================================================");

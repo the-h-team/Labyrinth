@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
@@ -8,11 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
-import org.json.simple.JSONObject;
 
 /**
  * @author Hempfest
@@ -185,8 +185,8 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public <T> T get(Class<T> type) {
 		if (type.isAssignableFrom(ConfigurationSection.class)) {
-			if (getRoot() instanceof YamlConfiguration) {
-				YamlConfiguration conf = (YamlConfiguration) getRoot();
+			if (config instanceof YamlConfiguration) {
+				YamlConfiguration conf = (YamlConfiguration) config;
 				return (T) conf.getConfig().getConfigurationSection(this.key);
 			}
 		}
@@ -219,14 +219,19 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 	}
 
 	@Override
-	public boolean create() throws IOException {
-		if (!getRoot().exists()) {
-			getRoot().create();
+	public boolean create() {
+		if (!config.exists()) {
+			try {
+				config.create();
+			} catch (IOException ex) {
+				LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An issue occurred while attempting to create the backing file for the '" + config.getName() + "' configuration.");
+				ex.printStackTrace();
+			}
 		}
-		if (getRoot().getType() == FileType.JSON) {
+		if (config.getType() == FileType.JSON) {
 			set(new Object());
 		} else {
-			((YamlConfiguration)getRoot()).getConfig().createSection(this.key);
+			((YamlConfiguration)config).getConfig().createSection(this.key);
 		}
 		save();
 		return false;
@@ -240,11 +245,6 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public boolean save() {
 		return config.save();
-	}
-
-	@Override
-	public Configurable getRoot() {
-		return config;
 	}
 
 	@Override
@@ -278,11 +278,11 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Set<String> getKeys(boolean deep) {
-		if (getRoot() instanceof YamlConfiguration) {
+		if (config instanceof YamlConfiguration) {
 			return get(ConfigurationSection.class).getKeys(deep);
 		} else {
 			Set<String> keys = new HashSet<>();
-			JsonConfiguration json = (JsonConfiguration) getRoot();
+			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
 				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
 				if (deep) {
@@ -323,11 +323,11 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
-		if (getRoot() instanceof YamlConfiguration) {
+		if (config instanceof YamlConfiguration) {
 			return get(ConfigurationSection.class).getValues(deep);
 		} else {
 			Map<String, Object> map = new HashMap<>();
-			JsonConfiguration json = (JsonConfiguration) getRoot();
+			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
 				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
 				if (deep) {

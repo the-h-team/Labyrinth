@@ -103,7 +103,7 @@ public class JsonConfiguration extends Configurable {
 			Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 			GsonBuilder gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().setLenient();
 			for (JsonAdapterInput<?> serializer : serializers.values()) {
-				gson.registerTypeAdapter(serializer.getType(), serializer);
+				gson.registerTypeHierarchyAdapter(serializer.getClassType(), serializer);
 			}
 			Gson g = gson.create();
 			g.toJson(json, Map.class, writer);
@@ -192,27 +192,34 @@ public class JsonConfiguration extends Configurable {
 	@SuppressWarnings("unchecked")
 	private Object checkObject(Type type, Object object) {
 		Object target = object;
-		//if (type == ItemStack.class) type = JsonItemStack.class;
-		if (target instanceof JSONObject) {
-			JSONObject j = (JSONObject) object;
-			Gson g = new GsonBuilder().create();
-			Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> type.getTypeName().contains(de.getKey())).findFirst().orElse(null);
-			if (d != null) {
-				if (j.containsKey(d.getKey())) {
-					Object ob = j.get(d.getKey());
-					Object o;
-					if (ob instanceof String) {
-						Map<String, Object> map = g.fromJson((String) ob, new TypeToken<Map<String, Object>>() {
-						}.getType());
-						o = d.getValue().read(map);
-					} else {
-						o = d.getValue().read((Map<String, Object>) ob);
-					}
-					if (o != null) {
-						target = o;
+		try {
+			Class<?> cl = Class.forName(type.getTypeName());
+			//if (type == ItemStack.class) type = JsonItemStack.class;
+			if (target instanceof JSONObject) {
+				JSONObject j = (JSONObject) object;
+				Gson g = new GsonBuilder().create();
+
+				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getClassType())).findFirst().orElse(null);
+				if (d != null) {
+					if (j.containsKey(d.getKey())) {
+						Object ob = j.get(d.getKey());
+						Object o;
+						if (ob instanceof String) {
+							Map<String, Object> map = g.fromJson((String) ob, new TypeToken<Map<String, Object>>() {
+							}.getType());
+							o = d.getValue().read(map);
+						} else {
+							o = d.getValue().read((Map<String, Object>) ob);
+						}
+						if (o != null) {
+							target = o;
+						}
 					}
 				}
 			}
+		} catch (ClassNotFoundException exception) {
+			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An issue occurred while attempting to deserialize object " + type.getTypeName());
+			exception.printStackTrace();
 		}
 		return target;
 	}
@@ -572,7 +579,7 @@ public class JsonConfiguration extends Configurable {
 	public List<Long> getLongList(String key) {
 		List<?> l = getList(key);
 		if (l.isEmpty()) return new ArrayList<>();
-		if (!(l.get(0) instanceof Long)) return new ArrayList<>();
+		if (!(l.get(0) instanceof Long) || !(l.get(0) instanceof Integer)) return new ArrayList<>();
 		return (List<Long>) l;
 	}
 

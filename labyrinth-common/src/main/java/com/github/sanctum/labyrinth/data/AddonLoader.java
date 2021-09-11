@@ -2,8 +2,6 @@ package com.github.sanctum.labyrinth.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -15,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Load addon classes in Java 8-16+.
@@ -32,7 +31,7 @@ public class AddonLoader {
         }
     }
 
-    private AddonLoader(JavaPlugin javaPlugin) {
+    private AddonLoader(Plugin javaPlugin) {
         this.javaPlugin = javaPlugin;
     }
 
@@ -61,7 +60,7 @@ public class AddonLoader {
             loadedClasses.add(resolvedClass);
         }
     }
-    private final JavaPlugin javaPlugin;
+    private final Plugin javaPlugin;
 
     /**
      * Load a single jar file for your plugin.
@@ -143,11 +142,11 @@ public class AddonLoader {
      * @param yourPlugin an instance of your main plugin class
      * @return an addon loader for your plugin
      */
-    public static AddonLoader forPlugin(JavaPlugin yourPlugin) {
+    public static AddonLoader forPlugin(Plugin yourPlugin) {
         return new AddonLoader(yourPlugin);
     }
 
-    private static Map<String, Class<?>> getClassMap(JavaPlugin javaPlugin) throws IllegalStateException {
+    private static Map<String, Class<?>> getClassMap(Plugin javaPlugin) throws IllegalStateException {
         try {
             //noinspection unchecked
             return (Map<String, Class<?>>) PLUGIN_CLASS_MAP.get(javaPlugin.getClass().getClassLoader());

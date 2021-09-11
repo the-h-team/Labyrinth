@@ -144,6 +144,11 @@ public class FileList {
 		return get(n);
 	}
 
+	@Deprecated
+	public FileManager find(String n, String d) {
+		return get(n, d);
+	}
+
 	/**
 	 * @deprecated Use {@link FileList#get(String,String,FileExtension)} instead!!
 	 */

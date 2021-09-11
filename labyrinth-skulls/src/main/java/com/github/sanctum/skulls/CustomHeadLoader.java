@@ -3,6 +3,7 @@ package com.github.sanctum.skulls;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.MemorySpace;
+import com.github.sanctum.labyrinth.data.Node;
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -50,16 +51,17 @@ public final class CustomHeadLoader {
 	 */
 	public CustomHeadLoader look(String section) {
 		if (memory.isNode(section)) {
-			for (String id : memory.getNode(section).getKeys(false)) {
-				boolean custom = memory.getNode(section).getNode(id).getNode("custom").toPrimitive().getBoolean();
-				String name = memory.getNode(section).getNode(id).getNode("name").toPrimitive().getString();
+			Node parent = memory.getNode(section);
+			for (String id : parent.getKeys(false)) {
+				boolean custom = parent.getNode(id).getNode("custom").toPrimitive().getBoolean();
+				String name = parent.getNode(id).getNode("name").toPrimitive().getString();
 				if (name == null) continue;
 				if (custom) {
-					String category = memory.getNode(section).getNode(id).getNode("category").toPrimitive().getString();
+					String category = parent.getNode(id).getNode("category").toPrimitive().getString();
 					String value = null;
 
-					if (memory.getNode(section).getNode(id).getNode("value").toPrimitive().isString()) {
-						value = memory.getNode(section).getNode(id).getNode("value").toPrimitive().getString();
+					if (parent.getNode(id).getNode("value").toPrimitive().isString()) {
+						value = parent.getNode(id).getNode("value").toPrimitive().getString();
 					}
 
 					if (value != null) {
@@ -70,8 +72,8 @@ public final class CustomHeadLoader {
 
 
 				} else {
-					String category = memory.getNode(section).getNode(id).getNode("category").toPrimitive().getString();
-					String user = memory.getNode(section).getNode(id).getNode("user").toPrimitive().getString();
+					String category = parent.getNode(id).getNode("category").toPrimitive().getString();
+					String user = parent.getNode(id).getNode("user").toPrimitive().getString();
 
 					boolean isID = user != null && user.contains("-");
 

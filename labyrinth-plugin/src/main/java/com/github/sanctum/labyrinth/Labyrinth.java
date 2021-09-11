@@ -24,6 +24,7 @@ import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
+import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.RandomHex;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
@@ -114,7 +115,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 		Configurable.registerClass(ItemStackSerializable.class);
 		Configurable.registerClass(LocationSerializable.class);
-		Configurable.registerClass(RandomHex.class);
+		Configurable.registerClass(CustomColor.class);
 		ConfigurationSerialization.registerClass(RandomHex.class);
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
@@ -191,7 +192,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 			for (WrappedComponent component : components) {
 				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
 					if (!component.isMarked()) {
-						Schedule.sync(() -> component.action().apply()).run();
+						Schedule.sync(() -> component.action().run()).run();
 						component.setMarked(true);
 						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
 					}
@@ -238,7 +239,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	@Nullable
 	public Cooldown getCooldown(String id) {
 		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
-			FileManager library = FileList.search(this).find("cooldowns", "Persistent", FileType.JSON);
+			FileManager library = FileList.search(this).get("cooldowns", "Persistent", FileType.JSON);
 			if (library.read(f -> f.isNode("Library." + id))) {
 
 				long time = library.read(f -> f.getLong("Library." + id + ".expiration"));

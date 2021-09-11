@@ -1,17 +1,19 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.data.service.DummyAdapter;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.jetbrains.annotations.NotNull;
 
 /**
- * This annotation marks the exact package location of a JSON serializable object.
+ * This annotation used to mark the exact package location of a JSON serializable object.
+ *
+ * But now with less restrictions than v1.0 you can serialize objects under any name alias.
  *
  * @author Hempfest
- * @version 1.0
+ * @version 2.0
  * <p> Naming the value under this annotation anything other than the class it represents will result in
  * failure to to read.</p>
  */
@@ -21,8 +23,13 @@ import org.jetbrains.annotations.NotNull;
 public @interface NodePointer {
 
 	/**
-	 * @return The class pointer for an object.
+	 * @return The alias for this object.
 	 */
-	@NotNull String value();
+	String value();
+
+	/**
+	 * @return The implementation for adapting.
+	 */
+	Class<? extends JsonAdapter<?>> type() default DummyAdapter.class;
 
 }

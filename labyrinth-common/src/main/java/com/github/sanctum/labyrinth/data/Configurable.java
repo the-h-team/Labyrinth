@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,25 +35,101 @@ public abstract class Configurable implements MemorySpace, Root {
 	 * <p>All element adapters require a {@link NodePointer} annotation to resolve types when deserializing.
 	 * If a pointer is not present this adapter cannot properly register.</p>
 	 *
-	 * <p>If the provided {@link NodePointer} doesn't equate to the exact package location of the service for serialization
-	 * this will also cause issue when attempting deserialization.</p>
-	 *
-	 * <p>All {@link JsonAdapter} object's require a bare accessible constructor. In the event of one missing issue may occur.</p>
+	 * <p>All {@link JsonAdapter} object's require a bare accessible constructor through the use of this method. In the event of one missing an issue may occur.</p>
 	 *
 	 * @param c The adapter to register.
 	 */
 	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c) {
 		try {
-			JsonAdapter<?> d = c.getDeclaredConstructor().newInstance();
-			String key = AnnotationDiscovery.of(NodePointer.class, d).map((r, u) -> r.value());
-			if (key == null)
+			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
+			if (test.isPresent()) {
+				JsonAdapter<?> d = null;
+				String alias = test.map((r, u) -> r.value());
+				if (alias != null) {
+					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					if (n != null) {
+						d = n.getDeclaredConstructor().newInstance();
+					} else {
+						d = c.getDeclaredConstructor().newInstance();
+					}
+				} else {
+					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					if (n != null) {
+						d = n.getDeclaredConstructor().newInstance();
+					}
+				}
+				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
+				serializers.put(alias, new JsonAdapterInput.Impl<>(d));
+			} else
 				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
-			serializers.put(key, new JsonAdapterInput.Impl<>(d));
 		} catch (Exception e) {
 			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.");
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Register a json element adapter for automatic use with json data usage.
+	 *
+	 * <p>All element adapters require a {@link NodePointer} annotation to resolve types when deserializing.
+	 * If a pointer is not present this adapter cannot properly register.</p>
+	 *
+	 * <p>All {@link JsonAdapter} object's require a bare accessible constructor through the use of this method. In the event of one missing an issue may occur.</p>
+	 *
+	 * @param c The adapter to register.
+	 * @param objects The constructor arguments for adapter instantiation.
+	 */
+	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c, Object... objects) {
+		try {
+			Class<? extends JsonAdapter<?>> d = null;
+			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
+			if (test.isPresent()) {
+				String alias = test.map((r, u) -> r.value());
+				if (alias != null) {
+					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					if (n != null) {
+						d = n;
+					} else {
+						d = c;
+					}
+				} else {
+					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					if (n != null) {
+						d = n;
+					}
+				}
+				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
+				Constructor<?> constructor = null;
+				for (Constructor<?> con : d.getConstructors()) {
+					if (objects.length == con.getParameters().length) {
+						int success = 0;
+						for (int i = 0; i < objects.length; i++) {
+							Class<?> objectClass = objects[i].getClass();
+							Class<?> typeClass = con.getParameters()[i].getType();
+							if (objectClass.isAssignableFrom(typeClass)) {
+								success++;
+							}
+							if (success == objects.length) {
+								constructor =  con;
+								break;
+							}
+						}
+					}
+				}
+				if (constructor != null) {
+					serializers.put(alias, new JsonAdapterInput.Impl<>(d.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(objects)));
+				} else {
+					serializers.put(alias, new JsonAdapterInput.Impl<>(d.getDeclaredConstructor().newInstance()));
+				}
+			} else
+				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
+		} catch (Exception e) {
+			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.");
+			e.printStackTrace();
+		}
+	}
+
+
 
 	/**
 	 * Search for the desired element adapter for quick use.
@@ -62,7 +139,7 @@ public abstract class Configurable implements MemorySpace, Root {
 	 * @return The desired Json element adapter or null if non existent.
 	 */
 	public static <V> JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
-		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
+		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName()) || type.isAssignableFrom(e.getValue().getClassType())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
 	}
 
 	protected abstract Object get(String key);

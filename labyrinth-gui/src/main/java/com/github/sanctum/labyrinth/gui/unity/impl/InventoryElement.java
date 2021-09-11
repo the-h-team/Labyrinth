@@ -392,6 +392,16 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 	}
 
+	public static class Animated extends InventoryElement {
+
+		public Animated(String title, Menu menu) {
+			super(title, menu, true);
+		}
+
+
+
+	}
+
 	public static class Paginated extends InventoryElement {
 
 		public Paginated(String title, Menu menu) {

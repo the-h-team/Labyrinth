@@ -1,18 +1,17 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
-import com.github.sanctum.labyrinth.gui.unity.impl.BorderElement;
-import com.github.sanctum.labyrinth.gui.unity.impl.FillerElement;
-import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClickElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClosingElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
+import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.task.Asynchronous;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,13 +24,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -85,6 +84,10 @@ public abstract class Menu {
 
 
 	public abstract void open(Player player);
+
+	public Listener getController() {
+		return this.controller;
+	}
 
 	/**
 	 * @return The namespace for the menu.
@@ -504,6 +507,10 @@ public abstract class Menu {
 
 	}
 
+	public static Set<Menu> getHistory() {
+		return menus;
+	}
+
 	/**
 	 * A factory for passing generic values on runtime to a menu builder.
 	 *
@@ -649,12 +656,8 @@ public abstract class Menu {
 		}
 
 		public T orGet(Predicate<Menu> predicate) {
-
-			for (Menu m : Menu.menus) {
-				if (predicate.test(m)) {
-					return (T) m;
-				}
-			}
+			Menu test = Menu.menus.stream().filter(predicate).findFirst().orElse(null);
+			if (test != null) return (T) test;
 
 			Menu menu = null;
 
@@ -720,7 +723,15 @@ public abstract class Menu {
 
 	}
 
-	private class Controller implements Listener {
+	final class Controller implements Listener {
+
+		private void unRegisterHandlers() {
+			HandlerList.unregisterAll(getController());
+			InventoryCloseEvent.getHandlerList().unregister(getController());
+			InventoryOpenEvent.getHandlerList().unregister(getController());
+			InventoryDragEvent.getHandlerList().unregister(getController());
+			InventoryClickEvent.getHandlerList().unregister(getController());
+		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClose(InventoryCloseEvent e) {
@@ -756,8 +767,14 @@ public abstract class Menu {
 					}
 
 				}
-
-				p.updateInventory();
+				Inventory finalTarget = target;
+				if (!getProperties().contains(Property.CACHEABLE)) {
+					LabyrinthProvider.getService(Service.TASK).scheduleLater(() -> {
+						if (finalTarget.getViewers().stream().noneMatch(v -> v instanceof Player)) {
+							unRegisterHandlers();
+						}
+					}, 2);
+				}
 			}
 		}
 
