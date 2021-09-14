@@ -47,6 +47,21 @@ public class StringUtils {
 	}
 
 	/**
+	 * Check if the provided context exists (using case insensitive options) a target regex.
+	 *
+	 * @param regex the target regex to check for
+	 * @return true if the provided regex exists a case insensitive match from the target regex
+	 */
+	public boolean containsIgnoreCase(CharSequence... regex) {
+		for (CharSequence sequence : regex) {
+			if (containsIgnoreCase(sequence)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Generate a string id from the provided context pattern.
 	 * <p>
 	 * The more complex the pattern, the more variation--and the slimmer

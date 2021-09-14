@@ -107,6 +107,10 @@ public class PersistentContainer extends PersistentData {
 		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
 			R value = deserialize(type, manager.read(f -> f.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)));
+			if (value == null) {
+				delete(key);
+				return null;
+			}
 			return attach(key, value);
 		}
 		return null;

@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.Nullable;
@@ -116,7 +118,7 @@ public class HFEncoded {
 				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
 			}
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- " + e.getMessage());
 		}
 		return null;
 	}

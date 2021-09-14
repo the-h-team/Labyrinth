@@ -132,7 +132,7 @@ public class JsonConfiguration extends Configurable {
 				return false;
 			}
 		}
-		return parent.mkdir() && file.createNewFile();
+		return parent.mkdirs() && file.createNewFile();
 	}
 
 	@Override
