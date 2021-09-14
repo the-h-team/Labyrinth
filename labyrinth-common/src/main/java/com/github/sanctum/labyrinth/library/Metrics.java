@@ -1,5 +1,9 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.task.TaskChain;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -18,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -172,19 +174,16 @@ public class Metrics {
      * Starts the Scheduler which submits our data every 30 minutes.
      */
     private void startSubmitting() {
-        final Timer timer = new Timer(true); // We use a timer cause the Bukkit scheduler is affected by server lags
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (!plugin.isEnabled()) { // Plugin was disabled
-                    timer.cancel();
-                    return;
-                }
-                // Nevertheless we want our code to run in the Bukkit main thread, so we have to use the Bukkit scheduler
-                // Don't be afraid! The connection to the bStats server is still async, only the stats collection is loadDepends ;)
-                Bukkit.getScheduler().runTask(plugin, () -> submitData());
+        TaskChain timer = LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.ASYNCHRONOUS);
+        timer.repeat(task -> {
+            if (!plugin.isEnabled()) { // Plugin was disabled
+                task.cancel();
+                return;
             }
-        }, 1000 * 60 * 5, 1000 * 60 * 30);
+            // Nevertheless we want our code to run in the Bukkit main thread, so we have to use the Bukkit scheduler
+            // Don't be afraid! The connection to the bStats server is still async, only the stats collection is loadDepends ;)
+            Bukkit.getScheduler().runTask(plugin, this::submitData);
+        }, "bstats-metrics", 1000 * 60 * 5, 1000 * 60 * 30);
         // Submit the data every 30 minutes, first time after 5 minutes to give other plugins enough time to start
         // WARNING: Changing the frequency has no effect but your plugin WILL be blocked/deleted!
         // WARNING: Just don't do it!

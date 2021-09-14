@@ -39,10 +39,6 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	 */
 	Class<T> getClassType();
 
-	default String getObjective() {
-		return getClassType().getSimpleName();
-	}
-
 	/**
 	 * @return The type this serializer represents.
 	 */

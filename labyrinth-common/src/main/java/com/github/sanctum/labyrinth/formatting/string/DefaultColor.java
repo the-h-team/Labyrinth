@@ -46,6 +46,7 @@ public enum DefaultColor implements CustomColor {
 
 	@Override
 	public CustomColor context(String context) {
+		this.context = context;
 		return this;
 	}
 
@@ -65,6 +66,11 @@ public enum DefaultColor implements CustomColor {
 
 	public String translate(String context) {
 		return new ColoredString(join(context), ColoredString.ColorType.HEX).toString();
+	}
+
+	@Override
+	public String toString() {
+		return getStart();
 	}
 
 	@Override

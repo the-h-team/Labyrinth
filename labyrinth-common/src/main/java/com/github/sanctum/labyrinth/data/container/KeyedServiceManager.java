@@ -8,12 +8,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * An alternative to bukkit service provision.
+ * @author Hempfest
+ */
 public class KeyedServiceManager<K> {
 
 	private final Set<RegisteredKeyedService<?, ?>> registry = new HashSet<>();
 
-	public <T> void register(@NotNull T provider, @NotNull K key, @NotNull ServicePriority priority) {
-		this.registry.add(new RegisteredKeyedService<>(provider, key, priority));
+	public <T> void register(@NotNull T service, @NotNull K key, @NotNull ServicePriority priority) {
+		this.registry.add(new RegisteredKeyedService<>(service, key, priority));
 	}
 
 
@@ -44,15 +48,34 @@ public class KeyedServiceManager<K> {
 		}
 	}
 
-	public <T> void unregister(@NotNull T provider) {
-		for (RegisteredKeyedService<?, ?> service : this.registry) {
-			if (service.getService().equals(provider)) {
-				Schedule.sync(() -> this.registry.remove(service)).run();
+	public <T> void unregister(@NotNull T service) {
+		for (RegisteredKeyedService<?, ?> s : this.registry) {
+			if (s.getService().equals(service)) {
+				Schedule.sync(() -> this.registry.remove(s)).run();
 				break;
 			}
 		}
 	}
 
+	public <T> @Nullable T load(@NotNull Class<T> service, K key) {
+		T serv = null;
+		for (RegisteredKeyedService<?, ?> s : this.registry.stream().sorted(Comparator.comparingInt(value -> value.getPriority().ordinal())).collect(Collectors.toList())) {
+			if (service.isAssignableFrom(s.getSuperClass()) && Objects.equals(s.getKey(), key)) {
+				serv = (T) s.getService();
+			}
+		}
+		return serv;
+	}
+
+	public <T> @Nullable T load(@NotNull Class<T> service, ServicePriority priority) {
+		T serv = null;
+		for (RegisteredKeyedService<?, ?> s : this.registry.stream().sorted(Comparator.comparingInt(value -> value.getPriority().ordinal())).collect(Collectors.toList())) {
+			if (service.isAssignableFrom(s.getSuperClass()) && s.getPriority() == priority) {
+				serv = (T) s.getService();
+			}
+		}
+		return serv;
+	}
 
 	public <T> @Nullable T load(@NotNull Class<T> service) {
 		T serv = null;
@@ -64,6 +87,14 @@ public class KeyedServiceManager<K> {
 		return serv;
 	}
 
+	public @Nullable <T> RegisteredKeyedService<T, K> getRegistration(@NotNull Class<T> service) {
+		for (RegisteredKeyedService<?, ?> s : this.registry.stream().sorted(Comparator.comparingInt(value -> value.getPriority().ordinal())).collect(Collectors.toList())) {
+			if (service.isAssignableFrom(s.getSuperClass())) {
+				return (RegisteredKeyedService<T, K>) s;
+			}
+		}
+		return null;
+	}
 
 	public @Nullable <T> RegisteredKeyedService<T, K> getRegistration(@NotNull Class<T> service, K key) {
 		for (RegisteredKeyedService<?, ?> s : this.registry) {

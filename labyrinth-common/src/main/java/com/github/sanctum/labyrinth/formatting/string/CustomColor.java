@@ -33,4 +33,5 @@ public interface CustomColor extends JsonAdapter<CustomColor> {
 		return "";
 	}
 
+
 }

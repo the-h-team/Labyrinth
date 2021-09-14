@@ -4,6 +4,10 @@ import com.github.sanctum.labyrinth.api.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A small and simple service loader.
+ * @author rigobert0
+ */
 public class ServiceManager {
 	final Map<ServiceType<?>, Service> services;
 

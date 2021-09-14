@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.HUID;
-import com.github.sanctum.labyrinth.task.Schedule;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -12,7 +13,7 @@ import net.md_5.bungee.api.chat.TextComponent;
  *
  * @author Hempfest
  */
-public class WrappedComponent {
+public class WrappedComponent implements ActionComponent {
 
 	private final TextComponent component;
 
@@ -25,8 +26,8 @@ public class WrappedComponent {
 	public WrappedComponent(TextComponent component) {
 		this.component = component;
 		this.commandSerial = HUID.randomID();
-		this.component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + toString()));
-		LabyrinthProvider.getInstance().getComponents().add(this);
+		this.component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + getId()));
+		LabyrinthProvider.getInstance().addComponent(this);
 	}
 
 	/**
@@ -40,11 +41,12 @@ public class WrappedComponent {
 		return this;
 	}
 
-	public WrappedComponent setMarked(boolean marked) {
+	@Override
+	public void setMarked(boolean marked) {
 		this.marked = marked;
-		return this;
 	}
 
+	@Override
 	public boolean isMarked() {
 		return marked;
 	}
@@ -55,10 +57,11 @@ public class WrappedComponent {
 	 * @return the id of the wrapper
 	 */
 	@Override
-	public String toString() {
+	public String getId() {
 		return commandSerial.toString();
 	}
 
+	@Override
 	public Applicable action() {
 		return action != null ? action : () -> {
 		};
@@ -68,8 +71,9 @@ public class WrappedComponent {
 		return component;
 	}
 
+	@Override
 	public void remove() {
-		Schedule.sync(() -> LabyrinthProvider.getInstance().getComponents().remove(this)).wait(1);
+		LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> LabyrinthProvider.getInstance().removeComponent(this), toString() + "-removal",5);
 	}
 
 }

@@ -71,6 +71,14 @@ public abstract class VentMap implements Service {
 	 * @param host the plugin providing the listener
 	 * @param key  the key associated with the listener or null if none was specified
 	 */
+	public abstract void unregister(Plugin host, @NotNull String key);
+
+	/**
+	 * Removes a registered subscription listener by specification.
+	 *
+	 * @param host the plugin providing the listener
+	 * @param key  the key associated with the listener or null if none was specified
+	 */
 	public abstract void unregister(Plugin host, @Nullable String key, Object listener);
 
 	/**

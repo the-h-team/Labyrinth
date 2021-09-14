@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.annotation.Json;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.library.Message;
@@ -16,6 +17,13 @@ public class Check {
 		if (!b) {
 			throw new IllegalArgumentException(message);
 		}
+	}
+
+	public static @Json String forJson(String string, String message) {
+		if (!(string.startsWith("{") || string.startsWith("["))) {
+			throw new IllegalArgumentException(message);
+		}
+		return string;
 	}
 
 	public static <T> T forNull(T t) {

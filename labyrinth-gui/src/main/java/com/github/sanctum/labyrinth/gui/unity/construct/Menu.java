@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClickElement;
@@ -769,11 +770,11 @@ public abstract class Menu {
 				}
 				Inventory finalTarget = target;
 				if (!getProperties().contains(Property.CACHEABLE)) {
-					LabyrinthProvider.getService(Service.TASK).scheduleLater(() -> {
+					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 						if (finalTarget.getViewers().stream().noneMatch(v -> v instanceof Player)) {
 							unRegisterHandlers();
 						}
-					}, 2);
+					}, getKey().orElse("dummy") + "-menu", 2);
 				}
 			}
 		}

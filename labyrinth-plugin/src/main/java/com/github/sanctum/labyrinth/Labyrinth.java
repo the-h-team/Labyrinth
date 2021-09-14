@@ -14,6 +14,7 @@ import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.VaultImplementation;
+import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
@@ -23,27 +24,33 @@ import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
-import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
+import com.github.sanctum.labyrinth.formatting.Bulletin;
+import com.github.sanctum.labyrinth.formatting.BulletinSerialization;
+import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.RandomHex;
-import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
+import com.github.sanctum.labyrinth.task.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -83,14 +90,17 @@ import org.jetbrains.annotations.Nullable;
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
 @LabeledAs("Core")
-public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
+public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulletin.Factory {
 
-	private ServiceManager serviceManager;
+	private final ServiceManager serviceManager = new ServiceManager();
+	private final KeyedServiceManager<Plugin> servicesManager = new KeyedServiceManager<>();
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
-	private final LinkedList<WrappedComponent> components = new LinkedList<>();
+	private final Map<String, ActionComponent> components = new HashMap<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
+	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
+	private final SynchronousTaskChain staskManager = new SynchronousTaskChain(this);
 	private boolean cachedIsLegacy;
 	private boolean cachedIsNew;
 	private boolean cachedNeedsLegacyLocation;
@@ -101,7 +111,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	public void onEnable() {
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
-		serviceManager = new ServiceManager();
 		serviceManager.load(Service.VENT);
 		serviceManager.load(Service.TASK);
 		serviceManager.load(Service.RECORDING);
@@ -115,6 +124,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 		Configurable.registerClass(ItemStackSerializable.class);
 		Configurable.registerClass(LocationSerializable.class);
+		Configurable.registerClass(BulletinSerialization.class);
 		Configurable.registerClass(CustomColor.class);
 		ConfigurationSerialization.registerClass(RandomHex.class);
 		ConfigurationSerialization.registerClass(Template.class);
@@ -136,7 +146,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 				.applyAfter(() -> new VaultImplementation(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
 
-		if (isLegacy() || getServer().getVersion().contains("1.14")) {
+		if (requiresLocationLibrary()) {
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 		}
 
@@ -147,6 +157,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(this);
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
+
 
 	}
 
@@ -173,10 +184,8 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 		}
 
 		if (!isLegacy()) {
-			if (Item.getCache().size() > 0) {
-				for (Item i : Item.getCache()) {
-					Item.removeEntry(i);
-				}
+			for (Item i : Item.getCache()) {
+				Item.removeEntry(i);
 			}
 		}
 
@@ -189,15 +198,19 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 			if (cmd == null) return;
 			String label = cmd.getText();
 
-			for (WrappedComponent component : components) {
-				if (StringUtils.use(label.replace("/", "")).containsIgnoreCase(component.toString())) {
-					if (!component.isMarked()) {
+			ActionComponent component = components.get(label);
+
+			if (component != null) {
+				if (!component.isMarked()) {
+					if (!component.isTooltip()) {
 						Schedule.sync(() -> component.action().run()).run();
 						component.setMarked(true);
 						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
+					} else {
+						Schedule.sync(() -> component.action().run()).run();
 					}
-					e.setCancelled(true);
 				}
+				e.setCancelled(true);
 			}
 		}
 	}
@@ -210,23 +223,21 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 
 	@Override
 	@NotNull
-	public ConcurrentLinkedQueue<Integer> getTasks() {
+	public ConcurrentLinkedQueue<Integer> getConcurrentTaskIds() {
 		return tasks;
 	}
 
 	@Override
-	public void scheduleNext(Applicable applicable) {
-		Schedule.sync(applicable).run();
-	}
-
-	@Override
-	public void scheduleLater(Applicable applicable, int ticks) {
-		Schedule.sync(applicable).waitReal(ticks);
-	}
-
-	@Override
-	public void scheduleAlways(Applicable applicable, int delay, int period) {
-		Schedule.sync(applicable).repeatReal(delay, period);
+	public TaskChain getScheduler(int runtime) {
+		if (runtime <= 1) {
+			if (runtime == SYNCHRONOUS) {
+				return staskManager;
+			}
+			if (runtime == ASYNCHRONOUS) {
+				return ataskManager;
+			}
+		}
+		return staskManager;
 	}
 
 	@Override
@@ -272,8 +283,18 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 
 	@Override
 	@NotNull
-	public LinkedList<WrappedComponent> getComponents() {
-		return components;
+	public List<ActionComponent> getComponents() {
+		return new ArrayList<>(components.values());
+	}
+
+	@Override
+	public void addComponent(ActionComponent component) {
+		components.put(component.getId(), component);
+	}
+
+	@Override
+	public void removeComponent(ActionComponent component) {
+		components.remove(component.getId());
 	}
 
 	@Override
@@ -305,6 +326,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI {
 	@Override
 	public boolean requiresLocationLibrary() {
 		return cachedNeedsLegacyLocation;
+	}
+
+	@Override
+	public KeyedServiceManager<Plugin> getServicesManager() {
+		return this.servicesManager;
 	}
 
 	@Override

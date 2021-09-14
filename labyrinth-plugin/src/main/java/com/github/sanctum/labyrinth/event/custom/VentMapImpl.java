@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -88,18 +89,44 @@ public final class VentMapImpl extends VentMap implements Service {
 				.findFirst();
 		if (listenerOptional.isPresent()) {
 			VentListener ventListener = listenerOptional.get();
+			if (Listener.class.isAssignableFrom(ventListener.getListener().getClass())) {
+				HandlerList.unregisterAll((Listener)ventListener.getListener());
+			}
 			Schedule.sync(() -> listeners.get(ventListener.getHost()).get(ventListener.getKey()).remove(ventListener))
 					.run();
 		}
 	}
 
+	@Override
+	public void unregister(Plugin host, @NotNull String key) {
+		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
+				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
+					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
+						HandlerList.unregisterAll((Listener)l.getListener());
+					}
+					return l.getKey().equals(key);
+				})).run());
+	}
+
 	public void unregister(Plugin host, @Nullable String key, Object listener) {
 		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
-				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> listener.equals(l.getListener()))).run());
+				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
+					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
+						HandlerList.unregisterAll((Listener)l.getListener());
+					}
+					return listener.equals(l.getListener());
+				})).run());
 	}
 
 	@Override
 	public void unregisterAll(@NotNull Plugin host) {
+		Optional.ofNullable(listeners.get(host)).ifPresent(m -> {
+			m.values().forEach(set -> set.forEach(l -> {
+				if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
+					HandlerList.unregisterAll((Listener)l.getListener());
+				}
+			}));
+		});
 		listeners.remove(host);
 	}
 

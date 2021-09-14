@@ -1,40 +1,28 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.labyrinth.task.TaskChain;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
-// TODO: description; elaborate on "most" in getTasks
+// TODO: description; elaborate on "most" in getConcurrentTaskIds
 public interface TaskService extends Service {
+
+    int SYNCHRONOUS = 0;
+    int ASYNCHRONOUS = 1;
+
     /**
      * Get a queued list of running task ids
      *
-     * @return a queue of most running task ids
+     * @return a queue of most running task ids, if a task query attempt is blocked the sole purpose of this collection type is to avoid blocks and continue indexing.
      */
-    @NotNull ConcurrentLinkedQueue<Integer> getTasks();
+    @NotNull ConcurrentLinkedQueue<Integer> getConcurrentTaskIds();
 
     /**
-     * Schedule a data operation to run on next tick.
-     *
-     * @param applicable The data to schedule.
+     * The labyrinth default chain for async/synchronously bound tasks.
+     * 
+     * @return A task scheduler / map of running/scheduled tasks.
      */
-    void scheduleNext(Applicable applicable);
-
-    /**
-     * Schedule a data operation to run after an allotted time.
-     *
-     * @param applicable The data to schedule.
-     * @param ticks The amount of time to wait in ticks.
-     */
-    void scheduleLater(Applicable applicable, int ticks);
-
-    /**
-     * Schedule a data operation to run infinitely.
-     *
-     * @param applicable The data to schedule.
-     * @param delay The amount of time to wait before firing.
-     * @param period The amount of time to wait in-between firing before hitting the delay again.
-     */
-    void scheduleAlways(Applicable applicable, int delay, int period);
+    TaskChain getScheduler(@MagicConstant(intValues = {SYNCHRONOUS, ASYNCHRONOUS}) int runtime);
 
 }

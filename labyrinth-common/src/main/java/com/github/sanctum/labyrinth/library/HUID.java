@@ -47,19 +47,13 @@ public class HUID {
 		return hUID;
 	}
 
-	private void setId() {
-		this.hUID = new RandomID(12).generate();
-	}
-
 	/**
 	 * Get a completely random HUID.
 	 *
 	 * @return a completely random HUID
 	 */
 	public static HUID randomID() {
-		HUID result = new HUID();
-		result.setId();
-		return result;
+		return new HUID(new RandomID(12).generate());
 	}
 
 	/**

@@ -30,8 +30,8 @@ public class Synchronous {
 		this.runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
-				if (!labyrinthAPI.getTasks().contains(getTaskId())) {
-					labyrinthAPI.getTasks().add(getTaskId());
+				if (!labyrinthAPI.getConcurrentTaskIds().contains(getTaskId())) {
+					labyrinthAPI.getConcurrentTaskIds().add(getTaskId());
 				}
 				try {
 					if (cancellation != null) {
@@ -40,7 +40,7 @@ public class Synchronous {
 						if (apply != null) {
 							apply.apply();
 						}
-						labyrinthAPI.getTasks().remove(getTaskId());
+						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						return;
 					}
 					if (cancel == null) {
@@ -72,7 +72,7 @@ public class Synchronous {
 						if (apply != null) {
 							apply.apply();
 						}
-						labyrinthAPI.getTasks().remove(getTaskId());
+						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 					} else {
 						int count = Integer.parseInt(cancel);
 						count--;
@@ -106,7 +106,7 @@ public class Synchronous {
 							if (apply != null) {
 								apply.apply();
 							}
-							labyrinthAPI.getTasks().remove(getTaskId());
+							labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						} else {
 							if (debug) {
 								labyrinthAPI.getLogger().info("Closing task, max usage counter achieved.");

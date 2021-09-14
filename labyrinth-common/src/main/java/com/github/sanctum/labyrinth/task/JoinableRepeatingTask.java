@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
  * A construct using the observer pattern that provides the functionality to join and to leave running repeatable tasks.
  *
  * @param <T> The type of object the task shall run for
+ * @author Rigobert0
  */
 public abstract class JoinableRepeatingTask<T> {
 	/**

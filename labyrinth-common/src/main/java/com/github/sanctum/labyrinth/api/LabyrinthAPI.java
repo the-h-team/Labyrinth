@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.data.ServiceManager;
+import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Logger;
@@ -17,6 +18,8 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
     default Logger getLogger() {
         return getPluginInstance().getLogger();
     }
+
+    KeyedServiceManager<Plugin> getServicesManager();
 
     ServiceManager getServiceManager();
 

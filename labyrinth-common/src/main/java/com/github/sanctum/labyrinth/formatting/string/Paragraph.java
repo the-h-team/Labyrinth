@@ -45,7 +45,11 @@ public class Paragraph {
 	 * @return the newly-formatted paragraph
 	 */
 	public String[] get() {
-		return this.text.split(this.regex);
+		String[] ar = this.text.replace(",", "{comma},").replace(".", "{period}.").split(this.regex);
+		for (int i = 0; i < ar.length; i++) {
+			ar[i] = ar[i].replace("{comma}", ",").replace("{period}", ".");
+		}
+		return ar;
 	}
 
 	/**
@@ -56,7 +60,7 @@ public class Paragraph {
 	 * element if lineNumber exceeds element count
 	 */
 	public String get(int lineNumber) {
-		return get()[Math.min(lineNumber, get().length)];
+		return get()[Math.min(lineNumber, get().length - 1)];
 	}
 
 
