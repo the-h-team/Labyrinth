@@ -5,10 +5,12 @@ import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.HUID;
+import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -21,6 +23,8 @@ public abstract class ToolTip<T> {
 	public abstract Type getType();
 
 	public abstract ToolTip<T> style(ChatColor color);
+
+	public abstract ToolTip<T> style(ChatColor... style);
 
 	public abstract ToolTip<T> style(CustomColor color);
 
@@ -64,6 +68,11 @@ public abstract class ToolTip<T> {
 		}
 
 		@Override
+		public ToolTip<String> style(ChatColor... style) {
+			return null;
+		}
+
+		@Override
 		public ToolTip<String> style(CustomColor color) {
 			return this;
 		}
@@ -104,6 +113,11 @@ public abstract class ToolTip<T> {
 		}
 
 		@Override
+		public ToolTip<String> style(ChatColor... style) {
+			return null;
+		}
+
+		@Override
 		public ToolTip<String> style(CustomColor color) {
 			return this;
 		}
@@ -123,6 +137,7 @@ public abstract class ToolTip<T> {
 	public static class Text extends ToolTip<String> {
 
 		private String message;
+		private String color;
 		private String style;
 
 		public Text(String message) {
@@ -132,7 +147,12 @@ public abstract class ToolTip<T> {
 		@Override
 		public String get() {
 			if (this.style != null) {
+				if (this.color != null) {
+					return this.color + this.style + this.message;
+				} else
 				return this.style + this.message;
+			} else if (this.color != null) {
+				return this.color + this.message;
 			} else return this.message;
 		}
 
@@ -157,21 +177,28 @@ public abstract class ToolTip<T> {
 		}
 
 		@Override
+		public ToolTip<String> style(ChatColor... style) {
+			this.style = ListUtils.use(style).join(colors -> colors.stream().map(ChatColor::toString).collect(Collectors.joining()));
+			return this;
+		}
+
+		@Override
 		public ToolTip<String> style(CustomColor color) {
+			this.style = null;
+			this.color = null;
 			this.message = color.context(this.message).join();
 			return this;
 		}
 
 		@Override
 		public ToolTip<String> color(ChatColor color) {
-			this.message = color + this.message;
+			this.color = color.toString();
 			return this;
 		}
 
 		@Override
 		public ToolTip<String> color(Color color) {
-			String hex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-			this.message = hex + this.message;
+			this.color = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
 			return this;
 		}
 
@@ -272,6 +299,11 @@ public abstract class ToolTip<T> {
 		}
 
 		@Override
+		public ToolTip<ItemStack> style(ChatColor... style) {
+			return null;
+		}
+
+		@Override
 		public ToolTip<ItemStack> style(CustomColor color) {
 			return this;
 		}
@@ -331,12 +363,17 @@ public abstract class ToolTip<T> {
 
 		@Override
 		public void remove() {
-			Schedule.sync(() -> LabyrinthProvider.getInstance().getComponents().remove(this)).wait(1);
+			Schedule.sync(() -> LabyrinthProvider.getInstance().removeComponent(this).deploy()).wait(1);
 		}
 
 		@Override
 		public ToolTip<Applicable> style(ChatColor style) {
 			return this;
+		}
+
+		@Override
+		public ToolTip<Applicable> style(ChatColor... style) {
+			return null;
 		}
 
 		@Override
@@ -381,6 +418,11 @@ public abstract class ToolTip<T> {
 		}
 
 		@Override
+		public ToolTip<String> style(ChatColor... style) {
+			return null;
+		}
+
+		@Override
 		public ToolTip<String> style(CustomColor color) {
 			return this;
 		}
@@ -418,6 +460,11 @@ public abstract class ToolTip<T> {
 		@Override
 		public ToolTip<String> style(ChatColor style) {
 			return this;
+		}
+
+		@Override
+		public ToolTip<String> style(ChatColor... style) {
+			return null;
 		}
 
 		@Override

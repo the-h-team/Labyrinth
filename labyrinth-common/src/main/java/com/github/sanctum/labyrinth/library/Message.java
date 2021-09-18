@@ -2,18 +2,19 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.logging.Logger;
-
 /**
+ * @deprecated Use {@linkplain Mailer} instead!
  * @author Hempfest
  */
 @SuppressWarnings("UnusedReturnValue")
+@Deprecated
 public class Message {
 
 	private Logger logger = Logger.getLogger("Minecraft");
@@ -40,7 +41,7 @@ public class Message {
 	/**
 	 * Send the specified player messages with a specified prefix.
 	 *
-	 * @param p the player to use
+	 * @param p      the player to use
 	 * @param prefix the prefix to send
 	 */
 	public Message(Player p, String prefix) {
@@ -131,7 +132,7 @@ public class Message {
 	/**
 	 * Broadcast a message publicly to those who meet the desired terms.
 	 *
-	 * @param text The text to broadcast.
+	 * @param text   The text to broadcast.
 	 * @param player The prerequisite to receiving the message.
 	 * @return this Message instance.
 	 */

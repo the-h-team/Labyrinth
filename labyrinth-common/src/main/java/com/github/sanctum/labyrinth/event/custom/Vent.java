@@ -105,6 +105,7 @@ public abstract class Vent {
 		protected final Set<Subscription<?>> subscriptions;
 
 		public Link(Subscription<?> parent) {
+			parent.p = true;
 			this.subscriptions = new HashSet<>();
 			this.parent = parent;
 		}
@@ -226,6 +227,7 @@ public abstract class Vent {
 		private final Priority priority;
 		private final Plugin user;
 		private String key;
+		protected boolean p;
 		private Subscription<?> parent;
 
 		public Subscription(Class<T> eventType, Plugin user, Priority priority, SubscriberCall<T> action) {
@@ -252,7 +254,12 @@ public abstract class Vent {
 		}
 
 		protected void setParent(Subscription<?> parent) {
+			this.p = false;
 			this.parent = parent;
+		}
+
+		public boolean isParent() {
+			return this.p;
 		}
 
 		public Optional<String> getKey() {

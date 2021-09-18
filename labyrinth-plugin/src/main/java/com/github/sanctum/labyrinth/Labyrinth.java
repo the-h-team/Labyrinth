@@ -24,15 +24,15 @@ import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
-import com.github.sanctum.labyrinth.formatting.Bulletin;
-import com.github.sanctum.labyrinth.formatting.BulletinSerialization;
+import com.github.sanctum.labyrinth.formatting.Message;
+import com.github.sanctum.labyrinth.formatting.MessageSerializable;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.formatting.string.RandomHex;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
+import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Message;
+import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
@@ -45,6 +45,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -90,7 +92,7 @@ import org.jetbrains.annotations.Nullable;
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
 @LabeledAs("Core")
-public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulletin.Factory {
+public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message.Factory {
 
 	private final ServiceManager serviceManager = new ServiceManager();
 	private final KeyedServiceManager<Plugin> servicesManager = new KeyedServiceManager<>();
@@ -124,9 +126,9 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulleti
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
 		Configurable.registerClass(ItemStackSerializable.class);
 		Configurable.registerClass(LocationSerializable.class);
-		Configurable.registerClass(BulletinSerialization.class);
+		Configurable.registerClass(MessageSerializable.class);
 		Configurable.registerClass(CustomColor.class);
-		ConfigurationSerialization.registerClass(RandomHex.class);
+		ConfigurationSerialization.registerClass(CustomColor.class);
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
 
@@ -138,7 +140,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulleti
 		}
 		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 		new EasyListener(DefaultEvent.Controller.class).call(this);
-		getEventMap().register(this, this);
+		getEventMap().subscribe(this, this);
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -284,17 +286,17 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulleti
 	@Override
 	@NotNull
 	public List<ActionComponent> getComponents() {
-		return new ArrayList<>(components.values());
+		return Collections.unmodifiableList(new ArrayList<>(components.values()));
 	}
 
 	@Override
-	public void addComponent(ActionComponent component) {
-		components.put(component.getId(), component);
+	public Deployable<Void> registerComponent(ActionComponent component) {
+		return Deployable.of(null, unused -> this.components.put(component.getId(), component));
 	}
 
 	@Override
-	public void removeComponent(ActionComponent component) {
-		components.remove(component.getId());
+	public Deployable<Void> removeComponent(ActionComponent component) {
+		return Deployable.of(null, unused -> this.components.remove(component.getId()));
 	}
 
 	@Override
@@ -345,8 +347,23 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Bulleti
 
 	@Override
 	@NotNull
-	public Message getNewMessage() {
-		return Message.loggedFor(this);
+	public com.github.sanctum.labyrinth.library.Message getNewMessage() {
+		return com.github.sanctum.labyrinth.library.Message.loggedFor(this);
+	}
+
+	@Override
+	public @NotNull Mailer getEmptyMailer() {
+		return Mailer.empty(this);
+	}
+
+	@Override
+	public @NotNull Mailer getEmptyMailer(CommandSender sender) {
+		return Mailer.empty(sender);
+	}
+
+	@Override
+	public @NotNull Mailer getEmptyMailer(Plugin plugin) {
+		return Mailer.empty(plugin);
 	}
 
 	@Override

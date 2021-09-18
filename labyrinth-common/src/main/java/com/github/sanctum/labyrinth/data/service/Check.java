@@ -19,8 +19,12 @@ public class Check {
 		}
 	}
 
+	public static @Json boolean isJson(String string) {
+		return string.startsWith("{") || string.startsWith("[");
+	}
+
 	public static @Json String forJson(String string, String message) {
-		if (!(string.startsWith("{") || string.startsWith("["))) {
+		if (!isJson(string)) {
 			throw new IllegalArgumentException(message);
 		}
 		return string;
@@ -28,6 +32,11 @@ public class Check {
 
 	public static <T> T forNull(T t) {
 		if (t == null) throw new IllegalArgumentException("Value cannot be null!");
+		return forWarnings(t);
+	}
+
+	public static <T> T forNull(T t, String message) {
+		if (t == null) throw new IllegalArgumentException(message);
 		return forWarnings(t);
 	}
 

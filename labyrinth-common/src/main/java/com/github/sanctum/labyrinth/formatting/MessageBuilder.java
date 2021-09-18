@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Json;
-import com.github.sanctum.labyrinth.library.Message;
+import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.library.Deployable;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -9,27 +11,32 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class BulletinMessage extends Bulletin {
+/**
+ * @inheritDoc
+ */
+public class MessageBuilder extends Message {
+
+	public MessageBuilder() {
+	}
 
 	@Override
-	public Bulletin append(Section text) {
+	public Message append(Chunk text) {
 		TEXT.add(text);
 		return this;
 	}
 
 	@Override
-	public Bulletin append(Bulletin message) {
+	public Message append(Message message) {
 		if (Objects.equals(message, this)) return this;
 		TEXT.addAll(message.TEXT);
 		return this;
 	}
 
 	@Override
-	public Bulletin append(@Json String message) {
+	public Message append(@Json String message) {
 		TEXT.add(new JsonSection(message));
 		return this;
 	}
@@ -45,41 +52,44 @@ public class BulletinMessage extends Bulletin {
 
 	@Override
 	public BaseComponent[] build() {
-		return TEXT.stream().map(Section::toComponent).toArray(BaseComponent[]::new);
+		return TEXT.stream().map(Chunk::toComponent).toArray(BaseComponent[]::new);
 	}
 
 	@Override
-	public @Json String toJson() {
+	public @Json
+	String toJson() {
 		return ComponentSerializer.toString(build());
 	}
 
 	@Override
-	public void send(Player target) {
-		Message.form(target).build(build());
+	public Deployable<Void> send(Player target) {
+		return Deployable.of(null, unused -> LabyrinthProvider
+				.getService(Service.MESSENGER)
+				.getEmptyMailer(target)
+				.chat(build()).deploy());
 	}
 
 	@Override
-	public void send(Predicate<Player> predicate) {
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			if (predicate.test(p)) {
-				Message.form(p).build(build());
-			}
-		}
+	public Deployable<Void> send(Predicate<Player> predicate) {
+		return Deployable.of(null, unused -> LabyrinthProvider
+				.getService(Service.MESSENGER)
+				.getEmptyMailer()
+				.announce(predicate, build()).deploy());
 	}
 
 	@NotNull
 	@Override
-	public Iterator<Section> iterator() {
+	public Iterator<Chunk> iterator() {
 		return TEXT.iterator();
 	}
 
 	@Override
-	public void forEach(Consumer<? super Section> action) {
+	public void forEach(Consumer<? super Chunk> action) {
 		TEXT.forEach(action);
 	}
 
 	@Override
-	public Spliterator<Section> spliterator() {
+	public Spliterator<Chunk> spliterator() {
 		return TEXT.spliterator();
 	}
 

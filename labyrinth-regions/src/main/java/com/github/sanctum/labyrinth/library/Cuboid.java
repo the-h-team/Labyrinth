@@ -273,7 +273,8 @@ public interface Cuboid {
 							if (f.isValid()) {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										Message.form(e.getPlayer()).send(getFlag("break").get().getMessage());
+
+										Mailer.empty(e.getPlayer()).chat(getFlag("break").get().getMessage()).deploy();
 										e.setCancelled(true);
 									}
 								}
@@ -293,7 +294,7 @@ public interface Cuboid {
 							if (f.isValid()) {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										Message.form(e.getPlayer()).send(getFlag("build").get().getMessage());
+										Mailer.empty(e.getPlayer()).chat(getFlag("build").get().getMessage()).deploy();
 										e.setCancelled(true);
 									}
 								}
@@ -308,7 +309,7 @@ public interface Cuboid {
 					.envelope(new Vent.Subscription<>(RegionPVPEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Player p = e.getPlayer();
 
-						Message msg = Message.form(p);
+						Mailer msg = Mailer.empty(p);
 
 						Region region = e.getRegion();
 
@@ -317,7 +318,7 @@ public interface Cuboid {
 							if (f.isValid()) {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										msg.send(getFlag("pvp").get().getMessage());
+										msg.chat(getFlag("pvp").get().getMessage()).deploy();
 										e.setCancelled(true);
 									}
 								}

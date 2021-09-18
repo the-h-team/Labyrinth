@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
@@ -149,8 +150,9 @@ public class AFK {
 	 * @param subscription The vent subscription to use.
 	 */
 	public static void override(Vent.Subscription<StatusChange> subscription) {
-		LabyrinthProvider.getInstance().getEventMap().unsubscribeAll(StatusChange.class, "afk-default");
-		Vent.subscribe(subscription);
+		VentMap api = LabyrinthProvider.getInstance().getEventMap();
+		api.unsubscribeAll(StatusChange.class, "afk-default");
+		api.subscribe(subscription);
 	}
 
 	/**
@@ -161,7 +163,7 @@ public class AFK {
 	 */
 	public static void override(Vent.Link link) {
 		VentMap ventMap = LabyrinthProvider.getInstance().getEventMap();
-		ventMap.unsubscribeAll(c -> !c.getEventType().getSimpleName().equalsIgnoreCase("statuschange") && c.getKey().isPresent() && c.getKey().get().equals("afk-default"));
+		ventMap.unsubscribeAll("afk-default");
 		ventMap.chain(link);
 	}
 

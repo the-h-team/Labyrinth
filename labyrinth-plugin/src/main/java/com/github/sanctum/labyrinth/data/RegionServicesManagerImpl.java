@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.library.Mailer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -298,7 +299,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 			Player p = event.getPlayer();
 			Player target = event.getVictim();
 
-			Message msg = Message.form(p);
+			Mailer msg = Mailer.empty(p);
 			Region.Resident r = Region.Resident.get(target);
 			if (event.isPhysical()) {
 
@@ -320,12 +321,12 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 						if (t.isSpawnTagged()) {
 							event.setCancelled(true);
-							msg.send("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.");
+							msg.chat("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.").deploy();
 						}
 						if (o.isSpawnTagged()) {
 							if (!t.isSpawnTagged()) {
 								o.setSpawnTagged(false);
-								msg.send("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.");
+								msg.chat("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.").deploy();
 							}
 						}
 					}
@@ -350,12 +351,12 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 						if (t.isSpawnTagged()) {
 							event.setCancelled(true);
-							msg.send("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.");
+							msg.chat("&3&o" + target.getDisplayName() + " &bis protected, you can't hurt them.").deploy();
 						}
 						if (o.isSpawnTagged()) {
 							if (t.isSpawnTagged()) {
 								o.setSpawnTagged(false);
-								msg.send("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.");
+								msg.chat("&c&oRemoving protection under offensive maneuvers. &7" + target.getDisplayName() + "&c&o isn't protected.").deploy();
 							}
 						}
 					}

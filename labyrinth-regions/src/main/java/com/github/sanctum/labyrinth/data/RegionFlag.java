@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import org.bukkit.plugin.Plugin;
@@ -38,7 +39,7 @@ public class RegionFlag extends Cuboid.Flag {
 
 		public Cuboid.Flag finish() {
 			//Schedule.sync(() -> RegionServicesManager.getInstance().load(service)).wait(1);
-			Vent.subscribe(subscription);
+			LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
 			return new RegionFlag(this.plugin, this.id, this.message);
 		}
 

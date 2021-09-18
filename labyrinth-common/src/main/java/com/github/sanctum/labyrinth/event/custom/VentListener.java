@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Core class for internal listener implementation
@@ -211,7 +212,7 @@ public class VentListener {
 	/**
 	 * @return the identifier for this listener, or "null", if none was set
 	 */
-	public @NotNull String getKey() {
+	public @Nullable String getKey() {
 		return label;
 	}
 
@@ -227,7 +228,7 @@ public class VentListener {
 	 */
 	public void remove() {
 		VentMap map = LabyrinthProvider.getInstance().getEventMap();
-		map.unregister(host, getKey(), listener);
+		map.unsubscribe(host, getKey(), listener);
 		extenders.forEach(map::unregisterExtender);
 	}
 

@@ -1,18 +1,12 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;
 import org.bukkit.Color;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.jetbrains.annotations.NotNull;
 
-public class RandomHex extends Number implements ConfigurationSerializable, CustomColor {
+public class RandomHex extends Number implements CustomColor {
 
 	private static final long serialVersionUID = -7282478033342958031L;
 	private final int hex;
@@ -75,28 +69,6 @@ public class RandomHex extends Number implements ConfigurationSerializable, Cust
 	}
 
 	@Override
-	public JsonElement write(CustomColor randomHex) {
-		JsonObject o = new JsonObject();
-		o.addProperty("color1", randomHex.getStart());
-		o.addProperty("color2", randomHex.getEnd());
-		o.addProperty("name", randomHex.name());
-		return o;
-	}
-
-	@Override
-	public CustomColor read(Map<String, Object> object) {
-		String start = (String) object.get("color1");
-		String end = (String) object.get("color2");
-		String name = (String) object.get("name");
-		return new RandomHex(start, end, name);
-	}
-
-	@Override
-	public Class<CustomColor> getClassType() {
-		return CustomColor.class;
-	}
-
-	@Override
 	public String name() {
 		return this.id;
 	}
@@ -135,18 +107,5 @@ public class RandomHex extends Number implements ConfigurationSerializable, Cust
 	@Override
 	public TextColor[] colors() {
 		return new TextColor[]{new TextColor(c1), new TextColor(c2)};
-	}
-
-	public static RandomHex deserialize(Map<String, Object> map) {
-		return new RandomHex((String) map.get("color1"), (String) map.get("color2"), (String) map.get("name"));
-	}
-
-	@Override
-	public @NotNull Map<String, Object> serialize() {
-		Map<String, Object> map = new HashMap<>();
-		map.put("color1", c1);
-		map.put("color2", c2);
-		map.put("name", id);
-		return map;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -73,18 +74,36 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void unsubscribeAll(@NotNull String key) {
-		unsubscribeAll(s -> s.getKey().map(key::equals).orElse(false));
+		Vent.Subscription<?> parent = getSubscriptions().stream().filter(Vent.Subscription::isParent).filter(s -> s.getKey().map(key::equals).orElse(false)).findFirst().orElse(null);
+		if (parent != null) {
+			for (Vent.Subscription<?> child : getSubscriptions().stream().filter(s -> !s.isParent()).filter(s -> s.getParent() != null && Objects.equals(s.getParent(), parent)).collect(Collectors.toList())) {
+				child.remove();
+			}
+			parent.remove();
+		} else {
+			unsubscribeAll(s -> s.getKey().map(key::equals).orElse(false));
+		}
+		for (VentListener listener : getListeners()) {
+			if (listener.getKey() != null && listener.getKey().equals(key)) {
+				listener.remove();
+			}
+		}
 	}
 
 	@Override
 	public void unsubscribeAll(Predicate<Vent.Subscription<?>> fun) {
 		subscriptions.values().forEach(v -> v.values().forEach(m -> m.values().forEach(
-				set -> Schedule.sync(() -> set.removeIf(fun))
+				set -> Schedule.sync(() -> set.removeIf(fun)).run()
 		)));
 	}
 
 	@Override
 	public void unregister(@NotNull Object listener) {
+		unsubscribe(listener);
+	}
+
+	@Override
+	public void unsubscribe(@NotNull Object listener) {
 		Optional<VentListener> listenerOptional = getListeners().stream().filter(l -> l.getListener().equals(listener))
 				.findFirst();
 		if (listenerOptional.isPresent()) {
@@ -99,6 +118,11 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void unregister(Plugin host, @NotNull String key) {
+		unsubscribe(host, key);
+	}
+
+	@Override
+	public void unsubscribe(Plugin host, @NotNull String key) {
 		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
 				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
 					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
@@ -109,6 +133,11 @@ public final class VentMapImpl extends VentMap implements Service {
 	}
 
 	public void unregister(Plugin host, @Nullable String key, Object listener) {
+		unsubscribe(host, key, listener);
+	}
+
+	@Override
+	public void unsubscribe(Plugin host, @Nullable String key, Object listener) {
 		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
 				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
 					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
@@ -120,6 +149,11 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void unregisterAll(@NotNull Plugin host) {
+		unsubscribeAll(host);
+	}
+
+	@Override
+	public void unsubscribeAll(@NotNull Plugin host) {
 		Optional.ofNullable(listeners.get(host)).ifPresent(m -> {
 			m.values().forEach(set -> set.forEach(l -> {
 				if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
@@ -132,11 +166,21 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public List<VentListener> list(@NotNull Plugin plugin) {
-		return listeners.get(plugin).values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+		return getListeners(plugin);
 	}
 
 	@Override
 	public List<Vent.Subscription<?>> narrow(@NotNull Plugin plugin) {
+		return getSubscriptions(plugin);
+	}
+
+	@Override
+	public List<VentListener> getListeners(@NotNull Plugin plugin) {
+		return listeners.get(plugin).values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Vent.Subscription<?>> getSubscriptions(@NotNull Plugin plugin) {
 		return Optional.ofNullable(subscriptions.get(plugin)).map(Map::values)
 				.map(Collection::stream)
 				.map(s -> s.flatMap(m -> m.values().stream()))
@@ -162,6 +206,11 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void register(@NotNull Plugin host, @NotNull Object listener) {
+		subscribe(host, listener);
+	}
+
+	@Override
+	public void subscribe(@NotNull Plugin host, @NotNull Object listener) {
 		Check.forWarnings(listener);
 		if (Listener.class.isAssignableFrom(listener.getClass())) {
 			EasyListener.call(host, (Listener) listener);
@@ -173,8 +222,13 @@ public final class VentMapImpl extends VentMap implements Service {
 
 	@Override
 	public void registerAll(@NotNull Plugin host, @NotNull Object... listener) {
-		for (Object o : listener) {
-			register(host, o);
+		subscribeAll(host, listener);
+	}
+
+	@Override
+	public void subscribeAll(@NotNull Plugin host, @NotNull Object... listeners) {
+		for (Object o : listeners) {
+			subscribe(host, o);
 		}
 	}
 

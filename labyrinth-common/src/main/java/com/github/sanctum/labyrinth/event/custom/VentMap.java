@@ -19,11 +19,10 @@ public abstract class VentMap implements Service {
 	 * @param eventType The {@link Vent} to unsubscribe from.
 	 * @param key       The key namespace for the subscription.
 	 * @param <T>       The inheritance of vent.
-	 * @deprecated As there could be multiple entries for one key, you cannot be sure to remove the right listener!
+	 * @apiNote  As there could be multiple entries for one key, you cannot be sure to remove the right listener!
 	 * And in the only case where it would always remove the right key,
 	 * the method is equivalent to {{@link #unsubscribeAll(Class, String)}}
 	 */
-	@Deprecated
 	public abstract <T extends Vent> void unsubscribe(@NotNull Class<T> eventType, @NotNull String key);
 
 	/**
@@ -61,16 +60,26 @@ public abstract class VentMap implements Service {
 	 * Remove a registered subscription listener from cache.
 	 *
 	 * @param listener The listener to remove.
-	 * @deprecated Takes long O(n) to find the listener. Use {{@link #unregister(Plugin, String, Object)}} for O(1)!
+	 * @deprecated Use {@linkplain VentMap#unsubscribe(Object)}
 	 */
+	@Deprecated
 	public abstract void unregister(@NotNull Object listener);
+
+	/**
+	 * Remove a registered subscription listener from cache.
+	 *
+	 * @param listener The listener to remove.
+	 */
+	public abstract void unsubscribe(@NotNull Object listener);
 
 	/**
 	 * Removes a registered subscription listener by specification.
 	 *
 	 * @param host the plugin providing the listener
 	 * @param key  the key associated with the listener or null if none was specified
+	 * @deprecated Use {@linkplain VentMap#unsubscribe(Plugin, String)}
 	 */
+	@Deprecated
 	public abstract void unregister(Plugin host, @NotNull String key);
 
 	/**
@@ -79,21 +88,50 @@ public abstract class VentMap implements Service {
 	 * @param host the plugin providing the listener
 	 * @param key  the key associated with the listener or null if none was specified
 	 */
+	public abstract void unsubscribe(Plugin host, @NotNull String key);
+
+	/**
+	 * Removes a registered subscription listener by specification.
+	 *
+	 * @param host the plugin providing the listener
+	 * @param key  the key associated with the listener or null if none was specified
+	 * @deprecated Use {@linkplain VentMap#unsubscribe(Plugin, String, Object)}   
+	 */
+	@Deprecated
 	public abstract void unregister(Plugin host, @Nullable String key, Object listener);
+
+	/**
+	 * Removes a registered subscription listener by specification.
+	 *
+	 * @param host the plugin providing the listener
+	 * @param key  the key associated with the listener or null if none was specified
+	 */
+	public abstract void unsubscribe(Plugin host, @Nullable String key, Object listener);
+
+	/**
+	 * Remove all registered subscription listeners for a plugin from cache.
+	 *
+	 * @param host The host to query.
+	 * @deprecated Use {@linkplain VentMap#unsubscribeAll(String)}   
+	 */
+	@Deprecated
+	public abstract void unregisterAll(@NotNull Plugin host);
 
 	/**
 	 * Remove all registered subscription listeners for a plugin from cache.
 	 *
 	 * @param host The host to query.
 	 */
-	public abstract void unregisterAll(@NotNull Plugin host);
+	public abstract void unsubscribeAll(@NotNull Plugin host);
 
 	/**
 	 * Narrow down a list of all subscription listeners provided by a single plugin.
 	 *
 	 * @param plugin The plugin providing the listeners.
 	 * @return A list of all linked listeners.
+	 * @deprecated Use {@linkplain VentMap#getListeners(Plugin)} (Plugin)} instead!!
 	 */
+	@Deprecated
 	public abstract List<VentListener> list(@NotNull Plugin plugin);
 
 	/**
@@ -101,15 +139,32 @@ public abstract class VentMap implements Service {
 	 *
 	 * @param plugin The plugin providing the subscriptions.
 	 * @return A list of all linked subscriptions.
+	 * @deprecated Use {@linkplain VentMap#getSubscriptions(Plugin)} instead!!
 	 */
+	@Deprecated
 	public abstract List<Vent.Subscription<?>> narrow(@NotNull Plugin plugin);
 
 	/**
-	 * Get a singular listener by its key.
+	 * Narrow down a list of all subscription listeners provided by a single plugin.
+	 *
+	 * @param plugin The plugin providing the listeners.
+	 * @return A list of all linked listeners.
+	 */
+	public abstract List<VentListener> getListeners(@NotNull Plugin plugin);
+
+	/**
+	 * Narrow down a list of all subscriptions provided by a single plugin.
+	 *
+	 * @param plugin The plugin providing the subscriptions.
+	 * @return A list of all linked subscriptions.
+	 */
+	public abstract List<Vent.Subscription<?>> getSubscriptions(@NotNull Plugin plugin);
+
+	/**
+	 * Get the first found vent listener annotated with the specified key.
 	 *
 	 * @param key The key for the listener.
 	 * @return The registered listener.
-	 * @deprecated A key can hold multiple listeners. Will be disabled in the future.
 	 */
 	public abstract VentListener get(String key);
 
@@ -124,12 +179,39 @@ public abstract class VentMap implements Service {
 	public abstract <T extends Vent> Vent.Subscription<T> get(@NotNull Class<T> eventType, @NotNull String key);
 
 	/**
+	 * Adds chained subscriptions to this map
+	 *
+	 * @param link the subscription container
+	 */
+	public abstract void chain(Vent.Link link);
+
+	/**
+	 * Registers a listener for the given plugin
+	 *
+	 * @param host     the plugin to set for the listeners
+	 * @param listener the listener to be registered
+	 * @deprecated Use {@linkplain VentMap#subscribe(Plugin, Object)}
+	 */
+	@Deprecated
+	public abstract void register(@NotNull Plugin host, @NotNull Object listener);
+
+	/**
 	 * Registers a listener for the given plugin
 	 *
 	 * @param host     the plugin to set for the listeners
 	 * @param listener the listener to be registered
 	 */
-	public abstract void register(@NotNull Plugin host, @NotNull Object listener);
+	public abstract void subscribe(@NotNull Plugin host, @NotNull Object listener);
+
+	/**
+	 * Registers multiple listeners at once for the given plugin
+	 *
+	 * @param host      the plugin to set for the listeners
+	 * @param listeners the listeners to be registered
+	 * @deprecated Use {@linkplain VentMap#subscribeAll(Plugin, Object...)}
+	 */
+	@Deprecated
+	public abstract void registerAll(@NotNull Plugin host, @NotNull Object... listeners);
 
 	/**
 	 * Registers multiple listeners at once for the given plugin
@@ -137,7 +219,7 @@ public abstract class VentMap implements Service {
 	 * @param host      the plugin to set for the listeners
 	 * @param listeners the listeners to be registered
 	 */
-	public abstract void registerAll(@NotNull Plugin host, @NotNull Object... listeners);
+	public abstract void subscribeAll(@NotNull Plugin host, @NotNull Object... listeners);
 
 	/**
 	 * Adds a subscription to this mapping.
@@ -146,13 +228,6 @@ public abstract class VentMap implements Service {
 	 * @param <T>          the vent type of the subscription
 	 */
 	public abstract <T extends Vent> void subscribe(Vent.Subscription<T> subscription);
-
-	/**
-	 * Adds chained subscriptions to this map
-	 *
-	 * @param link the subscription container
-	 */
-	public abstract void chain(Vent.Link link);
 
 	public abstract List<Vent.Subscription<?>> getSubscriptions();
 

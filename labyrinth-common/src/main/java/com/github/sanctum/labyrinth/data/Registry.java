@@ -154,7 +154,7 @@ public class Registry<T> {
 	}
 
 	/**
-	 * Using {@link AddonLoader} internally delegate information to instantiate loaded jar classes.
+	 * Using {@link com.github.sanctum.labyrinth.data.AddonLoader} internally delegate information to instantiate loaded jar classes.
 	 *
 	 * @param <T> The type of class to load.
 	 */
@@ -194,7 +194,6 @@ public class Registry<T> {
 					try {
 						T e = (T) cl.getDeclaredConstructor().newInstance();
 						data.add(e);
-						break;
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -218,7 +217,6 @@ public class Registry<T> {
 						T e = (T) cl.getDeclaredConstructor().newInstance();
 						action.accept(e);
 						data.add(e);
-						break;
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}

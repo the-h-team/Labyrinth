@@ -30,6 +30,7 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
      * Please look over the other methods provided by this object.
      *
      * @return Plugin instance
+     * @apiNote This method is not to be used by third parties!
      */
     Plugin getPluginInstance();
 }

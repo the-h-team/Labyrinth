@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.Message;
 import com.github.sanctum.labyrinth.library.TextLib;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -53,7 +54,7 @@ public class PrintedPaginationBuilder {
 		int next = page + 1;
 		int last = Math.max(page - 1, 1);
 		if (!this.prefix.isEmpty()) {
-			Message.form(player).send(this.prefix);
+			Mailer.empty(player).chat(this.prefix).deploy();
 		}
 		List<BaseComponent> toSend = new LinkedList<>();
 		if (page == 1) {
@@ -84,7 +85,7 @@ public class PrintedPaginationBuilder {
 			player.spigot().sendMessage(toSend.toArray(new BaseComponent[0]));
 		}
 		if (!this.suffix.isEmpty()) {
-			Message.form(player).send(this.suffix);
+			Mailer.empty(this.player).chat(this.suffix).deploy();
 		}
 	}
 }

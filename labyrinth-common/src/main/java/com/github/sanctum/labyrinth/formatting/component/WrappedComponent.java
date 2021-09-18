@@ -27,7 +27,7 @@ public class WrappedComponent implements ActionComponent {
 		this.component = component;
 		this.commandSerial = HUID.randomID();
 		this.component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + getId()));
-		LabyrinthProvider.getInstance().addComponent(this);
+		LabyrinthProvider.getInstance().registerComponent(this).deploy();
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class WrappedComponent implements ActionComponent {
 
 	@Override
 	public void remove() {
-		LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> LabyrinthProvider.getInstance().removeComponent(this), toString() + "-removal",5);
+		LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> LabyrinthProvider.getInstance().removeComponent(this).deploy(), toString() + "-removal",5);
 	}
 
 }
