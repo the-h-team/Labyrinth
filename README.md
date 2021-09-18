@@ -18,8 +18,8 @@ otherwise have been far more time-consuming.
         </repository>
         <!-- For stable release builds. -->
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
         <!-- No repository needed for Maven Central versions! :D -->
     </repositories>
