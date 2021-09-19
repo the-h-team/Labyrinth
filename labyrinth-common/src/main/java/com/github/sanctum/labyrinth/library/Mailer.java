@@ -444,7 +444,12 @@ public class Mailer {
 						case BROADCAST:
 							for (Player online : Bukkit.getOnlinePlayers()) {
 								if (predicate.getAttachment().test(online)) {
-									online.sendMessage(StringUtils.use(predicate.getString()).translate());
+									if (Check.isJson(predicate.getString())) {
+										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
+										online.spigot().sendMessage(base);
+									} else {
+										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+									}
 								}
 							}
 							break;
@@ -474,7 +479,12 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								for (Player online : Bukkit.getOnlinePlayers()) {
 									if (predicate.getAttachment().test(online)) {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										if (Check.isJson(predicate.getString())) {
+											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
+											online.spigot().sendMessage(base);
+										} else {
+											online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										}
 									}
 								}
 							}, HUID.randomID().toString(), timeout);
@@ -520,7 +530,12 @@ public class Mailer {
 						case BROADCAST:
 							for (Player online : Bukkit.getOnlinePlayers()) {
 								if (predicate.getAttachment().test(online)) {
-									online.sendMessage(StringUtils.use(predicate.getString()).translate());
+									if (Check.isJson(predicate.getString())) {
+										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
+										online.spigot().sendMessage(base);
+									} else {
+										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+									}
 								}
 							}
 							break;

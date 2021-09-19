@@ -53,7 +53,7 @@ public abstract class LabyrinthProvider {
 	/**
 	 * Get a service from cache.
 	 *
-	 * <h3>Example services are:</h3>
+	 * <h3>Example services are: </h3>
 	 * <pre>
 	 *     {@link Service#COMPONENTS}
 	 *     {@link Service#COOLDOWNS}

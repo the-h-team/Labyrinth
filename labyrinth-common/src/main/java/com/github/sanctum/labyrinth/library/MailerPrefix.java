@@ -16,13 +16,13 @@ public final class MailerPrefix {
 		return this;
 	}
 
-	public MailerPrefix middle(String e) {
-		this.e = e;
+	public MailerPrefix middle(String m) {
+		this.m = m;
 		return this;
 	}
 
-	public MailerPrefix end(String m) {
-		this.m = m;
+	public MailerPrefix end(String e) {
+		this.e = e;
 		return this;
 	}
 
@@ -39,21 +39,20 @@ public final class MailerPrefix {
 	}
 
 	public String join() {
-		String joined = "";
+		if (start() != null && middle() != null && end() != null) {
+			return start() + middle() + end();
+		}
+		if (start() != null && middle() != null) {
+			return start() + middle();
+		}
 		if (start() != null) {
-			joined = start();
+			return start();
 		}
-		if (middle() != null) {
-			joined = joined + middle();
-		}
-		if (end() != null) {
-			joined = joined + end();
-		}
-		return joined;
+		return "";
 	}
 
 	public boolean isEmpty() {
-		return (start() != null && start().isEmpty()) && (middle() != null && middle().isEmpty()) && (end() != null && end().isEmpty());
+		return start() == null && middle() == null && end() == null;
 	}
 
 	public Mailer finish() {

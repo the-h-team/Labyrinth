@@ -21,7 +21,7 @@ public class ServiceManager {
 	}
 
 	public <T extends Service> T get(Class<T> service) {
-		return (T) services.entrySet().stream().filter(e -> e.getValue().getClass().isAssignableFrom(service)).map(Map.Entry::getValue).findFirst().orElse(null);
+		return (T) services.entrySet().stream().filter(e -> service.isAssignableFrom(e.getValue().getClass())).map(Map.Entry::getValue).findFirst().orElse(null);
 	}
 
 	public <T extends Service> T get(ServiceType<T> serviceType) {
