@@ -32,6 +32,7 @@ import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
@@ -101,6 +102,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
+	private final ItemCompost composter = new ItemCompost();
 	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
 	private final SynchronousTaskChain staskManager = new SynchronousTaskChain(this);
 	private boolean cachedIsLegacy;
@@ -328,6 +330,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	@Override
 	public boolean requiresLocationLibrary() {
 		return cachedNeedsLegacyLocation;
+	}
+
+	@Override
+	public ItemCompost getItemComposter() {
+		return this.composter;
 	}
 
 	@Override
