@@ -857,7 +857,7 @@ public abstract class Menu {
 					if (element != null) {
 						Click click = element.getAttachment();
 						if (click == null) return;
-						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getView());
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getCursor(), e.getView());
 						click.apply(clickElement);
 
 						if (clickElement.getResult() != null) {
@@ -993,7 +993,7 @@ public abstract class Menu {
 						if (el != null) {
 							Click click = el.getAttachment();
 							if (click == null) return;
-							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
 							click.apply(clickElement);
 
 							if (clickElement.getResult() != null) {
@@ -1128,7 +1128,7 @@ public abstract class Menu {
 						ItemElement<?> element2 = getInventory().getItem(item);
 						if (element2 != null) {
 							Click click = element2.getAttachment();
-							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getView());
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getCursor(), e.getView());
 							if (click == null) {
 								if (Menu.this.click != null) {
 									Menu.this.click.apply(clickElement);;
@@ -1282,7 +1282,7 @@ public abstract class Menu {
 							}
 
 							if (Menu.this.click != null) {
-								ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), element1, e.getView());
+								ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), element1, e.getCursor(), e.getView());
 								Menu.this.click.apply(element3);
 
 								if (element3.getResult() != null) {
@@ -1320,7 +1320,7 @@ public abstract class Menu {
 					}
 
 					if (Menu.this.click != null) {
-						ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getView());
+						ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
 						Menu.this.click.apply(element3);
 
 						if (element3.getResult() != null) {

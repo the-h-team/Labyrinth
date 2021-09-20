@@ -5,6 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public class ClickElement extends PlayerElement{
@@ -23,10 +24,13 @@ public class ClickElement extends PlayerElement{
 
 	private final ClickType clickType;
 
+	private final ItemStack cursor;
+
 	private final InventoryAction action;
 
-	public ClickElement(Player clicker, int slot, InventoryAction action, ClickType type, ItemElement<?> element, InventoryView view) {
+	public ClickElement(Player clicker, int slot, InventoryAction action, ClickType type, ItemElement<?> element, ItemStack cursor, InventoryView view) {
 		super(clicker, view);
+		this.cursor = cursor;
 		this.action = action;
 		this.clickType = type;
 		this.slot = slot;
@@ -109,6 +113,10 @@ public class ClickElement extends PlayerElement{
 	 */
 	public @Nullable Consumer getConsumer() {
 		return playerConsumer;
+	}
+
+	public ItemStack getCursor() {
+		return this.cursor;
 	}
 
 	/**
