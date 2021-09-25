@@ -17,6 +17,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 public class ComponentChunk extends Message.Chunk {
 
 	private final List<ToolTip<?>> CONTEXT = new ArrayList<>();
-	private final TextComponent parent;
+	private TextComponent parent;
 	private String color;
 	private String style;
 
@@ -122,7 +123,21 @@ public class ComponentChunk extends Message.Chunk {
 	}
 
 	@Override
+	public Message.Chunk replace(String text, String replacement) {
+		TextComponent replace = new TextComponent();
+		List<BaseComponent> components = new ArrayList<>();
+		for (BaseComponent c : parent.getExtra()) {
+			TextComponent n = new TextComponent(StringUtils.use(c.toLegacyText()).replaceIgnoreCase(text, replacement));
+			components.add(n);
+		}
+		replace.setExtra(components);
+		this.parent = replace;
+		return this;
+	}
+
+	@Override
 	public String getText() {
+		Bukkit.broadcastMessage("Got text '" + parent.getText() + "'");
 		return parent.getText();
 	}
 

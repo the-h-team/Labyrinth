@@ -147,6 +147,8 @@ public abstract class Message implements Iterable<Message.Chunk> {
 
 		public abstract Chunk setText(String text);
 
+		public abstract Chunk replace(String text, String replacement);
+
 		public abstract String getText();
 
 		public boolean isEmpty() {

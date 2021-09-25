@@ -133,6 +133,12 @@ public class TextChunk extends Message.Chunk {
 	}
 
 	@Override
+	public Message.Chunk replace(String text, String replacement) {
+		this.text = StringUtils.use(this.text).replaceIgnoreCase(text, replacement);
+		return this;
+	}
+
+	@Override
 	public String getText() {
 		return this.text;
 	}
