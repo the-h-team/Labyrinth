@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.library.ListUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -21,6 +21,9 @@ import org.jetbrains.annotations.NotNull;
 public abstract class UniformedComponents<T> implements Iterable<T>, Serializable {
 
 	private static final long serialVersionUID = 380726810757536184L;
+
+	UniformedComponents() {
+	}
 
 	public abstract List<T> list();
 
@@ -68,6 +71,10 @@ public abstract class UniformedComponents<T> implements Iterable<T>, Serializabl
 	@Override
 	public Iterator<T> iterator() {
 		return list().iterator();
+	}
+
+	public static <T> UniformedComponents<T> accept(T[] array) {
+		return accept(Arrays.asList(array));
 	}
 
 	public static <T> UniformedComponents<T> accept(List<T> list) {
