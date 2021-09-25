@@ -22,7 +22,7 @@ public abstract class UniformedComponents<T> implements Iterable<T>, Serializabl
 
 	private static final long serialVersionUID = 380726810757536184L;
 
-	UniformedComponents() {
+	public UniformedComponents() {
 	}
 
 	public abstract List<T> list();
