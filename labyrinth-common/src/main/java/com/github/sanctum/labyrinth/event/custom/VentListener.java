@@ -174,10 +174,15 @@ public class VentListener {
 
 	private <T> CallInfo<T> invoke(Method method, String refError, String callError, Class<T> retC, Object... params) {
 		try {
+			method.setAccessible(true);
 			return new CallInfo<>(true, retC.cast(method.invoke(listener, params)));
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			Bukkit.getLogger().severe(refError);
-			e.getCause().printStackTrace();
+			if (e.getCause() != null) {
+				e.getCause().printStackTrace();
+			} else {
+				e.printStackTrace();
+			}
 		} catch (Exception e) {
 			Bukkit.getLogger().severe(callError);
 			e.printStackTrace();

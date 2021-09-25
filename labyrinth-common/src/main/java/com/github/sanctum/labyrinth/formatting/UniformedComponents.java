@@ -6,16 +6,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Hempfest
  */
-public abstract class UniformedComponents<T> implements Serializable {
+public abstract class UniformedComponents<T> implements Iterable<T>, Serializable {
 
 	private static final long serialVersionUID = 380726810757536184L;
 
@@ -50,6 +53,22 @@ public abstract class UniformedComponents<T> implements Serializable {
 	public abstract T getLast();
 
 	public abstract T get(int index);
+
+	@Override
+	public void forEach(Consumer<? super T> action) {
+		list().forEach(action);
+	}
+
+	@Override
+	public Spliterator<T> spliterator() {
+		return list().spliterator();
+	}
+
+	@NotNull
+	@Override
+	public Iterator<T> iterator() {
+		return list().iterator();
+	}
 
 	public static <T> UniformedComponents<T> accept(List<T> list) {
 		return new UniformedComponents<T>() {

@@ -65,7 +65,7 @@ public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 	@Override
 	public ItemStack read(Map<String, Object> o) {
 		JSONObject ob = (JSONObject) o.get("meta");
-		byte data = (byte) ob.get("data");
+		byte data = Byte.parseByte(String.valueOf((long) ob.get("data")));
 		Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
 
 		int amount = Integer.parseInt(String.valueOf(o.get("amount")));

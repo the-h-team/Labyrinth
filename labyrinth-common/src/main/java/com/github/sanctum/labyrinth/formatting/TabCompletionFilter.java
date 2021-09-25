@@ -11,6 +11,7 @@ import java.util.function.Supplier;
  *
  * @author [Hempfest, ms5984]
  */
+@Deprecated
 public class TabCompletionFilter {
 
 	protected List<String> completions;

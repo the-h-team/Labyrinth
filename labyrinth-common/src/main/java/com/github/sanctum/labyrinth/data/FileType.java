@@ -34,11 +34,11 @@ public enum FileType implements FileExtension {
 	}
 
 	public FileManager getNewFile(Plugin plugin, String name) {
-		return FileList.search(plugin).find(name, this);
+		return FileList.search(plugin).get(name, this);
 	}
 
 	public FileManager getNewFile(Plugin plugin, String name, String directory) {
-		return FileList.search(plugin).find(name, directory, this);
+		return FileList.search(plugin).get(name, directory, this);
 	}
 
 	@Override

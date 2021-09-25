@@ -13,7 +13,6 @@ public class ServiceType<T extends Service> {
 	@SuppressWarnings("unchecked")
 	public ServiceType(Supplier<T> supplier) {
 		this.supplier = supplier;
-		// Previous code caused lots of problems. Had to remove - Hemp
 		c = (Class<T>) supplier.get().getClass();
 	}
 

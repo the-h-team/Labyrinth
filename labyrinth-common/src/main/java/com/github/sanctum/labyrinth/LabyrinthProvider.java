@@ -3,7 +3,20 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.PluginChannel;
+import com.github.sanctum.labyrinth.data.PluginMessage;
 import com.github.sanctum.labyrinth.data.ServiceType;
+import com.github.sanctum.labyrinth.data.service.Constant;
+import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.library.Deployable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.plugin.Plugin;
 
 /**
  * ▄▄▌***▄▄▄·*▄▄▄▄·**▄·*▄▌▄▄▄**▪***▐*▄*▄▄▄▄▄*▄*.▄
@@ -71,13 +84,39 @@ public abstract class LabyrinthProvider {
 	 * @return The service.
 	 */
 	@Note("This method only works on loaded services!")
-	public static  <T extends Service> T getService(ServiceType<T> type) {
+	public static <T extends Service> T getService(ServiceType<T> type) {
 		return getInstance().getServiceManager().get(type);
 	}
 
 	@Note("This method only works on loaded services!")
 	public static <T extends Service> T getService(Class<T> service) {
 		return getInstance().getServiceManager().get(service);
+	}
+
+	public static <T> Deployable<Void> sendMessage(Plugin plugin, T object) {
+		return sendMessage(plugin, object, PluginChannel.DEFAULT);
+	}
+
+	public static <T> Deployable<Void> sendMessage(Plugin plugin, T object, PluginChannel<?> channel) {
+		return Deployable.of(null, unused -> new Vent.Call<>(new PluginMessageEvent(new PluginMessage<T>() {
+			@Override
+			public Plugin getPlugin() {
+				return plugin;
+			}
+
+			@Override
+			public T getMessage() {
+				return object;
+			}
+		}, channel)).run());
+	}
+
+	public static List<PluginChannel<?>> getDefaultChannels() {
+		return Constant.values(PluginChannel.class, PluginChannel.class).stream().map(c -> (PluginChannel<?>)c).collect(Collectors.toList());
+	}
+
+	public static Set<LabyrinthUser> getOfflinePlayers() {
+		return Arrays.stream(Bukkit.getOfflinePlayers()).filter(p -> p.getName() != null).map(OfflinePlayer::getName).map(LabyrinthUser::get).collect(Collectors.toSet());
 	}
 
 }

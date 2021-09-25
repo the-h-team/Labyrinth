@@ -90,6 +90,10 @@ public abstract class Message implements Iterable<Message.Chunk> {
 	public abstract @Json
 	String toJson();
 
+	public boolean isEmpty() {
+		return TEXT.isEmpty();
+	}
+
 	/**
 	 * Send the stylized message to a specified player.
 	 *
@@ -106,6 +110,8 @@ public abstract class Message implements Iterable<Message.Chunk> {
 	 */
 	public abstract Deployable<Void> send(Predicate<Player> predicate);
 
+	public abstract Deployable<Void> clear();
+
 	/**
 	 * An overall native method factory to easily accessing new message,section & tooltip objects
 	 */
@@ -117,7 +123,7 @@ public abstract class Message implements Iterable<Message.Chunk> {
 
 	}
 
-	public abstract static class Chunk {
+	public abstract static class Chunk implements Iterable<ToolTip<?>>{
 
 		public abstract Chunk append(String text);
 
@@ -156,23 +162,23 @@ public abstract class Message implements Iterable<Message.Chunk> {
 		public interface Factory {
 
 			default Chunk json(@Json String section) {
-				return new JsonSection(section);
+				return new JsonChunk(section);
 			}
 
 			default Chunk text(String text) {
-				return new TextSection(text);
+				return new TextChunk(text);
 			}
 
 			default Chunk text(String text, Color color) {
-				return new TextSection(text, color);
+				return new TextChunk(text, color);
 			}
 
 			default Chunk text(String text, ChatColor color) {
-				return new TextSection(text, color);
+				return new TextChunk(text, color);
 			}
 
 			default Chunk text(String text, CustomColor color) {
-				return new TextSection(text, color);
+				return new TextChunk(text, color);
 			}
 
 		}

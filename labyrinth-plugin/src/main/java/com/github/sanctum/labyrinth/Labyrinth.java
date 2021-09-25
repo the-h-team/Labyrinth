@@ -9,6 +9,7 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.data.ItemStackSerializable;
+import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
@@ -22,6 +23,7 @@ import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
@@ -130,6 +132,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		Configurable.registerClass(LocationSerializable.class);
 		Configurable.registerClass(MessageSerializable.class);
 		Configurable.registerClass(CustomColor.class);
+
 		ConfigurationSerialization.registerClass(CustomColor.class);
 		ConfigurationSerialization.registerClass(Template.class);
 		ConfigurationSerialization.registerClass(MetaTemplate.class);
@@ -192,7 +195,18 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 				Item.removeEntry(i);
 			}
 		}
+	}
 
+	@Subscribe(priority = Vent.Priority.READ_ONLY)
+	public void onJoin(DefaultEvent.Join e) {
+		LabyrinthUser user = LabyrinthUser.get(e.getPlayer().getName());
+		if (user != null) {
+			if (user.correctId(e.getPlayer())) {
+				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s user id has been updated.");
+			}
+		} else {
+			getEmptyMailer().error("- User " + e.getPlayer().getName() + " has NO unique id!!");
+		}
 	}
 
 	@Subscribe
@@ -203,6 +217,9 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 			String label = cmd.getText();
 
 			ActionComponent component = components.get(label);
+
+			if (label.equalsIgnoreCase("test")) {
+			}
 
 			if (component != null) {
 				if (!component.isMarked()) {

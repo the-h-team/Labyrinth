@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -35,7 +36,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Node getNode(String node) {
-		return (Node) config.memory.entrySet().stream().filter(n -> n.getKey().equals(key + "." + node)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
+		return (Node) Optional.ofNullable(config.memory.get(this.key + "." + node)).orElseGet(() -> {
 			ConfigurableNode n = new ConfigurableNode(key + "." + node, config);
 			config.memory.put(n.getPath(), n);
 			return n;

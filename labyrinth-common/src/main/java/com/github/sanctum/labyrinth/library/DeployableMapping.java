@@ -79,7 +79,9 @@ public final class DeployableMapping<R> implements Deployable<R> {
 
 	@Override
 	public CompletableFuture<R> submit() {
-		queue();
-		return CompletableFuture.supplyAsync(() -> this.value);
+		return CompletableFuture.supplyAsync(() -> {
+			deploy();
+			return this.value;
+		});
 	}
 }

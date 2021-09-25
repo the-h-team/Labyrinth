@@ -60,4 +60,27 @@ public class MathUtils {
 		return NumberFormat.getNumberInstance(locale).format(format(precision));
 	}
 
+	/**
+	 * Format the number with a specified language.
+	 *
+	 * @param locale the language to format to
+	 * @return the formatted amount as a string (number compliant)
+	 */
+	public String formatCurrency(Locale locale) {
+		return NumberFormat.getCurrencyInstance(locale).format(format(2));
+	}
+
+	/**
+	 * Format the number with a specified language.
+	 *
+	 * @param locale    the language to format to
+	 * @param precision the math context precision to apply
+	 * @return the formatted amount as a string (number compliant)
+	 */
+	public String formatCurrency(Locale locale, int precision) {
+		return NumberFormat.getCurrencyInstance(locale).format(format(precision));
+	}
+
+
+
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -83,7 +84,7 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Node getNode(String node) {
-		return (Node) MAP.QUERY.entrySet().stream().filter(n -> n.getKey().equals(key + "." + node)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
+		return (Node) Optional.ofNullable(MAP.QUERY.get(this.key + "." + node)).orElseGet(() -> {
 			AtlasNode n = new AtlasNode(this.key + "." + node, MAP);
 			MAP.QUERY.put(this.key + "." + node, n);
 			return n;

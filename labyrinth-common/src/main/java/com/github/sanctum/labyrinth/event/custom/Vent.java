@@ -91,7 +91,7 @@ public abstract class Vent {
 	 */
 	@Deprecated
 	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		getMap().register(host, listener);
+		getMap().subscribe(host, listener);
 	}
 
 	public VentMap getVentMap() {

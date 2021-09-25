@@ -4,10 +4,12 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -17,33 +19,34 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.jetbrains.annotations.NotNull;
 
-public class TextSection extends Message.Chunk {
+public class TextChunk extends Message.Chunk {
 
-	private final Map<ToolTip.Type, ToolTip<?>> CONTEXT = new HashMap<>();
+	private final List<ToolTip<?>> CONTEXT = new ArrayList<>();
 	private String text;
 	private String style;
 	private String color;
 
-	public TextSection(String text) {
+	public TextChunk(String text) {
 		this.text = text;
 	}
 
-	public TextSection(String text, Color color) {
+	public TextChunk(String text, Color color) {
 		String hex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
 		this.text = hex + text;
 	}
 
-	public TextSection(String text, ChatColor color) {
+	public TextChunk(String text, ChatColor color) {
 		this.text = color + text;
 	}
 
-	public TextSection(String text, CustomColor color) {
+	public TextChunk(String text, CustomColor color) {
 		this.text = color.context(text).join();
 	}
 
 	@Override
-	public TextSection append(String text) {
+	public TextChunk append(String text) {
 		this.text = this.text + text;
 		return this;
 	}
@@ -64,7 +67,7 @@ public class TextSection extends Message.Chunk {
 	}
 
 	@Override
-	public TextSection style(ChatColor style) {
+	public TextChunk style(ChatColor style) {
 		List<ChatColor> targets =
 				Arrays.asList(ChatColor.BOLD,
 						ChatColor.ITALIC,
@@ -97,7 +100,7 @@ public class TextSection extends Message.Chunk {
 	}
 
 	@Override
-	public TextSection style(CustomColor color) {
+	public TextChunk style(CustomColor color) {
 		String stripped = net.md_5.bungee.api.ChatColor.stripColor(StringUtils.use(this.text).translate());
 		this.color = null;
 		this.style = null;
@@ -118,13 +121,13 @@ public class TextSection extends Message.Chunk {
 	}
 
 	@Override
-	public TextSection bind(ToolTip<?> context) {
-		this.CONTEXT.put(context.getType(), context);
+	public TextChunk bind(ToolTip<?> context) {
+		this.CONTEXT.add(context);
 		return this;
 	}
 
 	@Override
-	public TextSection setText(String text) {
+	public TextChunk setText(String text) {
 		this.text = text;
 		return this;
 	}
@@ -140,14 +143,15 @@ public class TextSection extends Message.Chunk {
 		if (this.style != null) {
 			if (this.color != null) {
 				component = new TextComponent(TextComponent.fromLegacyText(StringUtils.use(this.color + this.style + this.text).translate()));
-			} else component = new TextComponent(TextComponent.fromLegacyText(StringUtils.use(this.style + this.text).translate()));
+			} else
+				component = new TextComponent(TextComponent.fromLegacyText(StringUtils.use(this.style + this.text).translate()));
 		} else if (this.color != null) {
 			component = new TextComponent(TextComponent.fromLegacyText(StringUtils.use(this.color + this.text).translate()));
 		}
-		for (ToolTip<?> context : this.CONTEXT.values()) {
+		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:
-					component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String)context.get()));
+					component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String) context.get()));
 					break;
 				case HOVER:
 					if (context instanceof ToolTip.Text) {
@@ -158,25 +162,23 @@ public class TextSection extends Message.Chunk {
 								component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.hover.content.Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate()))));
 							}
 						} else {
-							if (LabyrinthProvider.getInstance().isLegacy()) {
-								component.getHoverEvent().addContent(new Text(new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
+							if (component.getHoverEvent().getContents().size() == 1) {
+								component.getHoverEvent().addContent(new Text("\n" + StringUtils.use((String) context.get()).translate() + "\n"));
 							} else {
-								component.getHoverEvent().addContent(new net.md_5.bungee.api.chat.hover.content.Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate())));
+								component.getHoverEvent().addContent(new Text(StringUtils.use((String) context.get()).translate() + "\n"));
 							}
 						}
 					}
 					if (context instanceof ToolTip.Item) {
-						ToolTip.Item item = (ToolTip.Item)context;
+						ToolTip.Item item = (ToolTip.Item) context;
 						BaseComponent[] components = new BaseComponent[]{new TextComponent(item.toJson())};
 						if (component.getHoverEvent() == null) {
 							component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, components));
-						} else {
-							component.getHoverEvent().addContent(new Text(components));
 						}
 					}
 					break;
 				case ACTION:
-					ToolTip.Action action = (ToolTip.Action)context;
+					ToolTip.Action action = (ToolTip.Action) context;
 					LabyrinthProvider.getInstance().registerComponent(action).deploy();
 					component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + action.getId()));
 					break;
@@ -192,5 +194,21 @@ public class TextSection extends Message.Chunk {
 			}
 		}
 		return component;
+	}
+
+	@NotNull
+	@Override
+	public Iterator<ToolTip<?>> iterator() {
+		return CONTEXT.iterator();
+	}
+
+	@Override
+	public void forEach(Consumer<? super ToolTip<?>> action) {
+		CONTEXT.forEach(action);
+	}
+
+	@Override
+	public Spliterator<ToolTip<?>> spliterator() {
+		return CONTEXT.spliterator();
 	}
 }

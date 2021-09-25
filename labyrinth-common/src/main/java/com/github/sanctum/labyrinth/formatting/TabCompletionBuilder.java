@@ -10,6 +10,7 @@ import java.util.*;
  *
  * @author [Hempfest, ms5984]
  */
+@Deprecated
 public class TabCompletionBuilder {
 	static final Map<Integer, List<TabCompletionFilter>> COMPLETION_MAP = new HashMap<>();
 	static final Map<String, Applicable> APPLICABLE_MAP = new HashMap<>();

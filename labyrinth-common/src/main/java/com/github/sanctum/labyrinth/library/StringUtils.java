@@ -19,6 +19,7 @@ import org.bukkit.OfflinePlayer;
  */
 public class StringUtils {
 
+	protected static final String test = "hELLO";
 	private final String context;
 
 	protected StringUtils(String context) {
@@ -165,7 +166,8 @@ public class StringUtils {
 		try {
 			Double.parseDouble(this.context);
 			return true;
-		} catch (NumberFormatException ignored) {}
+		} catch (NumberFormatException ignored) {
+		}
 		return false;
 	}
 
@@ -178,7 +180,8 @@ public class StringUtils {
 		try {
 			Integer.parseInt(this.context);
 			return true;
-		} catch (NumberFormatException ignored) {}
+		} catch (NumberFormatException ignored) {
+		}
 		return false;
 	}
 
@@ -191,7 +194,8 @@ public class StringUtils {
 		try {
 			Long.parseLong(this.context);
 			return true;
-		} catch (NumberFormatException ignored) {}
+		} catch (NumberFormatException ignored) {
+		}
 		return false;
 	}
 
@@ -204,7 +208,8 @@ public class StringUtils {
 		try {
 			Float.parseFloat(this.context);
 			return true;
-		} catch (NumberFormatException ignored) {}
+		} catch (NumberFormatException ignored) {
+		}
 		return false;
 	}
 

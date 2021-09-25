@@ -37,7 +37,7 @@ public class MessageBuilder extends Message {
 
 	@Override
 	public Message append(@Json String message) {
-		TEXT.add(new JsonSection(message));
+		TEXT.add(new JsonChunk(message));
 		return this;
 	}
 
@@ -75,6 +75,11 @@ public class MessageBuilder extends Message {
 				.getService(Service.MESSENGER)
 				.getEmptyMailer()
 				.announce(predicate, build()).deploy());
+	}
+
+	@Override
+	public Deployable<Void> clear() {
+		return Deployable.of(null, unused -> TEXT.clear());
 	}
 
 	@NotNull

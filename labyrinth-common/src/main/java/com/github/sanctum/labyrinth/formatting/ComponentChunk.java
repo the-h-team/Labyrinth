@@ -4,10 +4,12 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -17,20 +19,21 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.jetbrains.annotations.NotNull;
 
-public class ComponentSection extends Message.Chunk {
+public class ComponentChunk extends Message.Chunk {
 
-	private final Map<ToolTip.Type, ToolTip<?>> CONTEXT = new HashMap<>();
+	private final List<ToolTip<?>> CONTEXT = new ArrayList<>();
 	private final TextComponent parent;
 	private String color;
 	private String style;
 
-	public ComponentSection(BaseComponent... parent) {
+	public ComponentChunk(BaseComponent... parent) {
 		this.parent = new TextComponent(parent);
 	}
 
 	@Override
-	public ComponentSection append(String text) {
+	public ComponentChunk append(String text) {
 		String now = parent.getText();
 		parent.setText(now + text);
 		return this;
@@ -52,7 +55,7 @@ public class ComponentSection extends Message.Chunk {
 	}
 
 	@Override
-	public ComponentSection style(ChatColor style) {
+	public ComponentChunk style(ChatColor style) {
 		List<ChatColor> targets =
 				Arrays.asList(ChatColor.BOLD,
 						ChatColor.ITALIC,
@@ -85,7 +88,7 @@ public class ComponentSection extends Message.Chunk {
 	}
 
 	@Override
-	public ComponentSection style(CustomColor color) {
+	public ComponentChunk style(CustomColor color) {
 		String now = parent.getText();
 		this.style = null;
 		this.color = null;
@@ -107,13 +110,13 @@ public class ComponentSection extends Message.Chunk {
 	}
 
 	@Override
-	public ComponentSection bind(ToolTip<?> context) {
-		this.CONTEXT.put(context.getType(), context);
+	public ComponentChunk bind(ToolTip<?> context) {
+		this.CONTEXT.add(context);
 		return this;
 	}
 
 	@Override
-	public ComponentSection setText(String text) {
+	public ComponentChunk setText(String text) {
 		parent.setText(text);
 		return this;
 	}
@@ -134,7 +137,7 @@ public class ComponentSection extends Message.Chunk {
 			String now = parent.getText();
 			parent.setText(color + now);
 		}
-		for (ToolTip<?> context : this.CONTEXT.values()) {
+		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:
 					parent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String)context.get()));
@@ -148,10 +151,10 @@ public class ComponentSection extends Message.Chunk {
 								parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate()))));
 							}
 						} else {
-							if (LabyrinthProvider.getInstance().isLegacy()) {
-								parent.getHoverEvent().addContent(new Text(new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
+							if (parent.getHoverEvent().getContents().size() == 1) {
+								parent.getHoverEvent().addContent(new Text("\n" + StringUtils.use((String) context.get()).translate() + "\n"));
 							} else {
-								parent.getHoverEvent().addContent(new Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate())));
+								parent.getHoverEvent().addContent(new Text(StringUtils.use((String) context.get()).translate() + "\n"));
 							}
 						}
 					}
@@ -160,8 +163,6 @@ public class ComponentSection extends Message.Chunk {
 						BaseComponent[] components = new BaseComponent[]{new TextComponent(item.toJson())};
 						if (parent.getHoverEvent() == null) {
 							parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, components));
-						} else {
-							parent.getHoverEvent().addContent(new Text(components));
 						}
 					}
 					break;
@@ -183,4 +184,21 @@ public class ComponentSection extends Message.Chunk {
 		}
 		return parent;
 	}
+
+	@NotNull
+	@Override
+	public Iterator<ToolTip<?>> iterator() {
+		return CONTEXT.iterator();
+	}
+
+	@Override
+	public void forEach(Consumer<? super ToolTip<?>> action) {
+		CONTEXT.forEach(action);
+	}
+
+	@Override
+	public Spliterator<ToolTip<?>> spliterator() {
+		return CONTEXT.spliterator();
+	}
+
 }

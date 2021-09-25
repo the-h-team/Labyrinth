@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,6 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to mark consumer methods for results of event handling.
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Extend {

@@ -5,6 +5,7 @@ package com.github.sanctum.labyrinth.formatting;
  *
  * @author [Hempfest, ms5984]
  */
+@Deprecated
 public class TabCompletion {
 
 	/**

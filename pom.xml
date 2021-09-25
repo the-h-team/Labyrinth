@@ -13,6 +13,7 @@
         <module>labyrinth-skulls</module>
         <module>labyrinth-regions</module>
         <module>labyrinth-plugin</module>
+        <module>labyrinth-global</module>
     </modules>
     <packaging>pom</packaging>
 

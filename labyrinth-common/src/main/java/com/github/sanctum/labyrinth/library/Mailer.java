@@ -5,8 +5,8 @@ import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
-import com.github.sanctum.labyrinth.formatting.ComponentSection;
-import com.github.sanctum.labyrinth.formatting.TextSection;
+import com.github.sanctum.labyrinth.formatting.ComponentChunk;
+import com.github.sanctum.labyrinth.formatting.TextChunk;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -78,7 +78,7 @@ public class Mailer {
 
 	public Deployable<Mailer> chat(@NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
-			BaseComponent[] comps = new FancyMessage().append(new TextSection(this.prefix.join())).append(new TextSection(" ")).append(new ComponentSection(components)).build();
+			BaseComponent[] comps = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
 			return new Mailable(this, this.sender, MailType.CHAT, comps);
 		}
 		return new Mailable(this, this.sender, MailType.CHAT, components);
@@ -93,7 +93,7 @@ public class Mailer {
 
 	public Deployable<Mailer> action(@NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
-			BaseComponent[] comps = new FancyMessage().append(new TextSection(this.prefix.join())).append(new TextSection(" ")).append(new ComponentSection(components)).build();
+			BaseComponent[] comps = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
 			return new Mailable(this, this.sender, MailType.ACTION, comps);
 		}
 		return new Mailable(this, this.sender, MailType.ACTION, components);
@@ -130,13 +130,13 @@ public class Mailer {
 
 	public Deployable<Mailer> announce(final @NotNull Predicate<Player> predicate, @NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
-			components = new FancyMessage().append(new TextSection(this.prefix.join())).append(new TextSection(" ")).append(new ComponentSection(components)).build();
+			components = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
 		}
 		@NotNull BaseComponent[] finalComponents = components;
 		return new Mailable(this, Bukkit.getConsoleSender(), MailType.BROADCAST, new MailableContext<Predicate<Player>>() {
 			@Override
 			public String getString() {
-				return new ComponentSection(finalComponents).toJson();
+				return new ComponentChunk(finalComponents).toJson();
 			}
 
 			@Override
@@ -210,6 +210,7 @@ public class Mailer {
 
 		@Override
 		public Deployable<Mailer> deploy(Consumer<? super Mailer> consumer) {
+			deploy();
 			consumer.accept(parent);
 			return this;
 		}

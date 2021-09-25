@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 /**
  * An object capable of Json serialization & deserialization.
- *
+ * <p>
  * Annotated with {@link NodePointer} location information.
  *
  * @param <T> The object type this serializer represents.
@@ -59,4 +60,11 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 		}
 		return null;
 	}
+
+	static GsonBuilder getJsonBuilder() {
+		GsonBuilder builder = new GsonBuilder();
+		Configurable.serializers.forEach((key, value) -> builder.registerTypeHierarchyAdapter(value.getClassType(), value));
+		return builder;
+	}
+
 }

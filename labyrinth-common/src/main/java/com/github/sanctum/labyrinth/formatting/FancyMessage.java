@@ -32,7 +32,7 @@ public class FancyMessage extends MessageBuilder {
 	 * @return The same bulletin builder.
 	 */
 	public FancyMessage then(String text) {
-		append(new TextSection(text));
+		append(new TextChunk(text));
 		return this;
 	}
 
