@@ -856,10 +856,10 @@ public abstract class Menu {
 					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
 					if (element != null) {
 						Click click = element.getAttachment();
-						if (click == null) return;
 						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getCursor(), e.getView());
-						click.apply(clickElement);
-
+						if (click != null) {
+							click.apply(clickElement);
+						}
 						if (clickElement.getResult() != null) {
 							e.setResult(clickElement.getResult());
 						}
@@ -872,6 +872,9 @@ public abstract class Menu {
 						if (element.getType() != null) {
 							ClickElement.Consumer consumer = clickElement.getConsumer();
 							switch (element.getType()) {
+								case TAKEAWAY:
+									element.remove(false);
+									break;
 								case BUTTON_EXIT:
 									if (consumer != null) {
 										consumer.accept(clickElement.getElement(), false);
@@ -992,9 +995,10 @@ public abstract class Menu {
 						ItemElement<?> el = getInventory().getItem(e.getRawSlot());
 						if (el != null) {
 							Click click = el.getAttachment();
-							if (click == null) return;
 							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
-							click.apply(clickElement);
+							if (click != null) {
+								click.apply(clickElement);
+							}
 
 							if (clickElement.getResult() != null) {
 								e.setResult(clickElement.getResult());
@@ -1008,6 +1012,9 @@ public abstract class Menu {
 							if (el.getType() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
 								switch (el.getType()) {
+									case TAKEAWAY:
+										el.remove(false);
+										break;
 									case BUTTON_EXIT:
 										if (consumer != null) {
 											consumer.accept(clickElement.getElement(), false);
@@ -1133,7 +1140,6 @@ public abstract class Menu {
 								if (Menu.this.click != null) {
 									Menu.this.click.apply(clickElement);;
 								}
-								return;
 							} else {
 								click.apply(clickElement);
 							}
@@ -1151,6 +1157,9 @@ public abstract class Menu {
 							if (element2.getType() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
 								switch (element2.getType()) {
+									case TAKEAWAY:
+										element2.remove(false);
+										break;
 									case BUTTON_EXIT:
 										if (consumer != null) {
 											consumer.accept(clickElement.getElement(), false);
