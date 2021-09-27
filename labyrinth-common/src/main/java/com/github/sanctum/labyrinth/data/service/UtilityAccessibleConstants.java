@@ -116,6 +116,49 @@ final class UtilityAccessibleConstants<T> extends AccessibleConstants<T> {
 	}
 
 	@Override
+	public <O> Deployable<List<Constant<O>>> get(Class<O> c) {
+		final List<Constant<O>> objects = new ArrayList<>();
+		return Deployable.of(objects, objects1 -> {
+			objects1.clear();
+			for (Field f : t.getFields()) {
+				int modifiers = f.getModifiers();
+				if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+					try {
+						Object o = f.get(null);
+						if (o != null) {
+							if (c.isAssignableFrom(o.getClass())) {
+								objects1.add(new Constant<O>() {
+									@Override
+									public String getName() {
+										return f.getName();
+									}
+
+									@Override
+									public Class<O> getType() {
+										return c;
+									}
+
+									@Override
+									public Class<?> getParent() {
+										return t;
+									}
+
+									@Override
+									public O getValue() {
+										return (O) o;
+									}
+								});
+							}
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+
+	@Override
 	public int count() {
 		return (int) Arrays.stream(t.getFields()).filter(f -> {
 			int modifiers = f.getModifiers();

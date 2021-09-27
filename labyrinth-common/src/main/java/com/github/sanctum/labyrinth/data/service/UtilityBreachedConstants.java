@@ -120,6 +120,50 @@ final class UtilityBreachedConstants<T> extends ProtectedConstants<T> {
 	}
 
 	@Override
+	public <O> Deployable<List<Constant<O>>> get(Class<O> c) {
+		final List<Constant<O>> objects = new ArrayList<>();
+		return Deployable.of(objects, objects1 -> {
+			objects1.clear();
+			for (Field f : t.getFields()) {
+				int modifiers = f.getModifiers();
+				if ((Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+					f.setAccessible(true);
+					try {
+						Object o = f.get(null);
+						if (o != null) {
+							if (c.isAssignableFrom(o.getClass())) {
+								objects1.add(new Constant<O>() {
+									@Override
+									public String getName() {
+										return f.getName();
+									}
+
+									@Override
+									public Class<O> getType() {
+										return c;
+									}
+
+									@Override
+									public Class<?> getParent() {
+										return t;
+									}
+
+									@Override
+									public O getValue() {
+										return (O) o;
+									}
+								});
+							}
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+
+	@Override
 	public Constant<T> get(String name) {
 		if (list.isEmpty()) {
 			resolve().deploy();

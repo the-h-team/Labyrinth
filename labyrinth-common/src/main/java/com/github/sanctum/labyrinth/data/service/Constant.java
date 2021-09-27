@@ -27,25 +27,18 @@ public interface Constant<T> {
 		return values(getParent(), getType());
 	}
 
+	static <T> List<Constant<T>> values(Class<T> c) {
+		List<Constant<T>> constants = new ArrayList<>();
+		for (Constant<T> constant : AccessibleConstants.of(c)) {
+			constants.add(constant);
+		}
+		return constants;
+	}
+
 	static <T> List<T> values(Type source, Class<T> c) {
 		Deployable<List<T>> deployable = AccessibleConstants.collect(source).resolve(c);
 		deployable.queue();
 		return deployable.submit().join();
-	}
-
-	static List<Object> values(Type source) {
-		Deployable<Map<Class<?>, List<Object>>> deployable = AccessibleConstants.collect(source).resolve();
-		deployable.queue();
-		Deployable<Map<Class<?>, List<Object>>> deployable2 = ProtectedConstants.collect(source).resolve();
-		deployable2.queue();
-		List<Object> list = new ArrayList<>();
-		for (Collection<Object> l : deployable.submit().join().values()) {
-			list.addAll(l);
-		}
-		for (Collection<Object> l : deployable2.submit().join().values()) {
-			list.addAll(l);
-		}
-		return list;
 	}
 
 	static List<Object> values(Object source) {

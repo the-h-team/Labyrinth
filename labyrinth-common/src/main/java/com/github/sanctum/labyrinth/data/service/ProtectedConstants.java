@@ -20,6 +20,8 @@ public abstract class ProtectedConstants<T> implements Iterable<Constant<T>>{
 
 	public abstract <O> Deployable<List<O>> resolve(Class<O> c);
 
+	public abstract <O> Deployable<List<Constant<O>>> get(Class<O> c);
+
 	public abstract Constant<?> get(String name);
 
 	public abstract int count();

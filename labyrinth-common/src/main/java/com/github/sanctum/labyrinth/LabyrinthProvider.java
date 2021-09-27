@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * ▄▄▌***▄▄▄·*▄▄▄▄·**▄·*▄▌▄▄▄**▪***▐*▄*▄▄▄▄▄*▄*.▄
@@ -79,9 +80,9 @@ public abstract class LabyrinthProvider {
 	 *     </pre>
 	 *
 	 * @param type The service to use.
-	 * @param <T> The type of service.
-	 * @throws IllegalArgumentException If the provided service type isn't loaded.
+	 * @param <T>  The type of service.
 	 * @return The service.
+	 * @throws IllegalArgumentException If the provided service type isn't loaded.
 	 */
 	@Note("This method only works on loaded services!")
 	public static <T extends Service> T getService(ServiceType<T> type) {
@@ -112,11 +113,15 @@ public abstract class LabyrinthProvider {
 	}
 
 	public static List<PluginChannel<?>> getDefaultChannels() {
-		return Constant.values(PluginChannel.class, PluginChannel.class).stream().map(c -> (PluginChannel<?>)c).collect(Collectors.toList());
+		return Constant.values(PluginChannel.class, PluginChannel.class).stream().map(c -> (PluginChannel<?>) c).collect(Collectors.toList());
 	}
 
 	public static Set<LabyrinthUser> getOfflinePlayers() {
 		return Arrays.stream(Bukkit.getOfflinePlayers()).filter(p -> p.getName() != null).map(OfflinePlayer::getName).map(LabyrinthUser::get).collect(Collectors.toSet());
+	}
+
+	public static @Nullable LabyrinthUser getPlayer(String name) {
+		return LabyrinthUser.get(name).isValid() ? LabyrinthUser.get(name) : null;
 	}
 
 }
