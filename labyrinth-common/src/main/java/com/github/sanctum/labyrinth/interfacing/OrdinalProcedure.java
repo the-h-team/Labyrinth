@@ -130,10 +130,11 @@ public abstract class OrdinalProcedure {
 		return discovery.methods().stream().filter(m -> m.getAnnotation(Ordinal.class).value() == ordinal).findFirst().map(method -> {
 			try {
 				return new GenericOrdinalElement(method.invoke(element));
-			} catch (Exception ignored) {
+			} catch (Exception exception) {
+				exception.printStackTrace();
 			}
 			return null;
-		}).orElseThrow(() -> new IllegalArgumentException("Ordinal " + ordinal + " not found."));
+		}).orElseThrow(() -> new RuntimeException("Ordinal " + ordinal + " either not found or access failed."));
 	}
 
 	/**
@@ -150,10 +151,11 @@ public abstract class OrdinalProcedure {
 		return discovery.methods().stream().filter(m -> m.getAnnotation(Ordinal.class).value() == ordinal).findFirst().map(method -> {
 			try {
 				return new GenericOrdinalElement(method.invoke(element, args));
-			} catch (Exception ignored) {
+			} catch (Exception exception) {
+				exception.printStackTrace();
 			}
 			return null;
-		}).orElseThrow(() -> new IllegalArgumentException("Ordinal " + ordinal + " not found."));
+		}).orElseThrow(() -> new RuntimeException("Ordinal " + ordinal + " either not found or access failed."));
 	}
 
 }
