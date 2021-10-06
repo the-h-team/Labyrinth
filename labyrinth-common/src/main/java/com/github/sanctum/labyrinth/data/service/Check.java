@@ -20,7 +20,7 @@ public class Check {
 	}
 
 	public static @Json boolean isJson(String string) {
-		return string.startsWith("{") || string.startsWith("[");
+		return string.startsWith("{") || string.startsWith("[") && string.endsWith("{") || string.endsWith("[");
 	}
 
 	public static @Json String forJson(String string, String message) {

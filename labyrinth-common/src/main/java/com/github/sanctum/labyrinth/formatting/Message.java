@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -111,6 +112,19 @@ public abstract class Message implements Iterable<Message.Chunk> {
 	public abstract Deployable<Void> send(Predicate<Player> predicate);
 
 	public abstract Deployable<Void> clear();
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Message)) return false;
+		Message chunks = (Message) o;
+		return Objects.equals(toJson(), chunks.toJson());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(toJson());
+	}
 
 	/**
 	 * An overall native method factory to easily accessing new message,section & tooltip objects

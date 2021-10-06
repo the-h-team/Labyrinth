@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -101,17 +102,13 @@ public class JsonConfiguration extends Configurable {
 	public boolean save() {
 		try {
 			Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
-			GsonBuilder gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().setLenient();
-			for (JsonAdapterInput<?> serializer : serializers.values()) {
-				gson.registerTypeHierarchyAdapter(serializer.getClassType(), serializer);
-			}
-			Gson g = gson.create();
+			Gson g = JsonAdapter.getJsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().setLenient().create();
 			g.toJson(json, Map.class, writer);
 			writer.flush();
 			writer.close();
 			return true;
 		} catch (Exception ex) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An object of unknown origin was attempted to be saved and failed.");
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("- An object of unknown origin was attempted to be saved and failed.").deploy();
 			ex.printStackTrace();
 			return false;
 		}
@@ -197,7 +194,7 @@ public class JsonConfiguration extends Configurable {
 			//if (type == ItemStack.class) type = JsonItemStack.class;
 			if (target instanceof JSONObject) {
 				JSONObject j = (JSONObject) object;
-				Gson g = new GsonBuilder().create();
+				Gson g = JsonAdapter.getJsonBuilder().create();
 
 				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getClassType())).findFirst().orElse(null);
 				if (d != null) {
@@ -218,7 +215,7 @@ public class JsonConfiguration extends Configurable {
 				}
 			}
 		} catch (ClassNotFoundException exception) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An issue occurred while attempting to deserialize object " + type.getTypeName());
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("- An issue occurred while attempting to deserialize object " + type.getTypeName()).deploy();
 			exception.printStackTrace();
 		}
 		return target;

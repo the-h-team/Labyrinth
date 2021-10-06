@@ -23,6 +23,9 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * An object responsible for sending messages to command senders
+ */
 public class Mailer {
 
 	private CommandSender sender;
@@ -55,52 +58,102 @@ public class Mailer {
 		return new Mailer(plugin);
 	}
 
+	/**
+	 * Who's this mailer for? Tell us here:
+	 *
+	 * @param user The user to message.
+	 * @return The same mailer.
+	 */
 	public Mailer accept(@NotNull CommandSender user) {
 		this.sender = user;
 		return this;
 	}
 
+	/**
+	 * Who's this mailer for? Tell us here:
+	 *
+	 * @param plugin The user to message.
+	 * @return The same mailer.
+	 */
 	public Mailer accept(@NotNull Plugin plugin) {
 		this.plugin = plugin;
 		return this;
 	}
 
+	/**
+	 * @return The prefix for this mailer ready for customization.
+	 */
 	public MailerPrefix prefix() {
 		return this.prefix;
 	}
 
+	/**
+	 * Send a message to the configured command sender {@linkplain this#accept(CommandSender)}
+	 * 
+	 * @param text The message to mail to the sender.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> chat(@NotNull String text) {
 		if (!this.prefix.isEmpty()) {
-			return new Mailable(this, this.sender, MailType.CHAT, prefix.join() + " " + text);
+			return new Mailable(this.sender, MailType.CHAT, prefix.join() + " " + text);
 		}
-		return new Mailable(this, this.sender, MailType.CHAT, text);
+		return new Mailable(this.sender, MailType.CHAT, text);
 	}
 
+	/**
+	 * Send a message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 *
+	 * @param components The message components to mail to the sender.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> chat(@NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
 			BaseComponent[] comps = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
-			return new Mailable(this, this.sender, MailType.CHAT, comps);
+			return new Mailable(this.sender, MailType.CHAT, comps);
 		}
-		return new Mailable(this, this.sender, MailType.CHAT, components);
+		return new Mailable(this.sender, MailType.CHAT, components);
 	}
 
+	/**
+	 * Send an action bar message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 *
+	 * NOTE: Sender must be a {@linkplain Player}
+	 *
+	 * @param text The message to mail to the sender.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> action(@NotNull String text) {
 		if (!this.prefix.isEmpty()) {
-			return new Mailable(this, this.sender, MailType.ACTION, prefix + " " + text);
+			return new Mailable(this.sender, MailType.ACTION, prefix + " " + text);
 		}
-		return new Mailable(this, this.sender, MailType.ACTION, text);
+		return new Mailable(this.sender, MailType.ACTION, text);
 	}
 
+	/**
+	 * Send an action bar message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 *
+	 * NOTE: Sender must be a {@linkplain Player}
+	 *
+	 * @param components The message components to mail to the sender.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> action(@NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
 			BaseComponent[] comps = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
-			return new Mailable(this, this.sender, MailType.ACTION, comps);
+			return new Mailable(this.sender, MailType.ACTION, comps);
 		}
-		return new Mailable(this, this.sender, MailType.ACTION, components);
+		return new Mailable(this.sender, MailType.ACTION, components);
 	}
 
+	/**
+	 * Send a title to the registered command sender {@linkplain this#accept(CommandSender)}
+	 *
+	 * @param title The initial title
+	 * @param subtitle The sub title.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> title(final @NotNull String title, final @Nullable String subtitle) {
-		return new Mailable(this, this.sender, MailType.TITLE, new MailableContext<String>() {
+		return new Mailable(this.sender, MailType.TITLE, new MailableContext<String>() {
 			@Override
 			public String getString() {
 				return title;
@@ -113,9 +166,16 @@ public class Mailer {
 		});
 	}
 
+	/**
+	 * Announce a text message to specific players online.
+	 *
+	 * @param predicate The player based predicate.
+	 * @param message The message to send.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> announce(final @NotNull Predicate<Player> predicate, @NotNull String message) {
 		final String target = !this.prefix.isEmpty() ? this.prefix.join() + " " + message : message;
-		return new Mailable(this, Bukkit.getConsoleSender(), MailType.BROADCAST, new MailableContext<Predicate<Player>>() {
+		return new Mailable(Bukkit.getConsoleSender(), MailType.BROADCAST, new MailableContext<Predicate<Player>>() {
 			@Override
 			public String getString() {
 				return target;
@@ -128,12 +188,19 @@ public class Mailer {
 		});
 	}
 
+	/**
+	 * Announce message components to specific players online.
+	 *
+	 * @param predicate The player based predicate.
+	 * @param components The message components to send.
+	 * @return A mailer deployable.
+	 */
 	public Deployable<Mailer> announce(final @NotNull Predicate<Player> predicate, @NotNull BaseComponent... components) {
 		if (!this.prefix.isEmpty()) {
 			components = new FancyMessage().append(new TextChunk(this.prefix.join())).append(new TextChunk(" ")).append(new ComponentChunk(components)).build();
 		}
 		@NotNull BaseComponent[] finalComponents = components;
-		return new Mailable(this, Bukkit.getConsoleSender(), MailType.BROADCAST, new MailableContext<Predicate<Player>>() {
+		return new Mailable(Bukkit.getConsoleSender(), MailType.BROADCAST, new MailableContext<Predicate<Player>>() {
 			@Override
 			public String getString() {
 				return new ComponentChunk(finalComponents).toJson();
@@ -147,21 +214,20 @@ public class Mailer {
 	}
 
 	public Deployable<Mailer> info(@NotNull String text) {
-		return new Mailable(this, this.plugin, Level.INFO, text);
+		return new Mailable(this.plugin, Level.INFO, text);
 	}
 
 	public Deployable<Mailer> warn(@NotNull String text) {
-		return new Mailable(this, this.plugin, Level.WARNING, text);
+		return new Mailable(this.plugin, Level.WARNING, text);
 	}
 
 	public Deployable<Mailer> error(@NotNull String text) {
-		return new Mailable(this, this.plugin, Level.SEVERE, text);
+		return new Mailable(this.plugin, Level.SEVERE, text);
 	}
 
 
-	static class Mailable implements Deployable<Mailer> {
+	class Mailable implements Deployable<Mailer> {
 
-		private final Mailer parent;
 		private final MailerResult result;
 		private String text;
 		private Level level;
@@ -170,8 +236,7 @@ public class Mailer {
 		private MailableContext<Predicate<Player>> predicate;
 		private MailType type;
 
-		public Mailable(Mailer parent, CommandSender player, MailType type, MailableContext<?> context) {
-			this.parent = parent;
+		Mailable(CommandSender player, MailType type, MailableContext<?> context) {
 			if (context.getAttachment() instanceof String) {
 				this.title = (MailableContext<String>) context;
 			} else {
@@ -181,22 +246,19 @@ public class Mailer {
 			this.type = type;
 		}
 
-		public Mailable(Mailer parent, CommandSender player, MailType type, BaseComponent... components) {
-			this.parent = parent;
+		Mailable(CommandSender player, MailType type, BaseComponent... components) {
 			this.result = new MailerResult(player);
 			this.type = type;
 			this.components = components;
 		}
 
-		public Mailable(Mailer parent, CommandSender player, MailType type, String text) {
-			this.parent = parent;
+		Mailable(CommandSender player, MailType type, String text) {
 			this.result = new MailerResult(player);
 			this.type = type;
 			this.text = text;
 		}
 
-		public Mailable(Mailer parent, Plugin plugin, Level level, String text) {
-			this.parent = parent;
+		Mailable(Plugin plugin, Level level, String text) {
 			this.result = new MailerResult(plugin);
 			this.level = level;
 			this.text = text;
@@ -211,7 +273,7 @@ public class Mailer {
 		@Override
 		public Deployable<Mailer> deploy(Consumer<? super Mailer> consumer) {
 			deploy();
-			consumer.accept(parent);
+			consumer.accept(Mailer.this);
 			return this;
 		}
 
@@ -228,7 +290,7 @@ public class Mailer {
 					switch (type) {
 						case ACTION:
 							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case CHAT:
 							if (components != null) {
@@ -237,7 +299,7 @@ public class Mailer {
 								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
 							}
 
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case BROADCAST:
 							for (Player online : Bukkit.getOnlinePlayers()) {
@@ -250,7 +312,7 @@ public class Mailer {
 									}
 								}
 							}
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
@@ -259,7 +321,7 @@ public class Mailer {
 							} else {
 								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
 							}
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 					}
 				} else {
@@ -267,7 +329,7 @@ public class Mailer {
 						case ACTION:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
 						case CHAT:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
@@ -276,7 +338,7 @@ public class Mailer {
 								} else {
 									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
 							break;
 						case BROADCAST:
@@ -291,7 +353,7 @@ public class Mailer {
 										}
 									}
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
 							break;
 						case TITLE:
@@ -302,7 +364,7 @@ public class Mailer {
 								} else {
 									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
 							break;
 					}
@@ -311,11 +373,11 @@ public class Mailer {
 				Plugin plugin = toPlugin(result.getSource());
 				if (timeout <= 0) {
 					plugin.getLogger().log(this.level, this.text);
-					consumer.accept(this.parent);
+					consumer.accept(Mailer.this);
 				} else {
 					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 						plugin.getLogger().log(this.level, this.text);
-						consumer.accept(this.parent);
+						consumer.accept(Mailer.this);
 					}, HUID.randomID().toString(), timeout);
 				}
 			}
@@ -329,7 +391,7 @@ public class Mailer {
 					switch (type) {
 						case ACTION:
 							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case CHAT:
 							if (components != null) {
@@ -337,7 +399,7 @@ public class Mailer {
 							} else {
 								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
 							}
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case BROADCAST:
 							for (Player online : Bukkit.getOnlinePlayers()) {
@@ -350,7 +412,7 @@ public class Mailer {
 									}
 								}
 							}
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
@@ -359,7 +421,7 @@ public class Mailer {
 							} else {
 								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
 							}
-							consumer.accept(parent);
+							consumer.accept(Mailer.this);
 							break;
 					}
 				} else {
@@ -367,7 +429,7 @@ public class Mailer {
 						case ACTION:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
 						case CHAT:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
@@ -376,7 +438,7 @@ public class Mailer {
 								} else {
 									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
 							break;
 						case BROADCAST:
@@ -391,7 +453,7 @@ public class Mailer {
 										}
 									}
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
 							break;
 						case TITLE:
@@ -402,7 +464,7 @@ public class Mailer {
 								} else {
 									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
 								}
-								consumer.accept(this.parent);
+								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
 							break;
 					}
@@ -411,11 +473,11 @@ public class Mailer {
 				Plugin plugin = toPlugin(result.getSource());
 				if (date == null) {
 					plugin.getLogger().log(this.level, this.text);
-					consumer.accept(this.parent);
+					consumer.accept(Mailer.this);
 				} else {
 					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 						plugin.getLogger().log(this.level, this.text);
-						consumer.accept(this.parent);
+						consumer.accept(Mailer.this);
 					}, HUID.randomID().toString(), date);
 				}
 			}
@@ -424,7 +486,7 @@ public class Mailer {
 
 		@Override
 		public <O> DeployableMapping<O> map(Function<? super Mailer, ? extends O> mapper) {
-			return new DeployableMapping<>(this.parent, (Function<? super Object, ? extends O>) mapper);
+			return new DeployableMapping<>(Mailer.this, (Function<? super Object, ? extends O>) mapper);
 		}
 
 		@Override
@@ -596,7 +658,7 @@ public class Mailer {
 
 		@Override
 		public CompletableFuture<Mailer> submit() {
-			return CompletableFuture.supplyAsync(() -> this.parent);
+			return CompletableFuture.supplyAsync(() -> Mailer.this);
 		}
 
 		CommandSender toSender(Object o) {

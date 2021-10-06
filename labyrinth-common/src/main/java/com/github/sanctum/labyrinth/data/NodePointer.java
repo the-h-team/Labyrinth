@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * This annotation used to mark the exact package location of a JSON serializable object.
  *
- * But now with less restrictions than v1.0 you can serialize objects under any name alias.
+ * But now with less restrictions than v1.0 you can serialize objects under any alias.
  *
  * @author Hempfest
  * @version 2.0
@@ -28,7 +28,9 @@ public @interface NodePointer {
 	String value();
 
 	/**
-	 * @return The implementation for adapting.
+	 * Optional re-direction.
+	 *
+	 * @return The implementation for adapting. Comparative to bukkit's {@link org.bukkit.configuration.serialization.DelegateDeserialization}
 	 */
 	Class<? extends JsonAdapter<?>> type() default DummyAdapter.class;
 

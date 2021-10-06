@@ -21,7 +21,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 @NodePointer("org.bukkit.inventory.ItemStack")
-public class ItemStackSerializable implements JsonAdapter<ItemStack> {
+public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 
 	private final Gson gson = new GsonBuilder().create();
 
@@ -64,35 +64,36 @@ public class ItemStackSerializable implements JsonAdapter<ItemStack> {
 
 	@Override
 	public ItemStack read(Map<String, Object> o) {
-		JSONObject ob = (JSONObject) o.get("meta");
-		byte data = Byte.parseByte(String.valueOf((long) ob.get("data")));
-		Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
-
 		int amount = Integer.parseInt(String.valueOf(o.get("amount")));
 		Material type = Material.valueOf((String) o.get("type"));
-		Item.Edit edit = Items.edit();
-		enchants.forEach((label, l) -> {
-			int integer = Integer.parseInt(String.valueOf(l));
-			String key = label.split(":")[0];
-			String space = label.split(":")[1];
-			edit.addEnchantment(Enchantment.getByKey(new NamespacedKey(key, space)), integer);
-		});
-		if (ob.get("displayname") != null) {
-			String name = (String) ob.get("displayname");
-			edit.setTitle(name);
-		}
-		if (ob.get("lore") != null) {
-			List<String> name = (JSONArray) ob.get("lore");
-			edit.setLore(name);
-		}
-		if (ob.get("flags") != null) {
-			List<String> flags = (JSONArray) ob.get("flags");
-			for (String f : flags) {
-				edit.setFlags(ItemFlag.valueOf(f));
-			}
-		}
 		ItemStack stack = new ItemStack(type);
-		stack.getData().setData(data);
+		Item.Edit edit = Items.edit();
+		JSONObject ob = (JSONObject) o.get("meta");
+		if (ob != null) {
+			byte data = Byte.parseByte(String.valueOf((long) ob.get("data")));
+			Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
+			enchants.forEach((label, l) -> {
+				int integer = Integer.parseInt(String.valueOf(l));
+				String key = label.split(":")[0];
+				String space = label.split(":")[1];
+				edit.addEnchantment(Enchantment.getByKey(new NamespacedKey(key, space)), integer);
+			});
+			if (ob.get("displayname") != null) {
+				String name = (String) ob.get("displayname");
+				edit.setTitle(name);
+			}
+			if (ob.get("lore") != null) {
+				List<String> name = (JSONArray) ob.get("lore");
+				edit.setLore(name);
+			}
+			if (ob.get("flags") != null) {
+				List<String> flags = (JSONArray) ob.get("flags");
+				for (String f : flags) {
+					edit.setFlags(ItemFlag.valueOf(f));
+				}
+			}
+			stack.getData().setData(data);
+		}
 		edit.setItem(stack);
 		edit.setAmount(amount);
 		return edit.build();

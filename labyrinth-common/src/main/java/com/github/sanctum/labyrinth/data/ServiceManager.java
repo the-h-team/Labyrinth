@@ -9,7 +9,7 @@ import java.util.Map;
  * A small and simple service loader.
  * @author rigobert0
  */
-public class ServiceManager {
+public final class ServiceManager {
 	final Map<ServiceType<?>, Service> services;
 
 	public ServiceManager() {

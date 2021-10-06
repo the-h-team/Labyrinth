@@ -270,11 +270,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public String toJson() {
-		GsonBuilder builder = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().serializeNulls().setLenient().serializeSpecialFloatingPointValues();
-		for (Map.Entry<String, JsonAdapterInput<?>> en : Configurable.serializers.entrySet()) {
-			builder.registerTypeAdapter(en.getValue().getType(), en.getValue());
-		}
-		return builder.create().toJson(get());
+		return JsonAdapter.getJsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().serializeNulls().setLenient().serializeSpecialFloatingPointValues().create().toJson(get());
 	}
 
 	@Override

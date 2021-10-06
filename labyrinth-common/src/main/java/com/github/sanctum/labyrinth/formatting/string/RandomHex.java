@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
+import com.github.sanctum.labyrinth.annotation.Json;
 import java.util.Random;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -20,8 +21,8 @@ public class RandomHex extends Number implements CustomColor {
 		this.id = name;
 		this.c1 = c1;
 		this.c2 = c2;
-		this.color = new GradientColor(this.c1, this.c2);
-		this.hex = java.awt.Color.decode(this.c1).getRGB();
+		this.color = new GradientColor(c1, c2);
+		this.hex = java.awt.Color.decode(c1).getRGB();
 	}
 
 	public RandomHex() {
@@ -69,6 +70,7 @@ public class RandomHex extends Number implements CustomColor {
 	}
 
 	@Override
+	@Json(key = "name")
 	public String name() {
 		return this.id;
 	}
@@ -95,11 +97,13 @@ public class RandomHex extends Number implements CustomColor {
 	}
 
 	@Override
+	@Json(key = "color1")
 	public String getStart() {
 		return this.c1;
 	}
 
 	@Override
+	@Json(key = "color2")
 	public String getEnd() {
 		return this.c2;
 	}

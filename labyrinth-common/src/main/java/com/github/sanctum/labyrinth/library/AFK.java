@@ -41,6 +41,7 @@ public class AFK {
 	}
 
 	public static AFK supply(Player player) {
+		if (player == null) return null;
 		if (get(player) != null) {
 			return get(player);
 		}
@@ -121,6 +122,7 @@ public class AFK {
 	}
 
 	public static AFK get(Player player) {
+		if (player == null) return null;
 		for (AFK afk : HISTORY) {
 			if (afk.getPlayer().getUniqueId().equals(player.getUniqueId())) {
 				return afk;

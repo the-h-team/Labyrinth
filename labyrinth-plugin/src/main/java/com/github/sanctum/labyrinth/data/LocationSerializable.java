@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 @NodePointer("org.bukkit.Location")
-public class LocationSerializable implements JsonAdapter<Location> {
+public final class LocationSerializable implements JsonAdapter<Location> {
 
 	@Override
 	public JsonElement write(Location l) {

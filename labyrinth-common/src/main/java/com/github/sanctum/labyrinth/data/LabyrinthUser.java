@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
+import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.VaultPlayer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ public class LabyrinthUser implements Nameable {
 
 	private static final Map<String, LabyrinthUser> users = new HashMap<>();
 	private static FileManager file;
+	private boolean checked;
 	private OfflinePlayer target = null;
 	private final String name;
 	private final List<String> names = new ArrayList<>();
@@ -38,7 +40,7 @@ public class LabyrinthUser implements Nameable {
 		LabyrinthUser user = users.get(name);
 		if (user == null) {
 			LabyrinthUser n = new LabyrinthUser(name);
-			if (n.getId() != null) {
+			if (n.isValid()) {
 				users.put(name, n);
 				return n;
 			}
@@ -46,9 +48,17 @@ public class LabyrinthUser implements Nameable {
 		return user;
 	}
 
+	public UUID getId() {
+		return this.id;
+	}
+
 	@Override
 	public @NotNull String getName() {
 		return this.name;
+	}
+
+	public AFK toAFK() {
+		return AFK.supply(toBukkit().getPlayer());
 	}
 
 	public OfflinePlayer toBukkit() {
@@ -58,12 +68,12 @@ public class LabyrinthUser implements Nameable {
 		return target;
 	}
 
-	public boolean isValid() {
-		return Arrays.stream(Bukkit.getOfflinePlayers()).anyMatch(p -> this.name.equals(p.getName()));
+	public boolean isOnline() {
+		return toBukkit().getPlayer() != null;
 	}
 
-	public UUID getId() {
-		return this.id;
+	public boolean isValid() {
+		return Arrays.stream(Bukkit.getOfflinePlayers()).anyMatch(p -> this.name.equals(p.getName()));
 	}
 
 	public VaultPlayer toVault() {
@@ -76,6 +86,8 @@ public class LabyrinthUser implements Nameable {
 
 	@Note("This is just a utility method, you should never use it!!!")
 	public boolean correctId(Player player) {
+		if (checked) return false;
+		checked = true;
 		if (this.id != null) {
 			if (player.getUniqueId() != null) {
 				if (!player.getUniqueId().equals(id)) {

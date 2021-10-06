@@ -113,7 +113,7 @@ public abstract class LabyrinthProvider {
 	}
 
 	public static List<PluginChannel<?>> getDefaultChannels() {
-		return Constant.values(PluginChannel.class, PluginChannel.class).stream().map(c -> (PluginChannel<?>) c).collect(Collectors.toList());
+		return Constant.values(PluginChannel.class).stream().map(c -> (PluginChannel<?>)c.getValue()).collect(Collectors.toList());
 	}
 
 	public static Set<LabyrinthUser> getOfflinePlayers() {

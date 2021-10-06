@@ -36,20 +36,19 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		JsonObject o = new JsonObject();
 		if (getKey() == null)
 			throw new RuntimeException("Serializable data for JSON files must be annotated with NodePointer");
-		o.add(getKey(), this.serializer.write(t));
+		o.add(getKey(), write(t));
 		return o;
 	}
 
 	@Override
 	public T deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-		Map<String, Object> map = gson.fromJson(jsonElement, new TypeToken<Map<String, Object>>() {
-		}.getType());
+		Map<String, Object> map = gson.fromJson(jsonElement, new TypeToken<Map<String, Object>>(){}.getType());
 		return read(map);
 	}
 
 	public String getKey() {
-		String test = AnnotationDiscovery.of(NodePointer.class, serializer).map((r, u) -> r.value());
-		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getClassType()).map((r, u) -> r.value());
+		String test = AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((r, u) -> r.value());
+		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getClassType()).mapFromClass((r, u) -> r.value());
 	}
 
 	@Override

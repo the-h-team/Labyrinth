@@ -54,7 +54,7 @@ public abstract class Vent {
 	}
 
 	public String getName() {
-		return this.getType().getSimpleName();
+		return getClass().getSimpleName();
 	}
 
 	public void setCancelled(boolean cancelled) {
@@ -84,14 +84,6 @@ public abstract class Vent {
 
 	public final Plugin getHost() {
 		return this.plugin;
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#register(Plugin, Object)} instead!
-	 */
-	@Deprecated
-	public static void register(@NotNull Plugin host, @NotNull Object listener) {
-		getMap().subscribe(host, listener);
 	}
 
 	public VentMap getVentMap() {
@@ -124,37 +116,6 @@ public abstract class Vent {
 			return this;
 		}
 
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#registerAll(Plugin, Object...)} instead!
-	 */
-	@Deprecated
-	public static void registerAll(@NotNull Plugin host, @NotNull Object... listeners) {
-		getMap().registerAll(host, listeners);
-
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#subscribe(Subscription)} instead!
-	 */
-	@Deprecated
-	public static <T extends Vent> void subscribe(Subscription<T> subscription) {
-		getMap().subscribe(subscription);
-	}
-
-	/**
-	 * @deprecated use {@link VentMap#chain(Link)} instead!
-	 */
-	@Deprecated
-	public static void chain(Link link) {
-		getMap().chain(link);
-	}
-
-	//Check if #getClass also works, this method may be deprecated soon™
-	@SuppressWarnings("unchecked")
-	public <T extends Vent> Class<T> getType() {
-		return (Class<T>) getClass();
 	}
 
 	public enum Runtime {
@@ -515,7 +476,7 @@ public abstract class Vent {
 		@SuppressWarnings("unchecked")
 		private List<Class<? extends Vent>> generateAssignableClasses(Class<? extends Vent> ventClass) {
 			List<Class<? extends Vent>> callingClasses = new ArrayList<>();
-			Class<? extends Vent> temp = event.getType();
+			Class<? extends Vent> temp = event.getClass();
 			do {
 				callingClasses.add(temp);
 				temp = (Class<? extends Vent>) temp.getSuperclass();

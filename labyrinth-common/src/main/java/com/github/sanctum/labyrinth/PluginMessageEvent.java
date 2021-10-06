@@ -4,6 +4,9 @@ import com.github.sanctum.labyrinth.data.PluginChannel;
 import com.github.sanctum.labyrinth.data.PluginMessage;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 
+/**
+ * An event responsible for relaying messages containing different object oriented information.
+ */
 public final class PluginMessageEvent extends Vent {
 
 	private final PluginMessage<?> message;
@@ -14,10 +17,16 @@ public final class PluginMessageEvent extends Vent {
 		this.channel = channel;
 	}
 
+	/**
+	 * @return The channel messaged.
+	 */
 	public PluginChannel<?> getChannel() {
 		return channel;
 	}
 
+	/**
+	 * @return The message received.
+	 */
 	public PluginMessage<?> getMessage() {
 		return message;
 	}

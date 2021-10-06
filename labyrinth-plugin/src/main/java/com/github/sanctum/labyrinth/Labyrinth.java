@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
+import com.github.sanctum.labyrinth.data.ChunkSerializable;
 import com.github.sanctum.labyrinth.data.Configurable;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
@@ -12,8 +13,11 @@ import com.github.sanctum.labyrinth.data.ItemStackSerializable;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
+import com.github.sanctum.labyrinth.data.MessageSerializable;
+import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
+import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.VaultImplementation;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -27,9 +31,9 @@ import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
-import com.github.sanctum.labyrinth.formatting.MessageSerializable;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
@@ -56,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
@@ -128,9 +133,13 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedIsNew = LabyrinthAPI.super.isNew();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
+
 		Configurable.registerClass(ItemStackSerializable.class);
 		Configurable.registerClass(LocationSerializable.class);
+		Configurable.registerClass(TemplateSerializable.class);
+		Configurable.registerClass(MetaTemplateSerializable.class);
 		Configurable.registerClass(MessageSerializable.class);
+		Configurable.registerClass(ChunkSerializable.class);
 		Configurable.registerClass(CustomColor.class);
 
 		ConfigurationSerialization.registerClass(CustomColor.class);
@@ -185,6 +194,10 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		for (int id : tasks) {
 			getServer().getScheduler().cancelTask(id);
 		}
+
+		getScheduler(ASYNCHRONOUS).purge();
+		getScheduler(SYNCHRONOUS).purge();
+
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException ignored) {
@@ -202,37 +215,34 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		LabyrinthUser user = LabyrinthUser.get(e.getPlayer().getName());
 		if (user != null) {
 			if (user.correctId(e.getPlayer())) {
-				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s user id has been updated.");
+				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s id has been updated.");
 			}
 		} else {
-			getEmptyMailer().error("- User " + e.getPlayer().getName() + " has NO unique id!!");
+			getEmptyMailer().error("- User " + e.getPlayer().getName() + " has NO unique id!! (This is not the fault of labyrinth, perhaps cracked problems)");
 		}
 	}
 
 	@Subscribe
 	public void onComponent(DefaultEvent.Communication e) {
 		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
-			DefaultEvent.Communication.ChatCommand cmd = e.getCommand().orElse(null);
-			if (cmd == null) return;
-			String label = cmd.getText();
+			e.getCommand().ifPresent(cmd -> {
+				String label = cmd.getText();
 
-			ActionComponent component = components.get(label);
+				ActionComponent component = components.get(label);
 
-			if (label.equalsIgnoreCase("test")) {
-			}
-
-			if (component != null) {
-				if (!component.isMarked()) {
-					if (!component.isTooltip()) {
-						Schedule.sync(() -> component.action().run()).run();
-						component.setMarked(true);
-						Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
-					} else {
-						Schedule.sync(() -> component.action().run()).run();
+				if (component != null) {
+					if (!component.isMarked()) {
+						if (!component.isTooltip()) {
+							Schedule.sync(() -> component.action().run()).run();
+							component.setMarked(true);
+							Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
+						} else {
+							Schedule.sync(() -> component.action().run()).run();
+						}
 					}
+					e.setCancelled(true);
 				}
-				e.setCancelled(true);
-			}
+			});
 		}
 	}
 

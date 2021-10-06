@@ -9,6 +9,7 @@ import java.util.Map;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.melion.rgbchat.chat.TextColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @NodePointer(value = "CustomColor", type = RandomHex.class)
 @SerializableAs("CustomColor")
+@DelegateDeserialization(RandomHex.class)
 public interface CustomColor extends JsonAdapter<CustomColor>, ConfigurationSerializable {
 
 	String name();
