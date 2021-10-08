@@ -126,7 +126,7 @@ _API Table of Contents_:
 * ### General-Purpose Utilities
   - [Applicable Data]()
   - [Annotation Discovery]()
-  - [Base64 Serialization]()
+  - [Base64 Serialization](https://github.com/the-h-team/Labyrinth/wiki/Base64-Serialization)
   - [Color Creation](https://github.com/the-h-team/Labyrinth/wiki/Color-stuff)
   - [Cuboid Generation]()
   - [Custom Event Abstraction & Listening](https://github.com/the-h-team/Labyrinth/wiki/Custom-Events)
