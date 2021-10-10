@@ -180,17 +180,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	@Override
 	public void onDisable() {
 
-		for (PersistentContainer component : containers) {
-			for (String key : component.keySet()) {
-				try {
-					component.save(key);
-				} catch (IOException e) {
-					getLogger().severe("- Unable to save meta '" + key + "' from namespace " + component.getKey().getNamespace() + ":" + component.getKey().getKey());
-					e.printStackTrace();
-				}
-			}
-		}
-
 		for (int id : tasks) {
 			getServer().getScheduler().cancelTask(id);
 		}
