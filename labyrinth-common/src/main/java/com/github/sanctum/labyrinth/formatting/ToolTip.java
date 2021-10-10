@@ -229,13 +229,26 @@ public abstract class ToolTip<T> {
 			return clazz;
 		}
 
-		private static Class<?> getNMSClass(String nmsClassName) {
+
+
+		private Class<?> getNMSClass(String nmsClassName) {
 			String name = Bukkit.getServer().getClass().getPackage().getName();
 			String version = name.substring(name.lastIndexOf('.') + 1) + ".";
 			String clazzName = "net.minecraft.server." + version + nmsClassName;
 			Class<?> clazz;
 			try {
 				clazz = Class.forName(clazzName);
+			} catch (Throwable t) {
+				t.printStackTrace();
+				return null;
+			}
+			return clazz;
+		}
+
+		private Class<?> getNewClass(String nmsClassName) {
+			Class<?> clazz;
+			try {
+				clazz = Class.forName(nmsClassName);
 			} catch (Throwable t) {
 				t.printStackTrace();
 				return null;
@@ -258,8 +271,8 @@ public abstract class ToolTip<T> {
 			Method asNMSCopyMethod = getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
 
 			// NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
-			Class<?> nmsItemStackClazz = getNMSClass("ItemStack");
-			Class<?> nbtTagCompoundClazz = getNMSClass("NBTTagCompound");
+			Class<?> nmsItemStackClazz = Bukkit.getVersion().contains("1.17") ? getNewClass("net.minecraft.world.item.ItemStack") : getNMSClass("ItemStack");
+			Class<?> nbtTagCompoundClazz = Bukkit.getVersion().contains("1.17") ? getNewClass("net.minecraft.nbt.NBTTagCompound") : getNMSClass("NBTTagCompound");
 			Method saveNmsItemStackMethod = getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
 
 			Object nmsNbtTagCompoundObj; // This will just be an empty NBTTagCompound instance to invoke the saveNms method
