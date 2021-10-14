@@ -269,61 +269,61 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public List<?> getList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
 		return (List<?>) o;
 	}
 
 	@Override
 	public Map<?, ?> getMap() {
 		Object o = get();
-		if (o == null) return new HashMap<>();
-		if (!(o instanceof Map)) return new HashMap<>();
+		if (o == null) return null;
+		if (!(o instanceof Map)) return null;
 		return (HashMap<?, ?>) o;
 	}
 
 	@Override
 	public List<String> getStringList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
-		if (!(((List<?>) o).get(0) instanceof String)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		if (!(((List<?>) o)).isEmpty() && !(((List<?>) o).get(0) instanceof String)) return null;
 		return (List<String>) o;
 	}
 
 	@Override
 	public List<Integer> getIntegerList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
-		if (!(((List<?>) o).get(0) instanceof Integer)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		if (!(((List<?>) o)).isEmpty() && !(((List<?>) o).get(0) instanceof Integer)) return null;
 		return (List<Integer>) o;
 	}
 
 	@Override
 	public List<Double> getDoubleList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
-		if (!(((List<?>) o).get(0) instanceof Double)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		if (!(((List<?>) o)).isEmpty() && !(((List<?>) o).get(0) instanceof Double)) return null;
 		return (List<Double>) o;
 	}
 
 	@Override
 	public List<Float> getFloatList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
-		if (!(((List<?>) o).get(0) instanceof Float)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		if (!(((List<?>) o)).isEmpty() && !(((List<?>) o).get(0) instanceof Float)) return null;
 		return (List<Float>) o;
 	}
 
 	@Override
 	public List<Long> getLongList() {
 		Object o = get();
-		if (o == null) return new ArrayList<>();
-		if (!(o instanceof List)) return new ArrayList<>();
-		if (!(((List<?>) o).get(0) instanceof Long)) return new ArrayList<>();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		if (!(((List<?>) o)).isEmpty() && !(((List<?>) o).get(0) instanceof Long)) return null;
 		return (List<Long>) o;
 	}
 

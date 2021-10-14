@@ -6,12 +6,16 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Total safe encapsulation of serializable objects for persistent storage use.
@@ -121,9 +125,9 @@ public class PersistentContainer extends PersistentData {
 	 * <p>
 	 * The persistence of this object will be attempted on shutdown.
 	 *
-	 * @param key the key delimiter for this value
+	 * @param key   the key delimiter for this value
 	 * @param value the value to store
-	 * @param <R> the type this value represents
+	 * @param <R>   the type this value represents
 	 * @return the stored value
 	 */
 	public <R> R attach(String key, R value) {
@@ -137,9 +141,9 @@ public class PersistentContainer extends PersistentData {
 	 * <p>
 	 * The persistence of this object will <strong>NOT</strong> be attempted on shutdown.
 	 *
-	 * @param key the key delimiter for this value
+	 * @param key   the key delimiter for this value
 	 * @param value the value to store
-	 * @param <R> the type this value represents
+	 * @param <R>   the type this value represents
 	 * @return the stored value
 	 */
 	public <R> R lend(String key, R value) {
@@ -149,6 +153,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	// TODO: Explicit throw of custom exception on get fail vs nullity contract
+
 	/**
 	 * Get a specified value by class type &amp; key delimiter.
 	 *
@@ -157,8 +162,8 @@ public class PersistentContainer extends PersistentData {
 	 * method as well as loading found but not cached values into the container.
 	 *
 	 * @param type the type this value is assignable from
-	 * @param key the key delimiter for this value
-	 * @param <R> the type this value represents
+	 * @param key  the key delimiter for this value
+	 * @param <R>  the type this value represents
 	 * @return the desired persistent value otherwise null if not found or not
 	 * assignable from the same class type
 	 */
@@ -250,6 +255,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	// TODO: Explicit throw on serialization fail vs nullity contract
+
 	/**
 	 * Serialize a specified value from this container by its key delimiter.
 	 *

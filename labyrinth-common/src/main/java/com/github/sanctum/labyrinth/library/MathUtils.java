@@ -46,7 +46,7 @@ public class MathUtils {
 	 * @return the formatted amount as a string (number compliant)
 	 */
 	public String format(Locale locale) {
-		return NumberFormat.getNumberInstance(locale).format(format(2));
+		return NumberFormat.getNumberInstance(locale).format(n.doubleValue());
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class MathUtils {
 	 * @return the formatted amount as a string (number compliant)
 	 */
 	public String formatCurrency(Locale locale) {
-		return NumberFormat.getCurrencyInstance(locale).format(format(2));
+		return NumberFormat.getCurrencyInstance(locale).format(n.doubleValue());
 	}
 
 	/**

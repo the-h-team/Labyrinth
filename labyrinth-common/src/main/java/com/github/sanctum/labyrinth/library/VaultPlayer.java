@@ -19,12 +19,10 @@ public class VaultPlayer {
 
 	private static final List<VaultPlayer> CACHE = new LinkedList<>();
 
-	protected static final Permission PERMS;
-
 	private final LabyrinthUser player;
 
-	static {
-		PERMS = Bukkit.getServicesManager().load(Permission.class);
+	static Permission getPerms() {
+		return Bukkit.getServicesManager().load(Permission.class);
 	}
 
 	protected VaultPlayer(@NotNull OfflinePlayer player) {
@@ -56,35 +54,35 @@ public class VaultPlayer {
 	}
 
 	public Group getGroup(String world) {
-		return new Group(PERMS.getPrimaryGroup(world, player.toBukkit()), world);
+		return new Group(getPerms().getPrimaryGroup(world, player.toBukkit()), world);
 	}
 
 	public Group[] getGroups(String world) {
-		return Arrays.stream(PERMS.getPlayerGroups(world, this.player.toBukkit())).map(s -> new Group(s, world)).toArray(Group[]::new);
+		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.toBukkit())).map(s -> new Group(s, world)).toArray(Group[]::new);
 	}
 
 	public boolean has(org.bukkit.permissions.Permission permission, String world) {
-		return PERMS.playerHas(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerHas(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean give(org.bukkit.permissions.Permission permission, String world) {
-		return PERMS.playerAdd(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerAdd(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean take(org.bukkit.permissions.Permission permission, String world) {
-		return PERMS.playerRemove(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerRemove(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean has(String permission, String world) {
-		return PERMS.playerHas(world, this.player.toBukkit(), permission);
+		return getPerms().playerHas(world, this.player.toBukkit(), permission);
 	}
 
 	public boolean give(String permission, String world) {
-		return PERMS.playerAdd(world, this.player.toBukkit(), permission);
+		return getPerms().playerAdd(world, this.player.toBukkit(), permission);
 	}
 
 	public boolean take(String permission, String world) {
-		return PERMS.playerRemove(world, this.player.toBukkit(), permission);
+		return getPerms().playerRemove(world, this.player.toBukkit(), permission);
 	}
 
 	public org.bukkit.permissions.Permission[] getKnownPermissions(String world) {

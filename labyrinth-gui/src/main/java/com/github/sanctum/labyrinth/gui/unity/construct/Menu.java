@@ -1138,7 +1138,8 @@ public abstract class Menu {
 							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getCursor(), e.getView());
 							if (click == null) {
 								if (Menu.this.click != null) {
-									Menu.this.click.apply(clickElement);;
+									Menu.this.click.apply(clickElement);
+									;
 								}
 							} else {
 								click.apply(clickElement);
@@ -1282,7 +1283,7 @@ public abstract class Menu {
 							ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
 							if (getProperties().contains(Property.SHAREABLE)) {
 								if (getInventory().isPaginated()) {
-									InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
+									InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
 									element1.setPage(inv.getGlobalSlot());
 								}
 
@@ -1320,7 +1321,7 @@ public abstract class Menu {
 					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
 					if (getProperties().contains(Property.SHAREABLE)) {
 						if (getInventory().isPaginated()) {
-							InventoryElement.Paginated inv = (InventoryElement.Paginated)getInventory();
+							InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
 							el.setPage(inv.getGlobalSlot());
 						}
 
