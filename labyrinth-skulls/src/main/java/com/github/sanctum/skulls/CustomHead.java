@@ -311,7 +311,7 @@ public abstract class CustomHead implements SkullObject {
 		@Deprecated
 		protected static void load(String name, String category, ItemStack item) {
 			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 
 			if (item.getType() != type)
 				throw new IllegalStateException(item.getType().name() + " is not a direct representation of " + type.name());

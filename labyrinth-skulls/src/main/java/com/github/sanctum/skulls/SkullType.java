@@ -28,10 +28,10 @@ public enum SkullType implements SkullObject {
 		if (value.equals("LP")) {
 			boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("PLAYER_HEAD"));
 			if (isNew) {
-				this.itemStack = new ItemStack(Items.getMaterial("playerhead"));
+				this.itemStack = new ItemStack(Items.findMaterial("playerhead"));
 			} else {
 				//noinspection deprecation
-				this.itemStack = new ItemStack(Items.getMaterial("skullitem"), 1, (short) 3);
+				this.itemStack = new ItemStack(Items.findMaterial("skullitem"), 1, (short) 3);
 			}
 
 		} else if (value.equals("LC")) {
