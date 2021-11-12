@@ -102,7 +102,7 @@ public class JsonConfiguration extends Configurable {
 	public boolean save() {
 		try {
 			Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
-			Gson g = JsonAdapter.getJsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().setLenient().create();
+			Gson g = JsonAdapter.getJsonBuilder().setPrettyPrinting().disableHtmlEscaping().enableComplexMapKeySerialization().serializeNulls().serializeSpecialFloatingPointValues().create();
 			g.toJson(json, Map.class, writer);
 			writer.flush();
 			writer.close();

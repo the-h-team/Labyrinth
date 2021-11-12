@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
 import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.VaultPlayer;
@@ -57,6 +58,7 @@ public class LabyrinthUser implements Nameable {
 		return this.name;
 	}
 
+	@Note("May provide unwanted effects (If you don't want multiple afk plugins running), an active AFK impl will be supplied if not found.")
 	public AFK toAFK() {
 		return AFK.supply(toBukkit().getPlayer());
 	}
@@ -84,8 +86,8 @@ public class LabyrinthUser implements Nameable {
 		return names;
 	}
 
-	@Note("This is just a utility method, you should never use it!!!")
-	public boolean correctId(Player player) {
+	@Ordinal(4)
+	boolean correctId(Player player) {
 		if (checked) return false;
 		checked = true;
 		if (this.id != null) {

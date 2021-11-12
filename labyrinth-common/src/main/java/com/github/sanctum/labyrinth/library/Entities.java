@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.bukkit.Location;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.ArmorStand;
@@ -175,6 +176,10 @@ public final class Entities {
 
 		public T spawn(@NotNull Location location) {
 			return location.getWorld().spawn(location, getEntityClass());
+		}
+
+		public T spawn(@NotNull Location location, Consumer<T> consumer) {
+			return location.getWorld().spawn(location, getEntityClass(), consumer::accept);
 		}
 
 		public Class<T> getEntityClass() {

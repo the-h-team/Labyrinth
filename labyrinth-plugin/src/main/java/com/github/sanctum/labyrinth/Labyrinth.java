@@ -18,7 +18,6 @@ import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
-import com.github.sanctum.labyrinth.data.VaultImplementation;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
@@ -37,11 +36,15 @@ import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.permissions.Permissions;
+import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
+import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
@@ -49,7 +52,6 @@ import com.github.sanctum.labyrinth.task.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,12 +63,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -131,6 +134,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		serviceManager.load(Service.LEGACY);
 		serviceManager.load(Service.COOLDOWNS);
 		serviceManager.load(Service.COMPONENTS);
+		servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedIsNew = LabyrinthAPI.super.isNew();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
@@ -154,14 +158,34 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 			FileList.copy(stream, copy.getRoot().getParent());
 		}
 		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
-		new EasyListener(DefaultEvent.Controller.class).call(this);
+		EasyListener.call(this, new DefaultEvent.Controller());
 		getEventMap().subscribe(this, this);
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
 		Schedule.sync(() -> new AdvancedEconomyImplementation(this))
-				.applyAfter(() -> new VaultImplementation(this)).wait(2);
+				.applyAfter(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
+		getScheduler(ASYNCHRONOUS).repeat(task -> {
+			if (getTimeActive().getSeconds() >= 7) {
+				if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+					VaultImplementation bridge = new VaultImplementation();
+					getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.High);
+				}
+				Permissions instance = getServicesManager().load(Permissions.class);
+				if (instance.getProvider().equals(this)) {
+					getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+				} else {
+					if (instance instanceof VaultImplementation) {
+						getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+					} else {
+						getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+					}
+				}
+				task.cancel();
+			}
+
+		}, HUID.randomID().toString(), 0, TimeUnit.SECONDS.toMillis(1));
 
 		if (requiresLocationLibrary()) {
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
@@ -174,7 +198,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(this);
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
-
 
 	}
 
@@ -204,7 +227,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	public void onJoin(DefaultEvent.Join e) {
 		LabyrinthUser user = LabyrinthUser.get(e.getPlayer().getName());
 		if (user != null) {
-			if (user.correctId(e.getPlayer())) {
+			if (OrdinalProcedure.select(user, 4, e.getPlayer()).cast(() -> Boolean.class)) {
 				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s id has been updated.");
 			}
 		} else {

@@ -16,7 +16,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -155,26 +154,18 @@ public class ComponentChunk extends Message.Chunk {
 		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:
-					parent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String)context.get()));
+					parent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String) context.get()));
 					break;
 				case HOVER:
 					if (context instanceof ToolTip.Text) {
-						if (parent.getHoverEvent() == null) {
-							if (LabyrinthProvider.getInstance().isLegacy()) {
-								parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
-							} else {
-								parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate()))));
-							}
+						if (LabyrinthProvider.getInstance().isLegacy()) {
+							parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
 						} else {
-							if (parent.getHoverEvent().getContents().size() == 1) {
-								parent.getHoverEvent().addContent(new Text("\n" + StringUtils.use((String) context.get()).translate() + "\n"));
-							} else {
-								parent.getHoverEvent().addContent(new Text(StringUtils.use((String) context.get()).translate() + "\n"));
-							}
+							ComponentUtil.addContent(parent, ((ToolTip.Text) context).get());
 						}
 					}
 					if (context instanceof ToolTip.Item) {
-						ToolTip.Item item = (ToolTip.Item)context;
+						ToolTip.Item item = (ToolTip.Item) context;
 						BaseComponent[] components = new BaseComponent[]{new TextComponent(item.toJson())};
 						if (parent.getHoverEvent() == null) {
 							parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, components));
@@ -182,7 +173,7 @@ public class ComponentChunk extends Message.Chunk {
 					}
 					break;
 				case ACTION:
-					ToolTip.Action action = (ToolTip.Action)context;
+					ToolTip.Action action = (ToolTip.Action) context;
 					LabyrinthProvider.getInstance().registerComponent(action).deploy();
 					parent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + action.getId()));
 					break;

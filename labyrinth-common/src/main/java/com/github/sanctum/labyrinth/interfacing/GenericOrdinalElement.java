@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.interfacing;
 
 import com.github.sanctum.labyrinth.library.TypeFlag;
+import org.intellij.lang.annotations.MagicConstant;
 
 public final class GenericOrdinalElement implements OrdinalElement<Object> {
 
@@ -10,7 +11,7 @@ public final class GenericOrdinalElement implements OrdinalElement<Object> {
 		this.o = o;
 	}
 
-	public <R> R cast(TypeFlag<R> flag) {
+	public <R> R cast(@MagicConstant(valuesFromClass = TypeFlag.class) TypeFlag<R> flag) {
 		return flag.getType().cast(getElement());
 	}
 

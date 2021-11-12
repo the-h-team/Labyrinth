@@ -323,7 +323,7 @@ public abstract class Vent {
 		public Call(T event) {
 			this.event = event;
 			this.copy = event;
-			this.type = Runtime.Synchronous;
+			this.type = event.getRuntime();
 		}
 
 		public Call(Runtime type, T event) {
@@ -335,11 +335,10 @@ public abstract class Vent {
 		public Supplier<T> run(Runtime runtime) {
 			runtime.validate(event);
 			switch (runtime) {
-				case Synchronous: {
+				case Synchronous:
 					T result = run();
 					return () -> result;
-				}
-				case Asynchronous: {
+				case Asynchronous:
 					final CompletableFuture<T> complete = complete();
 					return () -> {
 						try {
@@ -349,7 +348,6 @@ public abstract class Vent {
 							return event;
 						}
 					};
-				}
 				default:
 					throw new SubscriptionRuntimeException("An invalid runtime was provided!");
 

@@ -19,9 +19,6 @@ import java.util.Map;
 
 /**
  * A helpful utility class designed for easy json conversions
- * <p>
- * Specify an optional {@link NodePointer} in the instance of a singular object! It can be used
- * along side a {@link JsonAdapter}
  *
  * @author Hempfest
  */

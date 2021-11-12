@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +27,11 @@ public class Group {
 	}
 
 	static {
-		LIST = Arrays.stream(VaultPlayer.getPerms().getGroups()).map(s -> new Group(s, Bukkit.getWorlds().get(0).getName())).collect(Collectors.toList());
+		if (VaultPlayer.getPerms() != null) {
+			LIST = Arrays.stream(VaultPlayer.getPerms().getGroups()).map(s -> new Group(s, Bukkit.getWorlds().get(0).getName())).collect(Collectors.toList());
+		} else {
+			LIST = new ArrayList<>();
+		}
 	}
 
 	public static List<Group> getAll() {
@@ -46,26 +51,44 @@ public class Group {
 	}
 
 	public boolean has(Permission permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupHas(getWorld(), getName(), permission.getName());
 	}
 
 	public boolean has(String permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupHas(getWorld(), getName(), permission);
 	}
 
 	public boolean give(String permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupAdd(getWorld(), getName(), permission);
 	}
 
 	public boolean give(Permission permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupAdd(getWorld(), getName(), permission.getName());
 	}
 
 	public boolean take(String permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupRemove(getWorld(), getName(), permission);
 	}
 
 	public boolean take(Permission permission) {
+		if (VaultPlayer.getPerms() == null) {
+			return false;
+		}
 		return VaultPlayer.getPerms().groupRemove(getWorld(), getName(), permission.getName());
 	}
 

@@ -74,7 +74,7 @@ public abstract class OrdinalProcedure {
 	}
 
 	/**
-	 * Process all ordinals within range (0 - specified)
+	 * Process all ordinals within range (0 - specified) in order.
 	 *
 	 * @param element The element to process.
 	 * @param ordinal The max ordinal range to process.
@@ -96,7 +96,7 @@ public abstract class OrdinalProcedure {
 	}
 
 	/**
-	 * Process all ordinals within range (specified+) ordinals lower than specified will not process.
+	 * Process all ordinals within range (specified+) in order, ordinals lower than specified will not process.
 	 *
 	 * @param element The element to process.
 	 * @param ordinal The max ordinal range to process.

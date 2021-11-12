@@ -49,35 +49,35 @@ public abstract class Message implements Iterable<Message.Chunk> {
 	 * Append a section to the tail end of this object.
 	 *
 	 * @param section The section to append.
-	 * @return The same bulletin builder.
+	 * @return The same message builder.
 	 */
 	public abstract Message append(Chunk section);
 
 	/**
-	 * Append an entire bulletin to the tail end of this one.
+	 * Append an entire message to the tail end of this one.
 	 *
 	 * @param message The message to append.
-	 * @return The same bulletin builder.
+	 * @return The same message builder.
 	 */
 	public abstract Message append(Message message);
 
 	/**
-	 * Append an entire bulletin or section to the tail end of this object.
+	 * Append an entire message or section to the tail end of this object.
 	 *
 	 * @param jsonMessage The json translated component(s)
-	 * @return The same bulletin builder.
+	 * @return The same message builder.
 	 */
 	public abstract Message append(@Json String jsonMessage);
 
 	/**
-	 * Compress each individual component section within this bulletin into a singular base component.
+	 * Compress each individual component section within this message into a singular base component.
 	 *
 	 * @return The compressed message with retained formatting.
 	 */
 	public abstract BaseComponent bake();
 
 	/**
-	 * Build every stylized section within this bulletin.
+	 * Build every stylized section within this message.
 	 *
 	 * @return An array of styled base components.
 	 */
@@ -90,6 +90,14 @@ public abstract class Message implements Iterable<Message.Chunk> {
 	 */
 	public abstract @Json
 	String toJson();
+
+	public final Chunk get(int index) {
+		return TEXT.get(index);
+	}
+
+	public final int length() {
+		return TEXT.size();
+	}
 
 	public boolean isEmpty() {
 		return TEXT.isEmpty();

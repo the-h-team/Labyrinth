@@ -19,7 +19,6 @@ import org.bukkit.OfflinePlayer;
  */
 public class StringUtils {
 
-	protected static final String test = "hELLO";
 	private final String context;
 
 	protected StringUtils(String context) {
@@ -211,19 +210,6 @@ public class StringUtils {
 		} catch (NumberFormatException ignored) {
 		}
 		return false;
-	}
-
-	/**
-	 * Automatically append the provided context to the end of each list entry
-	 * excluding the final entry.
-	 *
-	 * @param list the list to append the provided context to
-	 * @return the formatted origin list
-	 * @deprecated replaced by new {@link ListUtils} class
-	 */
-	@Deprecated
-	public List<String> join(List<String> list) {
-		return ListUtils.use(list).append(string -> string + this.context);
 	}
 
 

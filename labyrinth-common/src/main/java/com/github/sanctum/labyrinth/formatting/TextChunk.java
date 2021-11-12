@@ -16,7 +16,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
@@ -161,18 +160,10 @@ public class TextChunk extends Message.Chunk {
 					break;
 				case HOVER:
 					if (context instanceof ToolTip.Text) {
-						if (component.getHoverEvent() == null) {
-							if (LabyrinthProvider.getInstance().isLegacy()) {
-								component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
-							} else {
-								component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.hover.content.Text(TextComponent.fromLegacyText(StringUtils.use((String) context.get()).translate()))));
-							}
+						if (LabyrinthProvider.getInstance().isLegacy()) {
+							component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
 						} else {
-							if (component.getHoverEvent().getContents().size() == 1) {
-								component.getHoverEvent().addContent(new Text("\n" + StringUtils.use((String) context.get()).translate() + "\n"));
-							} else {
-								component.getHoverEvent().addContent(new Text(StringUtils.use((String) context.get()).translate() + "\n"));
-							}
+							ComponentUtil.addContent(component, ((ToolTip.Text) context).get());
 						}
 					}
 					if (context instanceof ToolTip.Item) {

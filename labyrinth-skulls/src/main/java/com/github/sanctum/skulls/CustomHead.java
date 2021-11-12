@@ -70,7 +70,7 @@ public abstract class CustomHead implements SkullObject {
 		 */
 		public static void load(CustomHead object) {
 			boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-			Material type = Items.getMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+			Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 			if (object.get().getType() != type)
 				throw new IllegalStateException(object.get().getType().name() + " is not a direct representation of " + type.name());
 			HEADS.add(object);
@@ -86,7 +86,7 @@ public abstract class CustomHead implements SkullObject {
 							list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
 						}
 					} else {
-						LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang. Cracked accounts are not supported for custom heads.");
+						LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang or a valid internet connection wasn't established");
 
 						OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
 						if (search2.getResult() != null) {

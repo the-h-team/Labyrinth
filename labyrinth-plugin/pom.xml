@@ -105,6 +105,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-perms</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-regions</artifactId>
             <version>${project.version}</version>
         </dependency>

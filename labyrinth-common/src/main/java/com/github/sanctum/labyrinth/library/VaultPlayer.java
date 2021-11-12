@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.service.Check;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class VaultPlayer {
 	}
 
 	protected VaultPlayer(@NotNull OfflinePlayer player) {
-		this.player = LabyrinthUser.get(player.getName());
+		this.player = LabyrinthUser.get(Check.forNull(player.getName(), "Invalid user provided! Name cannot be null"));
 	}
 
 	protected VaultPlayer(@NotNull LabyrinthUser player) {
@@ -54,34 +55,58 @@ public class VaultPlayer {
 	}
 
 	public Group getGroup(String world) {
+		if (getPerms() == null) {
+			return new Group("no-vault", world);
+		}
 		return new Group(getPerms().getPrimaryGroup(world, player.toBukkit()), world);
 	}
 
 	public Group[] getGroups(String world) {
+		if (getPerms() == null) {
+			return new Group[]{new Group("no-vault", world)};
+		}
 		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.toBukkit())).map(s -> new Group(s, world)).toArray(Group[]::new);
 	}
 
 	public boolean has(org.bukkit.permissions.Permission permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerHas(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean give(org.bukkit.permissions.Permission permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerAdd(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean take(org.bukkit.permissions.Permission permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerRemove(world, this.player.toBukkit(), permission.getName());
 	}
 
 	public boolean has(String permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerHas(world, this.player.toBukkit(), permission);
 	}
 
 	public boolean give(String permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerAdd(world, this.player.toBukkit(), permission);
 	}
 
 	public boolean take(String permission, String world) {
+		if (getPerms() == null) {
+			return false;
+		}
 		return getPerms().playerRemove(world, this.player.toBukkit(), permission);
 	}
 

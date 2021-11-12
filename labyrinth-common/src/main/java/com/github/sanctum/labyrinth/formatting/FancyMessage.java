@@ -41,6 +41,18 @@ public class FancyMessage extends MessageBuilder {
 	 * <p>
 	 * The "tail end" is the most recently parsed section.
 	 *
+	 * @param bool The boolean to use.
+	 * @return The same bulletin builder.
+	 */
+	public FancyMessage then(boolean bool) {
+		return then(String.valueOf(bool));
+	}
+
+	/**
+	 * Append a new text section at the the tail end of this object.
+	 * <p>
+	 * The "tail end" is the most recently parsed section.
+	 *
 	 * @param i The int to use.
 	 * @return The same bulletin builder.
 	 */

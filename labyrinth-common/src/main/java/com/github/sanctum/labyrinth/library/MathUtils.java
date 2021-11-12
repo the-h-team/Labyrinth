@@ -35,7 +35,7 @@ public class MathUtils {
 	 * @return the newly formatted double
 	 */
 	public double format(int precision) {
-		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.HALF_EVEN);
+		BigDecimal b1 = BigDecimal.valueOf(n.doubleValue()).setScale(precision, RoundingMode.CEILING);
 		return b1.doubleValue();
 	}
 
@@ -68,17 +68,6 @@ public class MathUtils {
 	 */
 	public String formatCurrency(Locale locale) {
 		return NumberFormat.getCurrencyInstance(locale).format(n.doubleValue());
-	}
-
-	/**
-	 * Format the number with a specified language.
-	 *
-	 * @param locale    the language to format to
-	 * @param precision the math context precision to apply
-	 * @return the formatted amount as a string (number compliant)
-	 */
-	public String formatCurrency(Locale locale, int precision) {
-		return NumberFormat.getCurrencyInstance(locale).format(format(precision));
 	}
 
 

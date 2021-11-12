@@ -364,27 +364,27 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public boolean isStringList() {
-		return !getStringList().isEmpty();
+		return getStringList() != null && !getStringList().isEmpty();
 	}
 
 	@Override
 	public boolean isFloatList() {
-		return !getFloatList().isEmpty();
+		return getFloatList() != null && !getFloatList().isEmpty();
 	}
 
 	@Override
 	public boolean isDoubleList() {
-		return !getDoubleList().isEmpty();
+		return getDoubleList() != null && !getDoubleList().isEmpty();
 	}
 
 	@Override
 	public boolean isIntegerList() {
-		return !getIntegerList().isEmpty();
+		return getIntegerList() != null && !getIntegerList().isEmpty();
 	}
 
 	@Override
 	public boolean isLongList() {
-		return !getLongList().isEmpty();
+		return getLongList() != null && !getLongList().isEmpty();
 	}
 
 	@Override

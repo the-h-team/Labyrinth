@@ -17,8 +17,8 @@ public class RandomObject<T> {
 		this.array = array;
 	}
 
-	public T get(Object o) {
-		return get(o.hashCode());
+	public <E> T get(E element) {
+		return get(element.hashCode());
 	}
 
 	public T get(int hashcode) {

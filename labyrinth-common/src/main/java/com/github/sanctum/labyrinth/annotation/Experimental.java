@@ -26,7 +26,7 @@ public @interface Experimental {
 	String value() default "no comment";
 
 	/**
-	 * @return Whether or not the type this annotation belongs too is set for removal.
+	 * @return Whether or not the element this annotation belongs too is set for removal.
 	 */
 	boolean atRisk() default false;
 

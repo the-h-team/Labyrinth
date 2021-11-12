@@ -5,6 +5,8 @@ import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -187,8 +190,9 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 	public <T> T get(Class<T> type) {
 		if (type.isAssignableFrom(ConfigurationSection.class)) {
 			if (config instanceof YamlConfiguration) {
-				YamlConfiguration conf = (YamlConfiguration) config;
-				return (T) conf.getConfig().getConfigurationSection(this.key);
+				if (get() instanceof MemorySection) {
+					return (T) get();
+				}
 			}
 		}
 		Object o = config.get(this.key, type);

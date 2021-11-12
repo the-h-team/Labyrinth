@@ -45,9 +45,9 @@ public abstract class Configurable implements MemorySpace, Root {
 			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
 			if (test.isPresent()) {
 				JsonAdapter<?> d = null;
-				String alias = test.map((r, u) -> r.value());
+				String alias = test.mapFromClass((r, u) -> r.value());
 				if (alias != null) {
-					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (n != null) {
 						if (!DummyAdapter.class.isAssignableFrom(n)) {
 							d = n.getDeclaredConstructor().newInstance();
