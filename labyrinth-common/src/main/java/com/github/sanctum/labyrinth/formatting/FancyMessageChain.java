@@ -43,7 +43,7 @@ public class FancyMessageChain implements Iterable<Message>{
 	}
 
 	public Deployable<Void> send(Player target) {
-		return Deployable.of(null, unused -> getMessages().forEach(message -> message.send(target)));
+		return Deployable.of(null, unused -> getMessages().forEach(message -> message.send(target).deploy()));
 	}
 
 	@NotNull

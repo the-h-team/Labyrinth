@@ -13,11 +13,7 @@ public class ComponentUtil {
 		if (component.getHoverEvent() == null) {
 			component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(StringUtils.use(context).translate()))));
 		} else {
-			if (component.getHoverEvent().getContents().size() == 1) {
-				component.getHoverEvent().addContent(new Text("\n" + StringUtils.use(context).translate() + "\n" + StringUtils.use("&r").translate()));
-			} else {
-				component.getHoverEvent().addContent(new Text(StringUtils.use(context).translate() + "\n" + StringUtils.use("&r").translate()));
-			}
+			component.getHoverEvent().addContent(new Text(StringUtils.use(context).translate()));
 		}
 	}
 

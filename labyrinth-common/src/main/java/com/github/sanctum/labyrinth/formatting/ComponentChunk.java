@@ -151,19 +151,22 @@ public class ComponentChunk extends Message.Chunk {
 			String now = parent.getText();
 			parent.setText(color + now);
 		}
+		List<String> adjusted = new ArrayList<>();
+		this.CONTEXT.stream().filter(t -> t instanceof ToolTip.Text).forEach(toolTip -> adjusted.add(((ToolTip.Text) toolTip).get()));
+		ListUtils.use(adjusted).append(object -> object + "\n").forEach(context -> {
+			if (LabyrinthProvider.getInstance().isLegacy()) {
+				parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use(context).translate()).create()));
+			} else {
+				ComponentUtil.addContent(parent, context);
+			}
+		});
+
 		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:
 					parent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String) context.get()));
 					break;
 				case HOVER:
-					if (context instanceof ToolTip.Text) {
-						if (LabyrinthProvider.getInstance().isLegacy()) {
-							parent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
-						} else {
-							ComponentUtil.addContent(parent, ((ToolTip.Text) context).get());
-						}
-					}
 					if (context instanceof ToolTip.Item) {
 						ToolTip.Item item = (ToolTip.Item) context;
 						BaseComponent[] components = new BaseComponent[]{new TextComponent(item.toJson())};

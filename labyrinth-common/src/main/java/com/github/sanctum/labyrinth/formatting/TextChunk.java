@@ -153,19 +153,22 @@ public class TextChunk extends Message.Chunk {
 		} else if (this.color != null) {
 			component = new TextComponent(TextComponent.fromLegacyText(StringUtils.use(this.color + this.text).translate()));
 		}
+		List<String> adjusted = new ArrayList<>();
+		this.CONTEXT.stream().filter(t -> t instanceof ToolTip.Text).forEach(toolTip -> adjusted.add(((ToolTip.Text) toolTip).get()));
+		TextComponent finalComponent = component;
+		ListUtils.use(adjusted).append(object -> object + "\n").forEach(context -> {
+			if (LabyrinthProvider.getInstance().isLegacy()) {
+				finalComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use(context).translate()).create()));
+			} else {
+				ComponentUtil.addContent(finalComponent, context);
+			}
+		});
 		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:
 					component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (String) context.get()));
 					break;
 				case HOVER:
-					if (context instanceof ToolTip.Text) {
-						if (LabyrinthProvider.getInstance().isLegacy()) {
-							component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use((String) context.get()).translate()).create()));
-						} else {
-							ComponentUtil.addContent(component, ((ToolTip.Text) context).get());
-						}
-					}
 					if (context instanceof ToolTip.Item) {
 						ToolTip.Item item = (ToolTip.Item) context;
 						BaseComponent[] components = new BaseComponent[]{new TextComponent(item.toJson())};
