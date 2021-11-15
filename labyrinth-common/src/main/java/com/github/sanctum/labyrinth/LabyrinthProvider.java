@@ -11,7 +11,10 @@ import com.github.sanctum.labyrinth.data.service.Constant;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -117,7 +120,17 @@ public abstract class LabyrinthProvider {
 	}
 
 	public static Set<LabyrinthUser> getOfflinePlayers() {
-		return Arrays.stream(Bukkit.getOfflinePlayers()).filter(p -> p.getName() != null).map(OfflinePlayer::getName).map(LabyrinthUser::get).collect(Collectors.toSet());
+		Map<String, LabyrinthUser> users = new HashMap<>();
+		Arrays.stream(Bukkit.getOfflinePlayers()).forEach(op -> {
+			if (op.getName() != null) {
+				if (!users.containsKey(op.getName())) {
+					users.put(op.getName(), LabyrinthUser.get(op));
+				}
+			} else {
+				getInstance().getLogger().severe("- While traversing players a player with NO unique information (name, id) was found and needs to be removed manually.");
+			}
+		});
+		return new HashSet<>(users.values());
 	}
 
 	public static @Nullable LabyrinthUser getPlayer(String name) {

@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,23 +80,25 @@ public abstract class CustomHead implements SkullObject {
 		protected static List<CustomHead> loadOffline() {
 			List<CustomHead> list = new LinkedList<>();
 			if (!LOADED) {
-				for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-					OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
-					if (search.getResult() != null) {
-						if (player.getName() != null) {
-							list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
-						}
-					} else {
-						LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang or a valid internet connection wasn't established");
-
-						OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
-						if (search2.getResult() != null) {
+				Schedule.async(() -> {
+					for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+						OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+						if (search.getResult() != null) {
 							if (player.getName() != null) {
-								list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult()));
+								list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
+							}
+						} else {
+							LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang or a valid internet connection wasn't established");
+
+							OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
+							if (search2.getResult() != null) {
+								if (player.getName() != null) {
+									list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult()));
+								}
 							}
 						}
 					}
-				}
+				}).run();
 			}
 			return list;
 		}

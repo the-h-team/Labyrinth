@@ -488,7 +488,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).run();
+				player.openInventory(getViewer(player).getElement());
 
 			}
 		}
@@ -549,8 +549,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 						}
 					}
 				}).waitReal(2);
-
-				return;
 			} else {
 
 				for (ItemElement<?> element : getGlobalSlot().getAttachment()) {
@@ -563,16 +561,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
 				}
 
-				Schedule.sync(() -> player.openInventory(getElement())).run();
+				player.openInventory(getElement());
 
-			}
-
-			for (Player p : viewers) {
-				if (getElement() != null) {
-					if (!p.getOpenInventory().getTopInventory().equals(getElement())) {
-						Schedule.sync(() -> viewers.remove(p)).wait(1);
-					}
-				}
 			}
 		}
 	}

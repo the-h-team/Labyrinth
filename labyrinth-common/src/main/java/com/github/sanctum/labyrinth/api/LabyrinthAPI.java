@@ -20,6 +20,9 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
         return getPluginInstance().getLogger();
     }
 
+    /**
+     * @return An object used for removing items efficiently from inventories.
+     */
     ItemCompost getItemComposter();
 
     KeyedServiceManager<Plugin> getServicesManager();

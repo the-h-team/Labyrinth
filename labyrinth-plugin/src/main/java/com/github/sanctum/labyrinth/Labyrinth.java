@@ -32,6 +32,7 @@ import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.formatting.string.RandomHex;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -42,6 +43,12 @@ import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.paste.PasteManager;
+import com.github.sanctum.labyrinth.paste.option.Context;
+import com.github.sanctum.labyrinth.paste.type.Hastebin;
+import com.github.sanctum.labyrinth.paste.type.PasteOptions;
+import com.github.sanctum.labyrinth.paste.type.Pastebin;
+import com.github.sanctum.labyrinth.paste.type.PastebinUser;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
@@ -198,6 +205,17 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(this);
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
+
+		Schedule.async(() -> {
+			String API_KEY = "a5tsxh3c37_rmPTCN9gy9kjhd5vepz34";
+			Pastebin bin = PasteManager.getInstance().newPaste(API_KEY);
+			PasteOptions o = bin.getOptions();
+			o.setLanguage(Context.TEXT);
+			String result = bin.write("=======================================", "* Testing 123", "* More information goes here", "* Hello world!", "=======================================").get();
+			getLogger().warning(result);
+			o.setLanguage(Context.JSON);
+			getLogger().warning(bin.write(new RandomHex().toJsonString()).get());
+		}).wait(20 * 10);
 
 	}
 

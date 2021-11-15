@@ -14,6 +14,7 @@
         <module>labyrinth-regions</module>
         <module>labyrinth-plugin</module>
         <module>labyrinth-perms</module>
+        <module>labyrinth-paste</module>
     </modules>
     <packaging>pom</packaging>
 

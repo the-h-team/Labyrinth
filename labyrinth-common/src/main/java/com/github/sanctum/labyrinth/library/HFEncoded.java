@@ -82,6 +82,22 @@ public class HFEncoded {
 	}
 
 	/**
+	 * If the provided object is an encoded byte array deserialize it back into its object state.
+	 *
+	 * @return The object the byte array once was or null if not an encoded byte array.
+	 * @throws IOException if an I/O error occurs while reading stream heade
+	 * @throws ClassNotFoundException if the class of the serialized object cannot be found
+	 */
+	public <T> T fromByteArray() throws IOException, ClassNotFoundException {
+		if (obj == null || !byte[].class.isAssignableFrom(obj.getClass())) return null;
+		byte[] ar = (byte[]) obj;
+		ByteArrayInputStream input = new ByteArrayInputStream(ar);
+		BukkitObjectInputStream inputStream = new BukkitObjectInputStream(input);
+		return (T) inputStream.readObject();
+
+	}
+
+	/**
 	 * The original stored object retaining all values converted back to an object.
 	 * <p>
 	 * WARN: You will need to pass a type to the object upon use.

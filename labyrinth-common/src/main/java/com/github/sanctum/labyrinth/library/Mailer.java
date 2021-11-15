@@ -533,7 +533,9 @@ public class Mailer {
 						case CHAT:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								if (components != null) {
-									((Player)toSender(result.getSource())).spigot().sendMessage(components);
+									if (toSender(result.getSource()) instanceof Player) {
+										((Player) toSender(result.getSource())).spigot().sendMessage(components);
+									}
 								} else {
 									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
 								}

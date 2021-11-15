@@ -144,6 +144,32 @@ public class ListUtils<T> {
 		return fun.apply(list);
 	}
 
+	public boolean stringContainsIgnoreCase(CharSequence sequence) {
+		if (list.isEmpty()) return false;
+		if (String.class.isAssignableFrom(list.get(0).getClass())) {
+			for (T s : list) {
+				String context = s.toString();
+				if (StringUtils.use(context).containsIgnoreCase(sequence)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean stringContainsIgnoreCase(CharSequence... sequence) {
+		if (list.isEmpty()) return false;
+		if (String.class.isAssignableFrom(list.get(0).getClass())) {
+			for (T s : list) {
+				String context = s.toString();
+				if (StringUtils.use(context).containsIgnoreCase(sequence)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	@FunctionalInterface
 	public interface ListOperation<T> {
 		T append(T object);

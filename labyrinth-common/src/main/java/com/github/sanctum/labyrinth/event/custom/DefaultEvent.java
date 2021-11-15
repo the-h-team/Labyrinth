@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import java.util.Collection;
@@ -447,12 +449,14 @@ public class DefaultEvent extends Vent {
 
 			}
 
+			OrdinalProcedure.select(LabyrinthUser.get(event.getPlayer().getName()), 4, event.getPlayer());
+
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onLeave(PlayerQuitEvent event) {
 
-			Leave e = new Call<>(Runtime.Synchronous, new Leave(event.getPlayer())).run();
+			new Call<>(Runtime.Synchronous, new Leave(event.getPlayer())).run();
 
 		}
 
