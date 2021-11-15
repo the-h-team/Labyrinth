@@ -206,17 +206,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
-		Schedule.async(() -> {
-			String API_KEY = "a5tsxh3c37_rmPTCN9gy9kjhd5vepz34";
-			Pastebin bin = PasteManager.getInstance().newPaste(API_KEY);
-			PasteOptions o = bin.getOptions();
-			o.setLanguage(Context.TEXT);
-			String result = bin.write("=======================================", "* Testing 123", "* More information goes here", "* Hello world!", "=======================================").get();
-			getLogger().warning(result);
-			o.setLanguage(Context.JSON);
-			getLogger().warning(bin.write(new RandomHex().toJsonString()).get());
-		}).wait(20 * 10);
-
 	}
 
 	@Override
