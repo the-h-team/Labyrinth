@@ -80,10 +80,10 @@ public interface PasteManager {
 							public String[] getAll() {
 								String response = "Unable to receive proper response.";
 								try {
-									String requestURL = id.contains("http") ? id : "https://www.toptal.com/developers/hastebin/raw/" + id;
+									String requestURL = id.contains("http") && !id.contains("raw") ? id.replace("hastebin", "hastebin/raw") : "https://www.toptal.com/developers/hastebin/raw/" + id;
 									URL url = new URL(requestURL);
 									HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-									conn.setDoOutput(true);
+									conn.setDoInput(true);
 									conn.setInstanceFollowRedirects(false);
 									conn.setRequestMethod("GET");
 									conn.setRequestProperty("User-Agent", "Hastebin Java Api");
