@@ -173,26 +173,22 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		Schedule.sync(() -> new AdvancedEconomyImplementation(this))
 				.applyAfter(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).wait(2);
 		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
-		getScheduler(ASYNCHRONOUS).repeat(task -> {
-			if (getTimeActive().getSeconds() >= 7) {
-				if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-					VaultImplementation bridge = new VaultImplementation();
-					getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.High);
-				}
-				Permissions instance = getServicesManager().load(Permissions.class);
-				if (instance.getProvider().equals(this)) {
-					getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
-				} else {
-					if (instance instanceof VaultImplementation) {
-						getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
-					} else {
-						getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
-					}
-				}
-				task.cancel();
+		Schedule.sync(() -> {
+			if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+				VaultImplementation bridge = new VaultImplementation();
+				getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
 			}
-
-		}, HUID.randomID().toString(), 0, TimeUnit.SECONDS.toMillis(1));
+			Permissions instance = getServicesManager().load(Permissions.class);
+			if (instance.getProvider().equals(this)) {
+				getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+			} else {
+				if (instance instanceof VaultImplementation) {
+					getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+				} else {
+					getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+				}
+			}
+		}).waitReal(20 * 2);
 
 		if (requiresLocationLibrary()) {
 			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);

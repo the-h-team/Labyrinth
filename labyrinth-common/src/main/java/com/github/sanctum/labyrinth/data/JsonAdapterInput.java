@@ -66,10 +66,15 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		return serializer.getClassType();
 	}
 
-	static final class Impl<T> extends JsonAdapterInput<T> {
+	static class Impl<T> extends JsonAdapterInput<T> {
 
 		protected Impl(JsonAdapter<T> serializer) {
 			super(serializer);
+		}
+
+		@Override
+		public Class<? extends T> getSubClass() {
+			return super.getSubClass();
 		}
 	}
 

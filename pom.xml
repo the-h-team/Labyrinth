@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>${project.version}</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
@@ -27,6 +27,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <templates.version>1.0.0</templates.version>
+        <project.version>1.7.2</project.version>
     </properties>
 
     <licenses>

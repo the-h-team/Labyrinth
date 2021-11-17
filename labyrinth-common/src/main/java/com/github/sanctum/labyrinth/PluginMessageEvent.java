@@ -2,12 +2,13 @@ package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.data.PluginChannel;
 import com.github.sanctum.labyrinth.data.PluginMessage;
+import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 
 /**
- * An event responsible for relaying messages containing different object oriented information.
+ * An event responsible for relaying messages containing different object-oriented information.
  */
-public final class PluginMessageEvent extends Vent {
+public final class PluginMessageEvent extends DefaultEvent {
 
 	private final PluginMessage<?> message;
 	private final PluginChannel<?> channel;

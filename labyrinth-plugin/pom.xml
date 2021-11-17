@@ -5,7 +5,7 @@
     <parent>
         <artifactId>labyrinth</artifactId>
         <groupId>com.github.the-h-team</groupId>
-        <version>1.7.2-SNAPSHOT</version>
+        <version>1.7.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -48,6 +48,18 @@
                                 </filter>
                                 <filter>
                                     <artifact>com.github.the-h-team:labyrinth-skulls</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:labyrinth-perms</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:labyrinth-paste</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
