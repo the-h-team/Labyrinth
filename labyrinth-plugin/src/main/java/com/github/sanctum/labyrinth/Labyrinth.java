@@ -195,16 +195,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
-		PrintManager m = getLocalPrintManager();
-		NamespacedKey k = new NamespacedKey(this, "test_print");
-		m.register(() -> {
-			Map<String, Object> map = new HashMap<>();
-			FileList.search(this).get("config").getRoot().reload();
-			getLogger().warning("- Updating new value to " + LabyrinthOptions.IMPL_AFK.enabled());
-			map.put("afk-enabled", LabyrinthOptions.IMPL_AFK.enabled());
-			return map;
-		}, k);
-
 	}
 
 	@Override
@@ -243,9 +233,6 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 	@Subscribe
 	public void onComponent(DefaultEvent.Communication e) {
-		PrintManager m = getLocalPrintManager();
-		NamespacedKey k = new NamespacedKey(this, "test_print");
-		m.getPrint(k).reload().deploy();
 		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
 			e.getCommand().ifPresent(cmd -> {
 				String label = cmd.getText();
