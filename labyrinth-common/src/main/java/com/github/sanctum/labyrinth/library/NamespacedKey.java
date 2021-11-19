@@ -1,11 +1,14 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import java.util.Arrays;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.UUID;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a String based key which consists of two components - a namespace
@@ -87,6 +90,10 @@ public final class NamespacedKey {
 	@NotNull
 	public String getKey() {
 		return key;
+	}
+
+	@Nullable Plugin getNamespacePlugin() {
+		return Arrays.stream(Bukkit.getPluginManager().getPlugins()).filter(plugin -> plugin.getName().toLowerCase(Locale.ROOT).equals(namespace)).findFirst().orElse(null);
 	}
 
 	@Override

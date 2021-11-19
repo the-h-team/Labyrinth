@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.library.MathUtils;
 
 import java.util.Collection;
@@ -16,9 +17,12 @@ import org.bukkit.Bukkit;
 /**
  * Encapsulate a list of objects to be sorted and paginated.
  *
+ * @deprecated Replaced by {@link com.github.sanctum.labyrinth.formatting.pagination.AbstractPaginatedCollection}
  * @param <T> the object type representative of this pagination operation
  * @author Hempfest
  */
+@Deprecated
+@Experimental(value = "This class will attempt to be replaced soon.", atRisk = true)
 public class PaginatedList<T> {
 	private List<T> typeList;
 	private ComponentCompliment<T> start;

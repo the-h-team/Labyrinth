@@ -20,6 +20,7 @@ import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
+import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.event.EasyListener;
@@ -32,23 +33,15 @@ import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.formatting.string.RandomHex;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
-import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
-import com.github.sanctum.labyrinth.paste.PasteManager;
-import com.github.sanctum.labyrinth.paste.option.Context;
-import com.github.sanctum.labyrinth.paste.type.Hastebin;
-import com.github.sanctum.labyrinth.paste.type.PasteOptions;
-import com.github.sanctum.labyrinth.paste.type.Pastebin;
-import com.github.sanctum.labyrinth.paste.type.PastebinUser;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
@@ -71,7 +64,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -121,6 +113,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final VentMap eventMap = new VentMapImpl();
 	private final ItemCompost composter = new ItemCompost();
+	private final PrintManager manager = new PrintManager();
 	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
 	private final SynchronousTaskChain staskManager = new SynchronousTaskChain(this);
 	private boolean cachedIsLegacy;
@@ -202,6 +195,16 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
+		PrintManager m = getLocalPrintManager();
+		NamespacedKey k = new NamespacedKey(this, "test_print");
+		m.register(() -> {
+			Map<String, Object> map = new HashMap<>();
+			FileList.search(this).get("config").getRoot().reload();
+			getLogger().warning("- Updating new value to " + LabyrinthOptions.IMPL_AFK.enabled());
+			map.put("afk-enabled", LabyrinthOptions.IMPL_AFK.enabled());
+			return map;
+		}, k);
+
 	}
 
 	@Override
@@ -240,6 +243,9 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 	@Subscribe
 	public void onComponent(DefaultEvent.Communication e) {
+		PrintManager m = getLocalPrintManager();
+		NamespacedKey k = new NamespacedKey(this, "test_print");
+		m.getPrint(k).reload().deploy();
 		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
 			e.getCommand().ifPresent(cmd -> {
 				String label = cmd.getText();
@@ -378,6 +384,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	@Override
 	public ItemCompost getItemComposter() {
 		return this.composter;
+	}
+
+	@Override
+	public PrintManager getLocalPrintManager() {
+		return manager;
 	}
 
 	@Override

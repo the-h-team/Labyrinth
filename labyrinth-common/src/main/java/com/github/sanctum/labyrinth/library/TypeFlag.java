@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.annotation.Note;
 import java.lang.reflect.Type;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -20,6 +21,10 @@ public interface TypeFlag<T> extends Type {
 		return getType().getTypeName();
 	}
 
+	default T cast(Object o) {
+		return (T) o;
+	}
+
 	static TypeFlag<?> get(String name) throws RuntimeException {
 		try {
 			Class<?> clazz = Class.forName(name);
@@ -31,6 +36,11 @@ public interface TypeFlag<T> extends Type {
 
 	static TypeFlag<?> get(Type type) {
 		return get(type.getTypeName());
+	}
+
+	@Note("Use this to parse type flags magically using tokens!")
+	static <T> TypeFlag<T> get() {
+		return new EasyTypeAdapter<>();
 	}
 
 }

@@ -391,7 +391,6 @@ public abstract class ToolTip<T> {
 
 		@Override
 		public ToolTip<Applicable> style(CustomColor color) {
-
 			return this;
 		}
 
@@ -412,7 +411,7 @@ public abstract class ToolTip<T> {
 		private final String command;
 
 		public Command(String command) {
-			this.command = command;
+			this.command = command.startsWith("/") ? command : "/" + command;
 		}
 
 		@Override

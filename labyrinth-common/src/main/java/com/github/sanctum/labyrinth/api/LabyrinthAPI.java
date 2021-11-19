@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.api;
 
+import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
+import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import org.bukkit.plugin.Plugin;
 
@@ -25,8 +27,20 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
      */
     ItemCompost getItemComposter();
 
+    /**
+     * @return A manager for data footprints.
+     */
+    @Note("Don't store your footprints here! Make your own manager with PrintManager")
+    PrintManager getLocalPrintManager();
+
+    /**
+     * @return A service manager for plugin's
+     */
     KeyedServiceManager<Plugin> getServicesManager();
 
+    /**
+     * @return A general purpose service manager for {@link Service}'s
+     */
     ServiceManager getServiceManager();
 
     /**
