@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileType;
+import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.task.Schedule;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -151,7 +152,6 @@ public abstract class Cooldown {
 				.find("cooldowns", "Persistent", FileType.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimeLeft())));
 		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).applyAfter(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).run();
-
 	}
 
 	/**
@@ -195,9 +195,11 @@ public abstract class Cooldown {
 	 * @param c the cooldown representative to remove from cache
 	 */
 	public static void remove(Cooldown c) {
-		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.find("cooldowns", "Persistent", FileType.JSON)
-				.write(t -> t.set("Library." + c.getId(), null));
+		Node home = FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
+				.get("cooldowns", "Persistent", FileType.JSON)
+				.read(t -> t.getNode("Library." + c.getId()));
+		home.delete();
+		home.save();
 		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(c)).run();
 	}
 

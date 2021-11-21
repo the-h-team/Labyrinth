@@ -117,6 +117,9 @@ public abstract class AbstractPaginatedCollection<T> implements Collection<Page<
 					toSort = toSort.stream().sorted(collection1.comparator).collect(Collectors.toList());
 				}
 			}
+			if (toSort.isEmpty()) {
+				toSort = new ArrayList<>(collection1.collection);
+			}
 			collection1.collection = toSort;
 
 			int totalPageCount = collection1.size();
