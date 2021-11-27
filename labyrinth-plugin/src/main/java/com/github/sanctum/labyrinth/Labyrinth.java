@@ -45,6 +45,9 @@ import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
+import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
+import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
+import com.github.sanctum.labyrinth.placeholders.factory.WorldPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
@@ -195,6 +198,11 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
 
+		PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
+
+		registration.registerTranslation(new PlayerPlaceholders()).deploy();
+		registration.registerTranslation(new WorldPlaceholders()).deploy();
+
 	}
 
 	@Override
@@ -229,6 +237,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		} else {
 			getEmptyMailer().error("- User " + e.getPlayer().getName() + " has NO unique id!! (This is not the fault of labyrinth, perhaps cracked problems)");
 		}
+
 	}
 
 	@Subscribe

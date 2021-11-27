@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3-SNAPSHOT</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
@@ -15,6 +15,7 @@
         <module>labyrinth-plugin</module>
         <module>labyrinth-perms</module>
         <module>labyrinth-paste</module>
+        <module>labyrinth-placeholders</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -78,6 +79,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <compilerArgument>-XDignore.symbol.file</compilerArgument>
                 </configuration>
             </plugin>
         </plugins>

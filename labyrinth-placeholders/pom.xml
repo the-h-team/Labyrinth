@@ -9,8 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>labyrinth-regions</artifactId>
-    <name>Labyrinth-Regions</name>
+    <artifactId>labyrinth-placeholders</artifactId>
 
     <dependencies>
         <dependency>

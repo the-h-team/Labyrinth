@@ -108,6 +108,25 @@ public interface Deployable<T> {
 	CompletableFuture<T> submit();
 
 	/**
+	 * Complete the deployable information processing and get the object reference.
+	 *
+	 * @return The object reference from this deployable.
+	 */
+	default T complete() {
+		deploy();
+		return submit().join();
+	}
+
+	/**
+	 * Get the object reference.
+	 *
+	 * @return The object reference from this deployable.
+	 */
+	default T get() {
+		return complete();
+	}
+
+	/**
 	 * Create a default deployable instance
 	 *
 	 * @param t      The source material.
