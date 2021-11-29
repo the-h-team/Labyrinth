@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An interface used to mark items for removal within an {@link ItemCompost}
@@ -22,6 +23,11 @@ import org.bukkit.inventory.ItemStack;
 @FunctionalInterface
 public interface ItemMatcher {
 
+	@Deprecated
 	boolean compares(ItemStack item);
+
+	default boolean comparesTo(@NotNull ItemStack item) {
+		return compares(item);
+	}
 
 }

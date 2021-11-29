@@ -12,6 +12,7 @@ public final class PluginMessageEvent extends DefaultEvent {
 
 	private final PluginMessage<?> message;
 	private final PluginChannel<?> channel;
+	private Object response;
 
 	PluginMessageEvent(PluginMessage<?> message, PluginChannel<?> channel) {
 		this.message = message;
@@ -23,6 +24,14 @@ public final class PluginMessageEvent extends DefaultEvent {
 	 */
 	public PluginChannel<?> getChannel() {
 		return channel;
+	}
+
+	public Object getResponse() {
+		return response;
+	}
+
+	public void setResponse(Object response) {
+		this.response = response;
 	}
 
 	/**

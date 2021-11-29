@@ -71,6 +71,89 @@ public class Registry<T> {
 	/**
 	 * Specify actions on each element instantiated from query.
 	 *
+	 * @return the leftover data from the registry data operation
+	 */
+	public RegistryData<T> operate() {
+		Set<Class<T>> classes = Sets.newHashSet();
+		JarFile jarFile = null;
+		if (this.handle != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.handle.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
+			} catch (IOException e) {
+				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
+			}
+		}
+
+		List<JarEntry> entries = Collections.list(jarFile.entries());
+
+		if (this.FILTER != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.FILTER.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (CLASS.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (CLASS.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				}
+			});
+		}
+		List<T> additions = new LinkedList<>();
+		for (Class<T> aClass : classes) {
+			try {
+				T a = aClass.getDeclaredConstructor().newInstance();
+				additions.add(a);
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		return new RegistryData<>(additions, handle, PACKAGE);
+	}
+
+	/**
+	 * Specify actions on each element instantiated from query.
+	 *
 	 * @param operation an operation to perform when each element is instantiated
 	 * @return the leftover data from the registry data operation
 	 */

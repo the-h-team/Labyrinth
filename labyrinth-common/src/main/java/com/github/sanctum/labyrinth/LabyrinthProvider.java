@@ -97,12 +97,12 @@ public abstract class LabyrinthProvider {
 		return getInstance().getServiceManager().get(service);
 	}
 
-	public static <T> Deployable<Void> sendMessage(Plugin plugin, T object) {
+	public static <T> Deployable<Object> sendMessage(Plugin plugin, T object) {
 		return sendMessage(plugin, object, PluginChannel.DEFAULT);
 	}
 
-	public static <T> Deployable<Void> sendMessage(Plugin plugin, T object, PluginChannel<?> channel) {
-		return Deployable.of(null, unused -> new Vent.Call<>(new PluginMessageEvent(new PluginMessage<T>() {
+	public static <T> Deployable<Object> sendMessage(Plugin plugin, T object, PluginChannel<?> channel) {
+		return Deployable.of(null, unused -> unused = new Vent.Call<>(new PluginMessageEvent(new PluginMessage<T>() {
 			@Override
 			public Plugin getPlugin() {
 				return plugin;
@@ -112,7 +112,7 @@ public abstract class LabyrinthProvider {
 			public T getMessage() {
 				return object;
 			}
-		}, channel)).run());
+		}, channel)).run().getResponse());
 	}
 
 	public static List<PluginChannel<?>> getDefaultChannels() {

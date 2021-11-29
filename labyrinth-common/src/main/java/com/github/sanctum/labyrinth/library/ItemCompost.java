@@ -26,7 +26,7 @@ public class ItemCompost {
 			for (int i = 0; i < synchronizer.getParent().getSize(); i++) {
 				ItemStack slot = synchronizer.getParent().getItem(i);
 				for (ItemMatcher matcher : matchers.stream().filter(m -> ((ItemSync<ItemMatcher>) synchronizer).getMatcher().isAssignableFrom(m.getClass())).collect(Collectors.toList())) {
-					if (slot == null || !matcher.compares(slot)) continue;
+					if (slot == null || !matcher.comparesTo(slot)) continue;
 					amount += slot.getAmount();
 				}
 			}
@@ -34,7 +34,7 @@ public class ItemCompost {
 			for (int i = 0; i < synchronizer.getParent().getSize(); i++) {
 				ItemStack slot = synchronizer.getParent().getItem(i);
 				for (ItemMatcher matcher : matchers) {
-					if (slot == null || !matcher.compares(slot)) continue;
+					if (slot == null || !matcher.comparesTo(slot)) continue;
 					amount += slot.getAmount();
 				}
 			}
@@ -50,7 +50,7 @@ public class ItemCompost {
 				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
 					if (inv[j] == null) continue;
 					for (ItemMatcher matcher : matchers.stream().filter(m -> ((ItemSync<ItemMatcher>) synchronizer).getMatcher().isAssignableFrom(m.getClass())).collect(Collectors.toList())) {
-						if (matcher.compares(inv[j])) {
+						if (matcher.comparesTo(inv[j])) {
 							inv[j].setAmount(0);
 							break;
 						}
@@ -61,7 +61,7 @@ public class ItemCompost {
 				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
 					if (inv[j] == null) continue;
 					for (ItemMatcher matcher : matchers.stream().filter(m -> ((ItemSync<ItemMatcher>) synchronizer).getMatcher().isAssignableFrom(m.getClass())).collect(Collectors.toList())) {
-						if (matcher.compares(inv[j])) {
+						if (matcher.comparesTo(inv[j])) {
 							int newAmount = inv[j].getAmount() - remainingAmount;
 							if (newAmount > 0) {
 								inv[j].setAmount(newAmount);
@@ -82,7 +82,7 @@ public class ItemCompost {
 				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
 					if (inv[j] == null) continue;
 					for (ItemMatcher matcher : matchers) {
-						if (matcher.compares(inv[j])) {
+						if (matcher.comparesTo(inv[j])) {
 							inv[j].setAmount(0);
 							break;
 						}
@@ -93,7 +93,7 @@ public class ItemCompost {
 				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
 					if (inv[j] == null) continue;
 					for (ItemMatcher matcher : matchers) {
-						if (matcher.compares(inv[j])) {
+						if (matcher.comparesTo(inv[j])) {
 							int newAmount = inv[j].getAmount() - remainingAmount;
 							if (newAmount > 0) {
 								inv[j].setAmount(newAmount);

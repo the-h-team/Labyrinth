@@ -21,12 +21,12 @@ public final class ServiceManager {
 	}
 
 	public <T extends Service> T get(Class<T> service) {
-		return (T) services.entrySet().stream().filter(e -> service.isAssignableFrom(e.getValue().getClass())).map(Map.Entry::getValue).findFirst().orElse(null);
+		return service.cast(services.values().stream().filter(v -> service.isAssignableFrom(v.getClass())).findFirst().orElse(null));
 	}
 
 	public <T extends Service> T get(ServiceType<T> serviceType) {
 		Object service = services.entrySet().stream().filter(t -> serviceType.getType().isAssignableFrom(t.getKey().getType())).findFirst().map(Map.Entry::getValue).orElse(null);
-		return Check.forNull((T)service, "No loaded instance of service type " + serviceType.getType().getSimpleName() + " was found.");
+		return Check.forNull(serviceType.getType().cast(service), "No loaded instance of service type " + serviceType.getType().getSimpleName() + " was found.");
 	}
 
 

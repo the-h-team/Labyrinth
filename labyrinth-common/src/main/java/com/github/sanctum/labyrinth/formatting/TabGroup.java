@@ -6,28 +6,91 @@ import java.util.LinkedList;
 import java.util.List;
 import org.intellij.lang.annotations.MagicConstant;
 
+/**
+ * An interface delegating tab list header and footer display information.
+ */
 public interface TabGroup {
 
+	/**
+	 * Get the special key for this tab info group.
+	 *
+	 * @return This groups special key.
+	 */
 	String getKey();
 
+	/**
+	 * Check if this tab info group is currently active.
+	 *
+	 * @return true if this tab info group is ready for use.
+	 */
 	boolean isActive();
 
+	/**
+	 * Check if this tab group can re-wind its own indexing for smooth looping.
+	 *
+	 * @return true if this tab group is windable.
+	 */
 	boolean isWindable();
 
+	/**
+	 * Set the activity status of this tab group.
+	 *
+	 * @param active the status of the tab group.
+	 */
 	void setActive(boolean active);
 
+	/**
+	 * Get the tab information header at the specified index.
+	 *
+	 * @param index The index to retrieve.
+	 * @return A tab information object.
+	 */
 	TabInfo getHeader(int index);
 
+	/**
+	 * Get the current tab information header index.
+	 *
+	 * @return the current header index.
+	 */
 	int getCurrentHeaderIndex();
 
+	/**
+	 * Get the tab information footer at the specified index.
+	 *
+	 * @param index The index to retrieve.
+	 * @return A tab information object.
+	 */
 	TabInfo getFooter(int index);
 
+	/**
+	 * Get the current tab information footer index.
+	 *
+	 * @return the current footer index.
+	 */
 	int getCurrentFooterIndex();
 
+	/**
+	 * Set whether this tab group can rewind its own indexing or not.
+	 *
+	 * @param windable whether to allow winding or not.
+	 */
 	void setWindable(boolean windable);
 
-	void nextDisplay(@MagicConstant(valuesFromClass = TabInfo.class) int side);
+	/**
+	 * Adjust the current index for a given tab list position to the next display in order.
+	 *
+	 * @param side The tab list position to update.
+	 */
+	void nextDisplayIndex(@MagicConstant(valuesFromClass = TabInfo.class) int side);
 
+	/**
+	 * Create a fresh tab group from the provided header and footer.
+	 *
+	 * @param key The special key to use
+	 * @param header The header context
+	 * @param footer The footer context
+	 * @return A fresh TabGroup object containing the provided source material.
+	 */
 	static TabGroup fromInfo(String key, TabInfo[] header, TabInfo[] footer) {
 		return new TabGroup() {
 
@@ -72,7 +135,7 @@ public interface TabGroup {
 
 			@Override
 			public int getCurrentHeaderIndex() {
-				return headerPos;
+				return Math.max(0, headerPos);
 			}
 
 			@Override
@@ -82,7 +145,7 @@ public interface TabGroup {
 
 			@Override
 			public int getCurrentFooterIndex() {
-				return footerPos;
+				return Math.max(footerPos, 0);
 			}
 
 			@Override
@@ -91,7 +154,7 @@ public interface TabGroup {
 			}
 
 			@Override
-			public void nextDisplay(int side) {
+			public void nextDisplayIndex(int side) {
 				switch (side) {
 					case 0:
 						if (headerPos + 1 >= headerlist.size()) {

@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.GradientColor;
@@ -18,6 +20,8 @@ import org.bukkit.OfflinePlayer;
  * @author Hempfest
  */
 public class StringUtils {
+
+	private static final PlaceholderFormatService formatService = LabyrinthProvider.getService(PlaceholderFormatService.class);
 
 	private final String context;
 
@@ -113,6 +117,10 @@ public class StringUtils {
 	 * @return the translated "colored" string
 	 */
 	public String translate() {
+
+		if (formatService != null) {
+			return formatService.replaceAll(new ColoredString(this.context).toString(), null);
+		}
 		return new ColoredString(this.context).toString();
 	}
 
@@ -130,6 +138,22 @@ public class StringUtils {
 	}
 
 	/**
+	 * Simply set placeholders to the given context from the provided source. Nothing more.
+	 *
+	 * @param source the player to target
+	 * @return the translated non-colored placeholder set string
+	 */
+	public String laby(OfflinePlayer source) {
+		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+			return PlaceholderAPI.setPlaceholders(source, this.context);
+		}
+		if (formatService != null) {
+			return formatService.replaceAll(this.context, source);
+		}
+		return "{LAP-MISSING}:" + this.context;
+	}
+
+	/**
 	 * Apply the same logic as {@link StringUtils#translate()} but also utilize set placeholders for a
 	 * target player.
 	 *
@@ -138,8 +162,8 @@ public class StringUtils {
 	 * your server has PlaceholderAPI installed, of course;)
 	 */
 	public String translate(OfflinePlayer source) {
-		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-			return PlaceholderAPI.setPlaceholders(source, translate());
+		if (formatService != null) {
+			return formatService.replaceAll(translate(), source);
 		}
 		return translate();
 	}

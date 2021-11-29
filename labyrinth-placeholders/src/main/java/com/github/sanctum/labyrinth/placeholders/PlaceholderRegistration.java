@@ -1,121 +1,148 @@
 package com.github.sanctum.labyrinth.placeholders;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.data.AddonLoader;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * An abstraction dedicated to managing placeholder translation requests & additions.
+ */
 public abstract class PlaceholderRegistration {
 
-	private static PlaceholderRegistration instance;
-	private final List<PlaceholderTranslation> translations = Collections.synchronizedList(new LinkedList<>());
+	static PlaceholderTranslationUtility instance;
 
-	PlaceholderRegistration() {
-		instance = this;
+
+	public static @NotNull
+	@Note("Always valid!")
+	PlaceholderRegistration getInstance() {
+		if (instance == null) {
+			instance = new PlaceholderTranslationUtility() {
+			};
+		}
+		return instance.registration;
 	}
 
-	public static @NotNull @Note("Always valid!") PlaceholderRegistration getInstance() {
-		return instance != null ? instance : new PlaceholderRegistration() {
-		};
-	}
+	/**
+	 * Register a custom placeholder translation into cache.
+	 *
+	 * @param translation The translation to register.
+	 * @return A deployable registration sequence.
+	 */
+	public abstract Deployable<PlaceholderTranslation> registerTranslation(@NotNull PlaceholderTranslation translation);
 
-	public Deployable<PlaceholderTranslation> registerTranslation(@NotNull PlaceholderTranslation translation) {
-		return Deployable.of(translation, translations::add);
-	}
+	/**
+	 * Register a custom placeholder translation into cache from file.
+	 *
+	 * @param file The file to use for loading.
+	 * @return A deployable registration sequence.
+	 */
+	public abstract Deployable<PlaceholderTranslation> registerTranslation(@NotNull File file);
 
-	public Deployable<PlaceholderTranslation> registerTranslation(@NotNull File file) {
-		AddonLoader loader = AddonLoader.forPlugin(LabyrinthProvider.getInstance().getPluginInstance());
-		List<Class<?>> classes = loader.loadFile(file);
-		if (classes.stream().noneMatch(PlaceholderTranslation.class::isAssignableFrom)) throw new IllegalArgumentException("No translation found from the specified file!");
-		PlaceholderTranslation translation = classes.stream().filter(PlaceholderTranslation.class::isAssignableFrom).map(aClass -> {
-			try {
-				return (PlaceholderTranslation)aClass.getDeclaredConstructor().newInstance();
-			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}).findFirst().orElse(null);
-		return Deployable.of(translation, translations::add);
-	}
+	/**
+	 * Remove a registered translation from cache.
+	 *
+	 * @param translation The translation to remove.
+	 * @return A deployable removal sequence.
+	 */
+	public abstract Deployable<PlaceholderTranslation> unregisterTranslation(@NotNull PlaceholderTranslation translation);
 
-	public Deployable<PlaceholderTranslation> unregisterTranslation(@NotNull PlaceholderTranslation translation) {
-		return Deployable.of(translation, translations::remove);
-	}
+	/**
+	 * Get a registered translation by its identifier.
+	 *
+	 * @param identifier The identifier to use.
+	 * @return The registered translation or null.
+	 */
+	public abstract PlaceholderTranslation getTranslation(@NotNull PlaceholderIdentifier identifier);
 
-	public PlaceholderTranslation getTranslation(@NotNull PlaceholderIdentifier identifier) {
-		return translations.stream().filter(placeholderTranslation -> placeholderTranslation.hasCustomIdentifier() && placeholderTranslation.getIdentifier().get().equals(identifier.get())).findFirst().orElse(null);
-	}
+	/**
+	 * Get a registered translation by its name.
+	 *
+	 * @param name The identifier to use.
+	 * @return The registered translation or null.
+	 */
+	public abstract PlaceholderTranslation getTranslation(@NotNull String name);
 
-	public void runAction(@NotNull Consumer<PlaceholderTranslation> consumer) {
-		translations.forEach(consumer);
-	}
+	/**
+	 * A forEach method on cached translation objects.
+	 *
+	 * @param consumer The consuming operation to enact.
+	 */
+	public abstract void runAction(@NotNull Consumer<PlaceholderTranslation> consumer);
 
-	public boolean isEmpty(@NotNull String text) {
-		return isEmpty(text, null);
-	}
+	/**
+	 * Check if a specific translation is registered into cache.
+	 *
+	 * @param translation The translation to check
+	 * @return true if the translation is registered.
+	 */
+	public abstract boolean isRegistered(@NotNull PlaceholderTranslation translation);
 
-	public boolean isEmpty(@NotNull String text, @Nullable PlaceholderIdentifier identifier) {
-		boolean empty = false;
-		Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
-		do {
-			PlaceholderTranslation conversion = conversionIterator.next();
-			for (Placeholder hold : conversion.getPlaceholders()) {
-				empty = PlaceholderTranslationUtility.isEmpty(text, identifier != null ? identifier : conversion.getIdentifier(), hold);
-			}
-		} while (conversionIterator.hasNext());
-		return empty;
-	}
+	/**
+	 * Check if a string contains any registered placeholders.
+	 *
+	 * @param text The string to check
+	 * @return false if the string contains placeholders.
+	 */
+	public abstract boolean isEmpty(@NotNull String text);
 
-	public @NotNull String replaceAll(@NotNull String text) {
-		if (translations.isEmpty()) return text;
-		return replaceAll(text, null);
-	}
+	/**
+	 * Check if a string contains any registered placeholders under the specified identity.
+	 *
+	 * @param text       The string to check
+	 * @param identifier The identity
+	 * @return false if the string contains placeholders regarding the specified identity.
+	 */
+	public abstract boolean isEmpty(@NotNull String text, @Nullable PlaceholderIdentifier identifier);
 
-	public @NotNull String replaceAll(@NotNull String text, @Nullable Object receiver) {
-		if (translations.isEmpty()) return text;
-		String result = text;
-		Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
-		do {
-			PlaceholderTranslation conversion = conversionIterator.next();
-			for (Placeholder hold : conversion.getPlaceholders()) {
-				result = replaceAll(result, () -> receiver, conversion.getIdentifier(), hold);
-			}
-		} while (conversionIterator.hasNext());
-		return result;
-	}
+	/**
+	 * Replace all possible placeholders in the provided string.
+	 *
+	 * @param text The string to format
+	 * @return A placeholder formatted string.
+	 */
+	public abstract @NotNull String replaceAll(@NotNull String text);
 
-	public @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver) {
-		if (translations.isEmpty()) return text;
-		String result = text;
-		Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
-		do {
-			PlaceholderTranslation conversion = conversionIterator.next();
-			for (Placeholder hold : conversion.getPlaceholders()) {
-				result = replaceAll(result, receiver, conversion.getIdentifier(), hold);
-			}
-		} while (conversionIterator.hasNext());
-		return result;
-	}
+	/**
+	 * Replace all possible placeholders in the provided string using a custom variable.
+	 *
+	 * @param text     The string to format
+	 * @param receiver The variable to provide for context
+	 * @return A placeholder formatted string.
+	 */
+	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable Object receiver);
 
-	public @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, Placeholder placeholder) {
-		if (translations.isEmpty()) return text;
-		return replaceAll(text, receiver, null, placeholder);
-	}
+	/**
+	 * Replace all possible placeholders in the provided string using a custom variable
+	 *
+	 * @param text     The string to format
+	 * @param receiver The variable to provide for context
+	 * @return A placeholder formatted string
+	 */
+	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver);
 
-	public @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, @Nullable PlaceholderIdentifier identifier, @NotNull Placeholder placeholder) {
-		if (translations.isEmpty()) return text;
-		return PlaceholderTranslationUtility.translate(text, identifier, receiver, placeholder);
-	}
+	/**
+	 * Replace all possible placeholders in the provided string using a custom variable and placeholder inquiry.
+	 *
+	 * @param text        The string to format
+	 * @param receiver    The variable to provide for context
+	 * @param placeholder The placeholder to format
+	 * @return A placeholder formatted string.
+	 */
+	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, Placeholder placeholder);
 
+	/**
+	 * Replace all possible placeholders in the provided string using a custom variable, placeholder inquiry & identity.
+	 *
+	 * @param text        The string to format
+	 * @param receiver    The variable to provide for context
+	 * @param identifier  The identity
+	 * @param placeholder The placeholder to format
+	 * @return A placeholder formatted string.
+	 */
+	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, @Nullable PlaceholderIdentifier identifier, @NotNull Placeholder placeholder);
 
 
 }

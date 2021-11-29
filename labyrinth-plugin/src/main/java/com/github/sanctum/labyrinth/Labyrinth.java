@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
@@ -17,6 +18,7 @@ import com.github.sanctum.labyrinth.data.MessageSerializable;
 import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
+import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -49,6 +51,7 @@ import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
 import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.placeholders.factory.WorldPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
+import com.github.sanctum.labyrinth.task.Procedure;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskChain;
@@ -68,6 +71,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
@@ -129,31 +135,12 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	public void onEnable() {
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
-		serviceManager.load(Service.VENT);
-		serviceManager.load(Service.TASK);
-		serviceManager.load(Service.RECORDING);
-		serviceManager.load(Service.DATA);
-		serviceManager.load(Service.MESSENGER);
-		serviceManager.load(Service.LEGACY);
-		serviceManager.load(Service.COOLDOWNS);
-		serviceManager.load(Service.COMPONENTS);
-		servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
+		registerServices().deploy();
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedIsNew = LabyrinthAPI.super.isNew();
 		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
-
-		Configurable.registerClass(ItemStackSerializable.class);
-		Configurable.registerClass(LocationSerializable.class);
-		Configurable.registerClass(TemplateSerializable.class);
-		Configurable.registerClass(MetaTemplateSerializable.class);
-		Configurable.registerClass(MessageSerializable.class);
-		Configurable.registerClass(ChunkSerializable.class);
-		Configurable.registerClass(CustomColor.class);
-
-		ConfigurationSerialization.registerClass(CustomColor.class);
-		ConfigurationSerialization.registerClass(Template.class);
-		ConfigurationSerialization.registerClass(MetaTemplate.class);
-
+		registerJsonAdapters().deploy();
+		registerFileConfigurationAdapters().deploy();
 		FileManager copy = FileList.search(this).get("config");
 		InputStream stream = getResource("config.yml");
 		assert stream != null;
@@ -166,44 +153,105 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
-		Schedule.sync(() -> new AdvancedEconomyImplementation(this))
-				.applyAfter(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).wait(2);
-		Schedule.sync(() -> CommandUtils.initialize(Labyrinth.this)).run();
-		Schedule.sync(() -> {
-			if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-				VaultImplementation bridge = new VaultImplementation();
-				getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
-			}
-			Permissions instance = getServicesManager().load(Permissions.class);
-			if (instance.getProvider().equals(this)) {
-				getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
-			} else {
-				if (instance instanceof VaultImplementation) {
-					getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
-				} else {
-					getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
-				}
-			}
-		}).waitReal(20 * 2);
 
-		if (requiresLocationLibrary()) {
-			ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
-		}
-
-		if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
-			RegionServicesManagerImpl.initialize(this);
-		}
-
-		ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(this);
-
-		Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
-
-		PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
-
-		registration.registerTranslation(new PlayerPlaceholders()).deploy();
-		registration.registerTranslation(new WorldPlaceholders()).deploy();
+		registerImplementations().deploy();
+		registerHandshake().deploy();
+		registerDefaultPlaceholders().deploy();
 
 	}
+
+	Deployable<Labyrinth> registerServices() {
+		return Deployable.of(this, instance -> {
+			instance.serviceManager.load(Service.VENT);
+			instance.serviceManager.load(Service.TASK);
+			instance.serviceManager.load(Service.RECORDING);
+			instance.serviceManager.load(Service.DATA);
+			instance.serviceManager.load(Service.MESSENGER);
+			instance.serviceManager.load(Service.LEGACY);
+			instance.serviceManager.load(Service.COOLDOWNS);
+			instance.serviceManager.load(Service.COMPONENTS);
+			instance.serviceManager.load(new ServiceType<>(() -> (PlaceholderFormatService) (text, variable) -> {
+				String result = text;
+				if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+					if (variable instanceof OfflinePlayer) {
+						result = PlaceholderAPI.setPlaceholders((OfflinePlayer) variable, text);
+					}
+				}
+				return PlaceholderRegistration.getInstance().replaceAll(result, variable);
+			}));
+			instance.servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
+		});
+	}
+
+	Deployable<Labyrinth> registerImplementations() {
+		return Deployable.of(this, plugin -> {
+			Schedule.sync(() -> new AdvancedEconomyImplementation(plugin))
+					.applyAfter(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).wait(2);
+			Schedule.sync(() -> CommandUtils.initialize(plugin)).run();
+			Schedule.sync(() -> {
+				if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+					VaultImplementation bridge = new VaultImplementation();
+					getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
+				}
+				Permissions instance = getServicesManager().load(Permissions.class);
+				if (instance.getProvider().equals(plugin)) {
+					plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+				} else {
+					if (instance instanceof VaultImplementation) {
+						plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+					} else {
+						plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+					}
+				}
+			}).waitReal(20 * 2);
+
+			if (requiresLocationLibrary()) {
+				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
+			}
+
+			if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
+				RegionServicesManagerImpl.initialize(plugin);
+			}
+		});
+	}
+
+	Deployable<Labyrinth> registerHandshake() {
+		return Deployable.of(this, plugin -> {
+			ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(plugin);
+
+			Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
+		});
+	}
+
+	Deployable<Labyrinth> registerDefaultPlaceholders() {
+		return Deployable.of(this, plugin -> {
+			PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
+
+			registration.registerTranslation(new PlayerPlaceholders()).deploy();
+			registration.registerTranslation(new WorldPlaceholders()).deploy();
+		});
+	}
+
+	Deployable<Labyrinth> registerJsonAdapters() {
+		return Deployable.of(this, instance -> {
+			Configurable.registerClass(ItemStackSerializable.class);
+			Configurable.registerClass(LocationSerializable.class);
+			Configurable.registerClass(TemplateSerializable.class);
+			Configurable.registerClass(MetaTemplateSerializable.class);
+			Configurable.registerClass(MessageSerializable.class);
+			Configurable.registerClass(ChunkSerializable.class);
+			Configurable.registerClass(CustomColor.class);
+		});
+	}
+
+	Deployable<Labyrinth> registerFileConfigurationAdapters() {
+		return Deployable.of(this, instance -> {
+			ConfigurationSerialization.registerClass(CustomColor.class);
+			ConfigurationSerialization.registerClass(Template.class);
+			ConfigurationSerialization.registerClass(MetaTemplate.class);
+		});
+	}
+
 
 	@Override
 	public void onDisable() {
@@ -230,7 +278,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 	@Subscribe(priority = Vent.Priority.READ_ONLY)
 	public void onJoin(DefaultEvent.Join e) {
 		LabyrinthUser user = LabyrinthUser.get(e.getPlayer().getName());
-		if (user != null) {
+		if (user.isValid()) {
 			if (OrdinalProcedure.select(user, 4, e.getPlayer()).cast(() -> Boolean.class)) {
 				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s id has been updated.");
 			}
@@ -240,7 +288,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 	}
 
-	@Subscribe
+	@Subscribe(priority = Vent.Priority.READ_ONLY)
 	public void onComponent(DefaultEvent.Communication e) {
 		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
 			e.getCommand().ifPresent(cmd -> {

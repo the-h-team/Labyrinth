@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.placeholders;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * An interface  describing a primary identifier for a placeholder translation.
+ */
 @FunctionalInterface
 public interface PlaceholderIdentifier {
 

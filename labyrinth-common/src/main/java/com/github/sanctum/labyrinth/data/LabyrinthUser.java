@@ -89,7 +89,7 @@ public class LabyrinthUser implements Nameable {
 	}
 
 	public boolean isValid() {
-		return Arrays.stream(Bukkit.getOfflinePlayers()).anyMatch(p -> this.name.equals(p.getName()));
+		return Bukkit.getOfflinePlayer(getId()).hasPlayedBefore();
 	}
 
 	public VaultPlayer toVault() {

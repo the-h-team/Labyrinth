@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +42,12 @@ public interface Constant<T> {
 		return deployable.submit().join();
 	}
 
+	static <T> List<Constant<T>> values(Type source, TypeFlag<T> c) {
+		Deployable<List<Constant<T>>> deployable = AccessibleConstants.collect(source).get(c.getType());
+		deployable.queue();
+		return deployable.submit().join();
+	}
+
 	static List<Object> values(Object source) {
 		Deployable<Map<Class<?>, List<Object>>> deployable = AccessibleConstants.collect(source).resolve();
 		deployable.queue();
@@ -54,6 +61,10 @@ public interface Constant<T> {
 			list.addAll(l);
 		}
 		return list;
+	}
+
+	static <T> Constant<T> valueOf(TypeFlag<T> flag, String name) {
+		return (Constant<T>) AccessibleConstants.of(flag.getType()).get(name);
 	}
 
 }

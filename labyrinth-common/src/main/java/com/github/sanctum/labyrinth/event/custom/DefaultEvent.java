@@ -236,12 +236,6 @@ public class DefaultEvent extends Vent {
 
 			private String label;
 
-			public ChatCommand(String[] args, Set<? extends org.bukkit.entity.Player> recipients) {
-				super(recipients != null ? new HashSet<>(recipients) : null);
-				this.args = args;
-				this.label = args[0];
-			}
-
 			public ChatCommand(String[] args, Collection<? extends org.bukkit.entity.Player> recipients) {
 				super(recipients != null ? new HashSet<>(recipients) : null);
 				this.args = args;
@@ -250,7 +244,7 @@ public class DefaultEvent extends Vent {
 
 			@Override
 			public String[] get() {
-				return ListUtils.use(this.args).join(s -> s.stream().filter(st -> !st.equals(this.label)).collect(Collectors.toList()).toArray(s.toArray(new String[0])));
+				return args;
 			}
 
 			@Override

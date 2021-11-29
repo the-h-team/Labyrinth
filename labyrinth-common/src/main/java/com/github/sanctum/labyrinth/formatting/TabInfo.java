@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public final class TabInfo {
 
 	public static final int HEADER = 0;
-	public static final int FOOTER = 0;
+	public static final int FOOTER = 1;
 
 	static final Map<Player, TablistInstance> instances = new HashMap<>();
 	private final Map<Integer, String> messages = new HashMap<>();
@@ -18,8 +18,13 @@ public final class TabInfo {
 	private TabInfo() {
 	}
 
-	public TabInfo input(int line, String text) {
+	public TabInfo put(int line, String text) {
 		messages.put(line, text);
+		return this;
+	}
+
+	public TabInfo put(String text) {
+		messages.put(messages.size() + 1, text);
 		return this;
 	}
 
