@@ -10,7 +10,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
 
+/**
+ * @deprecated A new library for this will be provided soon.
+ */
 @SuppressWarnings("UnusedReturnValue")
+@Deprecated
 public class Asynchronous {
 
 	private final LabyrinthAPI labyrinthAPI = LabyrinthProvider.getInstance();

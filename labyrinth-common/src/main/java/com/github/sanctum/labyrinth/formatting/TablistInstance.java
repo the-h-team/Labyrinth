@@ -1,10 +1,16 @@
 package com.github.sanctum.labyrinth.formatting;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.Synchronous;
+import com.github.sanctum.labyrinth.task.Task;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -83,6 +89,16 @@ public interface TablistInstance {
 	boolean enable(Consumer<Player> consumer);
 
 	/**
+	 * Activate this tab list display instance and include custom meta within the task, alternating displays every x y (x being time and y being the unit.)
+	 *
+	 * @param consumer The meta to include.
+	 * @param unit The time unit to use
+	 * @param period The amount of time to use.
+	 * @return true if the instance was activated, false if already running.
+	 */
+	boolean enable(Consumer<Player> consumer, TimeUnit unit, long period);
+
+	/**
 	 * De-activate this tab list display instance if it's already active.
 	 *
 	 * @return true if the instance was de-activated, false if not running.
@@ -121,7 +137,6 @@ public interface TablistInstance {
 	static @NotNull TablistInstance get(@NotNull Player target) {
 		return TabInfo.instances.computeIfAbsent(target, player -> new TablistInstance() {
 			private final Map<String, TabGroup> groups = new HashMap<>();
-			private Synchronous task;
 			private String previous;
 
 			@Override
@@ -163,51 +178,52 @@ public interface TablistInstance {
 
 			@Override
 			public boolean enable() {
-				if (task != null && task.isRunning()) return false;
-				if (task == null) {
-					task = Schedule.sync(() -> getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
-						tabGroup.nextDisplayIndex(TabInfo.HEADER);
-						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
-						((Player) getHolder()).setPlayerListHeaderFooter(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString(), tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString());
-					}));
-				}
-				task.repeatReal(0, 1);
-				return true;
+				return enable(player1 -> {}, TimeUnit.MILLISECONDS, 40);
 			}
 
 			@Override
 			public boolean enable(Consumer<Player> consumer) {
-				if (task != null && task.isRunning()) return false;
-				if (task == null) {
-					task = Schedule.sync(() -> getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
+				return enable(consumer, TimeUnit.MILLISECONDS, 40);
+			}
+
+			@Override
+			public boolean enable(Consumer<Player> consumer, TimeUnit unit, long period) {
+				if (isEnabled()) return false;
+				LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).repeat(task1 -> {
+
+					if (getHolder() == null) {
+						task1.cancel();
+						return;
+					}
+
+					getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
 						tabGroup.nextDisplayIndex(TabInfo.HEADER);
 						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
-						getHolder().setPlayerListHeaderFooter(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString(), tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString());
+						getHolder().setPlayerListHeaderFooter(StringUtils.use(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString()).translate(), StringUtils.use(tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString()).translate());
 						consumer.accept(getHolder());
-					}));
-				}
-				task.repeatReal(0, 1);
+					});
+				}, getHolder().getName() + "-tablist", unit.toMillis(period), unit.toMillis(period));
 				return true;
 			}
 
 			@Override
 			public boolean disable() {
-				if (task == null || !task.isRunning()) return false;
-				task.cancelTask();
+				if (!isEnabled()) return false;
+				LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).get(getHolder().getName() + "-tablist").cancel();
 				return true;
 			}
 
 			@Override
 			public boolean disable(Consumer<Player> consumer) {
-				if (task == null || !task.isRunning()) return false;
-				task.cancelTask();
+				if (!isEnabled()) return false;
+				LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).get(getHolder().getName() + "-tablist").cancel();
 				consumer.accept(getHolder());
 				return true;
 			}
 
 			@Override
 			public boolean isEnabled() {
-				return task != null && task.isRunning();
+				return Optional.ofNullable(LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).get(getHolder().getName() + "-tablist")).isPresent();
 			}
 
 			@Override
@@ -217,7 +233,7 @@ public interface TablistInstance {
 						if (!group1.equals(group)) {
 							if (group1.isActive()) {
 								group1.setActive(false);
-								this.previous = group.getKey();
+								this.previous = group1.getKey();
 							}
 						}
 

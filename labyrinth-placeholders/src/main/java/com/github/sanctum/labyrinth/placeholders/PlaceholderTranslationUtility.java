@@ -174,6 +174,7 @@ abstract class PlaceholderTranslationUtility {
 		for (Placeholder p : conversion.getPlaceholders()) {
 			Pattern pattern = getPattern(conversion.getIdentifier(), p);
 			Matcher matcher = pattern.matcher(text);
+			if (!matcher.find()) continue;
 			do {
 				String parameters = matcher.group("parameters");
 				placeholderList.add(new Placeholder() {

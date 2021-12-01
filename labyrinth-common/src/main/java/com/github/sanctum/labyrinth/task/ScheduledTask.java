@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.task;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
+@Deprecated
 public class ScheduledTask {
 
 	protected final BukkitRunnable runnable;

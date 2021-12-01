@@ -4,6 +4,10 @@ package com.github.sanctum.labyrinth.task;
 import com.github.sanctum.labyrinth.library.Applicable;
 import org.bukkit.entity.Player;
 
+/**
+ * @deprecated A new library for this will be provided soon.
+ */
+@Deprecated
 public class Schedule {
 
 	/**
@@ -18,6 +22,7 @@ public class Schedule {
 	 * @param applicable the applicable data to execute within the task via void or lambda reference
 	 * @return a new synchronous task builder
 	 */
+	@Deprecated
 	public static Synchronous sync(Applicable applicable) {
 		return new Synchronous(applicable);
 	}
@@ -34,6 +39,7 @@ public class Schedule {
 	 * @param applicable the applicable data to execute within the task via void or lambda reference
 	 * @return a new synchronous task builder
 	 */
+	@Deprecated
 	public static Asynchronous async(Applicable applicable) {
 		return new Asynchronous(applicable);
 	}

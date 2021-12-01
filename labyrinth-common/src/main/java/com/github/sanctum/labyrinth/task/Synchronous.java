@@ -10,6 +10,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
 
+/**
+ * @deprecated A new library for this will be provided soon.
+ */
+@Deprecated
 public class Synchronous {
 
 	private final LabyrinthAPI labyrinthAPI = LabyrinthProvider.getInstance();
@@ -127,7 +131,11 @@ public class Synchronous {
 	}
 
 	public boolean isRunning() {
-		return !this.runnable.isCancelled();
+		try {
+			return !this.runnable.isCancelled();
+		} catch (IllegalStateException ignored) {
+			return false;
+		}
 	}
 
 	public void cancelTask() {

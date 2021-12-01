@@ -14,12 +14,10 @@ public class SynchronousTaskChain extends TaskChain {
 
 	protected final Timer timer;
 	protected final Plugin host;
-	protected final Map<String, Task> map;
 
 	public SynchronousTaskChain(Plugin host) {
 		this.host = host;
 		this.timer = new Timer(true);
-		this.map = new HashMap<>();
 	}
 
 	@Override
