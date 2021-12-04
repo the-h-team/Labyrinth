@@ -2,6 +2,8 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
 
+import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
@@ -10,10 +12,9 @@ public class ServiceType<T extends Service> {
 	final Supplier<T> supplier;
 	Class<T> c;
 
-	@SuppressWarnings("unchecked")
 	public ServiceType(Supplier<T> supplier) {
 		this.supplier = supplier;
-		c = (Class<T>) supplier.get().getClass();
+		c = new EasyTypeAdapter<T>().getType();
 	}
 
 	public Class<T> getType() {

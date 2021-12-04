@@ -312,9 +312,8 @@ public class FileManager {
 	}
 
 
-	@Experimental("Tested working but not guaranteed stable")
 	public @NotNull FileManager toJSON(String name, String dir) {
-		FileManager n = FileList.search(plugin).find(name, dir, FileType.JSON);
+		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
 		Configurable c = getRoot();
 		if (c instanceof YamlConfiguration) {
 			DataTable inquiry = DataTable.newTable();
@@ -325,6 +324,30 @@ public class FileManager {
 						if (s.isConfigurationSection(e)) {
 							ConfigurationSection a = s.getConfigurationSection(e);
 							inquiry.set(e, a.get(e));
+						}
+					}
+				} else {
+					inquiry.set(entry, c.getNode(entry).get());
+				}
+			}
+			n.write(inquiry, false);
+			return n;
+		}
+		return this;
+	}
+
+	public @NotNull FileManager toYaml(String name, String dir) {
+		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
+		Configurable c = getRoot();
+		if (c instanceof JsonConfiguration) {
+			DataTable inquiry = DataTable.newTable();
+			for (String entry : c.getKeys(true)) {
+				if (c.isNode(entry)) {
+					Node s = c.getNode(entry);
+					for (String e : s.getKeys(true)) {
+						if (s.isNode(e)) {
+							Node a = s.getNode(e);
+							inquiry.set(e, a.get());
 						}
 					}
 				} else {

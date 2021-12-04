@@ -163,7 +163,7 @@ public class StringUtils {
 	 */
 	public String translate(OfflinePlayer source) {
 		if (formatService != null) {
-			return formatService.replaceAll(translate(), source);
+			return new ColoredString(formatService.replaceAll(this.context, source)).toString();
 		}
 		return translate();
 	}

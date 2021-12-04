@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth;
 
+import com.github.sanctum.labyrinth.annotation.FieldsFrom;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.LabyrinthPluginMessageEvent;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.PluginChannel;
-import com.github.sanctum.labyrinth.data.PluginMessage;
+import com.github.sanctum.labyrinth.data.LabyrinthPluginChannel;
+import com.github.sanctum.labyrinth.data.LabyrinthPluginMessage;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.service.Constant;
 import com.github.sanctum.labyrinth.event.custom.Vent;
@@ -18,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +89,7 @@ public abstract class LabyrinthProvider {
 	 * @throws IllegalArgumentException If the provided service type isn't loaded.
 	 */
 	@Note("This method only works on loaded services!")
-	public static <T extends Service> T getService(ServiceType<T> type) {
+	public static <T extends Service> T getService(@FieldsFrom(Service.class) ServiceType<T> type) {
 		return getInstance().getServiceManager().get(type);
 	}
 
@@ -97,40 +98,8 @@ public abstract class LabyrinthProvider {
 		return getInstance().getServiceManager().get(service);
 	}
 
-	public static <T> Deployable<Object> sendMessage(Plugin plugin, T object) {
-		return sendMessage(plugin, object, PluginChannel.DEFAULT);
-	}
-
-	public static <T> Deployable<Object> sendMessage(Plugin plugin, T object, PluginChannel<?> channel) {
-		return Deployable.of(null, unused -> unused = new Vent.Call<>(new PluginMessageEvent(new PluginMessage<T>() {
-			@Override
-			public Plugin getPlugin() {
-				return plugin;
-			}
-
-			@Override
-			public T getMessage() {
-				return object;
-			}
-		}, channel)).run().getResponse());
-	}
-
-	public static List<PluginChannel<?>> getDefaultChannels() {
-		return Constant.values(PluginChannel.class).stream().map(c -> (PluginChannel<?>)c.getValue()).collect(Collectors.toList());
-	}
-
 	public static Set<LabyrinthUser> getOfflinePlayers() {
-		Map<String, LabyrinthUser> users = new HashMap<>();
-		Arrays.stream(Bukkit.getOfflinePlayers()).forEach(op -> {
-			if (op.getName() != null) {
-				if (!users.containsKey(op.getName())) {
-					users.put(op.getName(), LabyrinthUser.get(op));
-				}
-			} else {
-				getInstance().getLogger().severe("- While traversing players a player with NO unique information (name, id) was found and needs to be removed manually.");
-			}
-		});
-		return new HashSet<>(users.values());
+		return Arrays.stream(Bukkit.getOfflinePlayers()).map(LabyrinthUser::get).collect(Collectors.toSet());
 	}
 
 	public static @Nullable LabyrinthUser getPlayer(String name) {

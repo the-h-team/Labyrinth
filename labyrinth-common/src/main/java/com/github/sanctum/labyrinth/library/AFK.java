@@ -1,33 +1,31 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import java.text.MessageFormat;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.SubscriberCall;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
-import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.task.Synchronous;
+import com.github.sanctum.labyrinth.task.Task;
+import com.github.sanctum.labyrinth.task.TaskMonitor;
+import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.labyrinth.task.RenderedTask;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 /**
  * A class entirely responsible for handling away from keyboard users.
  */
 public class AFK {
 
-	private static final Set<AFK> HISTORY = new HashSet<>();
+	private static final Map<Player, AFK> HISTORY = new HashMap<>();
 
 	private Position location;
-
-	private Synchronous task;
 
 	private long time = 0L;
 
@@ -37,15 +35,12 @@ public class AFK {
 
 	protected AFK(Player player) {
 		this.player = player;
-		HISTORY.add(this);
+		HISTORY.put(player, this);
 	}
 
 	public static AFK supply(Player player) {
 		if (player == null) return null;
-		if (get(player) != null) {
-			return get(player);
-		}
-		return Initializer.use(player)
+		return HISTORY.computeIfAbsent(player, player1 -> Initializer.use(player1)
 				.next(LabyrinthProvider.getInstance().getPluginInstance())
 				.next((e, subscription) -> {
 					Player p = e.getAfk().getPlayer();
@@ -114,36 +109,11 @@ public class AFK {
 							break;
 					}
 				})
-				.finish();
-	}
-
-	public static Set<AFK> getHistory() {
-		return HISTORY;
+				.finish());
 	}
 
 	public static AFK get(Player player) {
-		if (player == null) return null;
-		for (AFK afk : HISTORY) {
-			if (afk.getPlayer().getUniqueId().equals(player.getUniqueId())) {
-				return afk;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Re-set the status of this user.
-	 */
-	public void reset(Status status) {
-		this.status = status;
-		this.time = System.currentTimeMillis();
-	}
-
-	/**
-	 * Set the status of this user.
-	 */
-	public void set(Status status) {
-		this.status = status;
+		return HISTORY.get(player);
 	}
 
 	/**
@@ -170,10 +140,27 @@ public class AFK {
 	}
 
 	/**
+	 * Re-set the status of this user.
+	 */
+	public void reset(Status status) {
+		this.status = status;
+		this.time = System.currentTimeMillis();
+	}
+
+	/**
+	 * Set the status of this user.
+	 */
+	public void set(Status status) {
+		this.status = status;
+	}
+
+	/**
 	 * Completely remove this user's AFK trace from cache.
 	 */
 	public void remove() {
-		Schedule.sync(() -> HISTORY.removeIf(a -> a.getPlayer().equals(getPlayer()))).run();
+		TaskScheduler.of(() -> HISTORY.remove(player)).schedule();
+		Task task = TaskMonitor.getLocalInstance().get(player.getName() + player.getUniqueId() + "-afk");
+		if (task != null) task.cancel();
 	}
 
 	public TimeWatch.Recording getRecording() {
@@ -290,13 +277,13 @@ public class AFK {
 									afk.set(Status.LEAVING);
 								}
 
-								Schedule.sync(() -> {
+								TaskScheduler.of(() -> {
 
 									if (AFK.get(e.getPlayer()) != null) {
 										afk.remove();
 									}
 
-								}).waitReal(20 * 10);
+								}).scheduleLater(20 * 10);
 
 							}
 
@@ -357,7 +344,7 @@ public class AFK {
 		 */
 		public AFK finish() {
 			final AFK afk = new AFK(this.player);
-			afk.task = Schedule.sync(() -> {
+			TaskScheduler.of(() -> {
 				if (afk.time == 0) {
 					afk.time = System.currentTimeMillis();
 					afk.location = new Position(afk.getPlayer().getLocation().getBlockX(), afk.getPlayer().getLocation().getBlockY(), afk.getPlayer().getLocation().getBlockZ(), afk.getPlayer().getLocation().getYaw(), afk.getPlayer().getLocation().getPitch());
@@ -405,8 +392,7 @@ public class AFK {
 					}
 				}
 
-			}).cancelAfter(afk.getPlayer());
-			afk.task.repeatReal(0, 12);
+			}).scheduleTimer(afk.player.getName() + afk.player.getUniqueId() + "-afk", 0, 12, TaskPredicate.cancelAfter(afk.player));
 			return afk;
 		}
 

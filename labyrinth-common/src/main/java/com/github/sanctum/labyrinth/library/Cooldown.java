@@ -5,7 +5,7 @@ import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.data.Node;
-import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -135,9 +135,10 @@ public abstract class Cooldown {
 	 */
 	public synchronized final void save() {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.find("cooldowns", "Persistent", FileType.JSON)
+				.get("cooldowns", "Persistent", FileType.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));
-		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).applyAfter(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).run();
+		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).schedule()
+				.next(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).schedule();
 	}
 
 	/**
@@ -149,9 +150,10 @@ public abstract class Cooldown {
 	 */
 	public synchronized final void update() {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.find("cooldowns", "Persistent", FileType.JSON)
+				.get("cooldowns", "Persistent", FileType.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimeLeft())));
-		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).applyAfter(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).run();
+		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).schedule()
+				.next(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).schedule();
 	}
 
 	/**
@@ -200,7 +202,7 @@ public abstract class Cooldown {
 				.read(t -> t.getNode("Library." + c.getId()));
 		home.delete();
 		home.save();
-		Schedule.sync(() -> LabyrinthProvider.getInstance().getCooldowns().remove(c)).run();
+		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(c)).schedule();
 	}
 
 

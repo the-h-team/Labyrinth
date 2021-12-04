@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.gui.unity.construct;
 import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -20,11 +21,11 @@ public class SingularMenu extends Menu {
 			addElement(new InventoryElement.Normal(title, this));
 		}
 
-		Schedule.sync(() -> {
+		TaskScheduler.of(() -> {
 			if (getProperties().contains(Property.SAVABLE)) {
 				retrieve();
 			}
-		}).waitReal(3);
+		}).scheduleLater(3);
 
 	}
 

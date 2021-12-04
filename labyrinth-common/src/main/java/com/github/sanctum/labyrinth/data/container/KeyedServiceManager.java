@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,7 @@ public class KeyedServiceManager<K> {
 		for (RegisteredKeyedService<?, ?> service : this.registry) {
 			if (key.getClass().isAssignableFrom(service.getKey().getClass())) {
 				if (key.equals(service.getKey())) {
-					Schedule.sync(() -> this.registry.remove(service)).run();
+					TaskScheduler.of(() -> this.registry.remove(service)).schedule();
 				}
 			}
 		}
@@ -34,7 +35,7 @@ public class KeyedServiceManager<K> {
 	public <T> void unregisterAll(@NotNull Class<T> service) {
 		for (RegisteredKeyedService<?, ?> s : this.registry) {
 			if (service.isAssignableFrom(s.getSuperClass())) {
-				Schedule.sync(() -> this.registry.remove(s)).run();
+				TaskScheduler.of(() -> this.registry.remove(s)).schedule();
 			}
 		}
 	}
@@ -42,7 +43,7 @@ public class KeyedServiceManager<K> {
 	public <T> void unregister(@NotNull Class<T> service) {
 		for (RegisteredKeyedService<?, ?> s : this.registry) {
 			if (service.isAssignableFrom(s.getSuperClass())) {
-				Schedule.sync(() -> this.registry.remove(s)).run();
+				TaskScheduler.of(() -> this.registry.remove(s)).schedule();
 				break;
 			}
 		}
@@ -51,7 +52,7 @@ public class KeyedServiceManager<K> {
 	public <T> void unregister(@NotNull T service) {
 		for (RegisteredKeyedService<?, ?> s : this.registry) {
 			if (s.getService().equals(service)) {
-				Schedule.sync(() -> this.registry.remove(s)).run();
+				TaskScheduler.of(() -> this.registry.remove(s)).schedule();
 				break;
 			}
 		}

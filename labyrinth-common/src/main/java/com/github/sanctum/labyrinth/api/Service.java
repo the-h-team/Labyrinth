@@ -18,5 +18,4 @@ public interface Service {
 	ServiceType<TaskService> TASK = new ServiceType<>(LabyrinthProvider::getInstance);
 	ServiceType<VentMap> VENT = new ServiceType<>(() -> LabyrinthProvider.getInstance().getEventMap());
 
-
 }

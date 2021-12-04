@@ -7,6 +7,7 @@ import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -376,7 +377,7 @@ public abstract class ToolTip<T> {
 
 		@Override
 		public void remove() {
-			Schedule.sync(() -> LabyrinthProvider.getInstance().removeComponent(this).deploy()).wait(1);
+			TaskScheduler.of(() -> LabyrinthProvider.getInstance().removeComponent(this).deploy()).scheduleLater(1);
 		}
 
 		@Override

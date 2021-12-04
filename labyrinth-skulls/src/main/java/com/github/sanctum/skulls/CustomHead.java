@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,7 +81,7 @@ public abstract class CustomHead implements SkullObject {
 		protected static List<CustomHead> loadOffline() {
 			List<CustomHead> list = new LinkedList<>();
 			if (!LOADED) {
-				Schedule.async(() -> {
+				TaskScheduler.of(() -> {
 					for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
 						OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
 						if (search.getResult() != null) {
@@ -98,7 +99,7 @@ public abstract class CustomHead implements SkullObject {
 							}
 						}
 					}
-				}).run();
+				}).scheduleAsync();
 			}
 			return list;
 		}

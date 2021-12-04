@@ -8,12 +8,16 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,11 +105,12 @@ abstract class PlaceholderTranslationUtility {
 			public @NotNull String replaceAll(@NotNull String text, @Nullable Object receiver) {
 				if (translations.isEmpty()) return text;
 				String result = text;
+				final PlaceholderVariable variable = () -> receiver;
 				Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
 				do {
 					PlaceholderTranslation conversion = conversionIterator.next();
 					for (Placeholder hold : conversion.getPlaceholders()) {
-						result = replaceAll(result, () -> receiver, conversion.getIdentifier(), hold);
+						result = replaceAll(result, variable, conversion.getIdentifier(), hold);
 					}
 				} while (conversionIterator.hasNext());
 				return result;
@@ -153,11 +158,61 @@ abstract class PlaceholderTranslationUtility {
 		StringBuffer builder = new StringBuffer();
 		do {
 			if (identifier != null) {
-				String id = matcher.group("identifier");
-				PlaceholderTranslation conversion = PlaceholderRegistration.getInstance().getTranslation(() -> id);
 				String parameters = matcher.group("parameters");
-				String translation = conversion.onTranslation(parameters, receiver != null ? receiver : () -> null);
-				matcher.appendReplacement(builder, translation != null ? translation : (placeholder.start() + identifier.get() + identifier.spacer() + parameters + placeholder.end()));
+				PlaceholderTranslation conversion = PlaceholderRegistration.getInstance().getTranslation(identifier);
+				if (conversion != null) {
+					String translation = conversion.onTranslation(parameters, receiver != null ? receiver : () -> null);
+					Map<String, Placeholder> mapMap = PlaceholderRegistration.history.get(identifier.get() + identifier.spacer());
+					final boolean valid = translation != null && !translation.equals(parameters) && !translation.isEmpty();
+					if (mapMap != null) {
+						if (mapMap.get(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end()) == null) {
+							if (valid) {
+								Placeholder record = new Placeholder() {
+									@Override
+									public char start() {
+										return placeholder.start();
+									}
+
+									@Override
+									public CharSequence parameters() {
+										return parameters;
+									}
+
+									@Override
+									public char end() {
+										return placeholder.end();
+									}
+								};
+								mapMap.put(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end(), record);
+							}
+						}
+					} else {
+						Map<String, Placeholder> map = new HashMap<>();
+						if (valid) {
+							Placeholder record = new Placeholder() {
+								@Override
+								public char start() {
+									return placeholder.start();
+								}
+
+								@Override
+								public CharSequence parameters() {
+									return parameters;
+								}
+
+								@Override
+								public char end() {
+									return placeholder.end();
+								}
+							};
+							map.put(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end(), record);
+						}
+						PlaceholderRegistration.history.put(identifier.get() + identifier.spacer(), map);
+					}
+					matcher.appendReplacement(builder, translation != null ? translation : (placeholder.start() + identifier.get() + identifier.spacer() + parameters + placeholder.end()));
+				} else {
+					matcher.appendReplacement(builder, placeholder.start() + identifier.get() + identifier.spacer() + parameters + placeholder.end());
+				}
 			} else {
 				PlaceholderRegistration.getInstance().runAction(conversion -> {
 					String parameters = matcher.group("parameters");
@@ -166,7 +221,7 @@ abstract class PlaceholderTranslationUtility {
 				});
 			}
 		} while (matcher.find());
-		return StringUtils.use(matcher.appendTail(builder).toString()).translate();
+		return matcher.appendTail(builder).toString();
 	}
 
 	@NotNull Placeholder[] getPlaceholders(String text, PlaceholderTranslation conversion) {

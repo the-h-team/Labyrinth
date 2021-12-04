@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.interfacing;
 
 import com.github.sanctum.labyrinth.annotation.Ordinal;
+import com.github.sanctum.labyrinth.data.OrdinalProcessException;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -66,7 +67,15 @@ public abstract class OrdinalProcedure {
 				try {
 					method.invoke(element);
 				} catch (Exception e) {
-					e.printStackTrace();
+					if (e.getCause() != null) {
+						if (e.getCause().getMessage() == null) {
+							throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getTypeName(), e.getCause().getStackTrace());
+						} else {
+							throw new OrdinalProcessException("Ordinal failure (#" + ordinal + ") @ " + element.getClass().getTypeName() + " : " + '"' + e.getCause().getMessage() + '"', e.getCause().getStackTrace());
+						}
+					} else {
+						throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getSimpleName());
+					}
 				}
 			}
 		});
@@ -88,7 +97,15 @@ public abstract class OrdinalProcedure {
 				try {
 					method.invoke(element);
 				} catch (Exception e) {
-					e.printStackTrace();
+					if (e.getCause() != null) {
+						if (e.getCause().getMessage() == null) {
+							throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getTypeName(), e.getCause().getStackTrace());
+						} else {
+							throw new OrdinalProcessException("Ordinal failure (#" + ordinal + ") @ " + element.getClass().getTypeName() + " : " + '"' + e.getCause().getMessage() + '"', e.getCause().getStackTrace());
+						}
+					} else {
+						throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getSimpleName());
+					}
 				}
 			}
 		});
@@ -110,7 +127,15 @@ public abstract class OrdinalProcedure {
 				try {
 					method.invoke(element);
 				} catch (Exception e) {
-					e.printStackTrace();
+					if (e.getCause() != null) {
+						if (e.getCause().getMessage() == null) {
+							throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getTypeName(), e.getCause().getStackTrace());
+						} else {
+							throw new OrdinalProcessException("Ordinal failure (#" + ordinal + ") @ " + element.getClass().getTypeName() + " : " + '"' + e.getCause().getMessage() + '"', e.getCause().getStackTrace());
+						}
+					} else {
+						throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getSimpleName());
+					}
 				}
 			}
 		});
@@ -131,9 +156,16 @@ public abstract class OrdinalProcedure {
 			try {
 				return new GenericOrdinalElement(method.invoke(element));
 			} catch (Exception exception) {
-				exception.printStackTrace();
+				if (exception.getCause() != null) {
+					if (exception.getCause().getMessage() == null) {
+						throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getTypeName(), exception.getCause().getStackTrace());
+					} else {
+						throw new OrdinalProcessException("Ordinal failure (#" + ordinal + ") @ " + element.getClass().getTypeName() + " : " + '"' + exception.getCause().getMessage() + '"', exception.getCause().getStackTrace());
+					}
+				} else {
+					throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getSimpleName());
+				}
 			}
-			return null;
 		}).orElseThrow(() -> new RuntimeException("Ordinal " + ordinal + " either not found or access failed."));
 	}
 
@@ -152,9 +184,16 @@ public abstract class OrdinalProcedure {
 			try {
 				return new GenericOrdinalElement(method.invoke(element, args));
 			} catch (Exception exception) {
-				exception.printStackTrace();
+				if (exception.getCause() != null) {
+					if (exception.getCause().getMessage() == null) {
+						throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getTypeName(), exception.getCause().getStackTrace());
+					} else {
+						throw new OrdinalProcessException("Ordinal failure (#" + ordinal + ") @ " + element.getClass().getTypeName() + " : " + '"' + exception.getCause().getMessage() + '"', exception.getCause().getStackTrace());
+					}
+				} else {
+					throw new OrdinalProcessException("Ordinal processing failed on #" + ordinal + " for object " + element.getClass().getSimpleName());
+				}
 			}
-			return null;
 		}).orElseThrow(() -> new RuntimeException("Ordinal " + ordinal + " either not found or access failed."));
 	}
 

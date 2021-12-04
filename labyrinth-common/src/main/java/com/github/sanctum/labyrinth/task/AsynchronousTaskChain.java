@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.task;
 
+import com.github.sanctum.labyrinth.annotation.Ordinal;
 import java.util.Date;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -17,19 +18,19 @@ public class AsynchronousTaskChain extends TaskChain {
 	@Override
 	public AsynchronousTaskChain run(final @NotNull Task task) {
 		task.parent = this;
-		timer.schedule(task, TimeUnit.SECONDS.toMillis(1));
+		timer.schedule(task, 0);
 		return this;
 	}
 
 	@Override
 	public AsynchronousTaskChain run(final @NotNull Runnable data) {
 		Task task = new Task("key", Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				data.run();
 			}
 		};
-		timer.schedule(task, TimeUnit.SECONDS.toMillis(1));
+		timer.schedule(task, 0);
 		return this;
 	}
 
@@ -44,7 +45,7 @@ public class AsynchronousTaskChain extends TaskChain {
 	@Override
 	public AsynchronousTaskChain wait(final @NotNull Runnable data, String key, long milli) {
 		Task task = new Task(key, Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				data.run();
 			}
@@ -65,7 +66,7 @@ public class AsynchronousTaskChain extends TaskChain {
 	@Override
 	public AsynchronousTaskChain wait(final @NotNull Runnable data, String key, @NotNull Date start) {
 		Task task = new Task(key, Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				data.run();
 			}
@@ -88,7 +89,7 @@ public class AsynchronousTaskChain extends TaskChain {
 	public AsynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, long delay, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
-				@Override
+				@Ordinal
 				public void execute() {
 					consumer.accept(this);
 				}
@@ -113,7 +114,7 @@ public class AsynchronousTaskChain extends TaskChain {
 	public AsynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, @NotNull Date start, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
-				@Override
+				@Ordinal
 				public void execute() {
 					consumer.accept(this);
 				}

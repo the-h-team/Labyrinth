@@ -7,7 +7,7 @@ import org.bukkit.plugin.Plugin;
  *
  * @param <T> The object type this message represents.
  */
-public interface PluginMessage<T> {
+public interface LabyrinthPluginMessage<T> {
 
 	Plugin getPlugin();
 

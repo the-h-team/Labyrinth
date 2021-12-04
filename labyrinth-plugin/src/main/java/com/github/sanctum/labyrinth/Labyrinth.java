@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.command.CommandRegistration;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
 import com.github.sanctum.labyrinth.data.Configurable;
@@ -33,9 +34,12 @@ import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
+import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
+import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
@@ -44,15 +48,16 @@ import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
+import com.github.sanctum.labyrinth.placeholders.Placeholder;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
 import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.placeholders.factory.WorldPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
-import com.github.sanctum.labyrinth.task.Procedure;
-import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
@@ -60,7 +65,9 @@ import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,8 +81,14 @@ import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -112,7 +125,7 @@ import org.jetbrains.annotations.Nullable;
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
 @LabeledAs("Core")
-public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message.Factory {
+public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI, Message.Factory {
 
 	private final ServiceManager serviceManager = new ServiceManager();
 	private final KeyedServiceManager<Plugin> servicesManager = new KeyedServiceManager<>();
@@ -148,8 +161,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 			FileList.copy(stream, copy.getRoot().getParent());
 		}
 		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
-		EasyListener.call(this, new DefaultEvent.Controller());
-		getEventMap().subscribe(this, this);
+		getEventMap().subscribeAll(this, new DefaultEvent.Controller(), this);
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -180,30 +192,104 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 				return PlaceholderRegistration.getInstance().replaceAll(result, variable);
 			}));
 			instance.servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
+			CommandRegistration.use(new Command("labyrinth") {
+
+				private final SimpleTabCompletion completion = SimpleTabCompletion.empty();
+				private final TypeFlag<Player> conversion = TypeFlag.PLAYER;
+
+				@Override
+				public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
+					Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
+
+					if (args.length == 0) {
+						mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).deploy();
+						return true;
+					}
+
+					if (args.length == 1) {
+						String label = args[0];
+
+						if (label.equalsIgnoreCase("placeholder")) {
+							mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]");
+							return true;
+						}
+						return true;
+					}
+
+					if (args.length == 2) {
+						String label = args[0];
+						String argument = args[1];
+
+						if (label.equalsIgnoreCase("placeholder")) {
+							if (sender instanceof Player) {
+								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
+							} else {
+								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+							}
+							return true;
+						}
+						return true;
+					}
+
+					if (args.length == 3) {
+						String label = args[0];
+						String argument = args[1];
+
+						if (label.equalsIgnoreCase("placeholder")) {
+							if (sender instanceof Player) {
+								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
+							} else {
+								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+							}
+							return true;
+						}
+						return true;
+					}
+
+					return false;
+				}
+
+				@NotNull
+				@Override
+				public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+					completion.fillArgs(args);
+					completion.then(TabCompletionIndex.ONE, "placeholder");
+					List<String> placeholders = new ArrayList<>();
+					PlaceholderRegistration.getInstance().getHistory().entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
+						for (Placeholder placeholder : e.getValue()) {
+							placeholders.add(placeholder.toRaw().replace(String.valueOf(placeholder.start()), placeholder.start() + e.getKey().get()));
+						}
+					});
+					completion.then(TabCompletionIndex.TWO, "placeholder", TabCompletionIndex.ONE, placeholders);
+					completion.then(TabCompletionIndex.THREE, "placeholder", TabCompletionIndex.ONE, Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).collect(Collectors.toList()));
+
+					return completion.get();
+				}
+			});
 		});
 	}
 
 	Deployable<Labyrinth> registerImplementations() {
 		return Deployable.of(this, plugin -> {
-			Schedule.sync(() -> new AdvancedEconomyImplementation(plugin))
-					.applyAfter(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).wait(2);
-			Schedule.sync(() -> CommandUtils.initialize(plugin)).run();
-			Schedule.sync(() -> {
-				if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-					VaultImplementation bridge = new VaultImplementation();
-					getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
-				}
-				Permissions instance = getServicesManager().load(Permissions.class);
-				if (instance.getProvider().equals(plugin)) {
-					plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
-				} else {
-					if (instance instanceof VaultImplementation) {
-						plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
-					} else {
-						plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
-					}
-				}
-			}).waitReal(20 * 2);
+			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(200)
+					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(200)
+							.next(() -> CommandUtils.initialize(plugin)).schedule()
+							.next(() -> {
+								if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+									VaultImplementation bridge = new VaultImplementation();
+									getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
+								}
+								Permissions instance = getServicesManager().load(Permissions.class);
+								if (instance.getProvider().equals(plugin)) {
+									plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+								} else {
+									if (instance instanceof VaultImplementation) {
+										plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+									} else {
+										plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+									}
+								}
+							}).scheduleLater(40);
 
 			if (requiresLocationLibrary()) {
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
@@ -219,7 +305,7 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 		return Deployable.of(this, plugin -> {
 			ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(plugin);
 
-			Schedule.sync(handshake::locate).applyAfter(handshake::register).run();
+			TaskScheduler.of(handshake::locate).schedule().next(handshake::register).scheduleLater(1);
 		});
 	}
 
@@ -288,27 +374,23 @@ public final class Labyrinth extends JavaPlugin implements LabyrinthAPI, Message
 
 	}
 
-	@Subscribe(priority = Vent.Priority.READ_ONLY)
-	public void onComponent(DefaultEvent.Communication e) {
-		if (e.getCommunicationType() == DefaultEvent.Communication.Type.COMMAND) {
-			e.getCommand().ifPresent(cmd -> {
-				String label = cmd.getText();
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onComponent(PlayerCommandPreprocessEvent e) {
+		String label = e.getMessage().split(" ")[0].replace("/", "");
+		ActionComponent component = components.get(label);
 
-				ActionComponent component = components.get(label);
-
-				if (component != null) {
-					if (!component.isMarked()) {
-						if (!component.isTooltip()) {
-							Schedule.sync(() -> component.action().run()).run();
-							component.setMarked(true);
-							Schedule.sync(component::remove).waitReal(this.cachedComponentRemoval);
-						} else {
-							Schedule.sync(() -> component.action().run()).run();
-						}
-					}
-					e.setCancelled(true);
+		if (component != null) {
+			Applicable action = component.action();
+			if (!component.isMarked()) {
+				if (!component.isTooltip()) {
+					TaskScheduler.of(action).schedule();
+					component.setMarked(true);
+					TaskScheduler.of(component::remove).scheduleLater(cachedComponentRemoval);
+				} else {
+					TaskScheduler.of(action).schedule();
 				}
-			});
+			}
+			e.setCancelled(true);
 		}
 	}
 

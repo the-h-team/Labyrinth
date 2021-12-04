@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.task;
 
+import com.github.sanctum.labyrinth.annotation.Ordinal;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +26,9 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain run(final @NotNull Task task) {
 		task.parent = this;
 		timer.schedule(new Task("dummy-" + task.getKey()) {
-			@Override
+			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, task::execute);
+				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		}, 0);
 		return this;
@@ -35,22 +37,22 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain run(final @NotNull Runnable data) {
 		Task task = new Task("dummy", Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				Bukkit.getScheduler().runTask(host, data);
 			}
 		};
-		timer.schedule(task, TimeUnit.SECONDS.toMillis(1));
+		timer.schedule(task, 0);
 		return this;
 	}
 
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Task task, long delay) {
 		task.parent = this;
-		Task t = new Task(task.getKey()) {
-			@Override
+		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
+			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, task::execute);
+				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		};
 		timer.schedule(t, delay);
@@ -61,7 +63,7 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Runnable data, String key, long milli) {
 		Task task = new Task(key, Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				Bukkit.getScheduler().runTask(host, data);
 			}
@@ -74,10 +76,10 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Task task, @NotNull Date start) {
 		task.parent = this;
-		Task t = new Task(task.getKey()) {
-			@Override
+		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
+			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, task::execute);
+				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		};
 		map.put(task.getKey(), t);
@@ -88,7 +90,7 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Runnable data, String key, @NotNull Date start) {
 		Task task = new Task(key, Task.SINGULAR, this) {
-			@Override
+			@Ordinal
 			public void execute() {
 				Bukkit.getScheduler().runTask(host, data);
 			}
@@ -101,8 +103,8 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain repeat(final @NotNull Task task, long delay, long period) {
 		if (!map.containsKey(task.getKey())) {
-			Task t = new Task(task.getKey()) {
-				@Override
+			Task t = new Task(task.getKey(), Task.REPEATABLE, this) {
+				@Ordinal
 				public void execute() {
 
 					if (!host.isEnabled()) {
@@ -110,7 +112,7 @@ public class SynchronousTaskChain extends TaskChain {
 						return;
 					}
 
-					Bukkit.getScheduler().runTask(host, task::execute);
+					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 				}
 			};
 			map.put(task.getKey(), t);
@@ -123,7 +125,7 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, long delay, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
-				@Override
+				@Ordinal
 				public void execute() {
 					if (!host.isEnabled()) {
 						this.cancel();
@@ -142,14 +144,14 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Task task, @NotNull Date start, long period) {
 		task.parent = this;
 		if (!map.containsKey(task.getKey())) {
-			Task t = new Task(task.getKey()) {
-				@Override
+			Task t = new Task(task.getKey(), Task.REPEATABLE, this) {
+				@Ordinal
 				public void execute() {
 					if (!host.isEnabled()) {
 						this.cancel();
 						return;
 					}
-					Bukkit.getScheduler().runTask(host, task::execute);
+					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 				}
 			};
 			map.put(task.getKey(), t);
@@ -162,7 +164,7 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, @NotNull Date start, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
-				@Override
+				@Ordinal
 				public void execute() {
 					if (!host.isEnabled()) {
 						this.cancel();

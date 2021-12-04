@@ -25,8 +25,8 @@ public final class ServiceManager {
 	}
 
 	public <T extends Service> T get(ServiceType<T> serviceType) {
-		Object service = services.entrySet().stream().filter(t -> serviceType.getType().isAssignableFrom(t.getKey().getType())).findFirst().map(Map.Entry::getValue).orElse(null);
-		return Check.forNull(serviceType.getType().cast(service), "No loaded instance of service type " + serviceType.getType().getSimpleName() + " was found.");
+		T service = services.entrySet().stream().filter(t -> serviceType.equals(t.getKey())).findFirst().map(e -> serviceType.getType().cast(e.getValue())).orElse(null);
+		return Check.forNull(service, "No loaded instance of service type " + serviceType.getType().getSimpleName() + " was found.");
 	}
 
 

@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -211,7 +212,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 	public boolean delete() {
 		if (config.isNode(this.key)) {
 			config.set(this.key, null);
-			Schedule.sync(() -> config.memory.remove(this)).run();
+			TaskScheduler.of(() -> config.memory.remove(this.key)).schedule();
 			return true;
 		} else {
 			return false;

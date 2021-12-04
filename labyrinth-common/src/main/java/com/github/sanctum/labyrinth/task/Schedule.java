@@ -5,7 +5,7 @@ import com.github.sanctum.labyrinth.library.Applicable;
 import org.bukkit.entity.Player;
 
 /**
- * @deprecated A new library for this will be provided soon.
+ * @deprecated Use {@link TaskScheduler} instead!!
  */
 @Deprecated
 public class Schedule {

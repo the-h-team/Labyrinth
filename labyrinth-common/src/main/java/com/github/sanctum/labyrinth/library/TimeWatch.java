@@ -103,6 +103,10 @@ public class TimeWatch {
 		return false;
 	}
 
+	public Recording toRecording() {
+		return Recording.subtract(this.time);
+	}
+
 	/**
 	 * Encapsulates stop-watch like data.
 	 */

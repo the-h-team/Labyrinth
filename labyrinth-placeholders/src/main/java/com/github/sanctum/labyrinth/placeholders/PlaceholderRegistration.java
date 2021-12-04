@@ -3,6 +3,10 @@ package com.github.sanctum.labyrinth.placeholders;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class PlaceholderRegistration {
 
 	static PlaceholderTranslationUtility instance;
+	static final Map<String, Map<String, Placeholder>> history = new HashMap<>();
 
 
 	public static @NotNull
@@ -143,6 +148,16 @@ public abstract class PlaceholderRegistration {
 	 * @return A placeholder formatted string.
 	 */
 	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, @Nullable PlaceholderIdentifier identifier, @NotNull Placeholder placeholder);
+
+	public final Map<PlaceholderIdentifier, List<Placeholder>> getHistory() {
+		Map<PlaceholderIdentifier, List<Placeholder>> map = new HashMap<>();
+		history.forEach((s, stringPlaceholderMap) -> {
+			PlaceholderIdentifier identifier = () -> s;
+			List<Placeholder> placeholders = new ArrayList<>(stringPlaceholderMap.values());
+			map.put(identifier, placeholders);
+		});
+		return map;
+	}
 
 
 }

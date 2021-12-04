@@ -199,7 +199,7 @@ public interface TablistInstance {
 					getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
 						tabGroup.nextDisplayIndex(TabInfo.HEADER);
 						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
-						getHolder().setPlayerListHeaderFooter(StringUtils.use(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString()).translate(), StringUtils.use(tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString()).translate());
+						getHolder().setPlayerListHeaderFooter(StringUtils.use(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString()).translate(getHolder()), StringUtils.use(tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString()).translate(getHolder()));
 						consumer.accept(getHolder());
 					});
 				}, getHolder().getName() + "-tablist", unit.toMillis(period), unit.toMillis(period));

@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.placeholders;
 
 import java.util.UUID;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 @FunctionalInterface
 public interface PlaceholderVariable {
