@@ -1,71 +1,13 @@
 package com.github.sanctum.labyrinth.library;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.github.sanctum.labyrinth.data.service.Constant;
+import java.util.Locale;
 import java.util.function.Consumer;
 import org.bukkit.Location;
-import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Bat;
-import org.bukkit.entity.Bee;
-import org.bukkit.entity.Blaze;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.Cat;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cod;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Dolphin;
-import org.bukkit.entity.Donkey;
-import org.bukkit.entity.DragonFireball;
-import org.bukkit.entity.Drowned;
-import org.bukkit.entity.Egg;
-import org.bukkit.entity.ElderGuardian;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.EnderSignal;
-import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Endermite;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Evoker;
-import org.bukkit.entity.EvokerFangs;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Fox;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Giant;
-import org.bukkit.entity.Guardian;
-import org.bukkit.entity.Hoglin;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Husk;
-import org.bukkit.entity.Illusioner;
+import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LeashHitch;
-import org.bukkit.entity.LightningStrike;
-import org.bukkit.entity.Llama;
-import org.bukkit.entity.LlamaSpit;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Mule;
-import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Painting;
-import org.bukkit.entity.Panda;
-import org.bukkit.entity.Pig;
-import org.bukkit.entity.Pillager;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.PolarBear;
-import org.bukkit.entity.PufferFish;
-import org.bukkit.entity.Rabbit;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -74,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
  * @author Hempfest
  */
 public final class Entities {
-	private static final Map<String, EntityType> TYPE_MAP = new HashMap<>();
 
 	public static final Spawner<Pig> PIG = new Spawner<>(EntityType.PIG);
 	public static final Spawner<Cow> COW = new Spawner<>(EntityType.COW);
@@ -107,7 +48,7 @@ public final class Entities {
 	public static final Spawner<Evoker> EVOKER = new Spawner<>(EntityType.EVOKER);
 	public static final Spawner<EvokerFangs> EVOKER_FANGS = new Spawner<>(EntityType.EVOKER_FANGS);
 	public static final Spawner<ExperienceOrb> EXPERIENCE_ORB = new Spawner<>(EntityType.EXPERIENCE_ORB);
-	public static final Spawner<FallingBlock> FALLING_BLOCK = new Spawner<>(EntityType.FALLING_BLOCK);
+	public static final BlockSpawner FALLING_BLOCK = new BlockSpawner();
 	public static final Spawner<Fireball> FIREBALL = new Spawner<>(EntityType.FIREBALL);
 	public static final Spawner<Firework> FIREWORK = new Spawner<>(EntityType.FIREWORK);
 	public static final Spawner<FishHook> FISHING_HOOK = new Spawner<>(EntityType.FISHING_HOOK);
@@ -138,19 +79,49 @@ public final class Entities {
 	public static final Spawner<Painting> PAINTING = new Spawner<>(EntityType.PAINTING);
 	public static final Spawner<Panda> PANDA = new Spawner<>(EntityType.PANDA);
 	public static final Spawner<Pillager> PILLAGER = new Spawner<>(EntityType.PILLAGER);
-	public static final Spawner<Player> PLAYER = new Spawner<>(EntityType.PLAYER);
 	public static final Spawner<PolarBear> POLAR_BEAR = new Spawner<>(EntityType.POLAR_BEAR);
 	public static final Spawner<TNTPrimed> PRIMED_TNT = new Spawner<>(EntityType.PRIMED_TNT);
 	public static final Spawner<PufferFish> PUFFERFISH = new Spawner<>(EntityType.PUFFERFISH);
 	public static final Spawner<Rabbit> RABBIT = new Spawner<>(EntityType.RABBIT);
-
-
-
-	static {
-		for (EntityType type : EntityType.values()) {
-			TYPE_MAP.put(type.name().toLowerCase().replace("_", ""), type);
-		}
-	}
+	public static final Spawner<IronGolem> IRON_GOLEM = new Spawner<>(EntityType.IRON_GOLEM);
+	public static final Spawner<Parrot> PARROT = new Spawner<>(EntityType.PARROT);
+	public static final Spawner<Phantom> PHANTOM = new Spawner<>(EntityType.PHANTOM);
+	public static final Spawner<Piglin> PIGLIN = new Spawner<>(EntityType.PIGLIN);
+	public static final Spawner<PiglinBrute> PIGLIN_BRUTE = new Spawner<>(EntityType.PIGLIN_BRUTE);
+	public static final Spawner<Ravager> RAVAGER = new Spawner<>(EntityType.RAVAGER);
+	public static final Spawner<Salmon> SALMON = new Spawner<>(EntityType.SALMON);
+	public static final Spawner<Shulker> SHULKER = new Spawner<>(EntityType.SHULKER);
+	public static final Spawner<ShulkerBullet> SHULKER_BULLET = new Spawner<>(EntityType.SHULKER_BULLET);
+	public static final Spawner<Silverfish> SILVERFISH = new Spawner<>(EntityType.SILVERFISH);
+	public static final Spawner<Skeleton> SKELETON = new Spawner<>(EntityType.SKELETON);
+	public static final Spawner<SkeletonHorse> SKELETON_HORSE = new Spawner<>(EntityType.SKELETON_HORSE);
+	public static final Spawner<Slime> SLIME = new Spawner<>(EntityType.SLIME);
+	public static final Spawner<SmallFireball> SMALL_FIREBALL = new Spawner<>(EntityType.SMALL_FIREBALL);
+	public static final Spawner<Snowball> SNOWBALL = new Spawner<>(EntityType.SNOWBALL);
+	public static final Spawner<Snowman> SNOWMAN = new Spawner<>(EntityType.SNOWMAN);
+	public static final Spawner<SpectralArrow> SPECTRAL_aRROW = new Spawner<>(EntityType.SPECTRAL_ARROW);
+	public static final Spawner<Spider> SPIDER = new Spawner<>(EntityType.SPIDER);
+	public static final Spawner<Squid> SQUID = new Spawner<>(EntityType.SQUID);
+	public static final Spawner<Stray> STRAY = new Spawner<>(EntityType.STRAY);
+	public static final Spawner<Strider> STRIDER = new Spawner<>(EntityType.STRIDER);
+	public static final Spawner<ThrownExpBottle> THROWN_EXP_BOTTLE = new Spawner<>(EntityType.THROWN_EXP_BOTTLE);
+	public static final Spawner<TraderLlama> TRADER_LLAMA = new Spawner<>(EntityType.TRADER_LLAMA);
+	public static final Spawner<Trident> TRIDEnt = new Spawner<>(EntityType.TRIDENT);
+	public static final Spawner<TropicalFish> TROPICAL_FISH = new Spawner<>(EntityType.TROPICAL_FISH);
+	public static final Spawner<Turtle> TURTLE = new Spawner<>(EntityType.TURTLE);
+	public static final Spawner<Vex> VEX = new Spawner<>(EntityType.VEX);
+	public static final Spawner<Villager> VILLAGER = new Spawner<>(EntityType.VILLAGER);
+	public static final Spawner<Vindicator> VINDICATOR = new Spawner<>(EntityType.VINDICATOR);
+	public static final Spawner<WanderingTrader> WANDERING_TRADER = new Spawner<>(EntityType.WANDERING_TRADER);
+	public static final Spawner<Witch> WITCH = new Spawner<>(EntityType.WITCH);
+	public static final Spawner<Wither> WITHER = new Spawner<>(EntityType.WITHER);
+	public static final Spawner<WitherSkeleton> WITHER_SKELETON = new Spawner<>(EntityType.WITHER_SKELETON);
+	public static final Spawner<WitherSkull> WITHER_SKULL = new Spawner<>(EntityType.WITHER_SKULL);
+	public static final Spawner<Wolf> WOLF = new Spawner<>(EntityType.WOLF);
+	public static final Spawner<Zoglin> ZOGLIN = new Spawner<>(EntityType.ZOGLIN);
+	public static final Spawner<Zombie> ZOMBIE = new Spawner<>(EntityType.ZOMBIE);
+	public static final Spawner<ZombieHorse> ZOMBIE_HORSE = new Spawner<>(EntityType.ZOMBIE_HORSE);
+	public static final Spawner<ZombieVillager> ZOMBIE_VILLAGER = new Spawner<>(EntityType.ZOMBIE_VILLAGER);
 
 	/**
 	 * Search for an entity type result ignoring case
@@ -160,30 +131,70 @@ public final class Entities {
 	 * @return the desired EntityType or null
 	 */
 	public static EntityType getEntity(String name) {
-		return TYPE_MAP.get(name.toLowerCase().replaceAll("_", ""));
+		TypeFlag<Spawner<? extends Entity>> flag = TypeFlag.get();
+		return Constant.values(Entities.class, flag).stream().filter(spawnerConstant -> spawnerConstant.getName().toLowerCase(Locale.ROOT).replace("_", "").equals(name.toLowerCase(Locale.ROOT).replace("_", ""))).findFirst().map(Constant::getValue).map(Spawner::getType).orElse(null);
 	}
 
-	private Entities() {
+	public static Spawner<? extends Entity> getSpawner(String name) {
+		return Constant.values(Entities.class, () -> Spawner.class).stream().filter(spawnerConstant -> spawnerConstant.getName().equals(name)).findFirst().map(spawnerConstant -> (Spawner<?>) spawnerConstant.getValue()).orElse(null);
+	}
+
+	public static Spawner<? extends Entity> getSpawner(EntityType type) {
+		return Constant.values(Entities.class, () -> Spawner.class).stream().filter(spawnerConstant -> spawnerConstant.getValue().type == type).findFirst().map(spawnerConstant -> (Spawner<?>) spawnerConstant.getValue()).orElse(null);
+	}
+
+	Entities() {
+	}
+
+	public static class BlockSpawner extends Spawner<FallingBlock> {
+
+		public BlockSpawner() {
+			super(EntityType.FALLING_BLOCK);
+		}
+
+		@Override
+		public FallingBlock spawn(@NotNull Location location) {
+			return super.spawn(location);
+		}
+
+		public FallingBlock spawn(@NotNull Location location, Material data) {
+			if (location.getWorld() == null)
+				throw new IllegalStateException("Cannot spawn entities in non existent worlds!");
+			return location.getWorld().spawnFallingBlock(location, data.createBlockData());
+		}
+
+		public FallingBlock spawn(@NotNull Location location, BlockData data) {
+			if (location.getWorld() == null)
+				throw new IllegalStateException("Cannot spawn entities in non existent worlds!");
+			return location.getWorld().spawnFallingBlock(location, data);
+		}
+
 	}
 
 	public static class Spawner<T extends Entity> {
 
 		private final EntityType type;
+		private final TypeFlag<T> flag;
 
 		public Spawner(@NotNull("Entity type cannot be null!") EntityType type) {
-			this.type =  type;
+			this.type = type;
+			this.flag = TypeFlag.get();
 		}
 
 		public T spawn(@NotNull Location location) {
+			if (location.getWorld() == null)
+				throw new IllegalStateException("Cannot spawn entities in non existent worlds!");
 			return location.getWorld().spawn(location, getEntityClass());
 		}
 
 		public T spawn(@NotNull Location location, Consumer<T> consumer) {
+			if (location.getWorld() == null)
+				throw new IllegalStateException("Cannot spawn entities in non existent worlds!");
 			return location.getWorld().spawn(location, getEntityClass(), consumer::accept);
 		}
 
 		public Class<T> getEntityClass() {
-			return (Class<T>)type.getEntityClass();
+			return flag.getType();
 		}
 
 		public EntityType getType() {

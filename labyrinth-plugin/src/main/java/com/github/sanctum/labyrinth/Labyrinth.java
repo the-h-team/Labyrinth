@@ -271,8 +271,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	Deployable<Labyrinth> registerImplementations() {
 		return Deployable.of(this, plugin -> {
-			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(200)
-					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(200)
+			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(165)
+					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(165)
 							.next(() -> CommandUtils.initialize(plugin)).schedule()
 							.next(() -> {
 								if (getServer().getPluginManager().isPluginEnabled("Vault")) {
