@@ -1,16 +1,28 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
+import com.github.sanctum.labyrinth.data.RegionServicesManager;
+import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
 import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
 import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -30,11 +42,11 @@ public interface Cuboid {
 
 	String getName();
 
-	Boundary getBoundary();
+	Boundary getBoundary(Player target);
 
 	World getWorld();
 
-	int getTotalBlockSize();
+	int getTotalBlocks();
 
 	int getXWidth();
 
@@ -60,6 +72,8 @@ public interface Cuboid {
 		private static final List<Selection> cache = new LinkedList<>();
 
 		private final Player wizard;
+
+		private ItemStack wand = new ItemStack(Material.WOODEN_AXE);
 
 		private Location pos1;
 
@@ -88,9 +102,12 @@ public interface Cuboid {
 			return wizard;
 		}
 
-		@SuppressWarnings("SameReturnValue")
 		public ItemStack getWand() {
-			return null;
+			return wand;
+		}
+
+		public void setWand(ItemStack wand) {
+			this.wand = wand;
 		}
 
 		public Location getPos1() {
@@ -182,7 +199,11 @@ public interface Cuboid {
 		}
 
 		public Region toRegion() {
-			return new Region.Standard(getPos1(), getPos2());
+			return new Region(getPos1(), getPos2()){};
+		}
+
+		public Region toRegion(Function<SimpleKeyedValue<Location, Location>, ? extends Region> function) {
+			return function.apply(SimpleKeyedValue.of(getPos1(), getPos2()));
 		}
 
 		public enum Direction {
@@ -191,36 +212,29 @@ public interface Cuboid {
 
 	}
 
-	abstract class Flag implements Listener, Cloneable {
+	abstract class Flag implements Listener {
 
 		private final Plugin plugin;
 		private boolean allowed;
 		private final String id;
-		protected String message;
 
 		public Flag(Flag flag) {
 			this.plugin = flag.getHost();
 			this.id = flag.getId();
-			this.message = flag.getMessage();
 			this.allowed = flag.allowed;
 		}
 
-		public Flag(Plugin plugin, String id, String message) {
-			plugin.getLogger().info("- Flag " + '"' + id + '"' + " loaded.");
+		public Flag(Plugin plugin, String id) {
 			this.plugin = plugin;
 			this.id = id;
-			this.message = message;
 			this.allowed = true;
 		}
 
-		@SuppressWarnings("MethodDoesntCallSuperMethod")
-		@Override
 		public Flag clone() {
 			return new RegionFlag(this);
 		}
 
 		public final void setAllowed(boolean allowed) {
-			plugin.getLogger().info("- Flag " + '"' + id + '"' + " state is '" + String.valueOf(allowed).toUpperCase() + "'.");
 			this.allowed = allowed;
 		}
 
@@ -236,10 +250,6 @@ public interface Cuboid {
 			return (this.plugin != null && this.plugin.isEnabled());
 		}
 
-		public String getMessage() {
-			return StringUtils.use(this.message).translate();
-		}
-
 		public String getId() {
 			return this.id;
 		}
@@ -253,18 +263,15 @@ public interface Cuboid {
 	class FlagManager {
 
 		private final Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
-		private final LinkedList<Flag> CUSTOM = new LinkedList<>();
-
-		private final Flag BREAK;
-		private final Flag BUILD;
-		private final Flag PVP;
+		private final Set<Flag> CACHE = new HashSet<>();
+		private final RegionServicesManager regionServices;
 
 		@SuppressWarnings("OptionalGetWithoutIsPresent") // TODO: Refactor to avoid unchecked #get/safely operate on Optionals
-		public FlagManager() {
-
-			BREAK = RegionFlag.Builder.initialize(plugin)
+		public FlagManager(RegionServicesManager manager) {
+			this.regionServices = manager;
+			Flag BREAK = RegionFlag.Builder
+					.initialize(plugin)
 					.label("break")
-					.receive("&4You cant do this!")
 					.envelope(new Vent.Subscription<>(RegionDestroyEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Region region = e.getRegion();
 
@@ -274,7 +281,7 @@ public interface Cuboid {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 
-										Mailer.empty(e.getPlayer()).chat(getFlag("break").get().getMessage()).deploy();
+										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
 										e.setCancelled(true);
 									}
 								}
@@ -283,9 +290,9 @@ public interface Cuboid {
 					}))
 					.finish();
 
-			BUILD = RegionFlag.Builder.initialize(plugin)
+			Flag BUILD = RegionFlag.Builder
+					.initialize(plugin)
 					.label("build")
-					.receive("&4You cant do this!")
 					.envelope(new Vent.Subscription<>(RegionBuildEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Region region = e.getRegion();
 
@@ -294,7 +301,7 @@ public interface Cuboid {
 							if (f.isValid()) {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										Mailer.empty(e.getPlayer()).chat(getFlag("build").get().getMessage()).deploy();
+										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
 										e.setCancelled(true);
 									}
 								}
@@ -303,9 +310,9 @@ public interface Cuboid {
 					}))
 					.finish();
 
-			PVP = RegionFlag.Builder.initialize(plugin)
+			Flag PVP = RegionFlag.Builder
+					.initialize(plugin)
 					.label("pvp")
-					.receive("&4You cant fight people here.")
 					.envelope(new Vent.Subscription<>(RegionPVPEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Player p = e.getPlayer();
 
@@ -318,7 +325,7 @@ public interface Cuboid {
 							if (f.isValid()) {
 								if (!f.isAllowed()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										msg.chat(getFlag("pvp").get().getMessage()).deploy();
+										msg.chat("&4You can't fight here!").deploy();
 										e.setCancelled(true);
 									}
 								}
@@ -327,35 +334,50 @@ public interface Cuboid {
 					}))
 					.finish();
 
-		}
+			register(PVP);
+			register(BREAK);
+			register(BUILD);
 
-		public Flag getDefault(FlagType type) {
-			switch (type) {
-				case PVP:
-					return PVP;
-				case BREAK:
-					return BREAK;
-				case BUILD:
-					return BUILD;
-				default:
-					throw new IllegalStateException("Invalid flag type presented.");
-			}
-		}
-
-		public enum FlagType {
-			PVP, BREAK, BUILD
-		}
-
-		public List<Flag> getDefault() {
-			return CUSTOM.stream().filter(f -> f.getHost() == plugin).collect(Collectors.toList());
 		}
 
 		public Optional<Flag> getFlag(String id) {
-			return CUSTOM.stream().filter(f -> f.getId().equals(id)).findFirst();
+			return CACHE.stream().filter(f -> f.getId().equals(id)).findFirst();
 		}
 
-		public LinkedList<Flag> getFlags() {
-			return CUSTOM;
+		public Set<Flag> getFlags() {
+			return Collections.unmodifiableSet(CACHE);
+		}
+
+		public boolean isRegistered(Cuboid.Flag flag) {
+			return CACHE.stream().anyMatch(f -> f.getId().equals(flag.getId()));
+		}
+
+		public boolean unregister(Cuboid.Flag flag) {
+			for (Region r : regionServices.getAll()) {
+				r.getFlags().forEach(f -> {
+					if (f.getId().equals(flag.getId())) {
+						TaskScheduler.of(() -> r.removeFlag(f)).schedule();
+					}
+				});
+			}
+			return CACHE.removeIf(f -> f.getId().equals(flag.getId()));
+		}
+
+		public boolean register(Cuboid.Flag flag) {
+			if (!getFlag(flag.getId()).isPresent()) {
+				regionServices.getAll().forEach(region -> region.addFlag(flag));
+				return CACHE.add(flag);
+			}
+			return false;
+		}
+
+		public boolean registerControlling(Cuboid.Flag flag) {
+			if (!getFlag(flag.getId()).isPresent()) {
+				LabyrinthProvider.getService(Service.VENT).subscribe(plugin, flag);
+				regionServices.getAll().forEach(region -> region.addFlag(flag));
+				return CACHE.add(flag);
+			}
+			return false;
 		}
 
 	}
@@ -596,6 +618,13 @@ public interface Cuboid {
 
 			public void walls() {
 				p.spawnParticle(org.bukkit.Particle.REDSTONE, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
+			}
+
+			public void box(Material material, long decay) {
+				Location location = new Location(p.getWorld(), getX(), getY(), getZ());
+				final BlockData og = location.getBlock().getState().getBlockData().getMaterial().createBlockData();
+				p.sendBlockChange(location, material.createBlockData());
+				TaskScheduler.of(() -> p.sendBlockChange(location, og)).scheduleLater(decay);
 			}
 
 		}

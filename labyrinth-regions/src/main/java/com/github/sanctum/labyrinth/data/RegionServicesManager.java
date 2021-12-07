@@ -2,7 +2,11 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
+import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Used to provide registration to many region related services.
@@ -18,62 +22,23 @@ public abstract class RegionServicesManager {
 		return Bukkit.getServicesManager().load(RegionServicesManager.class);
 	}
 
-	/**
-	 * Check if a flag is currently registered.
-	 *
-	 * @param flag the flag to check
-	 * @return false if not registered or null
-	 */
-	public abstract boolean isRegistered(Cuboid.Flag flag);
+	public abstract List<Region> getAll();
 
-	/**
-	 * Unregister a flag from cache.
-	 *
-	 * @param flag the flag to unregister
-	 * @return false if null or not registered
-	 */
-	public abstract boolean unregister(Cuboid.Flag flag);
+	public abstract Region get(@NotNull Location location);
 
-	/**
-	 * Register a flag into cache.
-	 *
-	 * @param flag the flag to register
-	 * @return false if already registered or null
-	 */
-	public abstract boolean register(Cuboid.Flag flag);
+	public abstract Region get(@NotNull Player player);
 
-	/**
-	 * Register a flag into cache and its accompanied listener.
-	 *
-	 * @param flag the flag to register
-	 * @return false if already registered or null
-	 */
-	public abstract boolean load(Cuboid.Flag flag);
+	public abstract Region get(@NotNull String name);
 
-	/**
-	 * Load a subscription to a region event or other into cache.
-	 *
-	 * @param subscription the subscription to invoke
-	 */
-	public abstract void load(Vent.Subscription<?> subscription);
+	public abstract Region get(@NotNull Location location, boolean passthrough);
 
-	/**
-	 * Unload a subscription by its relative namespace.
-	 *
-	 * @param type the event type to unsubscribe from
-	 * @param key  the namespace of the subscription
-	 * @param <T>  the inheritance of vent
-	 */
-	public abstract <T extends Vent> void unload(Class<T> type, String key);
+	public abstract Region get(@NotNull Player player, boolean passthrough);
 
-	/**
-	 * Unload all subscriptions by the same relative namespace.
-	 *
-	 * @param type the event type to unsubscribe from
-	 * @param key  the namespace of the subscription
-	 * @param <T>  the inheritance of vent
-	 */
-	public abstract <T extends Vent> void unloadAll(Class<T> type, String key);
+	public abstract Region get(@NotNull String name, boolean passthrough);
+
+	public abstract boolean load(@NotNull Region region);
+
+	public abstract boolean unload(@NotNull Region region);
 
 	/**
 	 * Manage all cuboid region flags.

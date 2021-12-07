@@ -1,9 +1,17 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -13,21 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-@SuppressWarnings("UnusedReturnValue")
-public abstract class Region implements Cuboid, Cloneable {
-
-	public static final FileManager DATA = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Regions", "Persistent");
-
-	private static final List<Region> RECORD = new LinkedList<>();
-
-	private static final List<Loading> LOADING = new LinkedList<>();
-
-	private static final List<Spawning> SPAWNING = new LinkedList<>();
+public abstract class Region implements Cuboid {
 
 	private final int xMin;
 	private final int xMax;
@@ -35,22 +29,46 @@ public abstract class Region implements Cuboid, Cloneable {
 	private final int yMax;
 	private final int zMin;
 	private final int zMax;
+	private final int totalSize;
+	private final double distanceBetweenPoints;
 	private final World world;
+	private final Location point1;
+	private final Location point2;
 	private final HUID id;
+	private final int height;
+	private final int xWidth;
+	private final int zWidth;
 	private UUID owner;
 	private String name;
 	private boolean passthrough;
-	private Plugin plugin;
+	private final Plugin plugin;
 	protected final List<Flag> FLAGS;
 	private final List<UUID> MEMBERS;
+	private final List<Block> list;
 
-	protected Region(Region cuboid) { // TODO: add explanation why passthrough field isn't copied
-		this(cuboid.xMin, cuboid.xMax, cuboid.yMin, cuboid.yMax, cuboid.zMin, cuboid.zMax, cuboid.world, cuboid.id);
-		setPlugin(cuboid.plugin);
-		setOwner(cuboid.owner);
-		setName(cuboid.getName());
-		addFlag(cuboid.FLAGS.toArray(new Flag[0]));
-		addMember(cuboid.MEMBERS.stream().map(Bukkit::getOfflinePlayer).toArray(OfflinePlayer[]::new));
+	protected Region(Region cuboid) {
+		this.xMin = cuboid.xMin;
+		this.xMax = cuboid.xMax;
+		this.yMin = cuboid.yMin;
+		this.yMax = cuboid.yMax;
+		this.zMin = cuboid.zMin;
+		this.zMax = cuboid.zMax;
+		this.height = this.yMax - this.yMin + 1;
+		this.xWidth = this.xMax - this.xMin + 1;
+		this.zWidth = this.zMax - this.zMin + 1;
+		this.totalSize = this.getHeight() * this.getXWidth() * this.getZWidth();
+		this.world = cuboid.world;
+		this.id = cuboid.id;
+		this.FLAGS = cuboid.FLAGS;
+		this.MEMBERS = cuboid.MEMBERS;
+		this.plugin = cuboid.plugin;
+		this.list = cuboid.list;
+		this.owner = cuboid.owner;
+		this.name = cuboid.name;
+		this.passthrough = cuboid.passthrough;
+		this.point1 = new Location(this.world, this.xMin, this.yMin, this.zMin);
+		this.point2 = new Location(this.world, this.xMax, this.yMax, this.zMax);
+		this.distanceBetweenPoints = this.getStartingPoint().distance(this.getEndingPoint());
 	}
 
 	protected Region(final Location point1, final Location point2) {
@@ -58,25 +76,40 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	protected Region(final Location point1, final Location point2, HUID id) {
-		this(Math.min(point1.getBlockX(), point2.getBlockX()), Math.max(point1.getBlockX(), point2.getBlockX()), Math.min(point1.getBlockY(), point2.getBlockY()), Math.max(point1.getBlockY(), point2.getBlockY()), Math.min(point1.getBlockZ(), point2.getBlockZ()), Math.max(point1.getBlockZ(), point2.getBlockZ()), point1.getWorld(), id);
+		this(point1.getWorld(), Math.min(point1.getBlockX(), point2.getBlockX()), Math.max(point1.getBlockX(), point2.getBlockX()), Math.min(point1.getBlockY(), point2.getBlockY()), Math.max(point1.getBlockY(), point2.getBlockY()), Math.min(point1.getBlockZ(), point2.getBlockZ()), Math.max(point1.getBlockZ(), point2.getBlockZ()), id);
 	}
 
-	protected Region(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, World world, HUID id) {
+	protected Region(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, HUID id) {
 		this.xMin = xMin;
 		this.xMax = xMax;
 		this.yMin = yMin;
 		this.yMax = yMax;
 		this.zMin = zMin;
 		this.zMax = zMax;
+		this.height = this.yMax - this.yMin + 1;
+		this.xWidth = this.xMax - this.xMin + 1;
+		this.zWidth = this.zMax - this.zMin + 1;
+		this.totalSize = this.getHeight() * this.getXWidth() * this.getZWidth();
 		this.world = world;
 		this.id = id;
-		this.FLAGS = new LinkedList<>();
-		this.MEMBERS = new LinkedList<>();
+		this.FLAGS = new ArrayList<>();
+		this.MEMBERS = new ArrayList<>();
 		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
-	}
-
-	protected void setPlugin(Plugin plugin) {
-		this.plugin = plugin;
+		this.list = new ArrayList<>(this.getTotalBlocks());
+		for (int x = this.xMin; x <= this.xMax; x++) {
+			for (int y = this.yMin; y <= this.yMax; y++) {
+				for (int z = this.zMin; z <= this.zMax; z++) {
+					Block b = this.world.getBlockAt(x, y, z);
+					list.add(b);
+				}
+			}
+		}
+		this.point1 = new Location(this.world, this.xMin, this.yMin, this.zMin);
+		this.point2 = new Location(this.world, this.xMax, this.yMax, this.zMax);
+		this.distanceBetweenPoints = this.getStartingPoint().distance(this.getEndingPoint());
+		for (Flag registered : RegionServicesManager.getInstance().getFlagManager().getFlags()) {
+			addFlag(registered);
+		}
 	}
 
 	public Plugin getPlugin() {
@@ -87,38 +120,29 @@ public abstract class Region implements Cuboid, Cloneable {
 		return this.id;
 	}
 
-	public Iterator<Block> getBlocksWithin() {
-		final List<Block> list = new ArrayList<>(this.getTotalBlockSize());
-		for (int x = this.xMin; x <= this.xMax; ++x) {
-			for (int y = this.yMin; y <= this.yMax; ++y) {
-				for (int z = this.zMin; z <= this.zMax; ++z) {
-					final Block b = this.world.getBlockAt(x, y, z);
-					list.add(b);
-				}
-			}
-		}
-		return list.iterator();
+	public List<Block> getBlocks() {
+		return Collections.unmodifiableList(list);
 	}
 
-	public List<Region> getLacedRegions() {
-		List<Region> list = new LinkedList<>();
-		for (Region c : cache().list()) {
-			for (Iterator<Block> it = getBlocksWithin(); it.hasNext(); ) {
-				Block b = it.next();
-				if (c.contains(b.getLocation()) && !c.getId().equals(getId())) {
-					list.add(c);
-					break;
+	public List<Region> getLaced() {
+		return CompletableFuture.supplyAsync(() -> {
+			List<Region> list = new ArrayList<>();
+			RegionServicesManager.getInstance().getAll().forEach(c -> {
+				for (Block b : this.list) {
+					if (c.contains(b.getLocation()) && !c.getId().equals(getId())) {
+						list.add(c);
+					}
 				}
-			}
-		}
-		return list;
+			});
+			return list;
+		}).join();
 	}
 
-	public Location getHighest() {
+	public Location getHighpoint() {
 		return getStartingPoint().getBlockY() > getEndingPoint().getBlockY() ? getStartingPoint() : getEndingPoint();
 	}
 
-	public Location getLowest() {
+	public Location getLowpoint() {
 		return getEndingPoint().getBlockY() < getStartingPoint().getBlockY() ? getEndingPoint() : getStartingPoint();
 	}
 
@@ -126,16 +150,16 @@ public abstract class Region implements Cuboid, Cloneable {
 		return new Location(this.world, (double) (this.xMax - this.xMin) / 2 + this.xMin, (double) (this.yMax - this.yMin) / 2 + this.yMin, (double) (this.zMax - this.zMin) / 2 + this.zMin);
 	}
 
-	public double getDistanceBetween() {
-		return this.getStartingPoint().distance(this.getEndingPoint());
+	public double getDistanceBetweenPoints() {
+		return this.distanceBetweenPoints;
 	}
 
 	public Location getStartingPoint() {
-		return new Location(this.world, this.xMin, this.yMin, this.zMin);
+		return point1;
 	}
 
 	public Location getEndingPoint() {
-		return new Location(this.world, this.xMax, this.yMax, this.zMax);
+		return point2;
 	}
 
 	public Location getRandomWithin() {
@@ -156,8 +180,8 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	@Override
-	public Boundary getBoundary() {
-		return new Boundary(xMax + 0.5, xMin + 0.5, yMax + 0.5, yMin + 0.5, zMax + 0.5, zMin + 0.5);
+	public Boundary getBoundary(Player target) {
+		return new Boundary(xMax + 0.5, xMin + 0.5, yMax + 0.5, yMin + 0.5, zMax + 0.5, zMin + 0.5).target(target);
 	}
 
 	@Override
@@ -167,22 +191,22 @@ public abstract class Region implements Cuboid, Cloneable {
 
 	@Override
 	public int getHeight() {
-		return this.yMax - this.yMin + 1;
+		return height;
 	}
 
 	@Override
-	public int getTotalBlockSize() {
-		return this.getHeight() * this.getXWidth() * this.getZWidth();
+	public int getTotalBlocks() {
+		return totalSize;
 	}
 
 	@Override
 	public int getXWidth() {
-		return this.xMax - this.xMin + 1;
+		return xWidth;
 	}
 
 	@Override
 	public int getZWidth() {
-		return this.zMax - this.zMin + 1;
+		return zWidth;
 	}
 
 	@Override
@@ -228,7 +252,7 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	public List<Flag> getFlags() {
-		return UniformedComponents.accept(FLAGS).sort();
+		return Collections.unmodifiableList(FLAGS);
 	}
 
 	public Optional<Flag> getFlag(String id) {
@@ -248,10 +272,7 @@ public abstract class Region implements Cuboid, Cloneable {
 	}
 
 	public boolean addFlag(Flag flag) {
-		if (!hasFlag(flag) && RegionServicesManager.getInstance().isRegistered(flag)) {
-			return this.FLAGS.add(flag.clone());
-		}
-		if (!hasFlag(flag) && !RegionServicesManager.getInstance().isRegistered(flag) && RegionServicesManager.getInstance().getFlagManager().getDefault().stream().anyMatch(f -> f.getId().equals(flag.getId()))) {
+		if (!hasFlag(flag)) {
 			return this.FLAGS.add(flag.clone());
 		}
 		return false;
@@ -297,13 +318,9 @@ public abstract class Region implements Cuboid, Cloneable {
 		return MEMBERS.remove(p.getUniqueId());
 	}
 
-	public boolean removeFlag(Flag flag) {
-		return this.FLAGS.removeIf(f -> f.getId().equals(flag.getId()));
-	}
-
 	public boolean removeFlag(Flag... flag) {
-		for (Flag f : flag) {
-			if (!removeFlag(f)) {
+		for (Flag fl : flag) {
+			if (!this.FLAGS.removeIf(f -> f.getId().equals(fl.getId()))) {
 				return false;
 			}
 		}
@@ -333,85 +350,21 @@ public abstract class Region implements Cuboid, Cloneable {
 				.getY() <= (yMax() + 0.5) + precision && loc.getZ() >= (zMin() + 0.5) - precision && loc.getZ() <= (zMax() + 0.5) + precision;
 	}
 
-	public boolean remove() {
-		return RECORD.remove(this);
+	public final boolean remove() {
+		return RegionServicesManager.getInstance().unload(this);
 	}
 
-	public boolean load() {
-		return RECORD.add(this);
+	public final boolean load() {
+		return RegionServicesManager.getInstance().load(this);
 	}
 
-	public void save() throws IOException {
-		if (this.getStartingPoint() != null && this.getEndingPoint() != null) {
-			if (!this.getName().equals(getId().toString())) {
-				DATA.getConfig().set("Markers.region." + getId().toString() + ".name", this.getName());
-			}
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".plugin", this.getPlugin().getName());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos1", this.getStartingPoint());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".pos2", this.getEndingPoint());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".pass", this.isPassthrough());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
-			DATA.getConfig().set("Markers.region." + getId().toString() + ".members", MEMBERS.stream().map(UUID::toString).collect(Collectors.toList()));
-			for (Flag f : getFlags()) {
-				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
-				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
-				DATA.getConfig().set("Markers.region." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
-			}
-			DATA.saveConfig();
-		} else
-			throw new IOException("One or more locations were found null during the saving process.");
-	}
-
-	@SuppressWarnings("MethodDoesntCallSuperMethod")
-	@Override
-	public Region clone() {
-		return new Standard(this);
-	}
-
-	public static UniformedComponents<Region> cache() {
-		return UniformedComponents.accept(RECORD);
-	}
-
-	public static UniformedComponents<Loading> loading() {
-		return UniformedComponents.accept(LOADING);
-	}
-
-	public static UniformedComponents<Spawning> spawning() {
-		return UniformedComponents.accept(SPAWNING);
-	}
-
-	public static Optional<Spawn> spawn() {
-		for (Region c : cache().list()) {
-			if (c instanceof Spawn) {
-				if (((Spawn) c).location() != null)
-					return Optional.of((Spawn) c);
-			}
-		}
-		return Optional.empty();
-	}
-
-	public static Optional<Region> match(Location location) {
-		for (Region c : cache().list()) {
-			if (c.contains(location)) {
-				return Optional.of(c);
-			}
-		}
-		return Optional.empty();
-	}
-
-	public static List<Region> list(Location location) {
-		List<Region> list = new LinkedList<>();
-		for (Region c : cache().list()) {
-			if (c.contains(location)) {
-				list.add(c);
-			}
-		}
-		return list;
+	public final Region clone() {
+		return new Region(this){};
 	}
 
 	public static class Resident {
 
-		public static final List<Resident> LIST = new LinkedList<>();
+		public static final List<Resident> LIST = new ArrayList<>();
 
 		private final OfflinePlayer p;
 
@@ -448,7 +401,7 @@ public abstract class Region implements Cuboid, Cloneable {
 				return CompletableFuture.supplyAsync(() -> Optional.ofNullable(getPlayer())
 						.map(OfflinePlayer::getPlayer)
 						.map(Player::getLocation)
-						.flatMap(Region::match)
+						.flatMap(location -> Optional.ofNullable(RegionServicesManager.getInstance().get(location)))
 				).join();
 			}
 			return Optional.empty();
@@ -469,220 +422,6 @@ public abstract class Region implements Cuboid, Cloneable {
 		public void setSpawnTagged(boolean spawnTagged) {
 			this.spawnTagged = spawnTagged;
 		}
-	}
-
-	public static class Spawning extends Region {
-
-		private Location loc;
-
-		protected Spawning(Region cuboid) {
-			super(cuboid);
-		}
-
-		public Spawning(Location point1, Location point2) {
-			super(point1, point2);
-		}
-
-		public Spawning(Location point1, Location point2, HUID id) {
-			super(point1, point2, id);
-		}
-
-		public void setPlugin(Plugin plugin) {
-			super.setPlugin(plugin);
-		}
-
-		@Override
-		public boolean remove() {
-			return SPAWNING.remove(this);
-		}
-
-		@Override
-		public boolean load() {
-			return SPAWNING.add(this);
-		}
-
-		public Location location() {
-			return loc;
-		}
-
-		public void setLocation(Location loc) {
-			this.loc = loc;
-		}
-
-		public List<Spawning> getArea() {
-			List<Spawning> list = new LinkedList<>();
-			for (Spawning c : SPAWNING) {
-				for (Iterator<Block> it = getBlocksWithin(); it.hasNext(); ) {
-					Block b = it.next();
-					if (c.contains(b.getLocation())) {
-						list.add(c);
-						break;
-					}
-				}
-			}
-			return list;
-		}
-
-		@Override
-		public void save() throws IOException {
-			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
-				if (!this.getName().equals(getId().toString())) {
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".name", this.getName());
-				}
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pass", this.isPassthrough());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				for (Flag f : getFlags()) {
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
-				}
-				DATA.saveConfig();
-			} else
-				throw new IOException("One or more locations were found null during the saving process.");
-		}
-	}
-
-	public static class Loading extends Region {
-
-		protected Loading(Region cuboid) {
-			super(cuboid);
-		}
-
-		public Loading(Location point1, Location point2) {
-			super(point1, point2);
-		}
-
-		public Loading(Location point1, Location point2, HUID id) {
-			super(point1, point2, id);
-		}
-
-		public void setPlugin(Plugin plugin) {
-			super.setPlugin(plugin);
-		}
-
-		@Override
-		public boolean remove() {
-			return LOADING.remove(this);
-		}
-
-		@Override
-		public boolean load() {
-			return LOADING.add(this);
-		}
-	}
-
-	public static class Standard extends Region {
-
-		public Standard(Region cuboid) {
-			super(cuboid);
-			if (cuboid.getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Standard(Location point1, Location point2) {
-			super(point1, point2);
-			if (getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Standard(Location point1, Location point2, HUID id) {
-			super(point1, point2, id);
-			if (getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Standard forPlugin(Plugin plugin) {
-			super.setPlugin(plugin);
-			return this;
-		}
-
-	}
-
-	public static class Spawn extends Region {
-
-		private Location loc;
-
-		public Spawn(Spawning cuboid) {
-			super(cuboid);
-			if (cuboid.getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Spawn(Location point1, Location point2) {
-			super(point1, point2);
-			if (getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Spawn(Location point1, Location point2, HUID id) {
-			super(point1, point2, id);
-			if (getFlags().isEmpty()) {
-				FLAGS.addAll(RegionServicesManager.getInstance().getFlagManager().getDefault());
-			}
-		}
-
-		public Location location() {
-			return loc;
-		}
-
-		public void setLocation(Location loc) {
-			this.loc = loc;
-		}
-
-		public List<Spawn> getArea() {
-			List<Spawn> list = new LinkedList<>();
-			for (Region c : RECORD) {
-				if (c instanceof Spawn) {
-					for (Iterator<Block> it = getBlocksWithin(); it.hasNext(); ) {
-						Block b = it.next();
-						if (c.contains(b.getLocation())) {
-							list.add((Spawn) c);
-							break;
-						}
-					}
-				}
-			}
-			return list;
-		}
-
-		public Spawn forPlugin(Plugin plugin) {
-			super.setPlugin(plugin);
-			return this;
-		}
-
-		@Override
-		public void save() throws IOException {
-			if (this.getStartingPoint() != null && this.getEndingPoint() != null && this.location() != null) {
-				if (!this.getName().equals(getId().toString())) {
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".name", this.getName());
-				}
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".plugin", this.getPlugin().getName());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos1", this.getStartingPoint());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pos2", this.getEndingPoint());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".start", location());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".pass", this.isPassthrough());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".owner", this.getOwner().getUniqueId().toString());
-				DATA.getConfig().set("Markers.spawn." + getId().toString() + ".members", getMembers().stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
-				for (Flag f : getFlags()) {
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".allowed", f.isAllowed());
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".plugin", f.isValid() ? f.getHost().getName() : "NA");
-					DATA.getConfig().set("Markers.spawn." + getId().toString() + ".flags." + f.getId() + ".message", f.getMessage());
-				}
-				DATA.saveConfig();
-			} else
-				throw new IOException("One or more locations were found null during the saving process.");
-		}
-
 	}
 
 }

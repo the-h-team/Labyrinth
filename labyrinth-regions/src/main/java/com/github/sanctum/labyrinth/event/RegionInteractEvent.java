@@ -34,7 +34,7 @@ public abstract class RegionInteractEvent extends DefaultEvent.Player {
 	}
 
 	public enum Type {
-		BUILD, BREAK, PVP, LEFT_CLICK, RIGHT_CLICK
+		BUILD, BREAK, PVP, INTERACT
 	}
 
 

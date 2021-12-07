@@ -10,7 +10,7 @@ public class RegionInteractionEvent extends RegionInteractEvent {
 	private final ClickType clickType;
 
 	public RegionInteractionEvent(org.bukkit.entity.Player player, Region region, Block block, ClickType type) {
-		super(type == ClickType.LEFT ? Type.LEFT_CLICK : Type.RIGHT_CLICK, player, region);
+		super(Type.INTERACT, player, region);
 		this.block = block;
 		this.clickType = type;
 	}

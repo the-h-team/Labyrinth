@@ -26,7 +26,6 @@ import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
-import com.github.sanctum.labyrinth.event.EasyListener;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
@@ -57,9 +56,9 @@ import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
 import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.placeholders.factory.WorldPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
-import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskChain;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
@@ -273,23 +272,23 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		return Deployable.of(this, plugin -> {
 			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(165)
 					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(165)
-							.next(() -> CommandUtils.initialize(plugin)).schedule()
-							.next(() -> {
-								if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-									VaultImplementation bridge = new VaultImplementation();
-									getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
-								}
-								Permissions instance = getServicesManager().load(Permissions.class);
-								if (instance.getProvider().equals(plugin)) {
-									plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
-								} else {
-									if (instance instanceof VaultImplementation) {
-										plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
-									} else {
-										plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
-									}
-								}
-							}).scheduleLater(40);
+					.next(() -> CommandUtils.initialize(plugin)).schedule()
+					.next(() -> {
+						if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+							VaultImplementation bridge = new VaultImplementation();
+							getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
+						}
+						Permissions instance = getServicesManager().load(Permissions.class);
+						if (instance.getProvider().equals(plugin)) {
+							plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+						} else {
+							if (instance instanceof VaultImplementation) {
+								plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+							} else {
+								plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+							}
+						}
+					}).scheduleLater(40);
 
 			if (requiresLocationLibrary()) {
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
@@ -374,7 +373,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onComponent(PlayerCommandPreprocessEvent e) {
 		String label = e.getMessage().split(" ")[0].replace("/", "");
 		ActionComponent component = components.get(label);

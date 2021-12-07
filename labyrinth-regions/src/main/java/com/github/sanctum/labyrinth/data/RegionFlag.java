@@ -12,7 +12,6 @@ public class RegionFlag extends Cuboid.Flag {
 		private final Plugin plugin;
 		private Vent.Subscription<?> subscription;
 		private String id;
-		private String message;
 
 		protected Builder(Plugin plugin) {
 			this.plugin = plugin;
@@ -32,15 +31,11 @@ public class RegionFlag extends Cuboid.Flag {
 			return this;
 		}
 
-		public Builder receive(String message) {
-			this.message = message;
-			return this;
-		}
-
 		public Cuboid.Flag finish() {
-			//Schedule.sync(() -> RegionServicesManager.getInstance().load(service)).wait(1);
-			LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
-			return new RegionFlag(this.plugin, this.id, this.message);
+			if (this.subscription != null) {
+				LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
+			}
+			return new RegionFlag(this.plugin, this.id);
 		}
 
 	}
@@ -50,14 +45,8 @@ public class RegionFlag extends Cuboid.Flag {
 		super(flag);
 	}
 
-	public RegionFlag(Plugin plugin, String id, String message) {
-		super(plugin, id, message);
-	}
-
-	@SuppressWarnings("UnusedReturnValue")
-	public RegionFlag setMessage(String message) {
-		this.message = message;
-		return this;
+	public RegionFlag(Plugin plugin, String id) {
+		super(plugin, id);
 	}
 
 }
