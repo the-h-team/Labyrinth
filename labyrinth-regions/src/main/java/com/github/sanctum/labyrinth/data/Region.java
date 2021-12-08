@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
+import com.github.sanctum.labyrinth.interfacing.Catchable;
+import com.github.sanctum.labyrinth.interfacing.Snapshot;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.HUID;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -19,10 +21,10 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class Region implements Cuboid {
+public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 
+	private Region parent;
 	private final int xMin;
 	private final int xMax;
 	private final int yMin;
@@ -46,7 +48,13 @@ public abstract class Region implements Cuboid {
 	private final List<UUID> MEMBERS;
 	private final List<Block> list;
 
+	protected Region(Region cuboid, Region parent) {
+		this(cuboid);
+		this.parent = parent;
+	}
+
 	protected Region(Region cuboid) {
+		this.parent = cuboid.parent;
 		this.xMin = cuboid.xMin;
 		this.xMax = cuboid.xMax;
 		this.yMin = cuboid.yMin;
@@ -76,10 +84,22 @@ public abstract class Region implements Cuboid {
 	}
 
 	protected Region(final Location point1, final Location point2, HUID id) {
-		this(point1.getWorld(), Math.min(point1.getBlockX(), point2.getBlockX()), Math.max(point1.getBlockX(), point2.getBlockX()), Math.min(point1.getBlockY(), point2.getBlockY()), Math.max(point1.getBlockY(), point2.getBlockY()), Math.min(point1.getBlockZ(), point2.getBlockZ()), Math.max(point1.getBlockZ(), point2.getBlockZ()), id);
+		this(point1, point2, LabyrinthProvider.getInstance().getPluginInstance(), id);
+	}
+
+	protected Region(final Location point1, final Location point2, Plugin plugin) {
+		this(point1, point2, plugin, HUID.randomID());
+	}
+
+	protected Region(final Location point1, final Location point2, Plugin plugin, HUID id) {
+		this(point1.getWorld(), Math.min(point1.getBlockX(), point2.getBlockX()), Math.max(point1.getBlockX(), point2.getBlockX()), Math.min(point1.getBlockY(), point2.getBlockY()), Math.max(point1.getBlockY(), point2.getBlockY()), Math.min(point1.getBlockZ(), point2.getBlockZ()), Math.max(point1.getBlockZ(), point2.getBlockZ()), plugin, id);
 	}
 
 	protected Region(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, HUID id) {
+		this(world, xMin, xMax, yMin, yMax, zMin, zMax, LabyrinthProvider.getInstance().getPluginInstance(), id);
+	}
+
+	protected Region(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, Plugin plugin, HUID id) {
 		this.xMin = xMin;
 		this.xMax = xMax;
 		this.yMin = yMin;
@@ -94,7 +114,7 @@ public abstract class Region implements Cuboid {
 		this.id = id;
 		this.FLAGS = new ArrayList<>();
 		this.MEMBERS = new ArrayList<>();
-		this.plugin = JavaPlugin.getProvidingPlugin(getClass());
+		this.plugin = plugin;
 		this.list = new ArrayList<>(this.getTotalBlocks());
 		for (int x = this.xMin; x <= this.xMax; x++) {
 			for (int y = this.yMin; y <= this.yMax; y++) {
@@ -112,7 +132,39 @@ public abstract class Region implements Cuboid {
 		}
 	}
 
-	public Plugin getPlugin() {
+	@Override
+	public Region getSnapshot() {
+		return new Region(this, this) {
+		};
+	}
+
+	@Override
+	public boolean update() throws IllegalArgumentException {
+		if (parent == null) return false;
+		if (!parent.id.equals(id)) throw new IllegalArgumentException("Region snapshot mismatch!.");
+		boolean updated = false;
+		if (!parent.MEMBERS.containsAll(MEMBERS)) {
+			parent.MEMBERS.clear();
+			parent.MEMBERS.addAll(MEMBERS);
+			updated = true;
+		}
+		if (!parent.FLAGS.containsAll(FLAGS)) {
+			parent.FLAGS.clear();
+			parent.FLAGS.addAll(FLAGS);
+			updated = true;
+		}
+		if (!parent.owner.equals(owner)) {
+			parent.setOwner(owner);
+			updated = true;
+		}
+		if (!parent.getName().equals(getName())) {
+			parent.setName(name);
+			updated = true;
+		}
+		return updated;
+	}
+
+	public final Plugin getPlugin() {
 		return this.plugin;
 	}
 
@@ -174,7 +226,6 @@ public abstract class Region implements Cuboid {
 		this.name = name;
 	}
 
-	@Override
 	public String getName() {
 		return this.name != null ? name : id.toString();
 	}
@@ -288,9 +339,9 @@ public abstract class Region implements Cuboid {
 
 	public boolean addFlag(Flag... flag) {
 		for (Flag f : flag) {
-			if (!addFlag(f)) {
+			if (hasFlag(f)) {
 				return false;
-			}
+			} else this.FLAGS.add(f.clone());
 		}
 		return true;
 	}
@@ -359,7 +410,8 @@ public abstract class Region implements Cuboid {
 	}
 
 	public final Region clone() {
-		return new Region(this){};
+		return new Region(this) {
+		};
 	}
 
 	public static class Resident {

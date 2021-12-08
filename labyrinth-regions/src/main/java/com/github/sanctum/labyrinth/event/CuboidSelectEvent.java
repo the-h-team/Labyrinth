@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.event;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -36,11 +37,11 @@ public abstract class CuboidSelectEvent extends DefaultEvent.Player {
 		return selection.getWand();
 	}
 
-	public void expand(Cuboid.Selection.Direction direction) {
+	public void expand(BlockFace direction) {
 		selection.expand(direction);
 	}
 
-	public void expand(Cuboid.Selection.Direction direction, int amount) {
+	public void expand(BlockFace direction, int amount) {
 		selection.expand(direction, amount);
 	}
 

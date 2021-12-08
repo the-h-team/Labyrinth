@@ -6,17 +6,16 @@ import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
 import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
 import com.github.sanctum.labyrinth.event.custom.Vent;
-import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,18 +28,106 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * @author Hempfest
  */
 public interface Cuboid {
 
-	String getName();
+	static Cuboid fromPoints(Location start, Location end) {
+		Check.forNull(start, "Starting point cannot be null!");
+		Check.forNull(end, "End point cannot be null!");
+		return new Cuboid() {
+
+			private final int xMin;
+			private final int xMax;
+			private final int yMin;
+			private final int yMax;
+			private final int zMin;
+			private final int zMax;
+			private final int height;
+			private final int zWidth;
+			private final int xWidth;
+			private final int totalSize;
+			private final World world;
+
+			{
+				this.xMin = Math.min(start.getBlockX(), end.getBlockX());
+				this.xMax = Math.max(start.getBlockX(), end.getBlockX());
+				this.yMin = Math.min(start.getBlockY(), end.getBlockY());
+				this.yMax = Math.max(start.getBlockY(), end.getBlockY());
+				this.zMin = Math.min(start.getBlockZ(), end.getBlockZ());
+				this.zMax = Math.max(start.getBlockZ(), end.getBlockZ());
+				this.world = start.getWorld();
+				this.height = this.yMax - this.yMin + 1;
+				this.xWidth = this.xMax - this.xMin + 1;
+				this.zWidth = this.zMax - this.zMin + 1;
+				this.totalSize = height * xWidth * zWidth;
+			}
+
+			@Override
+			public Boundary getBoundary(Player target) {
+				return new Boundary(xMax, xMin, yMax, yMin, zMax, zMin);
+			}
+
+			@Override
+			public World getWorld() {
+				return world;
+			}
+
+			@Override
+			public int getTotalBlocks() {
+				return totalSize;
+			}
+
+			@Override
+			public int getXWidth() {
+				return xWidth;
+			}
+
+			@Override
+			public int getZWidth() {
+				return zWidth;
+			}
+
+			@Override
+			public int getHeight() {
+				return height;
+			}
+
+			@Override
+			public int xMax() {
+				return xMax;
+			}
+
+			@Override
+			public int xMin() {
+				return xMin;
+			}
+
+			@Override
+			public int yMax() {
+				return yMax;
+			}
+
+			@Override
+			public int yMin() {
+				return yMin;
+			}
+
+			@Override
+			public int zMax() {
+				return zMax;
+			}
+
+			@Override
+			public int zMin() {
+				return zMin;
+			}
+		};
+	}
 
 	Boundary getBoundary(Player target);
 
@@ -66,10 +153,17 @@ public interface Cuboid {
 
 	int zMin();
 
-	@SuppressWarnings("UnusedReturnValue")
+	default Region toRegion() {
+		return new Region(getWorld(), xMin(), xMax(), yMin(), yMax(), zMin(), zMax(), HUID.randomID()){};
+	}
+
+	default <R extends Region> R toRegion(Function<SimpleKeyedValue<Cuboid, SimpleKeyedValue<Location, Location>>, R> function) {
+		return function.apply(SimpleKeyedValue.of(this, SimpleKeyedValue.of(new Location(getWorld(), xMin(), yMin(), zMin()), new Location(getWorld(), xMax(), yMax(), this.zMax()))));
+	}
+
 	class Selection {
 
-		private static final List<Selection> cache = new LinkedList<>();
+		private static final Set<Selection> cache = new HashSet<>();
 
 		private final Player wizard;
 
@@ -126,7 +220,7 @@ public interface Cuboid {
 			return getPos2().getBlockY() < getPos1().getBlockY() ? getPos2() : getPos1();
 		}
 
-		public Location expand(Direction direction) {
+		public Location expand(BlockFace direction) {
 			Location update;
 			switch (direction) {
 				case UP:
@@ -134,7 +228,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case DOWN:
-					update = getLowest().getBlock().getRelative(BlockFace.DOWN).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.DOWN).getLocation();
 					setPos2(update);
 					return update;
 				case EAST:
@@ -142,7 +236,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case WEST:
-					update = getLowest().getBlock().getRelative(BlockFace.WEST).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.WEST).getLocation();
 					setPos2(update);
 					return update;
 				case NORTH:
@@ -150,7 +244,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case SOUTH:
-					update = getLowest().getBlock().getRelative(BlockFace.SOUTH).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.SOUTH).getLocation();
 					setPos2(update);
 					return update;
 				default:
@@ -158,7 +252,7 @@ public interface Cuboid {
 			}
 		}
 
-		public Location expand(Direction direction, int distance) {
+		public Location expand(BlockFace direction, int distance) {
 			Location update;
 			switch (direction) {
 				case UP:
@@ -166,7 +260,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case DOWN:
-					update = getLowest().getBlock().getRelative(BlockFace.DOWN, distance).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.DOWN, distance).getLocation();
 					setPos2(update);
 					return update;
 				case EAST:
@@ -174,7 +268,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case WEST:
-					update = getLowest().getBlock().getRelative(BlockFace.WEST, distance).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.WEST, distance).getLocation();
 					setPos2(update);
 					return update;
 				case NORTH:
@@ -182,7 +276,7 @@ public interface Cuboid {
 					setPos1(update);
 					return update;
 				case SOUTH:
-					update = getLowest().getBlock().getRelative(BlockFace.SOUTH, distance).getLocation();
+					update = getHighest().getBlock().getRelative(BlockFace.SOUTH, distance).getLocation();
 					setPos2(update);
 					return update;
 				default:
@@ -198,34 +292,23 @@ public interface Cuboid {
 			this.pos2 = pos2;
 		}
 
-		public Region toRegion() {
-			return new Region(getPos1(), getPos2()){};
-		}
-
-		public Region toRegion(Function<SimpleKeyedValue<Location, Location>, ? extends Region> function) {
-			return function.apply(SimpleKeyedValue.of(getPos1(), getPos2()));
-		}
-
-		public enum Direction {
-			UP, DOWN, EAST, WEST, NORTH, SOUTH
+		public Cuboid toCuboid() {
+			return fromPoints(getPos1(), getPos2());
 		}
 
 	}
 
 	abstract class Flag implements Listener {
 
-		private final Plugin plugin;
 		private boolean allowed;
 		private final String id;
 
 		public Flag(Flag flag) {
-			this.plugin = flag.getHost();
 			this.id = flag.getId();
 			this.allowed = flag.allowed;
 		}
 
-		public Flag(Plugin plugin, String id) {
-			this.plugin = plugin;
+		public Flag(String id) {
 			this.id = id;
 			this.allowed = true;
 		}
@@ -234,28 +317,24 @@ public interface Cuboid {
 			return new RegionFlag(this);
 		}
 
-		public final void setAllowed(boolean allowed) {
+		public final void setEnabled(boolean allowed) {
 			this.allowed = allowed;
 		}
 
-		public final boolean isAllowed() {
+		public final boolean isEnabled() {
 			return this.allowed;
 		}
 
 		public final boolean isDefault() {
-			return getHost().getName().equals("Labyrinth");
+			return StringUtils.use(id).containsIgnoreCase("break", "build", "pvp");
 		}
 
 		public final boolean isValid() {
-			return (this.plugin != null && this.plugin.isEnabled());
+			return RegionServicesManager.getInstance().getFlagManager().getFlag(id).isPresent();
 		}
 
 		public String getId() {
 			return this.id;
-		}
-
-		public Plugin getHost() {
-			return this.plugin;
 		}
 
 	}
@@ -278,7 +357,7 @@ public interface Cuboid {
 						if (region.hasFlag(getFlag("break").get())) {
 							Flag f = region.getFlag("break").get();
 							if (f.isValid()) {
-								if (!f.isAllowed()) {
+								if (!f.isEnabled()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 
 										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
@@ -299,7 +378,7 @@ public interface Cuboid {
 						if (region.hasFlag(getFlag("build").get())) {
 							Flag f = region.getFlag("build").get();
 							if (f.isValid()) {
-								if (!f.isAllowed()) {
+								if (!f.isEnabled()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
 										e.setCancelled(true);
@@ -323,7 +402,7 @@ public interface Cuboid {
 						if (region.hasFlag(getFlag("pvp").get())) {
 							Flag f = region.getFlag("pvp").get();
 							if (f.isValid()) {
-								if (!f.isAllowed()) {
+								if (!f.isEnabled()) {
 									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
 										msg.chat("&4You can't fight here!").deploy();
 										e.setCancelled(true);
