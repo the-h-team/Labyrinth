@@ -349,7 +349,7 @@ public interface Cuboid {
 		public FlagManager(RegionServicesManager manager) {
 			this.regionServices = manager;
 			Flag BREAK = RegionFlag.Builder
-					.initialize(plugin)
+					.initialize()
 					.label("break")
 					.envelope(new Vent.Subscription<>(RegionDestroyEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Region region = e.getRegion();
@@ -370,7 +370,7 @@ public interface Cuboid {
 					.finish();
 
 			Flag BUILD = RegionFlag.Builder
-					.initialize(plugin)
+					.initialize()
 					.label("build")
 					.envelope(new Vent.Subscription<>(RegionBuildEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Region region = e.getRegion();
@@ -390,7 +390,7 @@ public interface Cuboid {
 					.finish();
 
 			Flag PVP = RegionFlag.Builder
-					.initialize(plugin)
+					.initialize()
 					.label("pvp")
 					.envelope(new Vent.Subscription<>(RegionPVPEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
 						Player p = e.getPlayer();

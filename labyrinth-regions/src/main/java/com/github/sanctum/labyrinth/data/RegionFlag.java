@@ -8,17 +8,15 @@ import org.bukkit.plugin.Plugin;
 public class RegionFlag extends Cuboid.Flag {
 
 	public static class Builder {
-
-		private final Plugin plugin;
 		private Vent.Subscription<?> subscription;
 		private String id;
 
-		protected Builder(Plugin plugin) {
-			this.plugin = plugin;
+		protected Builder() {
+
 		}
 
-		public static Builder initialize(Plugin plugin) {
-			return new Builder(plugin);
+		public static Builder initialize() {
+			return new Builder();
 		}
 
 		public Builder label(String id) {
@@ -35,7 +33,7 @@ public class RegionFlag extends Cuboid.Flag {
 			if (this.subscription != null) {
 				LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
 			}
-			return new RegionFlag(this.plugin, this.id);
+			return new RegionFlag(this.id);
 		}
 
 	}
@@ -45,8 +43,8 @@ public class RegionFlag extends Cuboid.Flag {
 		super(flag);
 	}
 
-	public RegionFlag(Plugin plugin, String id) {
-		super(plugin, id);
+	public RegionFlag(String id) {
+		super(id);
 	}
 
 }
