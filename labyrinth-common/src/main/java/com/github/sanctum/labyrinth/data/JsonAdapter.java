@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.JsonElement;
@@ -36,10 +37,6 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	 */
 	T read(Map<String, Object> object);
 
-	/**
-	 * @deprecated To be removed, use {@link JsonAdapter#getSubClass()} instead!
-	 * @return The class this serializer represents.
-	 */
 	@Deprecated
 	Class<T> getClassType();
 
@@ -55,10 +52,9 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	@Note("Non bare constructors should have this method overridden!")
 	default T createInstance(Type type) {
 		Class<?> c = TypeToken.get(type).getRawType();
-		if (getClassType().isAssignableFrom(c)) {
+		if (getSubClass().isAssignableFrom(c)) {
 			try {
-				Object o = c.getDeclaredConstructor().newInstance();
-				return (T) o;
+				return getSubClass().cast(c.getDeclaredConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
@@ -68,7 +64,7 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 
 	static GsonBuilder getJsonBuilder() {
 		GsonBuilder builder = new GsonBuilder();
-		Configurable.serializers.forEach((key, value) -> builder.registerTypeHierarchyAdapter(value.getClassType(), value));
+		Configurable.serializers.forEach((key, value) -> builder.registerTypeHierarchyAdapter(value.getSubClass(), value));
 		return builder;
 	}
 

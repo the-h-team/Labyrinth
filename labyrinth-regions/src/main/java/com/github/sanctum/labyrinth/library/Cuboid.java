@@ -69,7 +69,7 @@ public interface Cuboid {
 
 			@Override
 			public Boundary getBoundary(Player target) {
-				return new Boundary(xMax, xMin, yMax, yMin, zMax, zMin);
+				return new Boundary(xMax, xMin, yMax, yMin, zMax, zMin).target(target);
 			}
 
 			@Override

@@ -12,7 +12,9 @@ import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -23,7 +25,7 @@ import org.bukkit.plugin.Plugin;
  */
 public class AFK {
 
-	private static final Map<Player, AFK> HISTORY = new HashMap<>();
+	private static final Set<AFK> HISTORY = new HashSet<>();
 
 	private Position location;
 
@@ -35,12 +37,11 @@ public class AFK {
 
 	protected AFK(Player player) {
 		this.player = player;
-		HISTORY.put(player, this);
 	}
 
 	public static AFK supply(Player player) {
 		if (player == null) return null;
-		return HISTORY.computeIfAbsent(player, player1 -> Initializer.use(player1)
+		return HISTORY.stream().filter(a -> a.player.equals(player)).findFirst().orElseGet(() -> Initializer.use(player)
 				.next(LabyrinthProvider.getInstance().getPluginInstance())
 				.next((e, subscription) -> {
 					Player p = e.getAfk().getPlayer();
@@ -94,18 +95,18 @@ public class AFK {
 							e.getAfk().reset(Status.ACTIVE);
 							break;
 						case REMOVABLE:
+							e.getAfk().remove();
 							Bukkit.broadcastMessage(StringUtils.use("&2&l[&fLabyrinth&2&l]" + " &c&oPlayer &b" + p.getName() + " &c&owas kicked for being AFK too long.").translate());
 							p.kickPlayer(StringUtils.use("&2&l[&fLabyrinth&2&l]" + "\n" + "&c&oAFK too long.\n&c&oKicking to ensure safety :)").translate());
-							e.getAfk().remove();
 							break;
 						case CHATTING:
 						case EXECUTING:
 							e.getAfk().set(Status.RETURNING);
 							break;
 						case LEAVING:
+							e.getAfk().remove();
 							p.setDisplayName(p.getName());
 							Bukkit.broadcastMessage(StringUtils.use("&2&l[&fLabyrinth&2&l]" + " &7Player &b" + p.getName() + " &7is no longer AFK").translate());
-							e.getAfk().remove();
 							break;
 					}
 				})
@@ -113,7 +114,7 @@ public class AFK {
 	}
 
 	public static AFK get(Player player) {
-		return HISTORY.get(player);
+		return HISTORY.stream().filter(a -> a.player.equals(player)).findFirst().orElse(null);
 	}
 
 	/**
@@ -158,7 +159,7 @@ public class AFK {
 	 * Completely remove this user's AFK trace from cache.
 	 */
 	public void remove() {
-		TaskScheduler.of(() -> HISTORY.remove(player)).schedule();
+		TaskScheduler.of(() -> HISTORY.remove(this)).schedule();
 		Task task = TaskMonitor.getLocalInstance().get(player.getName() + player.getUniqueId() + "-afk");
 		if (task != null) task.cancel();
 	}
@@ -269,22 +270,13 @@ public class AFK {
 				ventMap.chain(new Vent.Link(new Vent.Subscription<>(StatusChange.class, "afk-default", plugin, Vent.Priority.MEDIUM, subscriberCall))
 						.next(new Vent.Subscription<>(DefaultEvent.Leave.class, "afk-default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
 
-							AFK afk = supply(e.getPlayer());
+							final AFK afk = supply(e.getPlayer());
 
 							if (afk != null) {
 								if (afk.getStatus() == Status.AWAY) {
 									e.getPlayer().setDisplayName(e.getPlayer().getName());
 									afk.set(Status.LEAVING);
 								}
-
-								TaskScheduler.of(() -> {
-
-									if (AFK.get(e.getPlayer()) != null) {
-										afk.remove();
-									}
-
-								}).scheduleLater(20 * 10);
-
 							}
 
 						})).next(new Vent.Subscription<>(DefaultEvent.Communication.class, "afk-default", plugin, Vent.Priority.HIGH, (e, subscription) -> {
@@ -393,6 +385,7 @@ public class AFK {
 				}
 
 			}).scheduleTimer(afk.player.getName() + afk.player.getUniqueId() + "-afk", 0, 12, TaskPredicate.cancelAfter(afk.player));
+			HISTORY.add(afk);
 			return afk;
 		}
 

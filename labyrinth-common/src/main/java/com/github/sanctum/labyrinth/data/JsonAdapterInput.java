@@ -48,7 +48,7 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 
 	public String getKey() {
 		String test = AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((r, u) -> r.value());
-		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getClassType()).mapFromClass((r, u) -> r.value());
+		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getSubClass()).mapFromClass((r, u) -> r.value());
 	}
 
 	@Override
@@ -61,11 +61,6 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		return serializer.read(object);
 	}
 
-	@Override
-	public Class<T> getClassType() {
-		return serializer.getClassType();
-	}
-
 	static class Impl<T> extends JsonAdapterInput<T> {
 
 		protected Impl(JsonAdapter<T> serializer) {
@@ -73,8 +68,8 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		}
 
 		@Override
-		public Class<? extends T> getSubClass() {
-			return super.getSubClass();
+		public Class<T> getClassType() {
+			return serializer.getClassType();
 		}
 	}
 

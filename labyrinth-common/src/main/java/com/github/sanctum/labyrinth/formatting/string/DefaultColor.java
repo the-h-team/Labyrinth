@@ -1,7 +1,5 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.google.gson.JsonElement;
-import java.util.Map;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;
@@ -71,20 +69,5 @@ public enum DefaultColor implements CustomColor {
 	@Override
 	public String toString() {
 		return getStart();
-	}
-
-	@Override
-	public JsonElement write(CustomColor customColor) {
-		return null;
-	}
-
-	@Override
-	public CustomColor read(Map<String, Object> object) {
-		return null;
-	}
-
-	@Override
-	public Class<CustomColor> getClassType() {
-		return null;
 	}
 }

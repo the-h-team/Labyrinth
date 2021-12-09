@@ -76,6 +76,4 @@ public interface CustomColor extends JsonAdapter<CustomColor>, JsonIntermediate,
 	default Class<CustomColor> getClassType() {
 		return CustomColor.class;
 	}
-
-
 }

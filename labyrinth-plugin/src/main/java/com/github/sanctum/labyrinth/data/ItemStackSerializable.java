@@ -103,4 +103,5 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 	public Class<ItemStack> getClassType() {
 		return ItemStack.class;
 	}
+
 }

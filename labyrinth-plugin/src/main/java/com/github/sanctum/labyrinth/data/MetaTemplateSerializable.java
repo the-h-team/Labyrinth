@@ -23,4 +23,5 @@ public final class MetaTemplateSerializable implements JsonAdapter<MetaTemplate>
 	public Class<MetaTemplate> getClassType() {
 		return MetaTemplate.class;
 	}
+
 }

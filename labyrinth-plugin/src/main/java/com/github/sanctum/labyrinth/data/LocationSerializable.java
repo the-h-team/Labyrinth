@@ -39,4 +39,5 @@ public final class LocationSerializable implements JsonAdapter<Location> {
 	public Class<Location> getClassType() {
 		return Location.class;
 	}
+
 }

@@ -194,7 +194,7 @@ public class JsonConfiguration extends Configurable {
 				JSONObject j = (JSONObject) object;
 				Gson g = JsonAdapter.getJsonBuilder().create();
 
-				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getClassType())).findFirst().orElse(null);
+				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getSubClass())).findFirst().orElse(null);
 				if (d != null) {
 					if (j.containsKey(d.getKey())) {
 						Object ob = j.get(d.getKey());

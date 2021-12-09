@@ -41,7 +41,6 @@ import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
@@ -169,6 +168,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		registerImplementations().deploy();
 		registerHandshake().deploy();
 		registerDefaultPlaceholders().deploy();
+
 
 	}
 

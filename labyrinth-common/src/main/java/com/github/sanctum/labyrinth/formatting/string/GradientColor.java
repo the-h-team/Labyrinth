@@ -108,18 +108,4 @@ public class GradientColor implements CustomColor {
 		return new ColoredString(join(), ColoredString.ColorType.HEX).toString();
 	}
 
-	@Override
-	public JsonElement write(CustomColor customColor) {
-		return null;
-	}
-
-	@Override
-	public CustomColor read(Map<String, Object> object) {
-		return null;
-	}
-
-	@Override
-	public Class<CustomColor> getClassType() {
-		return null;
-	}
 }

@@ -194,7 +194,7 @@ public final class Entities {
 		}
 
 		public Class<T> getEntityClass() {
-			return flag.getType();
+			return (Class<T>) getType().getEntityClass();
 		}
 
 		public EntityType getType() {
