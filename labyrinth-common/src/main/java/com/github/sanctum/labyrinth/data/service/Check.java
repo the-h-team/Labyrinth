@@ -51,10 +51,10 @@ public class Check {
 			message.warn("- Warning scan found (" + discovery.count() + ") methods at checkout for object '" + t.getClass().getSimpleName() + "'");
 			if (t.getClass().isAnnotationPresent(Experimental.class)) {
 				Experimental e = t.getClass().getAnnotation(Experimental.class);
-				message.warn("- Entire class " + t.getClass().getSimpleName() + " found with warning '" + e.value() + "'");
+				message.warn("- Entire class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'");
 			}
 			discovery.ifPresent((r, m) -> {
-				message.warn("- Method " + m.getName() + " found with warning '" + r.value() + "'");
+				message.warn("- Method " + m.getName() + " found with warning '" + r.dueTo() + "'");
 			});
 			discovery2.ifPresent((r, m) -> {
 				message.info("- Method " + m.getName() + " found with note '" + r.value() + "'");
@@ -63,7 +63,7 @@ public class Check {
 			if (t.getClass().isAnnotationPresent(Experimental.class)) {
 				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
 				Experimental e = t.getClass().getAnnotation(Experimental.class);
-				message.warn("- Class " + t.getClass().getSimpleName() + " found with warning '" + e.value() + "'");
+				message.warn("- Class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'");
 			}
 			if (t.getClass().isAnnotationPresent(Note.class)) {
 				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();

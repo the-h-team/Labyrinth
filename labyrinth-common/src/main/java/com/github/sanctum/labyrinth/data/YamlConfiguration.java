@@ -150,7 +150,7 @@ public class YamlConfiguration extends Configurable {
 
 	@Override
 	public Location getLocation(String key) {
-		if (LabyrinthProvider.getInstance().requiresLocationLibrary()) {
+		if (LabyrinthProvider.getInstance().isLegacyVillager()) {
 			final Object o = getConfig().get(key);
 			if (!(o instanceof LegacyConfigLocation)) return null;
 			return ((LegacyConfigLocation) o).getLocation();

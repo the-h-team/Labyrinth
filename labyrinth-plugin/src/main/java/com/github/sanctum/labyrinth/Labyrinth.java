@@ -150,7 +150,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		registerServices().deploy();
 		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 		cachedIsNew = LabyrinthAPI.super.isNew();
-		cachedNeedsLegacyLocation = LabyrinthAPI.super.requiresLocationLibrary();
+		cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
 		registerJsonAdapters().deploy();
 		registerFileConfigurationAdapters().deploy();
 		FileManager copy = FileList.search(this).get("config");
@@ -168,7 +168,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		registerImplementations().deploy();
 		registerHandshake().deploy();
 		registerDefaultPlaceholders().deploy();
-
 
 	}
 
@@ -253,7 +252,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 				@Override
 				public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
 					completion.fillArgs(args);
-					completion.then(TabCompletionIndex.ONE, "placeholder");
+					completion.then(TabCompletionIndex.ONE, "placeholder", "version");
 					List<String> placeholders = new ArrayList<>();
 					PlaceholderRegistration.getInstance().getHistory().entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
 						for (Placeholder placeholder : e.getValue()) {
@@ -291,7 +290,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 						}
 					}).scheduleLater(40);
 
-			if (requiresLocationLibrary()) {
+			if (isLegacyVillager()) {
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 			}
 
@@ -503,7 +502,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	}
 
 	@Override
-	public boolean requiresLocationLibrary() {
+	public boolean isLegacyVillager() {
 		return cachedNeedsLegacyLocation;
 	}
 

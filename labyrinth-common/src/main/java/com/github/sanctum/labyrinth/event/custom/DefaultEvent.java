@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.AFK;
+import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -406,6 +408,17 @@ public class DefaultEvent extends Vent {
 			}
 
 		}
+
+		/*
+		@EventHandler
+		public void onCommandHide(PlayerCommandSendEvent e) {
+			CommandUtils.getVisibilityCalculations().forEach((key, value) -> {
+				if (!value.apply(e.getPlayer())) {
+					e.getCommands().remove(key);
+				}
+			});
+		}
+		 */
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {

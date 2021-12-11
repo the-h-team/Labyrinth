@@ -10,6 +10,7 @@ public interface TypeFlag<T> extends Type {
 
 	TypeFlag<Player> PLAYER = () -> Player.class;
 	TypeFlag<UUID> UUID = () -> UUID.class;
+	TypeFlag<HUID> HUID = () -> HUID.class;
 	TypeFlag<String> STRING = () -> String.class;
 	TypeFlag<Boolean> BOOLEAN = () -> Boolean.class;
 	TypeFlag<Number> NUMBER = () -> Number.class;

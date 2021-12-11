@@ -1,8 +1,11 @@
 package com.github.sanctum.labyrinth.data;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
-public class RegistryData<T> {
+public class RegistryData<T> implements Iterable<T> {
 
 	private final List<T> list;
 
@@ -25,6 +28,12 @@ public class RegistryData<T> {
 	}
 
 	public List<T> getData() {
-		return list;
+		return Collections.unmodifiableList(list);
+	}
+
+	@NotNull
+	@Override
+	public Iterator<T> iterator() {
+		return list.iterator();
 	}
 }

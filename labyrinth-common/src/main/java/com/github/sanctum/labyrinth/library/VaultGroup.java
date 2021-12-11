@@ -14,31 +14,31 @@ import org.bukkit.permissions.Permission;
 /**
  * @author Hempfest
  */
-public class Group {
+public class VaultGroup {
 
-	private static final List<Group> LIST;
+	private static final List<VaultGroup> LIST;
 
 	private final String name;
 	private final String world;
 
-	protected Group(String name, String world) {
+	protected VaultGroup(String name, String world) {
 		this.name = name;
 		this.world = world;
 	}
 
 	static {
 		if (VaultPlayer.getPerms() != null) {
-			LIST = Arrays.stream(VaultPlayer.getPerms().getGroups()).map(s -> new Group(s, Bukkit.getWorlds().get(0).getName())).collect(Collectors.toList());
+			LIST = Arrays.stream(VaultPlayer.getPerms().getGroups()).map(s -> new VaultGroup(s, Bukkit.getWorlds().get(0).getName())).collect(Collectors.toList());
 		} else {
 			LIST = new ArrayList<>();
 		}
 	}
 
-	public static List<Group> getAll() {
+	public static List<VaultGroup> getAll() {
 		return LIST;
 	}
 
-	public static Optional<Group> get(String name) {
+	public static Optional<VaultGroup> get(String name) {
 		return LIST.stream().filter(g -> g.getName().equalsIgnoreCase(name)).findFirst();
 	}
 

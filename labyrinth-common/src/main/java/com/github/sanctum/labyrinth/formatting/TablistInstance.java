@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Schedule;
@@ -127,6 +128,27 @@ public interface TablistInstance {
 	 * @param active The status to set.
 	 */
 	void setActive(TabGroup group, boolean active);
+
+	default boolean setActive(TabGroup group, TimeUnit unit, long time, boolean stopFirst) {
+		if (stopFirst) {
+			if (disable()) {
+				setActive(group, true);
+				enable();
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					if (disable()) {
+						setActive(getPrevious(), true);
+						enable();
+					}
+				}, group.getKey() + "-status-change", unit.toMillis(time));
+				return true;
+			}
+		} else {
+			setActive(group, true);
+			LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> setActive(getPrevious(), true), group.getKey() + "-status-change", unit.toMillis(time));
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Get a cached reference of a players personal tab list instance.

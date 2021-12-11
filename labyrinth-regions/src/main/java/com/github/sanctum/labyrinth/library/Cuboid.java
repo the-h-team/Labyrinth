@@ -351,66 +351,16 @@ public interface Cuboid {
 			Flag BREAK = RegionFlag.Builder
 					.initialize()
 					.label("break")
-					.envelope(new Vent.Subscription<>(RegionDestroyEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
-						Region region = e.getRegion();
-
-						if (region.hasFlag(getFlag("break").get())) {
-							Flag f = region.getFlag("break").get();
-							if (f.isValid()) {
-								if (!f.isEnabled()) {
-									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-
-										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
-										e.setCancelled(true);
-									}
-								}
-							}
-						}
-					}))
 					.finish();
 
 			Flag BUILD = RegionFlag.Builder
 					.initialize()
 					.label("build")
-					.envelope(new Vent.Subscription<>(RegionBuildEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
-						Region region = e.getRegion();
-
-						if (region.hasFlag(getFlag("build").get())) {
-							Flag f = region.getFlag("build").get();
-							if (f.isValid()) {
-								if (!f.isEnabled()) {
-									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										Mailer.empty(e.getPlayer()).chat("&4You can't do this!").deploy();
-										e.setCancelled(true);
-									}
-								}
-							}
-						}
-					}))
 					.finish();
 
 			Flag PVP = RegionFlag.Builder
 					.initialize()
 					.label("pvp")
-					.envelope(new Vent.Subscription<>(RegionPVPEvent.class, plugin, Vent.Priority.MEDIUM, (e, subscription) -> {
-						Player p = e.getPlayer();
-
-						Mailer msg = Mailer.empty(p);
-
-						Region region = e.getRegion();
-
-						if (region.hasFlag(getFlag("pvp").get())) {
-							Flag f = region.getFlag("pvp").get();
-							if (f.isValid()) {
-								if (!f.isEnabled()) {
-									if (!region.isMember(e.getPlayer()) && !region.getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())) {
-										msg.chat("&4You can't fight here!").deploy();
-										e.setCancelled(true);
-									}
-								}
-							}
-						}
-					}))
 					.finish();
 
 			register(PVP);

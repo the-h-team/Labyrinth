@@ -115,11 +115,11 @@ public final class CustomHeadLoader {
 		}
 	}
 
-	protected Map<HeadText, ItemStack> getHeads() {
+	Map<HeadText, ItemStack> getHeads() {
 		return this.additions;
 	}
 
-	protected boolean isLoaded() {
+	boolean isLoaded() {
 		return this.loaded;
 	}
 
@@ -151,7 +151,7 @@ public final class CustomHeadLoader {
 
 			profile.getProperties().put("textures", new Property("textures", headValue));
 
-			if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9") || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11") || Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13")) {
+			if (LabyrinthProvider.getInstance().isLegacy()) {
 
 				try {
 					//noinspection ConstantConditions

@@ -47,7 +47,7 @@ public class Registry<T> {
 	}
 
 	/**
-	 * Source a plugin for the main jar file directory.
+	 * Source an object for the main jar file directory.
 	 *
 	 * @param loader the object to source-inject the classes from
 	 * @return this Registry instance
@@ -60,11 +60,23 @@ public class Registry<T> {
 	/**
 	 * Optionally search in a targeted package name.
 	 *
+	 * @deprecated Use {@link Registry#filter(String)} instead!!
 	 * @param packageName the name of the package to search
 	 * @return this Registry instance
 	 */
+	@Deprecated
 	public Registry<T> pick(String packageName) {
 		this.PACKAGE = packageName;
+		return this;
+	}
+
+	public Registry<T> filter(String packageName) {
+		this.PACKAGE = packageName;
+		return this;
+	}
+
+	public Registry<T> filter(Predicate<? super String> predicate) {
+		this.FILTER = predicate;
 		return this;
 	}
 
@@ -340,6 +352,48 @@ public class Registry<T> {
 						} else {
 							e = (T) cl.getDeclaredConstructor().newInstance();
 						}
+						data.add(e);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			return new RegistryData<>(data, this.plugin, this.directory);
+		}
+
+		public RegistryData<T> construct(Consumer<T> action, Object... o) {
+			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
+			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
+					.loadFolder(file);
+			List<T> data = new LinkedList<>();
+
+			Constructor<T> constructor = null;
+			for (Constructor<?> con : this.type.getConstructors()) {
+				if (o.length == con.getParameters().length) {
+					int success = 0;
+					for (int i = 0; i < o.length; i++) {
+						Class<?> objectClass = o[i].getClass();
+						Class<?> typeClass = con.getParameters()[i].getType();
+						if (objectClass.isAssignableFrom(typeClass)) {
+							success++;
+						}
+						if (success == o.length) {
+							constructor = (Constructor<T>) con;
+							break;
+						}
+					}
+				}
+			}
+			for (Class<?> cl : classes) {
+				if (this.type.isAssignableFrom(cl)) {
+					try {
+						T e;
+						if (constructor != null) {
+							e = (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o);
+						} else {
+							e = (T) cl.getDeclaredConstructor().newInstance();
+						}
+						action.accept(e);
 						data.add(e);
 					} catch (Exception ex) {
 						ex.printStackTrace();

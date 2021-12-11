@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.formatting.pagination;
 
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.library.Deployable;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +62,11 @@ public interface Page<T> extends Iterable<T> {
 	 *
 	 * @return All the elements within this page.
 	 */
+	@Deprecated
+	@Note("Generic array creation not allowed!")
 	T[] getContents();
+
+	Collection<T> getContent();
 
 	/**
 	 * Reorder this specific page by its parents' filtration sequences.
@@ -127,7 +132,23 @@ public interface Page<T> extends Iterable<T> {
 
 		@Override
 		public T[] getContents() {
-			return (T[]) this.collection.toArray();
+			Class<?> cl = null;
+			for (T t : this) {
+				cl = t.getClass();
+				break;
+			}
+			Object[] ar = (Object[]) Array.newInstance(cl, collection.size());
+			int i = 0;
+			for (T t : this) {
+				ar[i] = t;
+				i++;
+			}
+			return (T[]) ar;
+		}
+
+		@Override
+		public Collection<T> getContent() {
+			return Collections.unmodifiableCollection(this.collection);
 		}
 
 		@Override

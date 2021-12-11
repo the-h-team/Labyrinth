@@ -54,18 +54,18 @@ public class VaultPlayer {
 		return pl;
 	}
 
-	public Group getGroup(String world) {
+	public VaultGroup getGroup(String world) {
 		if (getPerms() == null) {
-			return new Group("no-vault", world);
+			return new VaultGroup("no-vault", world);
 		}
-		return new Group(getPerms().getPrimaryGroup(world, player.toBukkit()), world);
+		return new VaultGroup(getPerms().getPrimaryGroup(world, player.toBukkit()), world);
 	}
 
-	public Group[] getGroups(String world) {
+	public VaultGroup[] getGroups(String world) {
 		if (getPerms() == null) {
-			return new Group[]{new Group("no-vault", world)};
+			return new VaultGroup[]{new VaultGroup("no-vault", world)};
 		}
-		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.toBukkit())).map(s -> new Group(s, world)).toArray(Group[]::new);
+		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.toBukkit())).map(s -> new VaultGroup(s, world)).toArray(VaultGroup[]::new);
 	}
 
 	public boolean has(org.bukkit.permissions.Permission permission, String world) {

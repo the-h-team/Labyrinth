@@ -25,7 +25,7 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 
 	private final Gson gson = new GsonBuilder().create();
 
-	@Experimental("We need to find a way to make pdc data persistent too, otherwise item serialization/deserialization works flawlessly")
+	@Experimental(dueTo = "Needing a way to make pdc data persistent too, otherwise item serialization/deserialization works flawlessly")
 	@Override
 	public JsonElement write(ItemStack l) {
 		JsonObject o = new JsonObject();

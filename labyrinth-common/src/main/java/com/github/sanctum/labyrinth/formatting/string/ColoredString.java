@@ -18,7 +18,7 @@ public class ColoredString {
 
 	public ColoredString(String text) {
 		this.text = text;
-		if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
+		if (LabyrinthProvider.getInstance().isNew()) {
 			this.chosen = ColorType.HEX;
 		} else {
 			this.chosen = ColorType.MC;

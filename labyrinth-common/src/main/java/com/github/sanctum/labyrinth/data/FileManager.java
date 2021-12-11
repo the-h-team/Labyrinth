@@ -49,66 +49,6 @@ public class FileManager {
 	}
 
 	/**
-	 * Copy an InputStream directly to a given File.
-	 * <p>
-	 * Useful for placing resources retrieved from a JavaPlugin
-	 * implementation at custom locations.
-	 *
-	 * @param in   an InputStream, likely a plugin resource
-	 * @param file the desire file
-	 * @throws IllegalArgumentException if the file describes a directory
-	 * @throws IllegalStateException    if write is unsuccessful
-	 */
-	@Note("Access to this method will isolate to FileList only")
-	@Deprecated
-	public static void copy(InputStream in, File file) {
-		try {
-			OutputStream out = new FileOutputStream(file);
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			out.close();
-			in.close();
-		} catch (FileNotFoundException e) {
-			throw new IllegalArgumentException("File is a directory!", e);
-		} catch (IOException e) {
-			throw new IllegalStateException("Unable to write to file! See log:", e);
-		}
-	}
-
-	/**
-	 * Copy an InputStream directly to a given File.
-	 * <p>
-	 * Useful for placing resources retrieved from a JavaPlugin
-	 * implementation at custom locations.
-	 *
-	 * @param in      an InputStream, likely a plugin resource
-	 * @param manager the manager to locate to
-	 * @throws IllegalArgumentException if the file describes a directory
-	 * @throws IllegalStateException    if write is unsuccessful
-	 */
-	@Note("Access to this method will isolate to FileList only")
-	@Deprecated
-	public static void copy(InputStream in, FileManager manager) {
-		try {
-			OutputStream out = new FileOutputStream(manager.getRoot().getParent());
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			out.close();
-			in.close();
-		} catch (FileNotFoundException e) {
-			throw new IllegalArgumentException("File is a directory!", e);
-		} catch (IOException e) {
-			throw new IllegalStateException("Unable to write to file! See log:", e);
-		}
-	}
-
-	/**
 	 * Get the configurable root for this file manager.
 	 *
 	 * @return The configurable root for this manager.
@@ -188,130 +128,6 @@ public class FileManager {
 		configuration.save();
 	}
 
-	/**
-	 * @deprecated Replaced by new delegation
-	 * @see Configurable#getName()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public String getName() {
-		return configuration.getName();
-	}
-
-
-	/**
-	 * @deprecated Replaced by new delegation
-	 * @see Configurable#getDirectory()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public Optional<String> getDescription() {
-		return Optional.ofNullable(configuration.getDirectory());
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Root#delete()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public boolean delete() {
-		return configuration.delete();
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Root#exists()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public boolean exists() {
-		return configuration.exists();
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Root#create()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public boolean create() throws IOException {
-		return configuration.create();
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Configurable#getParent()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	public File getFile() {
-		return configuration.getParent();
-	}
-
-	/**
-	 * @deprecated Replaced by new abstraction {@link Configurable}
-	 * @see FileManager#getRoot()
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	synchronized public FileConfiguration getConfig() {
-		return configuration instanceof YamlConfiguration ? ((YamlConfiguration) configuration).getConfig() : null;
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see FileManager#read(Function)
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	synchronized public <R> R readValue(Function<FileConfiguration, R> function) {
-		return function.apply(getConfig());
-	}
-
-	/**
-	 * Get a Location from config safely (including legacy).
-	 *
-	 * @param node node of the location
-	 * @deprecated Replaced by new delegations {@link Configurable#getLocation(String)}, {@link Node#toBukkit()} or {@link Node#get(Class)}
-	 * where legacy support is automatically implied.
-	 * @return the stored location
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	synchronized public @Nullable Location getLegacySafeLocation(String node) {
-		return configuration.getLocation(node);
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Root#reload();
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	synchronized public void reload() {
-		configuration.reload();
-	}
-
-	/**
-	 * @deprecated Replaced by new delegation.
-	 * @see Root#save();
-	 */
-	@Deprecated
-	@Note("Replaced entirely")
-	synchronized public void saveConfig() {
-		configuration.save();
-	}
-
-
-	@Deprecated
-	@Note("To be removed completely")
-	synchronized public void refreshConfig() {
-		saveConfig();
-		reload();
-	}
-
-
 	public @NotNull FileManager toJSON(String name, String dir) {
 		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
 		Configurable c = getRoot();
@@ -360,9 +176,12 @@ public class FileManager {
 		return this;
 	}
 
-	@Experimental("Tested working but not guaranteed stable")
 	public @NotNull FileManager toJSON() {
 		return toJSON(getRoot().getName(), getRoot().getDirectory());
+	}
+
+	public @NotNull FileManager toYaml() {
+		return toYaml(getRoot().getName(), getRoot().getDirectory());
 	}
 
 	@Override

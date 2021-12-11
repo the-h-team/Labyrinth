@@ -20,7 +20,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -83,13 +82,17 @@ public class VentListener {
 	 */
 	private void buildEventHandlers() {
 		AnnotationDiscovery<Subscribe, ?> discovery = AnnotationDiscovery.of(Subscribe.class, listener);
+		AnnotationDiscovery<Disabled, ?> disabled = AnnotationDiscovery.of(Disabled.class, listener);
 		discovery.filter(m -> m.getParameters().length == 1 && Vent.class.isAssignableFrom(m.getParameters()[0].getType())
 				&& m.isAnnotationPresent(Subscribe.class) && Modifier.isPublic(m.getModifiers())).forEach(m -> {
 					Optional<Subscribe> subscribe = discovery.read(m).stream().findAny();
+			        Optional<Disabled> disable = disabled.read(m).stream().findAny();
 					@SuppressWarnings("unchecked")
 					Class<? extends Vent> mClass = (Class<? extends Vent>) m.getParameters()[0].getType();
 					if (subscribe.isPresent()) {
-						registerSubscription(m, mClass, subscribe.get());
+						if (!disable.isPresent()) {
+							registerSubscription(m, mClass, subscribe.get());
+						}
 					} else {
 						Bukkit.getLogger().severe("Error registering " + m.getDeclaringClass() + "#" +
 								m.getName());
@@ -299,7 +302,7 @@ public class VentListener {
 			this.parent = parent;
 		}
 
-		@Experimental("Do we need/want this public? - Hemp")
+		@Experimental(dueTo = "Do we need/want this public? - Hemp")
 		public static void runExtensions(String key, Object toProcess) {
 			LabyrinthProvider.getInstance().getEventMap().getExtenders(key)
 					.filter(e -> toProcess == null || e.getType().isAssignableFrom(toProcess.getClass()))

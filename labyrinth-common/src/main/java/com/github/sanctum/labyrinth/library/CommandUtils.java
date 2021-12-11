@@ -1,9 +1,14 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.command.CommandVisibilityCalculation;
+import java.util.HashMap;
+import java.util.Locale;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -20,6 +25,7 @@ public final class CommandUtils {
     private static CommandUtils instance;
     private static CommandMap map;
     private final Map<String, Command> commandMappings;
+    private static final Map<String, CommandVisibilityCalculation> calculations = new HashMap<>();
 
     private CommandUtils(LabyrinthAPI labyrinth) {
         try {
@@ -34,6 +40,10 @@ public final class CommandUtils {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException("Unable to start CommandUtils!");
         }
+    }
+
+    public static Map<String, CommandVisibilityCalculation> getVisibilityCalculations() {
+        return Collections.unmodifiableMap(calculations);
     }
 
     /**
@@ -57,7 +67,15 @@ public final class CommandUtils {
         return instance.commandMappings.get(name);
     }
 
-    public static void unregister(Command command) {
+    public static void register(Command command, CommandVisibilityCalculation calculation) {
+        calculations.put(command.getLabel(), calculation);
+        Plugin holder = JavaPlugin.getProvidingPlugin(command.getClass());
+        for (String alias : command.getAliases()) {
+            calculations.put(holder.getName().toLowerCase(Locale.ROOT) + ":" + alias.toLowerCase(Locale.ROOT), calculation);
+        }
+    }
+
+    public static void unregister(Command command) {register(null, player -> true);
         instance.commandMappings.remove(command.getName());
         for (String alias : command.getAliases()) {
             if (instance.commandMappings.containsKey(alias) && instance.commandMappings.get(alias).getAliases().contains(alias)) {

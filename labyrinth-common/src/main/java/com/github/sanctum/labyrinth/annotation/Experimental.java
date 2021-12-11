@@ -23,7 +23,7 @@ public @interface Experimental {
 	/**
 	 * @return The developer comment for this experiment.
 	 */
-	String value() default "no comment";
+	String dueTo() default "no comment";
 
 	/**
 	 * @return Whether or not the element this annotation belongs too is set for removal.

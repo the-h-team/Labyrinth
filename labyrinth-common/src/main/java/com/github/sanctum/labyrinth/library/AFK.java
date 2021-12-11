@@ -159,9 +159,11 @@ public class AFK {
 	 * Completely remove this user's AFK trace from cache.
 	 */
 	public void remove() {
-		TaskScheduler.of(() -> HISTORY.remove(this)).schedule();
 		Task task = TaskMonitor.getLocalInstance().get(player.getName() + player.getUniqueId() + "-afk");
-		if (task != null) task.cancel();
+		if (task != null) {
+			task.cancel();
+			TaskScheduler.of(() -> HISTORY.remove(this)).schedule();
+		}
 	}
 
 	public TimeWatch.Recording getRecording() {
@@ -384,7 +386,7 @@ public class AFK {
 					}
 				}
 
-			}).scheduleTimer(afk.player.getName() + afk.player.getUniqueId() + "-afk", 0, 12, TaskPredicate.cancelAfter(afk.player));
+			}).scheduleTimer(afk.player.getName() + afk.player.getUniqueId() + "-afk", 0, 12);
 			HISTORY.add(afk);
 			return afk;
 		}

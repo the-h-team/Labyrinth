@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
 
 /**
  * Encapsulate a list of objects to be sorted and paginated.
@@ -22,7 +21,7 @@ import org.bukkit.Bukkit;
  * @author Hempfest
  */
 @Deprecated
-@Experimental(value = "This class will attempt to be replaced soon.", atRisk = true)
+@Experimental(dueTo = "This class will attempt to be replaced soon.", atRisk = true)
 public class PaginatedList<T> {
 	private List<T> typeList;
 	private ComponentCompliment<T> start;

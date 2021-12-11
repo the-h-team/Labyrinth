@@ -23,16 +23,17 @@ public interface LegacyCheckService extends Service {
      * @return true if the server version is 1.16 or higher
      */
     default boolean isNew() {
-        return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17");
+        return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17") || Bukkit.getVersion().contains("1.18");
     }
 
     /**
-     * Check if due to the environment of the server
-     * the LegacyConfigLocation utility must be loaded.
+     * This version check mirrors {@link LegacyCheckService#isLegacy()} but adds the villager and pillager
+     * update on top, versions in this range require a labyrinth provided {@link org.bukkit.configuration.serialization.ConfigurationSerializable} implementation to allow
+     * proper yaml location/flat-file conversions.
      *
-     * @return if version 1.14 or lower (needs util)
+     * @return true if the server version is 1.14 or lower.
      */
-    default boolean requiresLocationLibrary() {
+    default boolean isLegacyVillager() {
         return isLegacy() || Bukkit.getVersion().contains("1.14");
     }
 }
