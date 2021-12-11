@@ -32,42 +32,49 @@ otherwise have been far more time-consuming.
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.1</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skulls</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for region related services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-regions</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for pastebin/hastebin related services. NEW! -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-paste</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
+            <scope>provided</scope>
+        </dependency>
+    <!-- Used specifically for placeholder provision services. NEW! -->
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-placeholder</artifactId>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-plugin</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -87,12 +94,12 @@ otherwise have been far more time-consuming.
     }
 
     dependencies {
-        compileOnly 'com.github.the-h-team:labyrinth-common:1.7.0'
-        compileOnly 'com.github.the-h-team:labyrinth-gui:1.7.0'
-        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.7.0'
-        compileOnly 'com.github.the-h-team:labyrinth-regions:1.7.0'
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.7.3'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.7.3'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.7.3'
+        compileOnly 'com.github.the-h-team:labyrinth-regions:1.7.3'
         // for build use only! (includes full plugin and resources)
-        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.7.0'
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.7.3'
     }
 ```
 
