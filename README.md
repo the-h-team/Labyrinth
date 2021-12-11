@@ -66,7 +66,7 @@ otherwise have been far more time-consuming.
     <!-- Used specifically for placeholder provision services. NEW! -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
-            <artifactId>labyrinth-placeholder</artifactId>
+            <artifactId>labyrinth-placeholders</artifactId>
             <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
