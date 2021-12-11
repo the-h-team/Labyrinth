@@ -6,7 +6,11 @@ otherwise have been far more time-consuming.
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth*?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.the-h-team/labyrinth*?label=sonatype&server=https%3A%2F%2Fs01.oss.sonatype.org&style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
 
+[![GitHub license](https://img.shields.io/github/license/the-h-team/Labyrinth.svg)](https://github.com/the-h-team/Labyrinth/blob/master/LICENSE)
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
+[![Github all releases](https://img.shields.io/github/downloads/the-h-team/Labyrinth/total.svg)](https://gitHub.com/the-h-team/Labyrinth/releases/)
+![Spiget tested server versions](https://img.shields.io/spiget/tested-versions/97679)
+
 ### Importing with Maven
 ```xml
 <project>
