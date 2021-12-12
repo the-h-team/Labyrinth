@@ -152,6 +152,11 @@ public interface Page<T> extends Iterable<T> {
 		}
 
 		@Override
+		public @NotNull Iterator<T> iterator() {
+			return collection.iterator();
+		}
+
+		@Override
 		public Deployable<Page<T>> reorder() {
 			return Deployable.of(this, ts -> {
 				Collection<T> copy = collection;
