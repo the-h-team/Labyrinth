@@ -15,6 +15,7 @@ import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.bukkit.Color;
 import org.bukkit.Location;

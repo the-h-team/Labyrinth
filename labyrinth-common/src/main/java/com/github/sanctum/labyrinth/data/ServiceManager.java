@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.data.service.Check;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +12,10 @@ import java.util.Map;
  * @author rigobert0
  */
 public final class ServiceManager {
-	final Map<ServiceType<?>, Service> services;
+	final LabyrinthMap<ServiceType<?>, Service> services;
 
 	public ServiceManager() {
-		this.services = new HashMap<>();
+		this.services = new LabyrinthEntryMap<>();
 	}
 
 	public void load(ServiceType<? extends Service> type) {
@@ -25,7 +27,7 @@ public final class ServiceManager {
 	}
 
 	public <T extends Service> T get(ServiceType<T> serviceType) {
-		T service = services.entrySet().stream().filter(t -> serviceType.equals(t.getKey())).findFirst().map(e -> serviceType.getType().cast(e.getValue())).orElse(null);
+		T service = services.entries().stream().filter(t -> serviceType.equals(t.getKey())).findFirst().map(e -> serviceType.getType().cast(e.getValue())).orElse(null);
 		return Check.forNull(service, "No loaded instance of service type " + serviceType.getType().getSimpleName() + " was found.");
 	}
 

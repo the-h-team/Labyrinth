@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>Hint at a given class for usage of utility.</p>
+ * <p>Hint at specific class(s) for usage of utility.</p>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -17,6 +17,7 @@ public @interface See {
 	/**
 	 * @return the class to check out.
 	 */
-	Class<?> value();
+	Class<?>[] value();
+
 
 }

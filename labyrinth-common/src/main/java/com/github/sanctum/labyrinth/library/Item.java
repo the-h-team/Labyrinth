@@ -1,9 +1,26 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LegacyContainer;
+import com.github.sanctum.labyrinth.data.service.Check;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -21,12 +38,8 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Use of this direct builder {@link Item} demands instantiation/execution to be done ONLY on your
@@ -49,9 +62,9 @@ public class Item {
 			weakValues().
 			makeMap();
 
-	private final Material mat;
+	private Material mat;
 
-	private final String name;
+	private String name;
 
 	private NamespacedKey key;
 
@@ -59,14 +72,30 @@ public class Item {
 
 	private ItemStack item;
 
-	public Item(Material appearance, String itemName) {
+	public Item(Material appearance, String displayName) {
+		this();
 		this.mat = appearance;
-		this.name = itemName;
+		this.name = displayName;
+	}
+
+	public Item(String displayName) {
+		this();
+		this.name = displayName;
+	}
+
+	public Item() {
 		Item.cache.add(this);
 	}
 
+	@Deprecated
+	@Note("Internal usage only!")
 	public Item setKey(String key) {
 		this.key = new NamespacedKey(LabyrinthProvider.getInstance().getPluginInstance(), key);
+		return this;
+	}
+
+	public Item setKey(String key, Plugin holder) {
+		this.key = new NamespacedKey(holder, key);
 		return this;
 	}
 
@@ -80,6 +109,65 @@ public class Item {
 		return this;
 	}
 
+	public Item process() {
+		ItemStack item = new ItemStack(Check.forNull(mat, "Material cannot but null!"));
+		ItemMeta meta = item.getItemMeta();
+		if (name != null) {
+			meta.setDisplayName(StringUtils.use(name).translate());
+		}
+		item.setItemMeta(meta);
+		this.item = item;
+		return this;
+	}
+
+	public Item.Edit edit() {
+		Edit edit = new Edit(this);
+		if (this.item != null) edit.setItem(item);
+		if (mat != null) edit.setType(mat);
+		if (name != null) edit.setTitle(name);
+		return edit;
+	}
+
+	public Item shape(Workbench workbench) {
+		StringBuilder top = new StringBuilder();
+		StringBuilder middle = new StringBuilder();
+		StringBuilder bottom = new StringBuilder();
+		LabyrinthCollection<SimpleKeyedValue<WorkbenchSlot, Character>> set = workbench.get();
+		for (int i = 0; i < 9; i++) {
+			if (i <= set.size()) {
+				SimpleKeyedValue<WorkbenchSlot, Character> slot = set.get(i);
+				int key = slot.getKey().toInt();
+				if (key == 0 || key == 1 || key == 2) {
+					top.append(slot.getValue());
+				}
+				if (key == 3 || key == 4 || key == 5) {
+					middle.append(slot.getValue());
+				}
+				if (key == 6 || key == 7 || key == 8) {
+					bottom.append(slot.getValue());
+				}
+			}
+		}
+		ShapedRecipe recipe = new ShapedRecipe(key, Check.forNull(item, "ItemStack not built yet!"));
+		recipe.shape(top.toString(), middle.toString(), bottom.toString());
+		if (!this.recipeStackMap.isEmpty()) {
+			setupItemstacks(recipe, top.toString(), middle.toString(), bottom.toString());
+		}
+		if (!this.recipeMap.isEmpty()) {
+			setupMaterials(recipe, top.toString(), middle.toString(), bottom.toString());
+		}
+		this.recipe = recipe;
+		return this;
+	}
+
+	public Item shape(Consumer<Workbench> consumer) {
+		SecretWorkbench workbench = new SecretWorkbench();
+		consumer.accept(workbench);
+		return shape(workbench);
+	}
+
+	@Deprecated
+	@Note("Use Item#process() or Item#edit() instead.")
 	public Item buildStack() {
 		ItemStack item = new ItemStack(mat);
 		ItemMeta meta = item.getItemMeta();
@@ -89,6 +177,8 @@ public class Item {
 		return this;
 	}
 
+	@Deprecated
+	@Note("Use Item#edit() instead.")
 	public Item attachLore(List<String> lore) {
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(lore.stream().map(s -> StringUtils.use(s).translate()).collect(Collectors.toList()));
@@ -96,6 +186,8 @@ public class Item {
 		return this;
 	}
 
+	@Deprecated
+	@Note("Use Item#edit() instead.")
 	public Item addEnchant(Enchantment e, int level) {
 		ItemStack i = item;
 		i.addUnsafeEnchantment(e, level);
@@ -103,91 +195,91 @@ public class Item {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
+	@Deprecated
+	@Note("Use Item#shape(Consumer) or Item#shape(Workbench) instead.")
 	public Item shapeRecipe(String... shape) {
 		ShapedRecipe recipe = new ShapedRecipe(key, item);
-		List<String> list = Arrays.asList(shape);
-		recipe.shape(list.get(0), list.get(1), list.get(2));
+		String top = shape[0];
+		String middle = shape[1];
+		String bottom = shape[2];
+		recipe.shape(top, middle, bottom);
 		if (!this.recipeStackMap.isEmpty()) {
-			if (this.recipeStackMap.get(list.get(0).charAt(0)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(0).charAt(0))));
-			}
-			if (this.recipeStackMap.get(list.get(0).charAt(1)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(0).charAt(1))));
-			}
-			if (this.recipeStackMap.get(list.get(0).charAt(2)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(0).charAt(2))));
-			}
-			if (this.recipeStackMap.get(list.get(1).charAt(0)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(1).charAt(0))));
-			}
-			if (this.recipeStackMap.get(list.get(1).charAt(1)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(1).charAt(1))));
-			}
-			if (this.recipeStackMap.get(list.get(1).charAt(2)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(1).charAt(2))));
-			}
-			if (this.recipeStackMap.get(list.get(2).charAt(0)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(2).charAt(0))));
-			}
-			if (this.recipeStackMap.get(list.get(2).charAt(1)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(2).charAt(1))));
-			}
-			if (this.recipeStackMap.get(list.get(2).charAt(2)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(list.get(2).charAt(2))));
-			}
+			setupItemstacks(recipe, top, middle, bottom);
 		}
 		if (!this.recipeMap.isEmpty()) {
-			if (this.recipeMap.get(list.get(0).charAt(0)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(0), this.recipeMap.get(list.get(0).charAt(0)));
-			}
-			if (this.recipeMap.get(list.get(0).charAt(1)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(1), this.recipeMap.get(list.get(0).charAt(1)));
-			}
-			if (this.recipeMap.get(list.get(0).charAt(2)) != null) {
-				recipe.setIngredient((list.get(0)).charAt(2), this.recipeMap.get(list.get(0).charAt(2)));
-			}
-			if (this.recipeMap.get(list.get(1).charAt(0)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(0), this.recipeMap.get(list.get(1).charAt(0)));
-			}
-			if (this.recipeMap.get(list.get(1).charAt(1)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(1), this.recipeMap.get(list.get(1).charAt(1)));
-			}
-			if (this.recipeMap.get(list.get(1).charAt(2)) != null) {
-				recipe.setIngredient((list.get(1)).charAt(2), this.recipeMap.get(list.get(1).charAt(2)));
-			}
-			if (this.recipeMap.get(list.get(2).charAt(0)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(0), this.recipeMap.get(list.get(2).charAt(0)));
-			}
-			if (this.recipeMap.get(list.get(2).charAt(1)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(1), this.recipeMap.get(list.get(2).charAt(1)));
-			}
-			if (this.recipeMap.get(list.get(2).charAt(2)) != null) {
-				recipe.setIngredient((list.get(2)).charAt(2), this.recipeMap.get(list.get(2).charAt(2)));
-			}
+			setupMaterials(recipe, top, middle, bottom);
 		}
+
 		this.recipe = recipe;
 		return this;
+	}
+
+	void setupItemstacks(ShapedRecipe recipe, String top, String middle, String bottom) {
+		if (this.recipeStackMap.get(top.charAt(0)) != null) {
+			recipe.setIngredient((top).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(top.charAt(0))));
+		}
+		if (this.recipeStackMap.get(top.charAt(1)) != null) {
+			recipe.setIngredient((top).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(top.charAt(1))));
+		}
+		if (this.recipeStackMap.get(top.charAt(2)) != null) {
+			recipe.setIngredient((top).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(top.charAt(2))));
+		}
+		if (this.recipeStackMap.get(middle.charAt(0)) != null) {
+			recipe.setIngredient((middle).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(middle.charAt(0))));
+		}
+		if (this.recipeStackMap.get(middle.charAt(1)) != null) {
+			recipe.setIngredient((middle).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(middle.charAt(1))));
+		}
+		if (this.recipeStackMap.get(middle.charAt(2)) != null) {
+			recipe.setIngredient((middle).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(middle.charAt(2))));
+		}
+		if (this.recipeStackMap.get(bottom.charAt(0)) != null) {
+			recipe.setIngredient((bottom).charAt(0), new RecipeChoice.ExactChoice(this.recipeStackMap.get(bottom.charAt(0))));
+		}
+		if (this.recipeStackMap.get(bottom.charAt(1)) != null) {
+			recipe.setIngredient((bottom).charAt(1), new RecipeChoice.ExactChoice(this.recipeStackMap.get(bottom.charAt(1))));
+		}
+		if (this.recipeStackMap.get(bottom.charAt(2)) != null) {
+			recipe.setIngredient((bottom).charAt(2), new RecipeChoice.ExactChoice(this.recipeStackMap.get(bottom.charAt(2))));
+		}
+	}
+
+	void setupMaterials(ShapedRecipe recipe, String top, String middle, String bottom) {
+		if (this.recipeMap.get(top.charAt(0)) != null) {
+			recipe.setIngredient((top).charAt(0), this.recipeMap.get(top.charAt(0)));
+		}
+		if (this.recipeMap.get(top.charAt(1)) != null) {
+			recipe.setIngredient((top).charAt(1), this.recipeMap.get(top.charAt(1)));
+		}
+		if (this.recipeMap.get(top.charAt(2)) != null) {
+			recipe.setIngredient((top).charAt(2), this.recipeMap.get(top.charAt(2)));
+		}
+		if (this.recipeMap.get(middle.charAt(0)) != null) {
+			recipe.setIngredient((middle).charAt(0), this.recipeMap.get(middle.charAt(0)));
+		}
+		if (this.recipeMap.get(middle.charAt(1)) != null) {
+			recipe.setIngredient((middle).charAt(1), this.recipeMap.get(middle.charAt(1)));
+		}
+		if (this.recipeMap.get(middle.charAt(2)) != null) {
+			recipe.setIngredient((middle).charAt(2), this.recipeMap.get(middle.charAt(2)));
+		}
+		if (this.recipeMap.get(bottom.charAt(0)) != null) {
+			recipe.setIngredient((bottom).charAt(0), this.recipeMap.get(bottom.charAt(0)));
+		}
+		if (this.recipeMap.get(bottom.charAt(1)) != null) {
+			recipe.setIngredient((bottom).charAt(1), this.recipeMap.get(bottom.charAt(1)));
+		}
+		if (this.recipeMap.get(bottom.charAt(2)) != null) {
+			recipe.setIngredient((bottom).charAt(2), this.recipeMap.get(bottom.charAt(2)));
+		}
 	}
 
 	public void register() {
 		Bukkit.addRecipe(recipe);
 	}
 
-	public static LinkedList<Item> getCache() {
-		return cache;
-	}
-
-	public static void removeDefault(Material m) {
-
-		Iterator<Recipe> it = Bukkit.recipeIterator();
-		Recipe recipe;
-		while (it.hasNext()) {
-			recipe = it.next();
-			if (recipe != null && recipe.getResult().getType() == m) {
-				it.remove();
-			}
-		}
+	public static List<Item> getCache() {
+		return Collections.unmodifiableList(cache);
 	}
 
 	public static void removeEntry(Item item) {
@@ -207,8 +299,8 @@ public class Item {
 		return Item.cache.stream().filter(i -> i.item.getType() == type).findFirst().orElse(null);
 	}
 
-	public static Item getRegistration(String name) {
-		return Item.cache.stream().filter(i -> Objects.requireNonNull(i.item.getItemMeta()).getDisplayName().equals(name)).findFirst().orElse(null);
+	public static Item getRegistration(String key) {
+		return Item.cache.stream().filter(i -> i.key.getKey().equals(key.toLowerCase(Locale.ROOT))).findFirst().orElse(null);
 	}
 
 	/**
@@ -298,9 +390,9 @@ public class Item {
 		/**
 		 * Select a color for this armor piece via RGB format.
 		 *
-		 * @param red the red value to use
+		 * @param red   the red value to use
 		 * @param green the green value to use
-		 * @param blue the blue value to use
+		 * @param blue  the blue value to use
 		 * @return this builder
 		 */
 		public ColoredArmor setColor(int red, int green, int blue) {
@@ -389,6 +481,7 @@ public class Item {
 	 */
 	public static class Edit {
 
+		private Item parent;
 		private List<ItemStack> LIST;
 		private ItemStack ITEM;
 		private boolean LISTED = false;
@@ -397,6 +490,11 @@ public class Item {
 		private Consumer<LegacyContainer> consumer;
 		private Map<Enchantment, Integer> ENCHANTS;
 		private String TITLE;
+
+		Edit(Item parent) {
+			this(Material.AIR);
+			this.parent = parent;
+		}
 
 		public Edit(Collection<ItemStack> items) {
 			this.LISTED = true;
@@ -555,7 +653,7 @@ public class Item {
 		 * Add an enchantment to this item, accepts unsafe enchanting levels!
 		 *
 		 * @param enchant The enchantment to use.
-		 * @param level The level to set on the enchantment.
+		 * @param level   The level to set on the enchantment.
 		 * @return The same item builder.
 		 */
 		public Edit addEnchantment(Enchantment enchant, int level) {
@@ -568,13 +666,27 @@ public class Item {
 
 		/**
 		 * Configure the item's persistent data container.
+		 * <p>
+		 * IF legacy no container will be present.
 		 *
+		 * @param container The persistent data container for the item.
+		 * @return The same item builder.
+		 * @deprecated Use {@link Edit#editContainer(Consumer)} instead!!
+		 */
+		@Deprecated
+		public Edit getContainer(Consumer<LegacyContainer> container) {
+			return editContainer(container);
+		}
+
+		/**
+		 * Configure the item's persistent data container.
+		 * <p>
 		 * IF legacy no container will be present.
 		 *
 		 * @param container The persistent data container for the item.
 		 * @return The same item builder.
 		 */
-		public Edit getContainer(Consumer<LegacyContainer> container) {
+		public Edit editContainer(Consumer<LegacyContainer> container) {
 			this.consumer = container;
 			return this;
 		}
@@ -624,7 +736,7 @@ public class Item {
 		/**
 		 * Finish the item modification by editing the item saturation & meta.
 		 *
-		 * @param damage The damageable inheritance to modify before retrieving
+		 * @param damage  The damageable inheritance to modify before retrieving
 		 * @param options The item meta to configure.
 		 * @return The list of fully customized item's
 		 */
@@ -752,7 +864,7 @@ public class Item {
 		/**
 		 * Finish the item modification by editing the item saturation & meta.
 		 *
-		 * @param damage The inheritance of damageable
+		 * @param damage  The inheritance of damageable
 		 * @param options The item meta.
 		 * @return The fully built item
 		 */
@@ -832,6 +944,30 @@ public class Item {
 			}
 
 			return this.ITEM;
+		}
+
+		public @Note("If this is a normal item edit this will return null")
+		Item complete() {
+			if (this.parent != null) {
+				this.parent.item = build();
+				return this.parent;
+			} else return null;
+		}
+
+		public @Note("If this is a normal item edit this will return null")
+		Item complete(Consumer<Damageable> consumer) {
+			if (this.parent != null) {
+				this.parent.item = build(consumer);
+				return this.parent;
+			} else return null;
+		}
+
+		public @Note("If this is a normal item edit this will return null")
+		Item complete(Consumer<Damageable> consumer, Consumer<ItemMeta> consumer2) {
+			if (this.parent != null) {
+				this.parent.item = build(consumer, consumer2);
+				return this.parent;
+			} else return null;
 		}
 
 

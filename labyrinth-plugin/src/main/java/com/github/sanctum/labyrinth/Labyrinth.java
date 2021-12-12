@@ -21,7 +21,10 @@ import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
@@ -345,8 +348,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			getServer().getScheduler().cancelTask(id);
 		}
 
-		getScheduler(ASYNCHRONOUS).purge();
-		getScheduler(SYNCHRONOUS).purge();
+		getScheduler(ASYNCHRONOUS).shutdown();
+		getScheduler(SYNCHRONOUS).shutdown();
 
 		try {
 			Thread.sleep(1);

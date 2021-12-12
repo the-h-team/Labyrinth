@@ -30,7 +30,7 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 
 	LabyrinthApplicable fix() {
 		if (this.parent == null) {
-			this.parent = TaskScheduler.of(this::schedule);
+			this.parent = TaskScheduler.of(this);
 		}
 		return this;
 	}

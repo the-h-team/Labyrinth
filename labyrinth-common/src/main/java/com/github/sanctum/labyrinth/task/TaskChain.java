@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.task;
 
+import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class TaskChain {
 
-	protected final Map<String, Task> map = new HashMap<>();
+	protected final LabyrinthMap<String, Task> map = new LabyrinthEntryMap<>();
 
 	public abstract TaskChain run(final @NotNull Task task);
 

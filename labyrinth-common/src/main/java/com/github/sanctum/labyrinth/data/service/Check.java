@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.annotation.Json;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,12 +32,12 @@ public class Check {
 	}
 
 	public static <T> T forNull(T t) {
-		if (t == null) throw new IllegalArgumentException("Value cannot be null!");
+		if (t == null) throw new NullPointerException("Value cannot be null!");
 		return forWarnings(t);
 	}
 
 	public static <T> T forNull(T t, String message) {
-		if (t == null) throw new IllegalArgumentException(message);
+		if (t == null) throw new NullPointerException(message);
 		return forWarnings(t);
 	}
 
@@ -47,28 +48,28 @@ public class Check {
 		AnnotationDiscovery<Note, Object> discovery2 = AnnotationDiscovery.of(Note.class, t);
 		discovery2.filter(m -> Arrays.stream(m.getParameters()).anyMatch(p -> p.isAnnotationPresent(Note.class)) || m.isAnnotationPresent(Note.class));
 		if (discovery.isPresent()) {
-			Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
-			message.warn("- Warning scan found (" + discovery.count() + ") methods at checkout for object '" + t.getClass().getSimpleName() + "'");
+			Mailer message = LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer();
+			message.warn("- Warning scan found (" + discovery.count() + ") methods at checkout for object '" + t.getClass().getSimpleName() + "'").queue();
 			if (t.getClass().isAnnotationPresent(Experimental.class)) {
 				Experimental e = t.getClass().getAnnotation(Experimental.class);
-				message.warn("- Entire class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'");
+				message.warn("- Entire class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'").queue();
 			}
 			discovery.ifPresent((r, m) -> {
-				message.warn("- Method " + m.getName() + " found with warning '" + r.dueTo() + "'");
+				message.warn("- Method " + m.getName() + " found with warning '" + r.dueTo() + "'").queue();
 			});
 			discovery2.ifPresent((r, m) -> {
-				message.info("- Method " + m.getName() + " found with note '" + r.value() + "'");
+				message.info("- Method " + m.getName() + " found with note '" + r.value() + "'").queue();
 			});
 		} else {
 			if (t.getClass().isAnnotationPresent(Experimental.class)) {
-				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
+				Mailer message = LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer();
 				Experimental e = t.getClass().getAnnotation(Experimental.class);
-				message.warn("- Class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'");
+				message.warn("- Class " + t.getClass().getSimpleName() + " found with warning '" + e.dueTo() + "'").queue();
 			}
 			if (t.getClass().isAnnotationPresent(Note.class)) {
-				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
+				Mailer message = LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer();
 				Note e = t.getClass().getAnnotation(Note.class);
-				message.info("- Class " + t.getClass().getSimpleName() + " found with note '" + e.value() + "'");
+				message.info("- Class " + t.getClass().getSimpleName() + " found with note '" + e.value() + "'").queue();
 			}
 		}
 		return t;
@@ -83,22 +84,22 @@ public class Check {
 		AnnotationDiscovery<A, Object> discovery = AnnotationDiscovery.of(annotative, t);
 		discovery.filter(m -> Arrays.stream(m.getParameters()).anyMatch(p -> p.isAnnotationPresent(annotative)) || m.isAnnotationPresent(annotative));
 		if (discovery.isPresent()) {
-			Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
+			Mailer message = LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer();
 			if (warning) {
-				message.info("- Warning scan found (" + discovery.count() + ") methods at checkout.");
+				message.info("- Warning scan found (" + discovery.count() + ") methods at checkout.").queue();
 				discovery.ifPresent((r, m) -> message.warn(function.accept(r, m)));
 			} else {
-				message.info("- Info scan found (" + discovery.count() + ") methods at checkout.");
+				message.info("- Info scan found (" + discovery.count() + ") methods at checkout.").queue();
 				discovery.ifPresent((r, m) -> message.info(function.accept(r, m)));
 			}
 		} else {
 			if (t.getClass().isAnnotationPresent(annotative)) {
-				Message message = LabyrinthProvider.getService(Service.MESSENGER).getNewMessage();
+				Mailer message = LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer();
 				A e = t.getClass().getAnnotation(annotative);
 				if (warning) {
-					message.warn(function.accept(e, t.getClass().getMethods()[0]));
+					message.warn(function.accept(e, t.getClass().getMethods()[0])).queue();
 				} else {
-					message.info(function.accept(e, t.getClass().getMethods()[0]));
+					message.info(function.accept(e, t.getClass().getMethods()[0])).queue();
 				}
 			}
 		}

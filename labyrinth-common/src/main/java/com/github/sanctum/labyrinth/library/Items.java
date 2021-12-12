@@ -26,7 +26,16 @@ public final class Items {
 	}
 
 	/**
-	 * Build and convert and itemstack all in one function.
+	 * Build and convert an item-stack all in one function.
+	 *
+	 * @return An item modification object.
+	 */
+	public static @NotNull Item.Edit edit() {
+		return new Item.Edit(findMaterial("dirt"));
+	}
+
+	/**
+	 * Build and convert an item-stack all in one function.
 	 *
 	 * @param fun The item builder to stack conversion.
 	 * @return An item modification object.
@@ -36,12 +45,13 @@ public final class Items {
 	}
 
 	/**
-	 * Build and convert and itemstack all in one function.
+	 * Build and convert an item-stack all in one function.
 	 *
+	 * @param fun The item builder to stack conversion.
 	 * @return An item modification object.
 	 */
-	public static @NotNull Item.Edit edit() {
-		return new Item.Edit(findMaterial("dirt"));
+	public static @NotNull ItemStack edit(ItemStack toEdit, Function<Item.Edit, ItemStack> fun) {
+		return fun.apply(edit().setItem(toEdit));
 	}
 
 	private Items() {
