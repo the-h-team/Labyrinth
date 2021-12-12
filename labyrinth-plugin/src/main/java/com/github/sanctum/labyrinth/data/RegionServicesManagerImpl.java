@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.event.CuboidSelectEvent;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
 import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
@@ -33,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class RegionServicesManagerImpl extends RegionServicesManager {
 
-	final List<Region> cache = new ArrayList<>();
+	final LabyrinthCollection<Region> cache = new LabyrinthList<>();
 	final Cuboid.FlagManager flagManager = new Cuboid.FlagManager(this);
 
 	public static void initialize(Labyrinth instance) {
@@ -165,8 +168,6 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 			Player p = event.getPlayer();
 			Player target = event.getVictim();
-
-			Mailer msg = Mailer.empty(p);
 			Region.Resident r = Region.Resident.get(target);
 			if (event.isPhysical()) {
 
@@ -195,8 +196,8 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 	}
 
 	@Override
-	public List<Region> getAll() {
-		return Collections.unmodifiableList(cache);
+	public LabyrinthCollection<Region> getAll() {
+		return ImmutableLabyrinthCollection.of(cache);
 	}
 
 	@Override
