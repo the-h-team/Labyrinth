@@ -109,7 +109,11 @@ otherwise have been far more time-consuming.
 + Load External Jars
 + Time, Command, String, Math and List Utilities
 + _Custom object!_ Persistent Data Storage using Base64 serialization
-+ Command Building
++ In-daemon task scheduling.
++ Custom o(1) o(n) complexity collection/map types.
+* Cuboid/Region API
+* Tablist display API
+* Tab completion utility
 + Safe, common library access to amazing plugins like Vault, Enterprise, PlaceholderAPI
 & Much More!
 
