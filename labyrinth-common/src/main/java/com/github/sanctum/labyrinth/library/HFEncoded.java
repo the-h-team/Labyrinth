@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -92,7 +93,48 @@ public class HFEncoded {
 		if (obj == null || !byte[].class.isAssignableFrom(obj.getClass())) return null;
 		byte[] ar = (byte[]) obj;
 		ByteArrayInputStream input = new ByteArrayInputStream(ar);
-		BukkitObjectInputStream inputStream = new BukkitObjectInputStream(input);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
+		return (T) inputStream.readObject();
+
+	}
+
+	/**
+	 * The original stored object retaining all values converted back to an object.
+	 * <p>
+	 * WARN: You will need to pass a type to the object upon use.
+	 *
+	 * @param lookups The individual class initializers to use.
+	 * @return the deserialized form of an object with its original state
+	 * @throws IOException typically, if a class has been modified in comparison
+	 * to its original structure
+	 * @throws ClassNotFoundException if the class could not be located properly
+	 */
+	public Object deserialized(ClassLookup... lookups) throws IOException, ClassNotFoundException {
+		byte[] serial = Base64.getDecoder().decode(objSerial);
+		ByteArrayInputStream input = new ByteArrayInputStream(serial);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
+		for (ClassLookup l : lookups) {
+			inputStream.add(l);
+		}
+		return inputStream.readObject();
+	}
+
+	/**
+	 * If the provided object is an encoded byte array deserialize it back into its object state.
+	 *
+	 * @param lookups The individual class initializers to use.
+	 * @return The object the byte array once was or null if not an encoded byte array.
+	 * @throws IOException if an I/O error occurs while reading stream heade
+	 * @throws ClassNotFoundException if the class of the serialized object cannot be found
+	 */
+	public <T> T fromByteArray(ClassLookup... lookups) throws IOException, ClassNotFoundException {
+		if (obj == null || !byte[].class.isAssignableFrom(obj.getClass())) return null;
+		byte[] ar = (byte[]) obj;
+		ByteArrayInputStream input = new ByteArrayInputStream(ar);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
+		for (ClassLookup l : lookups) {
+			inputStream.add(l);
+		}
 		return (T) inputStream.readObject();
 
 	}
@@ -110,7 +152,42 @@ public class HFEncoded {
 	public Object deserialized() throws IOException, ClassNotFoundException {
 		byte[] serial = Base64.getDecoder().decode(objSerial);
 		ByteArrayInputStream input = new ByteArrayInputStream(serial);
-		BukkitObjectInputStream inputStream = new BukkitObjectInputStream(input);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
+		return inputStream.readObject();
+	}
+
+	/**
+	 * If the provided object is an encoded byte array deserialize it back into its object state.
+	 *
+	 * @param classLoader The classloader to use for deserialization.
+	 * @return The object the byte array once was or null if not an encoded byte array.
+	 * @throws IOException if an I/O error occurs while reading stream heade
+	 * @throws ClassNotFoundException if the class of the serialized object cannot be found
+	 */
+	public <T> T fromByteArray(@NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
+		if (obj == null || !byte[].class.isAssignableFrom(obj.getClass())) return null;
+		byte[] ar = (byte[]) obj;
+		ByteArrayInputStream input = new ByteArrayInputStream(ar);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input).setLoader(classLoader);
+		return (T) inputStream.readObject();
+
+	}
+
+	/**
+	 * The original stored object retaining all values converted back to an object.
+	 * <p>
+	 * WARN: You will need to pass a type to the object upon use.
+	 *
+	 * @param classLoader The classloader to use for deserialization.
+	 * @return the deserialized form of an object with its original state
+	 * @throws IOException typically, if a class has been modified in comparison
+	 * to its original structure
+	 * @throws ClassNotFoundException if the class could not be located properly
+	 */
+	public Object deserialized(@NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
+		byte[] serial = Base64.getDecoder().decode(objSerial);
+		ByteArrayInputStream input = new ByteArrayInputStream(serial);
+		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input).setLoader(classLoader);
 		return inputStream.readObject();
 	}
 
@@ -124,9 +201,34 @@ public class HFEncoded {
 	 * @param <R> the type this object represents
 	 * @return a deserialized object or null
 	 */
-	public <R> @Nullable R deserialize(Class<R> type) {
+	public <R> @Nullable R deserialize(@NotNull Class<R> type) {
 		try {
 			Object o = deserialized();
+			if (o == null) return null;
+			if (type.isAssignableFrom(o.getClass())) {
+				return (R) o;
+			} else {
+				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- " + e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * Deserialize an object of specified type from a string.
+	 * <p>
+	 * Primarily for misc use, deserialization is handled internally for normal object use from containers.
+	 *
+	 * @param classLoader The classloader to use for deserialization.
+	 * @param type the type this object represents
+	 * @param <R> the type this object represents
+	 * @return a deserialized object or null
+	 */
+	public <R> @Nullable R deserialize(@NotNull Class<R> type, @NotNull ClassLoader classLoader) {
+		try {
+			Object o = deserialized(classLoader);
 			if (o == null) return null;
 			if (type.isAssignableFrom(o.getClass())) {
 				return (R) o;

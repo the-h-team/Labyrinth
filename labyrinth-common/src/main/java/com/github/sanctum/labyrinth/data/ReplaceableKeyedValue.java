@@ -25,13 +25,18 @@ public interface ReplaceableKeyedValue<K, V> extends SimpleKeyedValue<K, V>, Map
 			}
 
 			@Override
-			public K getKey() {
+			public @NotNull K getKey() {
 				return this.k;
 			}
 
 			@Override
 			public V getValue() {
 				return this.v;
+			}
+
+			@Override
+			public String toString() {
+				return "Entry{key=" + k + ", value=" + v + "}";
 			}
 		};
 	}

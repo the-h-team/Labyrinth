@@ -14,12 +14,12 @@ import org.jetbrains.annotations.NotNull;
  * @param <K> The key type for this map
  * @param <V> The value type for this map
  */
-abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
+public abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 
 	public static final int INITIAL_CAPACITY = -1;
 
 	protected Node head, tail;
-	protected int size = -1;
+	protected int size;
 	protected final int capacity;
 
 	public LabyrinthMapBase() {
@@ -40,10 +40,10 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		iterable.forEach(entry -> put(entry.getKey(), entry.getValue()));
 	}
 
-	class Node {
+	protected class Node {
 
-		ReplaceableKeyedValue<K, V> value;
-		Node next;
+		protected ReplaceableKeyedValue<K, V> value;
+		protected Node next;
 
 
 		Node(Node node) {
@@ -56,7 +56,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 			next = null;
 		}
 
-		Node(IrreplaceableKeyedValue<K, V> value) {
+		Node(ImmutableKeyedValue<K, V> value) {
 			this.value = value;
 			next = null;
 		}
@@ -71,7 +71,11 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 	public V put(K e, V value) {
 		Node imprint = getNode(e);
 		if (imprint != null) {
-			imprint.value.setValue(value);
+			if (value == null) {
+				remove(imprint);
+			} else {
+				imprint.value.setValue(value);
+			}
 			return value;
 		}
 		if (capacity != -1) {
@@ -106,7 +110,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 	public boolean remove(K e) {
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(current.value.getKey(), e)) {
+			if (current.value.getKey() == e || current.value.getKey().equals(e)) {
 				size--;
 				return remove(current);
 			}
@@ -130,7 +134,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		V result = null;
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(current.value.getKey(), key)) {
+			if (current.value.getKey() == key || current.value.getKey().equals(key)) {
 				result = current.value.getValue();
 				break;
 			}
@@ -141,7 +145,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 
 	@Override
 	public int size() {
-		return size + 1;
+		return size;
 	}
 
 	@Override
@@ -149,7 +153,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		boolean found = false;
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(current.value.getKey(), e)) {
+			if (current.value.getKey() == e || current.value.getKey().equals(e)) {
 				found = true;
 				break;
 			}
@@ -163,7 +167,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		boolean found = false;
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(current.value.getValue(), v)) {
+			if (current.value.getValue() == v || current.value.getValue().equals(v)) {
 				found = true;
 				break;
 			}
@@ -176,12 +180,12 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 	public void clear() {
 		head = null;
 		tail = null;
-		size = -1;
+		size = 0;
 	}
 
 	@Override
 	public Spliterator<ReplaceableKeyedValue<K, V>> spliterator() {
-		return Spliterators.spliterator(iterator(), size, 0);
+		return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED);
 	}
 
 	@NotNull
@@ -209,11 +213,26 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		};
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder list = new StringBuilder();
+		int count = 0;
+		for (ReplaceableKeyedValue<K, V> e : this) {
+			if (count == (size - 1)) {
+				list.append(e.toString());
+			} else {
+				list.append(e.toString()).append(", ");
+			}
+			count++;
+		}
+		return "[" + list + "]";
+	}
+
 	Node getNode(K key) {
 		Node result = null;
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(current.value.getKey(), key)) {
+			if (current.value.getKey() == key || current.value.getKey().equals(key)) {
 				result = current;
 				break;
 			}
@@ -302,12 +321,12 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		return true;
 	}
 
-	static class IrreplaceableKeyedValue<K, V> implements ReplaceableKeyedValue<K, V> {
+	static class ImmutableKeyedValue<K, V> implements ReplaceableKeyedValue<K, V> {
 
 		private final K k;
 		private final V v;
 
-		IrreplaceableKeyedValue(K k, V v) {
+		ImmutableKeyedValue(K k, V v) {
 			this.k = k;
 			this.v = v;
 		}
@@ -318,7 +337,7 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 		}
 
 		@Override
-		public K getKey() {
+		public @NotNull K getKey() {
 			return k;
 		}
 
@@ -329,6 +348,11 @@ abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 
 		static RuntimeException warning() {
 			return new ImmutableStorageException("Element modifications cannot be made to immutable maps!");
+		}
+
+		@Override
+		public String toString() {
+			return "Entry{key=" + k + ", value=" + v + "}";
 		}
 	}
 }

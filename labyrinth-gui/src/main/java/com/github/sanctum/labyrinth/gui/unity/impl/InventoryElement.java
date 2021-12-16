@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
+import com.github.sanctum.labyrinth.formatting.pagination.AbstractPaginatedCollection;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Asynchronous;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -70,7 +72,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					}
 					ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 					if (list == null) return this.inventory;
-					for (ItemElement<?> element : new PaginatedList<>(getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate).get(page)) {
+					for (ItemElement<?> element : AbstractPaginatedCollection.of(getWorkflow()).limit(list.getLimit()).sort(list.comparator).filter(list.predicate).get(page)) {
 						if (!this.inventory.contains(element.getElement())) {
 							this.inventory.addItem(element.getElement());
 						}
@@ -327,8 +329,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		private final InventoryElement element;
 
-		private PaginatedList<ItemElement<?>> pagination;
-
 		private final int num;
 
 		private boolean full;
@@ -365,24 +365,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			return Objects.hash(getElement(), num);
 		}
 
-		private ListElement<?> init() {
-			ListElement<?> list = (ListElement<?>) element.getElement(e -> e instanceof ListElement);
-			if (list != null) {
-				if (this.pagination == null) {
-					this.pagination = new PaginatedList<>(element.getWorkflow()).limit(list.getLimit()).compare(list.comparator).filter(list.predicate);
-				}
-			}
-			return list;
-		}
-
 		@Override
 		public Set<ItemElement<?>> getAttachment() {
-			ListElement<?> list = init();
+			ListElement<?> list = (ListElement<?>) element.getElement(e -> e instanceof ListElement);
 			if (list == null) return new HashSet<>();
-			Set<ItemElement<?>> set = new HashSet<>(pagination.update(element.getWorkflow()).compare(list.comparator).get(toNumber())).stream().sorted(list.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
-			for (ItemElement<?> it : getElement().getAttachment()) {
-				if (!set.contains(it) && it.isPlayerAdded() && it.getPage().toNumber() == toNumber()) {
-					set.add(it);
+
+			Set<ItemElement<?>> set = StreamSupport.stream(AbstractPaginatedCollection.of(element.getWorkflow()).limit(list.getLimit()).sort(list.comparator).get(toNumber()).spliterator(), false).sorted(list.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
+			for (ItemElement<?> extra : getElement().getAttachment()) {
+				if (!set.contains(extra) && extra.isPlayerAdded() && extra.getPage().toNumber() == toNumber()) {
+					set.add(extra);
 				}
 			}
 			if (set.size() >= list.getLimit()) {
@@ -462,6 +453,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 				this.tasks.put(player, Schedule.async(() -> Schedule.sync(() -> {
 					getViewer(player).getElement().clear();
+					BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+					if (border != null) {
+						for (ItemElement<?> element : border.getAttachment()) {
+							Optional<Integer> i = element.getSlot();
+							i.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
+						}
+					}
 					for (ItemElement<?> element : getViewer(player).getPage().getAttachment()) {
 						if (!getViewer(player).getElement().contains(element.getElement())) {
 							getViewer(player).getElement().addItem(element.getElement());
@@ -471,10 +469,19 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 						Optional<Integer> in = element.getSlot();
 						in.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 					}
+					FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+					if (filler != null) {
+						for (ItemElement<?> el : filler.getAttachment()) {
+							int slot = el.getSlot().orElse(0);
+							if (getViewer(player).getElement().getItem(slot) == null) {
+								getViewer(player).getElement().setItem(slot, el.getElement());
+							}
+						}
+					}
 				}).run()));
-				this.tasks.get(player).repeat(0, 1);
+				this.tasks.get(player).repeat(0, 60);
 
-				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).waitReal(2);
+				Schedule.sync(() -> player.openInventory(getViewer(player).getElement())).run();
 
 			} else {
 
@@ -536,7 +543,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							}
 						}).run();
 					}));
-					this.tasks.get(player).repeat(0, 1);
+					this.tasks.get(player).repeat(0, 60);
 				}
 
 				Schedule.sync(() -> {

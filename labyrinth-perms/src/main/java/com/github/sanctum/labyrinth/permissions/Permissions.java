@@ -18,6 +18,7 @@ public interface Permissions {
 
 	User getUser(OfflinePlayer player);
 
+	@Deprecated
 	User getUser(LabyrinthUser user);
 
 	Group getGroup(String name);

@@ -1,14 +1,26 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.command.CommandVisibilityCalculation;
-import java.util.HashMap;
-import java.util.Locale;
+import com.github.sanctum.labyrinth.command.SubCommandList;
+import com.github.sanctum.labyrinth.command.SubCommand;
+import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import java.util.Optional;
+import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -19,31 +31,47 @@ import java.util.Set;
 /**
  * Easily extract data from the server's internal command map.
  *
- * @author ms5984
+ * @author ms5984, Hempfest
  */
 public final class CommandUtils {
-    private static CommandUtils instance;
-    private static CommandMap map;
-    private final Map<String, Command> commandMappings;
-    private static final Map<String, CommandVisibilityCalculation> calculations = new HashMap<>();
 
-    private CommandUtils(LabyrinthAPI labyrinth) {
+    static Map<String, Command> commands;
+    static CommandMap commandMap;
+    private static final LabyrinthCollection<CommandVisibilityCalculation> calculations = new LabyrinthSet<>();
+    private static final LabyrinthMap<String, SubCommandList> wrappers = new LabyrinthEntryMap<>();
+
+    static {
+        Plugin main = LabyrinthProvider.getInstance().getPluginInstance();
+        Map<String, Command> commandMappings;
+        CommandMap theMap;
         try {
-            final Field commandMapField = labyrinth.getPluginInstance().getServer().getClass().getDeclaredField("commandMap");
+            final Field commandMapField = main.getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
-            final CommandMap commandMap = (CommandMap) commandMapField.get(labyrinth.getPluginInstance().getServer());
-            map = commandMap;
+            final CommandMap commandMap = (CommandMap) commandMapField.get(main.getServer());
+            theMap = commandMap;
             final Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
             knownCommandsField.setAccessible(true);
             //noinspection unchecked
             commandMappings = (Map<String, Command>) knownCommandsField.get(commandMap);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException("Unable to start CommandUtils!");
+            throw new IllegalStateException("Unable to initialize CommandUtils!");
         }
+        commandMap = theMap;
+        commands = commandMappings;
     }
 
-    public static Map<String, CommandVisibilityCalculation> getVisibilityCalculations() {
-        return Collections.unmodifiableMap(calculations);
+    /**
+     * @return An immutable map of all registered sub command holders.
+     */
+    public static LabyrinthMap<String, SubCommandList> getSubCommandHolders() {
+        return ImmutableLabyrinthMap.of(wrappers);
+    }
+
+    /**
+     * @return An immutable collection of command visibility calculations.
+     */
+    public static LabyrinthCollection<CommandVisibilityCalculation> getVisibilityCalculations() {
+        return ImmutableLabyrinthCollection.of(calculations);
     }
 
     /**
@@ -53,8 +81,7 @@ public final class CommandUtils {
      * @return all registered command labels
      */
     public static Set<String> getServerCommandListing() {
-
-        return Collections.unmodifiableSet(instance.commandMappings.keySet());
+        return Collections.unmodifiableSet(commands.keySet());
     }
 
     /**
@@ -63,31 +90,94 @@ public final class CommandUtils {
      * @param name label of the command
      * @return Command object if found or null
      */
-    public static @Nullable Command getCommandByLabel(String name) {
-        return instance.commandMappings.get(name);
+    public static @Nullable Command getCommandByLabel(@NotNull String name) {
+        return commands.get(name);
     }
 
-    public static void register(Command command, CommandVisibilityCalculation calculation) {
-        calculations.put(command.getLabel(), calculation);
-        Plugin holder = JavaPlugin.getProvidingPlugin(command.getClass());
-        for (String alias : command.getAliases()) {
-            calculations.put(holder.getName().toLowerCase(Locale.ROOT) + ":" + alias.toLowerCase(Locale.ROOT), calculation);
-        }
+    /**
+     * Read and or modify data from the servers command map possibly registering new commands into it.
+     *
+     * @param function The operation to run
+     * @param <R> A possible return result.
+     * @return A custom return value.
+     */
+    public static <R> R read(@NotNull Function<SimpleKeyedValue<CommandMap, Map<String, Command>>, R> function) {
+        return function.apply(SimpleKeyedValue.of(commandMap, commands));
     }
 
-    public static void unregister(Command command) {register(null, player -> true);
-        instance.commandMappings.remove(command.getName());
+    /**
+     * Hide command visibility from specific players.
+     *
+     * @param calculation The command calculation to use.
+     */
+    public static void register(@NotNull CommandVisibilityCalculation calculation) {
+        calculations.add(calculation);
+    }
+
+    /**
+     * Inject custom sub commands into any plugin on the server!
+     *
+     * @param subCommand The sub command to inject.
+     */
+    public static void register(@NotNull SubCommand subCommand) {
+        final Command parent = getCommandByLabel(subCommand.getCommand());
+        if (parent != null) {
+            final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElse(LabyrinthProvider.getInstance().getPluginInstance());
+            SubCommandList wrapper = wrappers.computeIfAbsent(subCommand.getCommand(), s -> {
+                SubCommandList w = new SubCommandList(parent){
+                    @Ordinal(24)
+                    Command getCrossover() {
+                        return this.parent;
+                    }
+                };
+                Command wrapped = OrdinalProcedure.select(w, 24).cast(() -> Command.class);
+                if (wrapped == null) throw new IllegalArgumentException("Cannot process non existent command base.");
+                return read(entry -> {
+                    Map<String, Command> commandMappings = entry.getValue();
+                    CommandMap map = entry.getKey();
+                    commandMappings.remove(parent.getName());
+                    for (String alias : parent.getAliases()) {
+                        if (commandMappings.containsKey(alias) && commandMappings.get(alias).getAliases().contains(alias)) {
+                            commandMappings.remove(alias);
+                        }
+
+                    }
+                    parent.unregister(map);
+                    map.register(w.getCommand(), plugin.getName(), wrapped);
+                    return w;
+                });
+            });
+            if (!wrapper.contains(subCommand)) wrapper.add(subCommand);
+        } else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
+    }
+
+    /**
+     * Unregister a cached sub command.
+     *
+     * @param subCommand The sub command to remove
+     */
+    public static void unregister(@NotNull SubCommand subCommand) {
+        final Command parent = getCommandByLabel(subCommand.getCommand());
+        if (parent != null) {
+            SubCommandList wrapper = wrappers.get(subCommand.getCommand());
+            if (wrapper != null && wrapper.contains(subCommand)) wrapper.remove(subCommand);
+        } else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
+    }
+
+    /**
+     * Completely unregister a command from the server command map.
+     *
+     * @param command The command to remove.
+     */
+    public static void unregister(@NotNull Command command) {
+        commands.remove(command.getName());
         for (String alias : command.getAliases()) {
-            if (instance.commandMappings.containsKey(alias) && instance.commandMappings.get(alias).getAliases().contains(alias)) {
-                instance.commandMappings.remove(alias);
+            if (commands.containsKey(alias) && commands.get(alias).getAliases().contains(alias)) {
+                commands.remove(alias);
             }
 
         }
-        command.unregister(map);
+        command.unregister(commandMap);
     }
 
-    public static void initialize(LabyrinthAPI labyrinth) throws IllegalStateException {
-        if (instance != null) throw new IllegalStateException("CommandUtils already loaded!");
-        instance = new CommandUtils(labyrinth);
-    }
 }

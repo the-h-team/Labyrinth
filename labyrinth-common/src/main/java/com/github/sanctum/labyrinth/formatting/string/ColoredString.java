@@ -63,7 +63,7 @@ public class ColoredString {
 	 * @return Returns a string of text embedded as a Component
 	 */
 	public TextComponent toComponent() {
-		return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17") ? translateHexComponent(text) : new TextComponent(ChatColor.translateAlternateColorCodes('&', text));
+		return LabyrinthProvider.getInstance().isNew() ? translateHexComponent(text) : new TextComponent(ChatColor.translateAlternateColorCodes('&', text));
 	}
 
 	private TextComponent translateHexComponent(String text) {

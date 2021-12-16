@@ -5,7 +5,7 @@ import org.bukkit.inventory.Inventory;
 /**
  * An object used to envelope inventory contents for proper removal.
  */
-public class InventorySync implements CompostElement {
+public abstract class InventorySync implements CompostElement {
 
 	private final Inventory parent;
 	private final int amount;

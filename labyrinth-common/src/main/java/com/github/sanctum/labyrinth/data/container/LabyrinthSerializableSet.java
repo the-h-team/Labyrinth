@@ -1,9 +1,12 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.library.ClassLookup;
 import com.github.sanctum.labyrinth.library.HFEncoded;
 import com.github.sanctum.labyrinth.library.TypeFlag;
+import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.Serializable;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class LabyrinthSerializableSet<E extends Serializable> extends LabyrinthCollectionBase<E> implements Serializable {
 
@@ -25,9 +28,19 @@ public abstract class LabyrinthSerializableSet<E extends Serializable> extends L
 		super(iterable, capacity);
 	}
 
-	public static <E extends Serializable> LabyrinthSerializableSet<E> deserialize(String serialized) {
+	public static <E extends Serializable> LabyrinthSerializableSet<E> deserialize(@NotNull String serialized, @NotNull ClassLoader classLoader) {
 		TypeFlag<LabyrinthSerializableSet<E>> flag = TypeFlag.get();
-		return new HFEncoded(serialized).deserialize(flag.getType());
+		return new HFEncoded(serialized).deserialize(flag.getType(), classLoader);
+	}
+
+	public static <E extends Serializable> LabyrinthSerializableSet<E> deserialize(@NotNull String serialized, ClassLookup... lookups) {
+		TypeFlag<LabyrinthSerializableSet<E>> flag = TypeFlag.get();
+		try {
+			Object o = new HFEncoded(serialized).deserialized(lookups);
+			return flag.cast(o);
+		} catch (IOException | ClassNotFoundException e) {
+			return null;
+		}
 	}
 
 	public static <E extends Serializable> LabyrinthSerializableSet<E> of(LabyrinthCollection<E> assortment) {

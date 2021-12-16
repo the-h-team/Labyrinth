@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -19,7 +20,7 @@ public abstract class ImmutableLabyrinthMap<K, V> extends LabyrinthMapBase<K, V>
 	}
 
 	void addImmutable(K k, V v) {
-		Node storage = new Node(new IrreplaceableKeyedValue<>(k, v));
+		Node storage = new Node(new ImmutableKeyedValue<>(k, v));
 		storage.next = null;
 		if (head == null) {
 			head = storage;
@@ -35,28 +36,45 @@ public abstract class ImmutableLabyrinthMap<K, V> extends LabyrinthMapBase<K, V>
 	}
 
 	@Override
+	@Deprecated
 	public V put(K e, V value) {
-		throw IrreplaceableKeyedValue.warning();
+		throw ImmutableKeyedValue.warning();
 	}
 
 	@Override
+	@Deprecated
+	public boolean putAll(Iterable<Map.Entry<K, V>> iterable) {
+		throw ImmutableKeyedValue.warning();
+	}
+
+	@Override
+	@Deprecated
+	public boolean removeAll(Iterable<Map.Entry<K, V>> iterable) {
+		throw ImmutableKeyedValue.warning();
+	}
+
+	@Override
+	@Deprecated
 	public boolean remove(K e) {
-		throw IrreplaceableKeyedValue.warning();
+		throw ImmutableKeyedValue.warning();
 	}
 
 	@Override
+	@Deprecated
 	public void clear() {
-		throw IrreplaceableKeyedValue.warning();
+		throw ImmutableKeyedValue.warning();
 	}
 
 	@Override
+	@Deprecated
 	public V computeIfAbsent(K key, V value) {
-		throw IrreplaceableKeyedValue.warning();
+		throw ImmutableKeyedValue.warning();
 	}
 
 	@Override
+	@Deprecated
 	public V computeIfAbsent(K key, Function<K, V> function) {
-		throw IrreplaceableKeyedValue.warning();
+		throw ImmutableKeyedValue.warning();
 	}
 
 	public static <K, V> ImmutableLabyrinthMap<K, V> of(LabyrinthMap<K, V> map) {
@@ -65,6 +83,29 @@ public abstract class ImmutableLabyrinthMap<K, V> extends LabyrinthMapBase<K, V>
 
 	public static <K, V> ImmutableLabyrinthMap<K, V> of(Map<K, V> map) {
 		return new ImmutableLabyrinthMap<K, V>(map){};
+	}
+
+	public static <K, V> Builder<K, V> builder() {
+		return new Builder<>();
+	}
+
+	public static final class Builder<K, V> {
+
+		private final LabyrinthMap<K, V> internal;
+
+		Builder() {
+			internal = new LabyrinthEntryMap<>();
+		}
+
+		public Builder<K, V> put(K key, V value) {
+			internal.put(key, value);
+			return this;
+		}
+
+		public ImmutableLabyrinthMap<K, V> build() {
+			return of(internal);
+		}
+
 	}
 
 

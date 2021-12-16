@@ -3,7 +3,6 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.command.CommandRegistration;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
 import com.github.sanctum.labyrinth.data.Configurable;
@@ -12,7 +11,6 @@ import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.data.ItemStackSerializable;
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.MessageSerializable;
@@ -21,13 +19,11 @@ import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
-import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
@@ -40,7 +36,6 @@ import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
 import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -150,20 +145,13 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	public void onEnable() {
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
+		getLogger().info("- Loading user cache system, please be patient...");
+		PlayerSearch.reload().deploy();
 		registerServices().deploy();
-		cachedIsLegacy = LabyrinthAPI.super.isLegacy();
-		cachedIsNew = LabyrinthAPI.super.isNew();
-		cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
 		registerJsonAdapters().deploy();
 		registerFileConfigurationAdapters().deploy();
-		FileManager copy = FileList.search(this).get("config");
-		InputStream stream = getResource("config.yml");
-		assert stream != null;
-		if (!copy.getRoot().exists()) {
-			FileList.copy(stream, copy.getRoot().getParent());
-		}
-		this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 		getEventMap().subscribeAll(this, new DefaultEvent.Controller(), this);
+
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -194,80 +182,90 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 				return PlaceholderRegistration.getInstance().replaceAll(result, variable);
 			}));
 			instance.servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
-			CommandRegistration.use(new Command("labyrinth") {
+			CommandUtils.read(entry -> {
 
-				private final SimpleTabCompletion completion = SimpleTabCompletion.empty();
-				private final TypeFlag<Player> conversion = TypeFlag.PLAYER;
+				Command registration = new Command("labyrinth") {
 
-				@Override
-				public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-					Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
+					private final SimpleTabCompletion completion = SimpleTabCompletion.empty();
+					private final TypeFlag<Player> conversion = TypeFlag.PLAYER;
 
-					if (args.length == 0) {
-						mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).deploy();
-						return true;
-					}
+					@Override
+					public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
+						Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
 
-					if (args.length == 1) {
-						String label = args[0];
-
-						if (label.equalsIgnoreCase("placeholder")) {
-							mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]");
+						if (args.length == 0) {
+							mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).deploy();
 							return true;
 						}
-						return true;
-					}
 
-					if (args.length == 2) {
-						String label = args[0];
-						String argument = args[1];
+						if (args.length == 1) {
+							String label = args[0];
 
-						if (label.equalsIgnoreCase("placeholder")) {
-							if (sender instanceof Player) {
-								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
-							} else {
-								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+							if (label.equalsIgnoreCase("placeholder")) {
+								mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]");
+								return true;
 							}
 							return true;
 						}
-						return true;
-					}
 
-					if (args.length == 3) {
-						String label = args[0];
-						String argument = args[1];
+						if (args.length == 2) {
+							String label = args[0];
+							String argument = args[1];
 
-						if (label.equalsIgnoreCase("placeholder")) {
-							if (sender instanceof Player) {
-								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
-							} else {
-								sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+							if (label.equalsIgnoreCase("placeholder")) {
+								if (sender instanceof Player) {
+									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
+								} else {
+									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+								}
+								return true;
 							}
 							return true;
 						}
-						return true;
+
+						if (args.length == 3) {
+							String label = args[0];
+							String argument = args[1];
+
+							if (label.equalsIgnoreCase("placeholder")) {
+								if (sender instanceof Player) {
+									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
+								} else {
+									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
+								}
+								return true;
+							}
+							return true;
+						}
+
+						return false;
 					}
 
-					return false;
-				}
+					@NotNull
+					@Override
+					public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+						completion.fillArgs(args);
+						completion.then(TabCompletionIndex.ONE, "placeholder", "version");
+						List<String> placeholders = new ArrayList<>();
+						PlaceholderRegistration.getInstance().getHistory().entries().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
+							for (Placeholder placeholder : e.getValue()) {
+								placeholders.add(placeholder.toRaw().replace(String.valueOf(placeholder.start()), placeholder.start() + e.getKey().get()));
+							}
+						});
+						completion.then(TabCompletionIndex.TWO, "placeholder", TabCompletionIndex.ONE, placeholders);
+						completion.then(TabCompletionIndex.THREE, "placeholder", TabCompletionIndex.ONE, Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).collect(Collectors.toList()));
 
-				@NotNull
-				@Override
-				public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-					completion.fillArgs(args);
-					completion.then(TabCompletionIndex.ONE, "placeholder", "version");
-					List<String> placeholders = new ArrayList<>();
-					PlaceholderRegistration.getInstance().getHistory().entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
-						for (Placeholder placeholder : e.getValue()) {
-							placeholders.add(placeholder.toRaw().replace(String.valueOf(placeholder.start()), placeholder.start() + e.getKey().get()));
-						}
-					});
-					completion.then(TabCompletionIndex.TWO, "placeholder", TabCompletionIndex.ONE, placeholders);
-					completion.then(TabCompletionIndex.THREE, "placeholder", TabCompletionIndex.ONE, Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).collect(Collectors.toList()));
-
-					return completion.get();
-				}
+						return completion.get();
+					}
+				};
+				entry.getKey().register(registration.getLabel(), getName(), registration);
+				return 4;
 			});
+
+			cachedIsLegacy = LabyrinthAPI.super.isLegacy();
+			cachedIsNew = LabyrinthAPI.super.isNew();
+			cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
+
 		});
 	}
 
@@ -275,7 +273,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		return Deployable.of(this, plugin -> {
 			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(165)
 					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(165)
-					.next(() -> CommandUtils.initialize(plugin)).schedule()
 					.next(() -> {
 						if (getServer().getPluginManager().isPluginEnabled("Vault")) {
 							VaultImplementation bridge = new VaultImplementation();
@@ -337,6 +334,13 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			ConfigurationSerialization.registerClass(CustomColor.class);
 			ConfigurationSerialization.registerClass(Template.class);
 			ConfigurationSerialization.registerClass(MetaTemplate.class);
+			FileManager copy = FileList.search(this).get("config");
+			InputStream stream = getResource("config.yml");
+			assert stream != null;
+			if (!copy.getRoot().exists()) {
+				FileList.copy(stream, copy.getRoot().getParent());
+			}
+			this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 		});
 	}
 
@@ -365,15 +369,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	@Subscribe(priority = Vent.Priority.READ_ONLY)
 	public void onJoin(DefaultEvent.Join e) {
-		LabyrinthUser user = LabyrinthUser.get(e.getPlayer().getName());
-		if (user.isValid()) {
-			if (OrdinalProcedure.select(user, 4, e.getPlayer()).cast(() -> Boolean.class)) {
-				getEmptyMailer().info("- User " + e.getPlayer().getName() + "'s id has been updated.");
-			}
-		} else {
-			getEmptyMailer().error("- User " + e.getPlayer().getName() + " has NO unique id!! (This is not the fault of labyrinth, perhaps cracked problems)");
-		}
-
+		PlayerSearch.of(e.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

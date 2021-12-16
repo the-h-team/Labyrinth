@@ -2,6 +2,8 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.annotation.Note;
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 
@@ -43,5 +45,6 @@ public interface TypeFlag<T> extends Type {
 	static <T> TypeFlag<T> get() {
 		return new EasyTypeAdapter<>();
 	}
+
 
 }

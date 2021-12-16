@@ -98,12 +98,4 @@ public abstract class LabyrinthProvider {
 		return getInstance().getServiceManager().get(service);
 	}
 
-	public static Set<LabyrinthUser> getOfflinePlayers() {
-		return Arrays.stream(Bukkit.getOfflinePlayers()).map(LabyrinthUser::get).collect(Collectors.toSet());
-	}
-
-	public static @Nullable LabyrinthUser getPlayer(String name) {
-		return LabyrinthUser.get(name).isValid() ? LabyrinthUser.get(name) : null;
-	}
-
 }

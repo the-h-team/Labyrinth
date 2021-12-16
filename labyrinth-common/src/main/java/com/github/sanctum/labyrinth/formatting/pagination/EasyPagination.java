@@ -10,6 +10,11 @@ import java.util.function.Predicate;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+/**
+ * A predefined paginated template.
+ *
+ * @param <T> The type of element
+ */
 public final class EasyPagination<T> {
 
 	private final AbstractPaginatedCollection<T> collection;
@@ -92,16 +97,15 @@ public final class EasyPagination<T> {
 		// Header here
 		FancyMessageChain chain = new FancyMessageChain();
 		chain.append(header -> this.header.accept(player, header));
-		T[] contents = p.getContents();
 		int testing = 0;
 		if (page > 0) {
 			for (int i = page; i > 0; i--) {
 				if (i == page) continue;
-				testing += collection.get(i).getContents().length;
+				testing += collection.get(i).size();
 			}
 		}
-		for (int i = 0; i < contents.length; i++) {
-			T t = contents[i];
+		for (int i = 0; i < p.size(); i++) {
+			T t = p.get(i);
 			// send each clan here.
 			FancyMessage message = new FancyMessage();
 			format.accept(t, testing + i + 1, message);

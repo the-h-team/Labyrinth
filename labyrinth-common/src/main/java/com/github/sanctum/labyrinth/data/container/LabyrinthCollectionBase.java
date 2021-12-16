@@ -4,7 +4,6 @@ import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
@@ -15,12 +14,12 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <E> The type of collection this is.
  */
-abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
+public abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 
-	final boolean capacityEnforced;
-	Node head, tail;
-	int size = -1;
-	int capacity;
+	protected final boolean capacityEnforced;
+	protected Node head, tail;
+	protected int size;
+	protected int capacity;
 
 	public LabyrinthCollectionBase() {
 		this.capacity = 10;
@@ -81,7 +80,7 @@ abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 		if (head == null) return false;
 		Node current = head;
 		while (current != null) {
-			if (Objects.equals(e, current.data)) {
+			if (current.data == e || current.data.equals(e)) {
 				size--;
 				return remove(current);
 			}
@@ -116,7 +115,8 @@ abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 			current = current.next;
 			in++;
 		}
-		if (result == null) throw new IndexOutOfBoundsException("Index " + index + " out of bounds for capacity " + size());
+		if (result == null)
+			throw new IndexOutOfBoundsException("Index " + index + " out of bounds for capacity " + size());
 		return result;
 	}
 
@@ -134,7 +134,7 @@ abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 		boolean found = false;
 		Node current = head;
 		while (current != null && !found) {
-			if (Objects.equals(e, current.data)) {
+			if (current.data == e || current.data.equals(e)) {
 				found = true;
 			}
 			current = current.next;
@@ -211,7 +211,7 @@ abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 
 	@Override
 	public Spliterator<E> spliterator() {
-		return Spliterators.spliterator(iterator(), size, 0);
+		return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED);
 	}
 
 	boolean removeFirst() {
@@ -261,17 +261,32 @@ abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<E> {
 		}
 		if (prevNode.next.next != null) {
 			// if there is, we follow the logic from the pseudo code
-			prevNode.next =(prevNode.next.next);
+			prevNode.next = (prevNode.next.next);
 		} else {
 			return removeLast();
 		}
 		return true;
 	}
 
-	class Node {
+	@Override
+	public String toString() {
+		StringBuilder list = new StringBuilder();
+		int count = 0;
+		for (E e : this) {
+			if (count == (size - 1)) {
+				list.append(e.toString());
+			} else {
+				list.append(e.toString()).append(", ");
+			}
+			count++;
+		}
+		return "[" + list + "]";
+	}
 
-		E data;
-		Node next;
+	protected class Node {
+
+		protected E data;
+		protected Node next;
 
 
 		Node(Node node) {

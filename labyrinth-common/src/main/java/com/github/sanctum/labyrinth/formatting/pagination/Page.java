@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth.formatting.pagination;
 
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollectors;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -34,6 +37,20 @@ public interface Page<T> extends Iterable<T> {
 	int getNumber();
 
 	/**
+	 * @return the size of this page (number of elements)
+	 */
+	int size();
+
+	/**
+	 * Get an element from this page.
+	 *
+	 * @throws IndexOutOfBoundsException if the specified index goes beyond the natural scope.
+	 * @param index The index to retrieve.
+	 * @return The object at the specified index
+	 */
+	T get(int index);
+
+	/**
 	 * Add an element to this page if it's modifiable.
 	 *
 	 * @param t The element to add.
@@ -58,17 +75,6 @@ public interface Page<T> extends Iterable<T> {
 	boolean contains(T t);
 
 	/**
-	 * Get all the elements within this page.
-	 *
-	 * @return All the elements within this page.
-	 */
-	@Deprecated
-	@Note("Generic array creation not allowed!")
-	T[] getContents();
-
-	Collection<T> getContent();
-
-	/**
 	 * Reorder this specific page by its parents' filtration sequences.
 	 *
 	 * <p>The use of this will allow you to delve further and apply ordering on specific pages but
@@ -80,25 +86,19 @@ public interface Page<T> extends Iterable<T> {
 	@Note("This is an optional method, you should nether need to use it but instead call the main AbstractPaginatedCollecction#reorder() method.")
 	Deployable<Page<T>> reorder();
 
-	@NotNull
-	@Override
-	default Iterator<T> iterator() {
-		return Arrays.asList(getContents()).iterator();
-	}
-
 	default boolean isEmpty() {
-		return getContents().length == 0;
+		return size() == 0;
 	}
 
 	class Impl<T> implements Page<T> {
 
 		private final AbstractPaginatedCollection<T> parent;
-		private Collection<T> collection;
+		private LabyrinthCollection<T> collection;
 		private final int page;
 
 		public Impl(AbstractPaginatedCollection<T> parent, int number) {
 			this.parent = parent;
-			this.collection = Collections.synchronizedList(new LinkedList<>());
+			this.collection = new LabyrinthList<>();
 			this.page = number;
 		}
 
@@ -111,6 +111,16 @@ public interface Page<T> extends Iterable<T> {
 		@Override
 		public int getNumber() {
 			return this.page;
+		}
+
+		@Override
+		public int size() {
+			return collection.size();
+		}
+
+		@Override
+		public T get(int index) {
+			return collection.get(index);
 		}
 
 		@Override
@@ -131,27 +141,6 @@ public interface Page<T> extends Iterable<T> {
 		}
 
 		@Override
-		public T[] getContents() {
-			Class<?> cl = null;
-			for (T t : this) {
-				cl = t.getClass();
-				break;
-			}
-			Object[] ar = (Object[]) Array.newInstance(cl, collection.size());
-			int i = 0;
-			for (T t : this) {
-				ar[i] = t;
-				i++;
-			}
-			return (T[]) ar;
-		}
-
-		@Override
-		public Collection<T> getContent() {
-			return Collections.unmodifiableCollection(this.collection);
-		}
-
-		@Override
 		public @NotNull Iterator<T> iterator() {
 			return collection.iterator();
 		}
@@ -159,12 +148,12 @@ public interface Page<T> extends Iterable<T> {
 		@Override
 		public Deployable<Page<T>> reorder() {
 			return Deployable.of(this, ts -> {
-				Collection<T> copy = collection;
+				LabyrinthCollection<T> copy = collection;
 				if (parent.predicate != null) {
-					copy = collection.stream().filter(parent.predicate).collect(Collectors.toList());
+					copy = collection.stream().filter(parent.predicate).collect(LabyrinthCollectors.toList());
 				}
 				if (parent.comparator != null) {
-					copy = copy.stream().sorted(parent.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
+					copy = copy.stream().sorted(parent.comparator).collect(LabyrinthCollectors.toSet());
 				}
 				collection.clear();
 				collection = copy;

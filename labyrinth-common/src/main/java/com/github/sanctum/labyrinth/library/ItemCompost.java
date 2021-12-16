@@ -1,14 +1,18 @@
 package com.github.sanctum.labyrinth.library;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemCompost {
 
-	private final List<ItemMatcher> matchers = new ArrayList<>();
+	private final LabyrinthCollection<ItemMatcher> matchers = new LabyrinthSet<>();
 
 	public ItemCompost registerMatcher(@NotNull ItemMatcher matcher) {
 		matchers.add(matcher);
@@ -110,6 +114,20 @@ public class ItemCompost {
 				return remainingAmount == 0;
 			}
 		}
+	}
+
+	public boolean add(ItemStack item, Inventory inventory, Location drop) {
+		boolean success = true;
+		Map<Integer, ItemStack> map = inventory.addItem(item);
+		if (!map.isEmpty()) {
+			success = false;
+			map.forEach((integer, itemStack) -> drop.getWorld().dropItem(drop, itemStack));
+		}
+		return success;
+	}
+
+	public boolean add(ItemStack item, Player player) {
+		return add(item, player.getInventory(), player.getLocation());
 	}
 
 }

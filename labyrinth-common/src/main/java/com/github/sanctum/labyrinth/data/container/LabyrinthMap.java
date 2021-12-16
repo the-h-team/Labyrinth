@@ -2,20 +2,22 @@ package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.annotation.See;
 import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
-import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A custom map type, this class will retain each element fed into it in the exact order it was received.
- *
+ * <p>
  * The practices of this map type explicitly follows o(1) time complexity when inserting new tail elements,
  * when removing or retrieving an element o(n) time complexity takes place.
  *
  * @param <K> The key type of element this collection is for.
  * @param <V> The value type of element this collection is for.
  */
-@See(LabyrinthEntryMap.class)
+@See({LabyrinthEntryMap.class, LabyrinthAtlasMap.class})
 public interface LabyrinthMap<K, V> extends Iterable<ReplaceableKeyedValue<K, V>> {
 
 	/**
@@ -36,12 +38,28 @@ public interface LabyrinthMap<K, V> extends Iterable<ReplaceableKeyedValue<K, V>
 	V put(K k, V v);
 
 	/**
+	 * Insert a map entry iterable into this map.
+	 *
+	 * @param iterable The iterable entries to consume.
+	 * @return true if all elements were added.
+	 */
+	boolean putAll(Iterable<Map.Entry<K, V>> iterable);
+
+	/**
 	 * Remove a value from this map by its designated key.
 	 *
 	 * @param k The key to query
 	 * @return true if the specified keyed value was removed.
 	 */
 	boolean remove(K k);
+
+	/**
+	 * Remove each entry from the iterable from this map.
+	 *
+	 * @param iterable The iterable entries to remove
+	 * @return true if every element was removed.
+	 */
+	boolean removeAll(Iterable<Map.Entry<K, V>> iterable);
 
 	/**
 	 * Check if a specified key is mapped.
@@ -80,13 +98,13 @@ public interface LabyrinthMap<K, V> extends Iterable<ReplaceableKeyedValue<K, V>
 
 	/**
 	 * Get a value from this map by its key.
-	 *
+	 * <p>
 	 * If the specified key isn't existent map a new value and retrieve that.
 	 *
-	 * @see this#put(Object, Object)
-	 * @param key The key to query.
+	 * @param key   The key to query.
 	 * @param value The value for the specified key.
 	 * @return an existing value or a newly mapped one.
+	 * @see this#put(Object, Object)
 	 */
 	default V computeIfAbsent(K key, V value) {
 		V test = get(key);
@@ -95,16 +113,32 @@ public interface LabyrinthMap<K, V> extends Iterable<ReplaceableKeyedValue<K, V>
 
 	/**
 	 * Get a value from this map by its key.
-	 *
+	 * <p>
 	 * If the specified key isn't existent map a new value and retrieve that.
 	 *
+	 * @param key   The key to query.
+	 * @param value The value for the specified key.
+	 * @return an existing value or a newly mapped one.
 	 * @see this#put(Object, Object)
-	 * @param key The key to query.
+	 */
+	default V computeIfAbsent(K key, Supplier<V> value) {
+		V test = get(key);
+		return test != null ? test : put(key, value.get());
+	}
+
+	/**
+	 * Get a value from this map by its key.
+	 * <p>
+	 * If the specified key isn't existent map a new value and retrieve that.
+	 *
+	 * @param key      The key to query.
 	 * @param function The value consumer for the specified key.
 	 * @return an existing value or a newly mapped one.
+	 * @see this#put(Object, Object)
 	 */
 	default V computeIfAbsent(K key, Function<K, V> function) {
-		return computeIfAbsent(key, function.apply(key));
+		V test = get(key);
+		return test != null ? test : put(key, function.apply(key));
 	}
 
 	/**
@@ -144,10 +178,8 @@ public interface LabyrinthMap<K, V> extends Iterable<ReplaceableKeyedValue<K, V>
 	 * @return a fresh stream containing all entries from this map.
 	 */
 	@See(LabyrinthCollectors.class)
-	default Stream<SimpleKeyedValue<K, V>> stream() {
-		Stream.Builder<SimpleKeyedValue<K, V>> builder = Stream.builder();
-		forEach(builder::add);
-		return builder.build();
+	default Stream<ReplaceableKeyedValue<K, V>> stream() {
+		return StreamSupport.stream(spliterator(), false);
 	}
 
 }

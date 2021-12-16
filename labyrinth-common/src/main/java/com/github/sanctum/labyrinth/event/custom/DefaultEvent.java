@@ -35,6 +35,7 @@ import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class DefaultEvent extends Vent {
@@ -409,16 +410,18 @@ public class DefaultEvent extends Vent {
 
 		}
 
-		/*
 		@EventHandler
 		public void onCommandHide(PlayerCommandSendEvent e) {
-			CommandUtils.getVisibilityCalculations().forEach((key, value) -> {
-				if (!value.apply(e.getPlayer())) {
-					e.getCommands().remove(key);
-				}
+			CommandUtils.getVisibilityCalculations().forEach(calculation -> {
+				String test = calculation.accept(e.getPlayer());
+				if (test != null) e.getCommands().remove(test);
 			});
 		}
-		 */
+
+		@EventHandler
+		public void onTabInsert(TabCompleteEvent e) {
+
+		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {

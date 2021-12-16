@@ -2,24 +2,25 @@ package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.annotation.See;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A custom collection type, this class will retain each element fed into it in the exact order it was received.
- *
+ * <p>
  * The practices of this collection type explicitly follows o(1) time complexity when inserting new tail elements,
  * when removing or retrieving an element o(n) time complexity takes place.
  *
  * @param <K> The type of element this collection is for.
  */
-@See({LabyrinthList.class, LabyrinthSet.class, LabyrinthSerializableSet.class})
+@See({LabyrinthList.class, LabyrinthSet.class, LabyrinthArrayList.class, LabyrinthSerializableSet.class})
 public interface LabyrinthCollection<K> extends Iterable<K> {
 
 	/**
 	 * Get an element from this collection at a specific index.
 	 *
-	 * @throws IndexOutOfBoundsException if the specified index goes beyond the natural scope.
 	 * @param index the index of the value to retrieve.
 	 * @return The value or null.
+	 * @throws IndexOutOfBoundsException if the specified index goes beyond the natural scope.
 	 */
 	K get(int index) throws IndexOutOfBoundsException;
 
@@ -95,9 +96,7 @@ public interface LabyrinthCollection<K> extends Iterable<K> {
 	 */
 	@See(LabyrinthCollectors.class)
 	default Stream<K> stream() {
-		Stream.Builder<K> builder = Stream.builder();
-		forEach(builder::add);
-		return builder.build();
+		return StreamSupport.stream(spliterator(), false);
 	}
 
 }

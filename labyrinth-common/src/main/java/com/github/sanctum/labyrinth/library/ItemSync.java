@@ -3,11 +3,11 @@ package com.github.sanctum.labyrinth.library;
 import org.bukkit.inventory.Inventory;
 
 /**
- * An object used to envelope inventory contents for proper removal of a specific match case.
+ * An object used to envelope inventory contents for proper removal or insertion of a specific match case.
  *
  * @param <T> The matcher in use.
  */
-public class ItemSync<T extends ItemMatcher> implements CompostElement {
+public abstract class ItemSync<T extends ItemMatcher> implements CompostElement {
 
 	private final Class<T> matcher;
 	private Inventory parent;

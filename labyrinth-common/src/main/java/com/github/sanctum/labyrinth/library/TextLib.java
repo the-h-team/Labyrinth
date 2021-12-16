@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.component.NewComponent;
 import com.github.sanctum.labyrinth.formatting.component.OldComponent;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
@@ -39,7 +40,7 @@ public abstract class TextLib {
 	 *
 	 * @param action the code to run when this component is clicked
 	 * @param component the component to justify action to
-	 * @return the newly action wrapped component
+	 * @return the new action wrapped component
 	 */
 	public TextComponent execute(Applicable action, TextComponent component) {
 		return wrap(component).accept(action).toReal();
@@ -50,7 +51,7 @@ public abstract class TextLib {
 	 *
 	 * @param action the code to run when this component is clicked
 	 * @param component the component to justify action to
-	 * @return the newly action wrapped component
+	 * @return the new action wrapped component
 	 */
 	public TextComponent execute(Applicable action, Consumer<TextComponent> component) {
 		TextComponent comp = new TextComponent();
@@ -275,7 +276,7 @@ public abstract class TextLib {
 
 	public static TextLib getInstance() {
 		if (instance == null) {
-			if (Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17")) {
+			if (LabyrinthProvider.getInstance().isNew()) {
 				instance = new NewComponent();
 			} else {
 				instance = new OldComponent();

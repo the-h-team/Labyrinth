@@ -19,13 +19,13 @@ import org.bukkit.OfflinePlayer;
  *
  * @author Hempfest
  */
-public class StringUtils {
+public final class StringUtils {
 
 	private static final PlaceholderFormatService formatService = LabyrinthProvider.getService(PlaceholderFormatService.class);
 
 	private final String context;
 
-	protected StringUtils(String context) {
+	StringUtils(String context) {
 		this.context = context;
 	}
 

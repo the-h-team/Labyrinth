@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth.placeholders;
 
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class PlaceholderRegistration {
 
 	static PlaceholderTranslationUtility instance;
-	static final Map<String, Map<String, Placeholder>> history = new HashMap<>();
+	static final LabyrinthMap<String, Map<String, Placeholder>> history = new LabyrinthEntryMap<>();
 
 
 	public static @NotNull
@@ -149,11 +152,17 @@ public abstract class PlaceholderRegistration {
 	 */
 	public abstract @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, @Nullable PlaceholderIdentifier identifier, @NotNull Placeholder placeholder);
 
-	public final Map<PlaceholderIdentifier, List<Placeholder>> getHistory() {
-		Map<PlaceholderIdentifier, List<Placeholder>> map = new HashMap<>();
-		history.forEach((s, stringPlaceholderMap) -> {
-			PlaceholderIdentifier identifier = () -> s;
-			List<Placeholder> placeholders = new ArrayList<>(stringPlaceholderMap.values());
+	public abstract @NotNull String replaceAll(@NotNull String text, @NotNull Placeholder placeholder, @NotNull String replacement);
+
+	public abstract @Nullable String findFirst(@NotNull String text, @NotNull Placeholder placeholder);
+
+	public abstract @NotNull LabyrinthCollection<String> findAny(@NotNull String text, @NotNull Placeholder placeholder);
+
+	public final LabyrinthMap<PlaceholderIdentifier, List<Placeholder>> getHistory() {
+		LabyrinthMap<PlaceholderIdentifier, List<Placeholder>> map = new LabyrinthEntryMap<>();
+		history.forEach(entry -> {
+			PlaceholderIdentifier identifier = entry::getKey;
+			List<Placeholder> placeholders = new ArrayList<>(entry.getValue().values());
 			map.put(identifier, placeholders);
 		});
 		return map;

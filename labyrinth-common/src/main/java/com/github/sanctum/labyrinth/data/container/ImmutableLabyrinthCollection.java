@@ -8,7 +8,9 @@ package com.github.sanctum.labyrinth.data.container;
 public abstract class ImmutableLabyrinthCollection<K> extends LabyrinthCollectionBase<K> {
 
 	ImmutableLabyrinthCollection(Iterable<K> assortment) {
-		super.addAll(assortment);
+		for (K k : assortment) {
+			super.add(k);
+		}
 	}
 
 	@Override
@@ -43,6 +45,29 @@ public abstract class ImmutableLabyrinthCollection<K> extends LabyrinthCollectio
 	public static <K> ImmutableLabyrinthCollection<K> of(Iterable<K> assortment) {
 		return new ImmutableLabyrinthCollection<K>(assortment) {
 		};
+	}
+
+	public static <K> ImmutableLabyrinthCollection.Builder<K> builder() {
+		return new ImmutableLabyrinthCollection.Builder<>();
+	}
+
+	public static final class Builder<K> {
+
+		private final LabyrinthCollection<K> internal;
+
+		Builder() {
+			internal = new LabyrinthList<>();
+		}
+
+		public Builder<K> add(K key) {
+			internal.add(key);
+			return this;
+		}
+
+		public ImmutableLabyrinthCollection<K> build() {
+			return of(internal);
+		}
+
 	}
 
 }

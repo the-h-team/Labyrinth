@@ -10,11 +10,11 @@ import java.util.Locale;
  *
  * @author Hempfest
  */
-public class MathUtils {
+public final class MathUtils {
 
 	private final Number n;
 
-	protected MathUtils(Number n) {
+	MathUtils(Number n) {
 		this.n = n;
 	}
 

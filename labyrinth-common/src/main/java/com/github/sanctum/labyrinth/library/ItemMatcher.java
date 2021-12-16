@@ -23,11 +23,6 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface ItemMatcher {
 
-	@Deprecated
-	boolean compares(ItemStack item);
-
-	default boolean comparesTo(@NotNull ItemStack item) {
-		return compares(item);
-	}
+	boolean comparesTo(@NotNull ItemStack item);
 
 }

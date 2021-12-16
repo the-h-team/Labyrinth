@@ -2,6 +2,9 @@ package com.github.sanctum.labyrinth.placeholders;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.AddonLoader;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import java.io.File;
@@ -28,7 +31,7 @@ abstract class PlaceholderTranslationUtility {
 	PlaceholderTranslationUtility() {
 		this.registration = new PlaceholderRegistration() {
 
-			private final List<PlaceholderTranslation> translations = Collections.synchronizedList(new LinkedList<>());
+			private final LabyrinthList<PlaceholderTranslation> translations = new LabyrinthList<>();
 
 			@Override
 			public Deployable<PlaceholderTranslation> registerTranslation(@NotNull PlaceholderTranslation translation) {
@@ -85,7 +88,7 @@ abstract class PlaceholderTranslationUtility {
 			@Override
 			public boolean isEmpty(@NotNull String text, @Nullable PlaceholderIdentifier identifier) {
 				boolean empty = false;
-				Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
+				Iterator<PlaceholderTranslation> conversionIterator = translations.iterator();
 				do {
 					PlaceholderTranslation conversion = conversionIterator.next();
 					for (Placeholder hold : conversion.getPlaceholders()) {
@@ -106,7 +109,7 @@ abstract class PlaceholderTranslationUtility {
 				if (translations.isEmpty()) return text;
 				String result = text;
 				final PlaceholderVariable variable = () -> receiver;
-				Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
+				Iterator<PlaceholderTranslation> conversionIterator = translations.iterator();
 				do {
 					PlaceholderTranslation conversion = conversionIterator.next();
 					for (Placeholder hold : conversion.getPlaceholders()) {
@@ -120,7 +123,7 @@ abstract class PlaceholderTranslationUtility {
 			public @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver) {
 				if (translations.isEmpty()) return text;
 				String result = text;
-				Iterator<PlaceholderTranslation> conversionIterator = translations.listIterator();
+				Iterator<PlaceholderTranslation> conversionIterator = translations.iterator();
 				do {
 					PlaceholderTranslation conversion = conversionIterator.next();
 					for (Placeholder hold : conversion.getPlaceholders()) {
@@ -140,6 +143,43 @@ abstract class PlaceholderTranslationUtility {
 			public @NotNull String replaceAll(@NotNull String text, @Nullable PlaceholderVariable receiver, @Nullable PlaceholderIdentifier identifier, @NotNull Placeholder placeholder) {
 				if (translations.isEmpty()) return text;
 				return PlaceholderTranslationUtility.this.getTranslation(text, identifier, receiver, placeholder);
+			}
+
+			@Override
+			public @NotNull String replaceAll(@NotNull String text, @NotNull Placeholder placeholder, @NotNull String replacement) {
+				Pattern pattern = getPattern(null, placeholder);
+				Matcher matcher = pattern.matcher(text);
+				if (!matcher.find())
+					return text;
+				StringBuffer builder = new StringBuffer();
+				do {
+					matcher.appendReplacement(builder, replacement);
+				} while (matcher.find());
+				return matcher.appendTail(builder).toString();
+			}
+
+			@Override
+			public @Nullable String findFirst(@NotNull String text, @NotNull Placeholder placeholder) {
+				Pattern pattern = getPattern(null, placeholder);
+				Matcher matcher = pattern.matcher(text);
+				if (!matcher.find())
+					return null;
+				return matcher.group("parameters");
+			}
+
+			@Override
+			public @NotNull LabyrinthCollection<String> findAny(@NotNull String text, @NotNull Placeholder placeholder) {
+				ImmutableLabyrinthCollection.Builder<String> builder = ImmutableLabyrinthCollection.builder();
+				Pattern pattern = getPattern(null, placeholder);
+				Matcher matcher = pattern.matcher(text);
+				StringBuffer buffer = new StringBuffer();
+				if (!matcher.find())
+					return new LabyrinthList<>();
+				do {
+					builder.add(matcher.group("parameters"));
+					matcher.appendReplacement(buffer, "");
+				} while (matcher.find());
+				return builder.build();
 			}
 		};
 	}

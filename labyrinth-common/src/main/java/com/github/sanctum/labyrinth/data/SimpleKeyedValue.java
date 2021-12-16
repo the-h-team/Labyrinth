@@ -4,14 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SimpleKeyedValue<K, V> {
 
-	K getKey();
+	@NotNull K getKey();
 
 	V getValue();
 
 	static <K, V> @NotNull SimpleKeyedValue<K, V> of(K k, V v) {
 		return new SimpleKeyedValue<K, V>() {
 			@Override
-			public K getKey() {
+			public @NotNull K getKey() {
 				return k;
 			}
 
@@ -19,6 +19,12 @@ public interface SimpleKeyedValue<K, V> {
 			public V getValue() {
 				return v;
 			}
+
+			@Override
+			public String toString() {
+				return "Entry{key=" + k + ", value=" + v + "}";
+			}
+
 		};
 	}
 

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Hempfest
  */
-public class TimeUtils {
+public final class TimeUtils {
 
 	/**
 	 * Unlike the other is{Unit}Passed methods this method will ensure that the return value is

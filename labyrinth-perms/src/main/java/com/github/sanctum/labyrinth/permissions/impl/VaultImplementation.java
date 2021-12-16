@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.permissions.impl;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.entity.Group;
 import com.github.sanctum.labyrinth.permissions.entity.Inheritance;
@@ -67,8 +67,8 @@ public class VaultImplementation implements Permissions {
 	@Override
 	public User[] getUsers() {
 		if (users.isEmpty()) {
-			for (LabyrinthUser user : LabyrinthProvider.getOfflinePlayers()) {
-				getUser(user);
+			for (PlayerSearch lookup : PlayerSearch.values()) {
+				getUser(lookup.getPlayer());
 			}
 		}
 		return users.values().toArray(new User[0]);

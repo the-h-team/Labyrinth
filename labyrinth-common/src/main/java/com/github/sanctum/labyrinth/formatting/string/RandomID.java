@@ -22,7 +22,7 @@ public class RandomID {
     public RandomID(int length) {
         this.length = length;
         //noinspection SpellCheckingInspection
-        this.assortment = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        this.assortment = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     }
 
     /**
@@ -43,11 +43,10 @@ public class RandomID {
      * @return a random ID
      */
     public String generate() {
-        String ALPHA_NUMERIC_STRING = assortment;
         StringBuilder builder = new StringBuilder();
         while (length-- != 0) {
-            int character = (int) (Math.random() * ALPHA_NUMERIC_STRING.length());
-            builder.append(ALPHA_NUMERIC_STRING.charAt(character));
+            int character = (int) (Math.random() * assortment.length());
+            builder.append(assortment.charAt(character));
         }
         return builder.toString();
     }
