@@ -6,13 +6,22 @@ import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.GradientColor;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
+import java.text.MessageFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Encapsulate string data to modify.
@@ -63,6 +72,72 @@ public final class StringUtils {
 			}
 		}
 		return false;
+	}
+
+	public @NotNull ParsedTimeFormat parseTime() throws IllegalTimeFormatException {
+		Pattern pattern = Pattern.compile("(\\d+)(d|hr|m|s)");
+		Matcher matcher = pattern.matcher(context);
+		long days = 0;
+		long hours = 0;
+		long minutes = 0;
+		long seconds = 0;
+		while (matcher.find()) {
+			switch (matcher.group(2)) {
+				case "d":
+					days = Long.parseLong(matcher.group(1));
+					break;
+				case "hr":
+					hours = Long.parseLong(matcher.group(1));
+					break;
+				case "m":
+					minutes = Long.parseLong(matcher.group(1));
+					break;
+				case "s":
+					seconds = Long.parseLong(matcher.group(1));
+					break;
+			}
+		}
+		if (days == 0 && hours == 0 && minutes == 0 && seconds == 0) throw new IllegalTimeFormatException("Time format cannot be empty!");
+		long finalDays = days;
+		long finalHours = hours;
+		long finalMinutes = minutes;
+		long finalSeconds = seconds;
+		return new ParsedTimeFormat() {
+			@Override
+			public long getDays() {
+				return finalDays;
+			}
+
+			@Override
+			public long getHours() {
+				return finalHours;
+			}
+
+			@Override
+			public long getMinutes() {
+				return finalMinutes;
+			}
+
+			@Override
+			public long getSeconds() {
+				return finalSeconds;
+			}
+
+			@Override
+			public String toString() {
+				ZonedDateTime time = new Date().toInstant().atZone(ZoneId.systemDefault());
+				String month = time.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+				String year = String.valueOf(time.getYear());
+				String day = String.valueOf(time.getDayOfMonth() + getDays());
+				Date date = getDate();
+				ZonedDateTime current = date.toInstant().atZone(ZoneId.systemDefault());
+				String clock = current.getHour() + ":" + current.getMinute();
+				// format 'Month day, year @ clock'
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				return month + " " + day + ", " + year + " @ " + clock + (calendar.get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am");
+			}
+		};
 	}
 
 	/**

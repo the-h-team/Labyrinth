@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface ClassLookup {
 
-	Class<?> accept(@NotNull String path);
+	Class<?> accept(@NotNull String className);
 
 }

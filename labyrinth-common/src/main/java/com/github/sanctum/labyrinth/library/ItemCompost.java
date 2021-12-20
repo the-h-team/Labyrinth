@@ -50,70 +50,35 @@ public class ItemCompost {
 		int remainingAmount = synchronizer.getAmount();
 		ItemStack[] inv = synchronizer.getParent().getContents();
 		if (synchronizer instanceof ItemSync) {
-			if (remainingAmount == -1) {
-				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
-					if (inv[j] == null) continue;
+			for (ItemStack item : inv) {
+				if (item != null) {
 					for (ItemMatcher matcher : matchers.stream().filter(m -> ((ItemSync<ItemMatcher>) synchronizer).getMatcher().isAssignableFrom(m.getClass())).collect(Collectors.toList())) {
-						if (matcher.comparesTo(inv[j])) {
-							inv[j].setAmount(0);
-							break;
+						if (matcher.comparesTo(item)) {
+							if (remainingAmount > 0) {
+								int test = item.getAmount() - remainingAmount;
+								remainingAmount -= item.getAmount();
+								item.setAmount(Math.max(test, 0));
+							} else return true;
 						}
 					}
 				}
-				return true;
-			} else {
-				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
-					if (inv[j] == null) continue;
-					for (ItemMatcher matcher : matchers.stream().filter(m -> ((ItemSync<ItemMatcher>) synchronizer).getMatcher().isAssignableFrom(m.getClass())).collect(Collectors.toList())) {
-						if (matcher.comparesTo(inv[j])) {
-							int newAmount = inv[j].getAmount() - remainingAmount;
-							if (newAmount > 0) {
-								inv[j].setAmount(newAmount);
-								break;
-							} else {
-								synchronizer.getParent().clear(j);
-								remainingAmount = -newAmount;
-								if (remainingAmount == 0) break;
-							}
-							break;
-						}
-					}
-				}
-				return remainingAmount == 0;
 			}
 		} else {
-			if (remainingAmount == -1) {
-				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
-					if (inv[j] == null) continue;
+			for (ItemStack item : inv) {
+				if (item != null) {
 					for (ItemMatcher matcher : matchers) {
-						if (matcher.comparesTo(inv[j])) {
-							inv[j].setAmount(0);
-							break;
+						if (matcher.comparesTo(item)) {
+							if (remainingAmount > 0) {
+								int test = item.getAmount() - remainingAmount;
+								remainingAmount -= item.getAmount();
+								item.setAmount(Math.max(test, 0));
+							} else return true;
 						}
 					}
 				}
-				return true;
-			} else {
-				for (int j = 0; j < synchronizer.getParent().getSize(); j++) {
-					if (inv[j] == null) continue;
-					for (ItemMatcher matcher : matchers) {
-						if (matcher.comparesTo(inv[j])) {
-							int newAmount = inv[j].getAmount() - remainingAmount;
-							if (newAmount > 0) {
-								inv[j].setAmount(newAmount);
-								break;
-							} else {
-								synchronizer.getParent().clear(j);
-								remainingAmount = -newAmount;
-								if (remainingAmount == 0) break;
-							}
-							break;
-						}
-					}
-				}
-				return remainingAmount == 0;
 			}
 		}
+		return remainingAmount == 0;
 	}
 
 	public boolean add(ItemStack item, Inventory inventory, Location drop) {

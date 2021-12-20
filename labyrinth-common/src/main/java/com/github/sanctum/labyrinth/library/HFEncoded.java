@@ -1,7 +1,10 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.annotation.Removal;
 import com.github.sanctum.labyrinth.api.Service;
+import java.io.ObjectOutputStream;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +16,6 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.util.Base64;
 
-@SuppressWarnings("RedundantThrows")
 public class HFEncoded {
 
 	private Object obj;
@@ -29,7 +31,9 @@ public class HFEncoded {
 	 * @param obj a Serializable object (Java Serializable and/or Bukkit's ConfigurationSerializable)
 	 */
 	public HFEncoded(Object obj) {
-		this.obj = obj;
+		if (obj instanceof String) {
+			this.objSerial = obj.toString();
+		} else this.obj = obj;
 	}
 
 	/**
@@ -41,8 +45,15 @@ public class HFEncoded {
 	 *
 	 * @param objSerial The serialized object string to convert
 	 */
+	@Deprecated
+	@Removal(because = "of new delegation", inVersion = "1.7.5")
 	public HFEncoded(String objSerial) {
 		this.objSerial = objSerial;
+	}
+
+	@Note("Delegate for both serialization transactions")
+	public static HFEncoded of(@NotNull Object obj) {
+		return new HFEncoded(obj);
 	}
 
 	/**
@@ -53,7 +64,7 @@ public class HFEncoded {
 	public byte[] toByteArray() {
 		try {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(output);
+			LabyrinthObjectOutputStream outputStream = new LabyrinthObjectOutputStream(output);
 			outputStream.writeObject(obj);
 			outputStream.flush();
 			return output.toByteArray();
@@ -71,7 +82,7 @@ public class HFEncoded {
 	public String serialize() throws NotSerializableException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		try {
-			BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(output);
+			LabyrinthObjectOutputStream outputStream = new LabyrinthObjectOutputStream(output);
 			outputStream.writeObject(obj);
 			outputStream.flush();
 		} catch (IOException e) {

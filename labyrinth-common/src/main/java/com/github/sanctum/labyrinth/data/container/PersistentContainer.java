@@ -57,7 +57,7 @@ public class PersistentContainer extends PersistentData {
 		boolean f = manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 		if (f && !this.dataMap.containsKey(key)) {
 			try {
-				Object o = new HFEncoded(manager.read(fi -> fi.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))).deserialized();
+				Object o = HFEncoded.of(manager.read(fi -> fi.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))).deserialized();
 				this.dataMap.put(key, o);
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
@@ -251,7 +251,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return the deserialized object otherwise null
 	 */
 	public <R> @Nullable R deserialize(Class<R> type, String value) {
-		return new HFEncoded(value).deserialize(type);
+		return HFEncoded.of(value).deserialize(type);
 	}
 
 	// TODO: Explicit throw on serialization fail vs nullity contract
@@ -263,7 +263,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return the serialized string otherwise null if an issue occurred
 	 */
 	public @Nullable String serialize(String key) throws IOException {
-		return new HFEncoded(this.dataMap.get(key)).serialize();
+		return HFEncoded.of(this.dataMap.get(key)).serialize();
 	}
 
 

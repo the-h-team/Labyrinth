@@ -53,8 +53,8 @@ public interface SimpleTabCompletion {
 		return new SimpleTabCompletion() {
 
 			String[] args;
-			final Map<Integer, Collection<String>> map = new HashMap<>();
-			final Map<Integer, Map.Entry<Integer, String>> predicates = new HashMap<>();
+			final Map<Integer, Collection<String>> non_predicates = new HashMap<>();
+			final Map<Integer, List<TabCompletionPredicate>> predicates = new HashMap<>();
 
 			{
 				this.args = arguments;
@@ -62,37 +62,22 @@ public interface SimpleTabCompletion {
 
 			@Override
 			public SimpleTabCompletion then(int index, Collection<String> completions) {
-				if (map.containsKey(index)) {
-					map.get(index).addAll(completions);
+				if (non_predicates.containsKey(index)) {
+					non_predicates.get(index).addAll(completions);
 				} else {
-					map.put(index, completions);
+					non_predicates.put(index, completions);
 				}
 				return this;
 			}
 
 			@Override
 			public SimpleTabCompletion then(int index, String predicate, int predicateIndex, Collection<String> completions) {
-				predicates.put(index, new Map.Entry<Integer, String>() {
-
-					@Override
-					public Integer getKey() {
-						return predicateIndex;
-					}
-
-					@Override
-					public String getValue() {
-						return predicate;
-					}
-
-					@Override
-					public String setValue(String value) {
-						return getValue();
-					}
-				});
-				if (map.containsKey(index)) {
-					map.get(index).addAll(completions);
+				if (predicates.containsKey(index)) {
+					predicates.get(index).add(new TabCompletionPredicate(predicateIndex, predicate, new ArrayList<>(completions)));
 				} else {
-					map.put(index, completions);
+					List<TabCompletionPredicate> list = new ArrayList<>();
+					list.add(new TabCompletionPredicate(predicateIndex, predicate, new ArrayList<>(completions)));
+					predicates.put(index, list);
 				}
 				return this;
 			}
@@ -107,20 +92,22 @@ public interface SimpleTabCompletion {
 			public @NotNull List<String> get() {
 				int index = args.length - 1;
 				List<String> list = new ArrayList<>();
-				Map.Entry<Integer, String> predicate = predicates.get(index);
-				Collection<String> completions = map.get(index);
+				List<TabCompletionPredicate> predicate = predicates.get(index);
 				if (predicate != null) {
-					if (predicate.getKey() < index) {
-						String arg = args[predicate.getKey()];
-						if (arg.equalsIgnoreCase(predicate.getValue())) {
-							for (String completion : completions) {
-								if (completion.toLowerCase().startsWith(args[index].toLowerCase())) {
-									list.add(completion);
+					predicate.forEach(entry -> {
+						if (entry.predicateIndex < index) {
+							String arg = args[entry.predicateIndex];
+							if (arg.equalsIgnoreCase(entry.predicate)) {
+								for (String completion : entry.completions) {
+									if (completion.toLowerCase().startsWith(args[index].toLowerCase())) {
+										list.add(completion);
+									}
 								}
 							}
 						}
-					}
+					});
 				} else {
+					Collection<String> completions = non_predicates.get(index);
 					if (completions != null) {
 						for (String completion : completions) {
 							if (completion.toLowerCase().startsWith(args[index].toLowerCase())) {

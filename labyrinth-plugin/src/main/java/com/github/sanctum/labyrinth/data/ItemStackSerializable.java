@@ -68,12 +68,12 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 		Material type = Material.valueOf((String) o.get("type"));
 		ItemStack stack = new ItemStack(type);
 		Item.Edit edit = Items.edit();
-		JSONObject ob = (JSONObject) o.get("meta");
+		Map<String,Object> ob = (Map<String, Object>) o.get("meta");
 		if (ob != null) {
-			byte data = Byte.parseByte(String.valueOf((long) ob.get("data")));
-			Map<String, Long> enchants = (JSONObject) ob.get("enchantments");
+			byte data = Byte.parseByte(ob.get("data").toString());
+			Map<String, Object> enchants = (Map<String, Object>) ob.get("enchantments");
 			enchants.forEach((label, l) -> {
-				int integer = Integer.parseInt(String.valueOf(l));
+				int integer = Integer.parseInt(l.toString());
 				String key = label.split(":")[0];
 				String space = label.split(":")[1];
 				edit.addEnchantment(Enchantment.getByKey(new NamespacedKey(key, space)), integer);
@@ -83,11 +83,11 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 				edit.setTitle(name);
 			}
 			if (ob.get("lore") != null) {
-				List<String> name = (JSONArray) ob.get("lore");
+				List<String> name = (List<String>) ob.get("lore");
 				edit.setLore(name);
 			}
 			if (ob.get("flags") != null) {
-				List<String> flags = (JSONArray) ob.get("flags");
+				List<String> flags = (List<String>) ob.get("flags");
 				for (String f : flags) {
 					edit.setFlags(ItemFlag.valueOf(f));
 				}

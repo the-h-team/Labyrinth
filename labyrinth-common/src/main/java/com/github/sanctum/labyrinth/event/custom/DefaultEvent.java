@@ -459,8 +459,6 @@ public class DefaultEvent extends Vent {
 
 			}
 
-			OrdinalProcedure.select(LabyrinthUser.get(event.getPlayer().getName()), 4, event.getPlayer());
-
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

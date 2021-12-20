@@ -15,6 +15,7 @@ import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.MessageSerializable;
 import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
+import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
@@ -23,8 +24,8 @@ import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
@@ -194,15 +195,18 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 						Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
 
 						if (args.length == 0) {
-							mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).deploy();
+							mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).queue();
 							return true;
 						}
 
 						if (args.length == 1) {
 							String label = args[0];
-
+							if (label.equalsIgnoreCase("version")) {
+								mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).queue();
+								return true;
+							}
 							if (label.equalsIgnoreCase("placeholder")) {
-								mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]");
+								mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]").queue();
 								return true;
 							}
 							return true;
@@ -456,6 +460,18 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			}
 			return null;
 		});
+	}
+
+	@Override
+	public boolean remove(Cooldown cooldown) {
+		if (!cooldowns.contains(cooldown)) return false;
+		Node home = FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
+				.get("cooldowns", "Persistent", FileType.JSON)
+				.read(t -> t.getNode("Library." + cooldown.getId()));
+		home.delete();
+		home.save();
+		TaskScheduler.of(() -> cooldowns.remove(cooldown)).schedule();
+		return true;
 	}
 
 	@Override

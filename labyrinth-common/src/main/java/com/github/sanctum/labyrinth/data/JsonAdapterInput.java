@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,6 +62,11 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		return serializer.read(object);
 	}
 
+	@Ordinal(24)
+	private String getPointer() {
+		return AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((annotation, source) -> annotation.value());
+	}
+
 	static class Impl<T> extends JsonAdapterInput<T> {
 
 		protected Impl(JsonAdapter<T> serializer) {
@@ -71,6 +77,12 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		public Class<T> getClassType() {
 			return serializer.getClassType();
 		}
+
+		@Ordinal(24)
+		private String getPointer() {
+			return super.getPointer();
+		}
+
 	}
 
 }

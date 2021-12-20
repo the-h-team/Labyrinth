@@ -140,7 +140,6 @@ public final class CommandUtils {
                         if (commandMappings.containsKey(alias) && commandMappings.get(alias).getAliases().contains(alias)) {
                             commandMappings.remove(alias);
                         }
-
                     }
                     parent.unregister(map);
                     map.register(w.getCommand(), plugin.getName(), wrapped);

@@ -38,7 +38,7 @@ public interface PasteWriter {
 	 */
 	default <T> PasteResponse write(T t, boolean serialize) throws NotSerializableException {
 		if (serialize) {
-			String serialized = new HFEncoded(t).serialize();
+			String serialized = HFEncoded.of(t).serialize();
 			return write(serialized);
 		}
 		if (t instanceof JsonIntermediate) {

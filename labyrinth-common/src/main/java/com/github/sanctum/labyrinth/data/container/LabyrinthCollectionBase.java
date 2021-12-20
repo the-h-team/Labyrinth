@@ -44,8 +44,10 @@ public abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<
 
 	@Override
 	public boolean add(E e) {
-		if (capacity > 0 && capacityEnforced) {
+		if (capacityEnforced) {
 			if (size() >= capacity) return false;
+		} else {
+			if (size() >= capacity) capacity++;
 		}
 		Node new_node = new Node(e);
 		if (head == null) {
@@ -115,14 +117,14 @@ public abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<
 			current = current.next;
 			in++;
 		}
-		if (result == null)
+		if (index >= size || index < 0)
 			throw new IndexOutOfBoundsException("Index " + index + " out of bounds for capacity " + size());
 		return result;
 	}
 
 	@Override
 	public int size() {
-		return size + 1;
+		return size;
 	}
 
 	public int capacity() {
@@ -170,7 +172,7 @@ public abstract class LabyrinthCollectionBase<E> implements LabyrinthCollection<
 
 	public <R> R[] toArray(R[] r) {
 		if (r.length < size)
-			return (R[]) Arrays.copyOf(toArray(), size + 1, r.getClass());
+			return (R[]) Arrays.copyOf(toArray(), size, r.getClass());
 		System.arraycopy(toArray(), 0, r, 0, size);
 		if (r.length > size)
 			r[size] = null;

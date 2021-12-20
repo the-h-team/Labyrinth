@@ -1,19 +1,27 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Removal;
+import com.github.sanctum.labyrinth.api.CooldownService;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileType;
-import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Hempfest
  */
-public abstract class Cooldown {
+public abstract class Cooldown implements ParsedTimeFormat {
 
+	private static final CooldownService SERVICE = LabyrinthProvider.getService(Service.COOLDOWNS);
 	private String format = "&e{DAYS} &rDays &e{HOURS} &rHours &e{MINUTES} &rMinutes &e{SECONDS} &rSeconds";
 
 	/**
@@ -51,8 +59,9 @@ public abstract class Cooldown {
 	 *
 	 * @return the amount of days left within the conversion table
 	 */
-	public final int getDaysLeft() {
-		return (int) TimeUnit.SECONDS.toDays(getTimeLeft());
+	@Override
+	public long getDays() {
+		return TimeUnit.SECONDS.toDays(getTimeLeft());
 	}
 
 	/**
@@ -63,8 +72,9 @@ public abstract class Cooldown {
 	 *
 	 * @return the amount of hours left within the conversion table
 	 */
-	public final long getHoursLeft() {
-		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDaysLeft() * 24);
+	@Override
+	public long getHours() {
+		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDays() * 24);
 	}
 
 	/**
@@ -75,7 +85,8 @@ public abstract class Cooldown {
 	 *
 	 * @return the amount of minutes left within the conversion table
 	 */
-	public final long getMinutesLeft() {
+	@Override
+	public long getMinutes() {
 		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
 	}
 
@@ -87,7 +98,8 @@ public abstract class Cooldown {
 	 *
 	 * @return the amount of seconds left within the conversion table
 	 */
-	public final long getSecondsLeft() {
+	@Override
+	public long getSeconds() {
 		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
 	}
 
@@ -100,7 +112,18 @@ public abstract class Cooldown {
 		Long a = getCooldown();
 		Long b = System.currentTimeMillis();
 		int compareNum = a.compareTo(b);
-		return LabyrinthProvider.getInstance().getCooldowns().contains(this) && compareNum <= 0;
+		return SERVICE.getCooldowns().contains(this) && compareNum <= 0;
+	}
+
+	/**
+	 * Change this cooldown instance's time display format.
+	 *
+	 * @param format The new full time format to use.
+	 * @return The same cooldown instance.
+	 */
+	public Cooldown format(String format) {
+		this.format = format;
+		return this;
 	}
 
 	/**
@@ -108,24 +131,19 @@ public abstract class Cooldown {
 	 * <p>
 	 * It is recommended you override this and implement your own beautiful
 	 * time format using the provided time variables such as
-	 * {@link #getSecondsLeft()}, {@link #getMinutesLeft()} etc.
+	 * {@link #getSeconds()}, {@link #getMinutes()} etc.
 	 * <p>
 	 * For persistent formats, use the {@link Cooldown#format(String)}
-	 * method after using {@link Cooldown#getById(String)}.
+	 * method after using {@link com.github.sanctum.labyrinth.api.CooldownService#getCooldown(String)}.
 	 *
 	 * @return the full amount of time left within the cooldown from seconds to days
 	 */
-	public String fullTimeLeft() {
+	public String toFormat() {
 		return this.format
-				.replace("{DAYS}", "" + getDaysLeft())
-				.replace("{HOURS}", "" + getHoursLeft())
-				.replace("{MINUTES}", "" + getMinutesLeft())
-				.replace("{SECONDS}", "" + getSecondsLeft());
-	}
-
-	public Cooldown format(String format) {
-		this.format = format;
-		return this;
+				.replace("{DAYS}", "" + getDays())
+				.replace("{HOURS}", "" + getHours())
+				.replace("{MINUTES}", "" + getMinutes())
+				.replace("{SECONDS}", "" + getSeconds());
 	}
 
 	/**
@@ -137,8 +155,7 @@ public abstract class Cooldown {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
 				.get("cooldowns", "Persistent", FileType.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));
-		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).schedule()
-				.next(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).schedule();
+		TaskScheduler.of(() -> SERVICE.getCooldowns().add(this)).schedule();
 	}
 
 	/**
@@ -152,8 +169,6 @@ public abstract class Cooldown {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
 				.get("cooldowns", "Persistent", FileType.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimeLeft())));
-		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(this)).schedule()
-				.next(() -> LabyrinthProvider.getInstance().getCooldowns().add(this)).schedule();
 	}
 
 	/**
@@ -162,8 +177,8 @@ public abstract class Cooldown {
 	 * @param seconds the amount of time in seconds to convert
 	 * @return the milliseconds needed for conversion
 	 */
-	protected final long abv(int seconds) {
-		return System.currentTimeMillis() + (seconds * 1000);
+	protected final long abv(long seconds) {
+		return System.currentTimeMillis() + (seconds * 1000L);
 	}
 
 	@Override
@@ -179,6 +194,51 @@ public abstract class Cooldown {
 		return Objects.hash(getId());
 	}
 
+	@Override
+	public String toString() {
+		ZonedDateTime time = new Date().toInstant().atZone(ZoneId.systemDefault());
+		String month = time.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+		String year = String.valueOf(time.getYear());
+		String day = String.valueOf(time.getDayOfMonth() + getDays());
+		Date date = getDate();
+		ZonedDateTime current = date.toInstant().atZone(ZoneId.systemDefault());
+		String clock = current.getHour() + ":" + current.getMinute();
+		// format 'Month day, year @ clock'
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		return month + " " + day + ", " + year + " @ " + clock + (calendar.get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am");
+	}
+
+	@Deprecated
+	@Removal(because = "of the new Cooldown#getDays() method.", inVersion = "1.7.[?6-7]")
+	public final int getDaysLeft() {
+		return (int) getDays();
+	}
+
+	@Deprecated
+	@Removal(because = "of the new Cooldown#getHours() method.", inVersion = "1.7.[?6-7]")
+	public final long getHoursLeft() {
+		return getHours();
+	}
+
+	@Deprecated
+	@Removal(because = "of the new Cooldown#getMinutes() method.", inVersion = "1.7.[?6-7]")
+	public final long getMinutesLeft() {
+		return getMinutes();
+	}
+
+	@Deprecated
+	@Removal(because = "of the new Cooldown#getSeconds() method.", inVersion = "1.7.[?6-7]")
+	public final long getSecondsLeft() {
+		return getSeconds();
+	}
+
+	@Deprecated
+	@Removal(because = "of the new Cooldown#toFormat() method.", inVersion = "1.7.[?6-7]")
+	public String fullTimeLeft() {
+		return toFormat();
+	}
+
 	/**
 	 * Get a native cooldown object by its set delimiter-id.
 	 *
@@ -188,21 +248,18 @@ public abstract class Cooldown {
 	 */
 	@Deprecated
 	public static Cooldown getById(String id) {
-		return LabyrinthProvider.getService(Service.COOLDOWNS).getCooldown(id);
+		return SERVICE.getCooldown(id);
 	}
 
 	/**
 	 * Remove an object of Cooldown inheritance from Labyrinth cache.
 	 *
 	 * @param c the cooldown representative to remove from cache
+	 * @deprecated Use {@link com.github.sanctum.labyrinth.api.CooldownService#remove(Cooldown)} instead!
 	 */
+	@Deprecated
 	public static void remove(Cooldown c) {
-		Node home = FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.get("cooldowns", "Persistent", FileType.JSON)
-				.read(t -> t.getNode("Library." + c.getId()));
-		home.delete();
-		home.save();
-		TaskScheduler.of(() -> LabyrinthProvider.getInstance().getCooldowns().remove(c)).schedule();
+		SERVICE.remove(c);
 	}
 
 

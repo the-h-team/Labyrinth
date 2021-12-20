@@ -16,22 +16,23 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 
-	public static final int INITIAL_CAPACITY = -1;
-
 	protected Node head, tail;
 	protected int size;
-	protected final int capacity;
+	protected int capacity;
+	protected final boolean capacityEnforced;
 
 	public LabyrinthMapBase() {
-		this(INITIAL_CAPACITY);
+		this.capacity = 10;
+		this.capacityEnforced = false;
 	}
 
 	public LabyrinthMapBase(int capacity) {
 		this.capacity = capacity;
+		this.capacityEnforced = true;
 	}
 
 	public LabyrinthMapBase(Iterable<Map.Entry<K, V>> iterable) {
-		this(INITIAL_CAPACITY);
+		this();
 		iterable.forEach(entry -> put(entry.getKey(), entry.getValue()));
 	}
 
@@ -78,8 +79,10 @@ public abstract class LabyrinthMapBase<K, V> implements LabyrinthMap<K, V> {
 			}
 			return value;
 		}
-		if (capacity != -1) {
+		if (capacityEnforced) {
 			if (size() >= capacity) return null;
+		} else {
+			if (size() >= capacity) capacity++;
 		}
 		Node new_node = new Node(e, value);
 		if (head == null) {

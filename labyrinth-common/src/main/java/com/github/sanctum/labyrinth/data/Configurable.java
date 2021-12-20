@@ -4,6 +4,8 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.github.sanctum.labyrinth.data.service.DummyAdapter;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -58,7 +60,7 @@ public abstract class Configurable implements MemorySpace, Root {
 						d = c.getDeclaredConstructor().newInstance();
 					}
 				} else {
-					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (n != null) {
 						if (!DummyAdapter.class.isAssignableFrom(n)) {
 							d = n.getDeclaredConstructor().newInstance();
@@ -90,12 +92,12 @@ public abstract class Configurable implements MemorySpace, Root {
 	 */
 	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c, Object... objects) {
 		try {
-			Class<? extends JsonAdapter<?>> d = null;
+			Class<? extends JsonAdapter<?>> d;
 			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
 			if (test.isPresent()) {
-				String alias = test.map((r, u) -> r.value());
+				String alias = test.mapFromClass((r, u) -> r.value());
 				if (alias != null) {
-					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (n != null) {
 						if (!DummyAdapter.class.isAssignableFrom(n)) {
 							d = n;
@@ -106,7 +108,7 @@ public abstract class Configurable implements MemorySpace, Root {
 						d = c;
 					}
 				} else {
-					Class<? extends JsonAdapter<?>> n = test.map((r, u) -> r.type());
+					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (!DummyAdapter.class.isAssignableFrom(n)) {
 						d = n;
 					} else {
@@ -155,6 +157,10 @@ public abstract class Configurable implements MemorySpace, Root {
 	 */
 	public static <V> JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
 		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName()) || type.isAssignableFrom(e.getValue().getSubClass())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
+	}
+
+	public static <V> JsonAdapter<V> getAdapter(@NotNull String pointer) {
+		return serializers.values().stream().filter(jsonAdapterInput -> pointer.equals(OrdinalProcedure.select(jsonAdapterInput, 24).cast(TypeFlag.STRING))).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
 	}
 
 	protected abstract Object get(String key);
