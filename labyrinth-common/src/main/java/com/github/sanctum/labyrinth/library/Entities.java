@@ -174,11 +174,9 @@ public final class Entities {
 	public static class Spawner<T extends Entity> {
 
 		private final EntityType type;
-		private final TypeFlag<T> flag;
 
 		public Spawner(@NotNull("Entity type cannot be null!") EntityType type) {
 			this.type = type;
-			this.flag = TypeFlag.get();
 		}
 
 		public T spawn(@NotNull Location location) {

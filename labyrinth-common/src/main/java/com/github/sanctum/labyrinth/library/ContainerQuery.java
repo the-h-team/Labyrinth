@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import java.util.Iterator;
+import java.util.function.Function;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.ItemStack;
@@ -37,6 +38,17 @@ public final class ContainerQuery<T extends Container> implements Iterable<ItemS
 	public ContainerQuestion<T> check() {
 		if (!isValid()) throw new UnsupportedOperationException("Cannot parse non containers!");
 		return new ContainerQuestion<>(this);
+	}
+
+	/**
+	 * Map the type of container this is.
+	 *
+	 * @param function The mapping function
+	 * @param <R> The type of container to cast
+	 * @return a newly mapped container query containing the same container object.
+	 */
+	public <R extends Container> ContainerQuery<R> map(Function<Container, R> function) {
+		return of(function.apply(container));
 	}
 
 	/**

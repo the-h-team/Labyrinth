@@ -39,6 +39,7 @@ import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
+import com.github.sanctum.labyrinth.library.ContainerQuery;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;

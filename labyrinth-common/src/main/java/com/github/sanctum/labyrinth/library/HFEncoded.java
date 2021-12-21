@@ -16,11 +16,12 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.util.Base64;
 
+/**
+ * A class for serializing/deserializing object's with support for {@link java.io.Serializable}, {@link org.bukkit.configuration.serialization.ConfigurationSerializable} & {@link com.github.sanctum.labyrinth.data.JsonAdapter}
+ */
 public class HFEncoded {
 
-	private Object obj;
-
-	private String objSerial;
+	private final Object obj;
 
 	/**
 	 * Convert the entire object into a string while retaining all of its values.
@@ -31,9 +32,7 @@ public class HFEncoded {
 	 * @param obj a Serializable object (Java Serializable and/or Bukkit's ConfigurationSerializable)
 	 */
 	public HFEncoded(Object obj) {
-		if (obj instanceof String) {
-			this.objSerial = obj.toString();
-		} else this.obj = obj;
+		this.obj = obj;
 	}
 
 	/**
@@ -48,7 +47,7 @@ public class HFEncoded {
 	@Deprecated
 	@Removal(because = "of new delegation", inVersion = "1.7.5")
 	public HFEncoded(String objSerial) {
-		this.objSerial = objSerial;
+		this.obj = objSerial;
 	}
 
 	@Note("Delegate for both serialization transactions")
@@ -121,7 +120,7 @@ public class HFEncoded {
 	 * @throws ClassNotFoundException if the class could not be located properly
 	 */
 	public Object deserialized(ClassLookup... lookups) throws IOException, ClassNotFoundException {
-		byte[] serial = Base64.getDecoder().decode(objSerial);
+		byte[] serial = Base64.getDecoder().decode(obj.toString());
 		ByteArrayInputStream input = new ByteArrayInputStream(serial);
 		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
 		for (ClassLookup l : lookups) {
@@ -161,7 +160,7 @@ public class HFEncoded {
 	 * @throws ClassNotFoundException if the class could not be located properly
 	 */
 	public Object deserialized() throws IOException, ClassNotFoundException {
-		byte[] serial = Base64.getDecoder().decode(objSerial);
+		byte[] serial = Base64.getDecoder().decode(obj.toString());
 		ByteArrayInputStream input = new ByteArrayInputStream(serial);
 		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input);
 		return inputStream.readObject();
@@ -196,13 +195,12 @@ public class HFEncoded {
 	 * @throws ClassNotFoundException if the class could not be located properly
 	 */
 	public Object deserialized(@NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
-		byte[] serial = Base64.getDecoder().decode(objSerial);
+		byte[] serial = Base64.getDecoder().decode(obj.toString());
 		ByteArrayInputStream input = new ByteArrayInputStream(serial);
 		LabyrinthObjectInputStream inputStream = new LabyrinthObjectInputStream(input).setLoader(classLoader);
 		return inputStream.readObject();
 	}
 
-	// TODO: Rethrow IO/ClassNotFound as checked exception(s) to remove nullity
 	/**
 	 * Deserialize an object of specified type from a string.
 	 * <p>
@@ -222,7 +220,7 @@ public class HFEncoded {
 				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
 			}
 		} catch (IOException | ClassNotFoundException e) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- " + e.getMessage());
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("- " + e.getMessage()).queue();
 		}
 		return null;
 	}
@@ -247,7 +245,7 @@ public class HFEncoded {
 				throw new IllegalArgumentException(o.getClass().getSimpleName() + " is not assignable from " + type.getSimpleName());
 			}
 		} catch (IOException | ClassNotFoundException e) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- " + e.getMessage());
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("- " + e.getMessage()).queue();
 		}
 		return null;
 	}

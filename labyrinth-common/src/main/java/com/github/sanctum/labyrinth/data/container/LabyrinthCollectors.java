@@ -81,8 +81,8 @@ public final class LabyrinthCollectors {
 	 */
 	public static <T, K, U> Collector<T, ?, LabyrinthMap<K, U>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper) {
 		return Collector.of(LabyrinthEntryMap::new,
-				uniqKeysMapAccumulator(keyMapper, valueMapper),
-				uniqKeysMapMerger());
+				defaultJavaEntryAccumulation(keyMapper, valueMapper),
+				defaultJavaEntryMerger());
 	}
 
 	/**
@@ -97,47 +97,38 @@ public final class LabyrinthCollectors {
 	 */
 	public static <T, K, U> Collector<T, ?, LabyrinthMap<K, U>> toImmutableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper) {
 		return Collector.of(LabyrinthEntryMap::new,
-				uniqKeysMapAccumulator(keyMapper, valueMapper),
-				uniqKeysMapMergerImmutable());
+				defaultJavaEntryAccumulation(keyMapper, valueMapper),
+				immutableJavaEntryMerger());
 	}
 
-	private static <T, K, V> BiConsumer<LabyrinthMap<K, V>, T> uniqKeysMapAccumulator(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+	private static <T, K, V> BiConsumer<LabyrinthMap<K, V>, T> defaultJavaEntryAccumulation(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
 		return (map, element) -> {
 			K k = keyMapper.apply(element);
-			V v = Check.forNull(valueMapper.apply(element));
-			V u = map.computeIfAbsent(k, v);
-			if (u != null) throw duplicateKeyException(k, u, v);
+			V v = Check.forNull(valueMapper.apply(element), "Cannot copy null map entry value for key " + k);
+			map.computeIfAbsent(k, v);
 		};
 	}
 
-	private static <K, V, M extends LabyrinthMap<K, V>> BinaryOperator<M> uniqKeysMapMerger() {
+	private static <K, V, M extends LabyrinthMap<K, V>> BinaryOperator<M> defaultJavaEntryMerger() {
 		return (m1, m2) -> {
 			for (Map.Entry<K, V> e : m2.entries()) {
 				K k = e.getKey();
-				V v = Check.forNull(e.getValue());
-				V u = m1.computeIfAbsent(k, v);
-				if (u != null) throw duplicateKeyException(k, u, v);
+				V v = Check.forNull(e.getValue(), "Cannot merge null map entry value for key " + k);
+				m1.computeIfAbsent(k, v);
 			}
 			return m1;
 		};
 	}
 
-	private static <K, V, M extends LabyrinthMap<K, V>> BinaryOperator<M> uniqKeysMapMergerImmutable() {
+	private static <K, V> BinaryOperator<LabyrinthMap<K, V>> immutableJavaEntryMerger() {
 		return (m1, m2) -> {
 			for (Map.Entry<K, V> e : m2.entries()) {
 				K k = e.getKey();
-				V v = Check.forNull(e.getValue());
-				V u = m1.computeIfAbsent(k, v);
-				if (u != null) throw duplicateKeyException(k, u, v);
+				V v = Check.forNull(e.getValue(), "Cannot merge null immutable map entry value for key " + k);
+				m1.computeIfAbsent(k, v);
 			}
-			return (M) ImmutableLabyrinthMap.of(m1);
+			return ImmutableLabyrinthMap.of(m1);
 		};
-	}
-
-	private static IllegalStateException duplicateKeyException(Object k, Object u, Object v) {
-		return new IllegalStateException(String.format(
-				"Duplicate key %s (attempted merging values %s and %s)",
-				k, u, v));
 	}
 
 }

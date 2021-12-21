@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.formatting.pagination.Page;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +12,7 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This acts as a 'collection' of sorted and or filtered elements that have been categorized into {@link LabyrinthCollectionPage}'s
+ * This acts as a 'collection' of sorted and or filtered elements that have been categorized into {@link LabyrinthPage}'s
  * for ease of use with pagination.
  *
  * <p>You'll receive a collection of pages containing the prior adjusted elements in the <strong>exact</strong>
@@ -20,9 +21,9 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> The type of object this collection represents.
  * @see Collection for a more precise descriptive on the backing of this module click here.
  */
-public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollection<LabyrinthCollectionPage<T>> {
+public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollection<Page<T>> {
 
-	protected final LabyrinthCollection<LabyrinthCollectionPage<T>> set = new LabyrinthSet<>();
+	protected final LabyrinthCollection<Page<T>> set = new LabyrinthSet<>();
 	protected LabyrinthCollection<T> collection;
 	protected int initialElementsPer = 8;
 	protected boolean sorted;
@@ -100,7 +101,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	public Deployable<LabyrinthPaginatedCollection<T>> reorder() {
 		return Deployable.of(this, collection1 -> {
 			collection1.sorted = true;
-			LabyrinthCollection<LabyrinthCollectionPage<T>> toAdd = new LabyrinthSet<>();
+			LabyrinthCollection<Page<T>> toAdd = new LabyrinthSet<>();
 			LabyrinthCollection<T> toSort = new LabyrinthList<>();
 
 			if (collection1.predicate != null) {
@@ -121,7 +122,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 			int totalPageCount = collection1.size();
 			for (int slot = 1; slot < totalPageCount + 1; slot++) {
 				int page = slot;
-				LabyrinthCollectionPage<T> newPage = new LabyrinthCollectionPage.Impl<>(collection1, slot);
+				LabyrinthPage<T> newPage = new LabyrinthPage<>(collection1, slot);
 				if (page <= totalPageCount) {
 
 					if (!toSort.isEmpty()) {
@@ -144,7 +145,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 		});
 	}
 
-	public @NotNull LabyrinthCollection<LabyrinthCollectionPage<T>> getPages() {
+	public @NotNull LabyrinthCollection<Page<T>> getPages() {
 		return ImmutableLabyrinthCollection.of(set);
 	}
 
@@ -189,7 +190,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 */
 	@Override
 	@Note("Use this method to also check if this collection contains a specific page!")
-	public boolean contains(LabyrinthCollectionPage<T> o) {
+	public boolean contains(Page<T> o) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -201,11 +202,11 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 */
 	@NotNull
 	@Override
-	public Iterator<LabyrinthCollectionPage<T>> iterator() {
+	public Iterator<Page<T>> iterator() {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
-		return set.stream().sorted(Comparator.comparingInt(LabyrinthCollectionPage::getNumber)).iterator();
+		return set.stream().sorted(Comparator.comparingInt(Page::getNumber)).iterator();
 	}
 
 	/**
@@ -215,7 +216,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
-		return set.stream().sorted(Comparator.comparingInt(LabyrinthCollectionPage::getNumber)).toArray(Object[]::new);
+		return set.stream().sorted(Comparator.comparingInt(Page::getNumber)).toArray(Object[]::new);
 	}
 
 
@@ -236,12 +237,12 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 * @return An existing page or a new one skipping nullity.
 	 */
 	@Note("This works differently than the normal get index method! Make sure you call AbstractPaginatedCollection#contains(Object) first on the index or 'page' you want.")
-	public @NotNull LabyrinthCollectionPage<T> get(int index) {
+	public @NotNull Page<T> get(int index) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
-		return set.stream().sorted(Comparator.comparingInt(LabyrinthCollectionPage::getNumber)).filter(p -> p.getNumber() == index).findFirst().orElseGet(() -> {
-			LabyrinthCollectionPage<T> newOne = new LabyrinthCollectionPage.Impl<>(this, index);
+		return set.stream().sorted(Comparator.comparingInt(Page::getNumber)).filter(p -> p.getNumber() == index).findFirst().orElseGet(() -> {
+			Page<T> newOne = new LabyrinthPage<>(this, index);
 			add(newOne);
 			return newOne;
 		});
@@ -252,7 +253,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 */
 	@Override
 	@Note("Add a custom page to this pagination collection")
-	public boolean add(LabyrinthCollectionPage<T> tPage) {
+	public boolean add(Page<T> tPage) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -260,11 +261,11 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	}
 
 	/**
-	 * @see LabyrinthPaginatedCollection#add(LabyrinthCollectionPage)
+	 * @see LabyrinthPaginatedCollection#add(Page)
 	 */
 	@Note("Add a custom page to this pagination collection")
-	public boolean add(Consumer<LabyrinthCollectionPage<T>> consumer, int page) {
-		LabyrinthCollectionPage<T> newIn = new LabyrinthCollectionPage.Impl<>(this, page);
+	public boolean add(Consumer<Page<T>> consumer, int page) {
+		Page<T> newIn = new LabyrinthPage<>(this, page);
 		consumer.accept(newIn);
 		add(newIn);
 		return true;
@@ -281,11 +282,11 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
-		LabyrinthCollectionPage<T> test = get(page);
+		Page<T> test = get(page);
 		if (test != null) {
 			return test.add(t);
 		}
-		LabyrinthCollectionPage<T> p = new LabyrinthCollectionPage.Impl<>(this, page);
+		LabyrinthPage<T> p = new LabyrinthPage<>(this, page);
 		p.add(t);
 		add(p);
 		return true;
@@ -296,7 +297,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 */
 	@Override
 	@Note("Add remove a page from this pagination collection")
-	public boolean remove(LabyrinthCollectionPage<T> o) {
+	public boolean remove(Page<T> o) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -314,18 +315,15 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
-		LabyrinthCollectionPage<T> test = get(page);
-		if (test != null) {
-			return test.remove(t);
-		}
-		return false;
+		Page<T> test = get(page);
+		return test.remove(t);
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	@Override
-	public boolean containsAll(@NotNull Iterable<LabyrinthCollectionPage<T>> c) {
+	public boolean containsAll(@NotNull Iterable<Page<T>> c) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -336,7 +334,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 * @inheritDoc
 	 */
 	@Override
-	public boolean addAll(@NotNull Iterable<LabyrinthCollectionPage<T>> c) {
+	public boolean addAll(@NotNull Iterable<Page<T>> c) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -347,7 +345,7 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	 * @inheritDoc
 	 */
 	@Override
-	public boolean removeAll(@NotNull Iterable<LabyrinthCollectionPage<T>> c) {
+	public boolean removeAll(@NotNull Iterable<Page<T>> c) {
 		if (set.isEmpty() && !collection.isEmpty()) {
 			reorder().deploy().submit().join();
 		}
@@ -360,5 +358,77 @@ public abstract class LabyrinthPaginatedCollection<T> implements LabyrinthCollec
 	@Override
 	public void clear() {
 		set.clear();
+	}
+
+	static final class LabyrinthPage<T> implements Page<T> {
+
+		private final LabyrinthPaginatedCollection<T> parent;
+		private LabyrinthCollection<T> collection;
+		private final int page;
+
+		LabyrinthPage(LabyrinthPaginatedCollection<T> parent, int number) {
+			this.parent = parent;
+			this.collection = new LabyrinthList<>();
+			this.page = number;
+		}
+
+		@Override
+		@Note("Labyrinth impl is modifiable by default. (elements can be added)")
+		public boolean isModifiable() {
+			return true;
+		}
+
+		@Override
+		public int getNumber() {
+			return this.page;
+		}
+
+		@Override
+		public int size() {
+			return collection.size();
+		}
+
+		@Override
+		public T get(int index) {
+			return collection.get(index);
+		}
+
+		@Override
+		public boolean add(T t) {
+			if (!isModifiable()) return false;
+			return collection.add(t);
+		}
+
+		@Override
+		public boolean remove(T t) {
+			if (!isModifiable()) return false;
+			return collection.remove(t);
+		}
+
+		@Override
+		public boolean contains(T t) {
+			return collection.contains(t);
+		}
+
+		@Override
+		public @NotNull Iterator<T> iterator() {
+			return collection.iterator();
+		}
+
+		@Override
+		public Deployable<Page<T>> reorder() {
+			return Deployable.of(this, ts -> {
+				LabyrinthCollection<T> copy = collection;
+				if (parent.predicate != null) {
+					copy = collection.stream().filter(parent.predicate).collect(LabyrinthCollectors.toList());
+				}
+				if (parent.comparator != null) {
+					copy = copy.stream().sorted(parent.comparator).collect(LabyrinthCollectors.toSet());
+				}
+				collection.clear();
+				collection = copy;
+			});
+		}
+
 	}
 }
