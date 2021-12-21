@@ -56,14 +56,21 @@ otherwise have been far more time-consuming.
             <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
-    <!-- Used specifically for pastebin/hastebin related services. NEW! -->
+    <!-- Used specifically for permission related services (Vault replacement). -->
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-perms</artifactId>
+            <version>1.7.3</version>
+            <scope>provided</scope>
+        </dependency>
+    <!-- Used specifically for pastebin/hastebin related services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-paste</artifactId>
             <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
-    <!-- Used specifically for placeholder provision services. NEW! -->
+    <!-- Used specifically for placeholder provision services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-placeholders</artifactId>
