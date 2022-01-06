@@ -715,7 +715,7 @@ public class Item {
 					meta.setDisplayName(this.TITLE);
 				}
 
-				if (this.LORE != null && !this.LORE.isEmpty()) {
+				if (this.LORE != null) {
 					meta.setLore(this.LORE);
 				}
 
@@ -759,7 +759,7 @@ public class Item {
 					meta.setDisplayName(this.TITLE);
 				}
 
-				if (this.LORE != null && !this.LORE.isEmpty()) {
+				if (this.LORE != null) {
 					meta.setLore(this.LORE);
 				}
 
@@ -800,7 +800,7 @@ public class Item {
 					meta.setDisplayName(this.TITLE);
 				}
 
-				if (this.LORE != null && !this.LORE.isEmpty()) {
+				if (this.LORE != null) {
 					meta.setLore(this.LORE);
 				}
 
@@ -842,7 +842,7 @@ public class Item {
 				meta.setDisplayName(this.TITLE);
 			}
 
-			if (this.LORE != null && !this.LORE.isEmpty()) {
+			if (this.LORE != null) {
 				meta.setLore(this.LORE);
 			}
 
@@ -886,7 +886,7 @@ public class Item {
 				meta.setDisplayName(this.TITLE);
 			}
 
-			if (this.LORE != null && !this.LORE.isEmpty()) {
+			if (this.LORE != null) {
 				meta.setLore(this.LORE);
 			}
 
@@ -927,7 +927,7 @@ public class Item {
 				meta.setDisplayName(this.TITLE);
 			}
 
-			if (this.LORE != null && !this.LORE.isEmpty()) {
+			if (this.LORE != null) {
 				meta.setLore(this.LORE);
 			}
 

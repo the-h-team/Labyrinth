@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.MenuRegistration;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -13,6 +14,8 @@ import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.task.Asynchronous;
+import com.github.sanctum.labyrinth.task.Task;
+import com.github.sanctum.labyrinth.task.TaskMonitor;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -49,8 +52,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class Menu {
 
-	protected static final Set<Menu> menus = new HashSet<>();
-
 	protected final Set<Element<?, ?>> elements;
 	protected final Rows rows;
 	protected final Type type;
@@ -74,7 +75,7 @@ public abstract class Menu {
 		this.elements = new HashSet<>();
 		this.properties = new HashSet<>(Arrays.asList(properties));
 		if (this.properties.contains(Property.CACHEABLE)) {
-			menus.add(this);
+			MenuRegistration.getInstance().register(this).deploy();
 		}
 	}
 
@@ -124,6 +125,10 @@ public abstract class Menu {
 
 	public final Optional<Close> getCloseEvent() {
 		return Optional.ofNullable(this.close);
+	}
+
+	public final @NotNull Plugin getHost() {
+		return host;
 	}
 
 	protected final void registerController() throws InstantiationException {
@@ -508,10 +513,6 @@ public abstract class Menu {
 
 	}
 
-	public static Set<Menu> getHistory() {
-		return menus;
-	}
-
 	/**
 	 * A factory for passing generic values on runtime to a menu builder.
 	 *
@@ -547,7 +548,7 @@ public abstract class Menu {
 
 		private String key;
 
-		private final Set<Property> properties = new HashSet<>();
+		protected final Set<Property> properties = new HashSet<>();
 
 		private Rows size;
 
@@ -657,7 +658,7 @@ public abstract class Menu {
 		}
 
 		public T orGet(Predicate<Menu> predicate) {
-			Menu test = Menu.menus.stream().filter(predicate).findFirst().orElse(null);
+			Menu test = MenuRegistration.getInstance().getAll().get().stream().filter(predicate).findFirst().orElse(null);
 			if (test != null) return (T) test;
 
 			Menu menu = null;
@@ -757,6 +758,10 @@ public abstract class Menu {
 					if (task != null) {
 						task.cancelTask();
 					}
+					Task t = TaskMonitor.getLocalInstance().get("Labyrinth:" + Menu.this.hashCode() + ";slide-" + p.getUniqueId());
+					if (t != null) {
+						t.cancel();
+					}
 				}
 
 				if (close != null) {
@@ -850,7 +855,6 @@ public abstract class Menu {
 
 			if (e.getClickedInventory() == e.getInventory()) {
 				Player p = (Player) e.getWhoClicked();
-
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
 					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
@@ -1139,7 +1143,6 @@ public abstract class Menu {
 							if (click == null) {
 								if (Menu.this.click != null) {
 									Menu.this.click.apply(clickElement);
-									;
 								}
 							} else {
 								click.apply(clickElement);

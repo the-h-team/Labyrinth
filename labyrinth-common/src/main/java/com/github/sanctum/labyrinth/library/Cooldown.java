@@ -43,15 +43,6 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	}
 
 	/**
-	 * Get the raw int value of total cooldown time remaining.
-	 *
-	 * @return the total amount of time left from the conversion table
-	 */
-	public final int getTimeLeft() {
-		return (int) Math.abs(getTimePassed());
-	}
-
-	/**
 	 * Get the amount of seconds left from the total cooldown length equated.
 	 * <p>
 	 * This != total cooldown time converted to days; it's a soft-cap
@@ -61,7 +52,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	@Override
 	public long getDays() {
-		return TimeUnit.SECONDS.toDays(getTimeLeft());
+		return TimeUnit.SECONDS.toDays(getTimePassed());
 	}
 
 	/**
@@ -74,7 +65,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	@Override
 	public long getHours() {
-		return TimeUnit.SECONDS.toHours(getTimeLeft()) - (getDays() * 24);
+		return TimeUnit.SECONDS.toHours(getTimePassed()) - (getDays() * 24);
 	}
 
 	/**
@@ -87,7 +78,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	@Override
 	public long getMinutes() {
-		return TimeUnit.SECONDS.toMinutes(getTimeLeft()) - (TimeUnit.SECONDS.toHours(getTimeLeft()) * 60);
+		return TimeUnit.SECONDS.toMinutes(getTimePassed()) - (TimeUnit.SECONDS.toHours(getTimePassed()) * 60);
 	}
 
 	/**
@@ -100,7 +91,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	@Override
 	public long getSeconds() {
-		return TimeUnit.SECONDS.toSeconds(getTimeLeft()) - (TimeUnit.SECONDS.toMinutes(getTimeLeft()) * 60);
+		return TimeUnit.SECONDS.toSeconds(getTimePassed()) - (TimeUnit.SECONDS.toMinutes(getTimePassed()) * 60);
 	}
 
 	/**
@@ -168,7 +159,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	public synchronized final void update() {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
 				.get("cooldowns", "Persistent", FileType.JSON)
-				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimeLeft())));
+				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimePassed())));
 	}
 
 	/**

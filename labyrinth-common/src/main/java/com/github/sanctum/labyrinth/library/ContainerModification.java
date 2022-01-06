@@ -1,16 +1,18 @@
 package com.github.sanctum.labyrinth.library;
 
+import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public final class ContainerModification<T extends Container> {
+public final class ContainerModification<T extends Container> extends ContainerQuestion<T> {
 
 	final ContainerQuery<T> query;
 	final Inventory snapshot;
 
 	ContainerModification(ContainerQuery<T> query) {
+		super(query);
 		this.query = query;
 		this.snapshot = query.container.getSnapshotInventory();
 	}
@@ -46,5 +48,23 @@ public final class ContainerModification<T extends Container> {
 		return query;
 	}
 
+	public boolean has(@NotNull ItemStack itemStack) {
+		return snapshot.contains(itemStack);
+	}
 
+	public boolean has(@NotNull Material material) {
+		return snapshot.contains(material);
+	}
+
+	public boolean has(@NotNull ItemStack itemStack, int amount) {
+		return snapshot.contains(itemStack, amount);
+	}
+
+	public boolean has(@NotNull Material material, int amount) {
+		return snapshot.contains(material, amount);
+	}
+
+	public boolean isEmpty() {
+		return snapshot.isEmpty();
+	}
 }

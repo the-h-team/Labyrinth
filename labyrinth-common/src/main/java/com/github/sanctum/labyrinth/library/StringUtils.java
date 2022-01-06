@@ -256,6 +256,36 @@ public final class StringUtils {
 	}
 
 	/**
+	 * Checks if a supplied string iterable contains the given context.
+	 *
+	 * @param iterable The string iterable.
+	 * @return true if the iterable contains the context false otherwise.
+	 */
+	public boolean isContained(Iterable<String> iterable) {
+		for (String s : iterable) {
+			if (containsIgnoreCase(s)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if a supplied string iterable contains the given context.
+	 *
+	 * @param iterable The string iterable.
+	 * @param alts The alternative context to look for.
+	 * @return true if the iterable contains the context false otherwise.
+	 */
+	public boolean isContained(Iterable<String> iterable, String... alts) {
+		for (String s : iterable) {
+			if (containsIgnoreCase(s)) return true;
+			for (String alt : alts) {
+				if (Pattern.compile(Pattern.quote(alt), Pattern.CASE_INSENSITIVE).matcher(s).find()) return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Checks if the given context is a double.
 	 *
 	 * @return true if the context is a double.

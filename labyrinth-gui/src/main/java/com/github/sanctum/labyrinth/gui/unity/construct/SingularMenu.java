@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
-import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
@@ -18,7 +17,12 @@ public class SingularMenu extends Menu {
 				addElement(new InventoryElement.Normal(title, this));
 			}
 		} else {
-			addElement(new InventoryElement.Normal(title, this));
+			if (getProperties().contains(Property.ANIMATED)) {
+				getProperties().add(Property.SHAREABLE);
+				addElement(new InventoryElement.Animated(title, this));
+			} else {
+				addElement(new InventoryElement.Normal(title, this));
+			}
 		}
 
 		TaskScheduler.of(() -> {
@@ -30,10 +34,9 @@ public class SingularMenu extends Menu {
 	}
 
 	@Override
-	public InventoryElement.Normal getInventory() {
+	public InventoryElement getInventory() {
 		return getElement(e -> e instanceof InventoryElement);
 	}
-
 
 
 	@Override
@@ -44,7 +47,6 @@ public class SingularMenu extends Menu {
 		}
 		getInventory().open(player);
 	}
-
 
 
 }

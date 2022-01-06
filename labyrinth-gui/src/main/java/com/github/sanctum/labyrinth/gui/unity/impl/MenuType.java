@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
+import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.api.MenuRegistration;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PaginatedMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PrintableMenu;
@@ -100,7 +103,11 @@ public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu
 	 */
 	public static final MenuType<PrintableMenu, InventoryElement.Printable, PrintableBuilder> PRINTABLE = new MenuType<>(new PrintableBuilder.Factory());
 
+	public static final @Experimental(dueTo = "Being brand new")
+	MenuType<SingularMenu, InventoryElement.Animated, AnimatedBuilder> ANIMATED = new MenuType<>(new AnimatedBuilder.Factory());
+
 	private final Menu.BuilderFactory<V, T, K> factory;
+	private final MenuRegistration registration = MenuRegistration.getInstance();
 
 	MenuType(Menu.BuilderFactory<V, T, K> factory) {
 		this.factory = factory;
@@ -111,11 +118,15 @@ public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu
 	}
 
 	public boolean exists(String key) {
-		return Menu.getHistory().stream().anyMatch(m -> m.getKey().map(key::equals).orElse(false));
+		return registration.get(key) != null;
+	}
+
+	public T get(String key) {
+		return (T) registration.get(key);
 	}
 
 	public T get(Predicate<Menu> predicate) {
-		for (Menu m : Menu.getHistory()) {
+		for (Menu m : registration.getAll().get()) {
 			if (predicate.test(m)) {
 				return (T) m;
 			}

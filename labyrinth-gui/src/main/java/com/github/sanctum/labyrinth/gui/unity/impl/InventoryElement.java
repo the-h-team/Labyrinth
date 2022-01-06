@@ -1,15 +1,23 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
+import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
+import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
-import com.github.sanctum.labyrinth.formatting.PaginatedList;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.formatting.pagination.AbstractPaginatedCollection;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.Asynchronous;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -72,7 +80,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 					}
 					ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 					if (list == null) return this.inventory;
-					for (ItemElement<?> element : AbstractPaginatedCollection.of(getWorkflow()).limit(list.getLimit()).sort(list.comparator).filter(list.predicate).get(page)) {
+					for (ItemElement<?> element : AbstractPaginatedCollection.of(getContents()).limit(list.getLimit()).sort(list.comparator).filter(list.predicate).get(page)) {
 						if (!this.inventory.contains(element.getElement())) {
 							this.inventory.addItem(element.getElement());
 						}
@@ -98,7 +106,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
 						}
 					}
-					for (ItemElement<?> element : getWorkflow()) {
+					for (ItemElement<?> element : getContents()) {
 						if (!this.inventory.contains(element.getElement())) {
 							this.inventory.addItem(element.getElement());
 						}
@@ -126,6 +134,12 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return tasks.get(player);
 	}
 
+	public InventoryElement setContents(Iterable<ItemElement<?>> elements) {
+		items.clear();
+		elements.forEach(this::addItem);
+		return this;
+	}
+
 	/**
 	 * Get a players page positioning.
 	 * <p>
@@ -143,7 +157,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return pl;
 	}
 
-	public Set<ItemElement<?>> getWorkflow() {
+	public Set<ItemElement<?>> getContents() {
 		Set<ItemElement<?>> items = new HashSet<>();
 		for (ItemElement<?> it : this.items) {
 			if (!it.getSlot().isPresent() && !it.isPlayerAdded()) {
@@ -176,6 +190,14 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
 		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+		if (isAnimated()) {
+			Animated animated = (Animated) this;
+			for (Slide s : animated.getSlides()) {
+				for (ItemElement<?> i : s.getAttachment().values()) {
+					if (item.test(i)) return i;
+				}
+			}
+		}
 		if (isPaginated()) {
 			return this.items.stream().filter(item).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(item).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(item).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(item).findFirst().orElse(null))));
 		} else {
@@ -187,16 +209,25 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
 		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
 		FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+		boolean check = getParent().getProperties().contains(Menu.Property.LIVE_META) || getParent().getProperties().contains(Menu.Property.ANIMATED);
+		if (isAnimated()) {
+			Animated animated = (Animated) this;
+			for (Slide s : animated.getSlides()) {
+				for (ItemElement<?> i : s.getAttachment().values()) {
+					if (isSimilar(i.getElement(), item)) return i;
+				}
+			}
+		}
 		return this.items.stream().filter(i -> {
-			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+			if (check) {
 				return isSimilar(item, i.getElement());
 			} else return i.getElement().isSimilar(item);
 		}).findFirst().orElse(list == null ? null : list.getAttachment().stream().filter(i -> {
-			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+			if (check) {
 				return isSimilar(item, i.getElement());
 			} else return i.getElement().isSimilar(item);
 		}).findFirst().orElse(border == null ? null : border.getAttachment().stream().filter(i -> i.getElement().isSimilar(item)).findFirst().orElse(filler == null ? null : filler.getAttachment().stream().filter(i -> {
-			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
+			if (check) {
 				return isSimilar(item, i.getElement());
 			} else return i.getElement().isSimilar(item);
 		}).findFirst().orElse(null))));
@@ -206,6 +237,14 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		for (ItemElement<?> it : getAttachment()) {
 			if (it.getSlot().map(s -> s == slot).orElse(false)) {
 				return it;
+			}
+		}
+		if (isAnimated()) {
+			Animated inv = (Animated) this;
+			for (Slide s : inv.getSlides()) {
+				for (ItemElement<?> item : s.getAttachment().values()) {
+					if (item.getSlot().isPresent() && item.getSlot().get() == slot) return item;
+				}
 			}
 		}
 		BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
@@ -229,6 +268,10 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	public boolean contains(ItemStack item) {
 		ListElement<?> list = (ListElement<?>) getElement(e -> e instanceof ListElement);
+		if (isAnimated()) {
+			Animated inv = (Animated) this;
+			if (inv.getSlides().stream().anyMatch(s -> s.getAttachment().values().stream().anyMatch(it -> isSimilar(it.getElement(), item)))) return true;
+		}
 		return this.items.stream().map(ItemElement::getElement).anyMatch(i -> {
 			if (getParent().getProperties().contains(Menu.Property.LIVE_META)) {
 				return isSimilar(item, i);
@@ -325,6 +368,49 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		return this instanceof Paginated;
 	}
 
+	public boolean isAnimated() {
+		return this instanceof Animated;
+	}
+
+	/*
+	 * Element section \/
+	 */
+	public static class Slide extends Menu.Element<InventoryElement, LabyrinthMap<Integer, ItemElement<?>>> {
+
+		private final LabyrinthMap<Integer, ItemElement<?>> items = new LabyrinthEntryMap<>();
+		private final InventoryElement parent;
+		private long changeInterval;
+
+		public Slide(InventoryElement parent) {
+			this.parent = parent;
+		}
+
+		public Slide set(int slot, ItemElement<?> itemElement) throws IndexOutOfBoundsException {
+			if (slot >= parent.inventory.getSize() || slot < 0) throw new IndexOutOfBoundsException("Cannot modify item element beyond natural scope.");
+			items.put(slot, itemElement.setSlot(slot).setParent(parent));
+			return this;
+		}
+
+		public Slide setNextDelay(long changeInterval) {
+			this.changeInterval = changeInterval;
+			return this;
+		}
+
+		public long getChangeInterval() {
+			return changeInterval;
+		}
+
+		@Override
+		public InventoryElement getElement() {
+			return parent;
+		}
+
+		@Override
+		public LabyrinthMap<Integer, ItemElement<?>> getAttachment() {
+			return ImmutableLabyrinthMap.of(items);
+		}
+	}
+
 	public static class Page extends Menu.Element<InventoryElement, Set<ItemElement<?>>> {
 
 		private final InventoryElement element;
@@ -370,7 +456,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			ListElement<?> list = (ListElement<?>) element.getElement(e -> e instanceof ListElement);
 			if (list == null) return new HashSet<>();
 
-			Set<ItemElement<?>> set = StreamSupport.stream(AbstractPaginatedCollection.of(element.getWorkflow()).limit(list.getLimit()).sort(list.comparator).get(toNumber()).spliterator(), false).sorted(list.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
+			Set<ItemElement<?>> set = StreamSupport.stream(AbstractPaginatedCollection.of(element.getContents()).limit(list.getLimit()).sort(list.comparator).get(toNumber()).spliterator(), false).sorted(list.comparator).collect(Collectors.toCollection(LinkedHashSet::new));
 			for (ItemElement<?> extra : getElement().getAttachment()) {
 				if (!set.contains(extra) && extra.isPlayerAdded() && extra.getPage().toNumber() == toNumber()) {
 					set.add(extra);
@@ -383,14 +469,85 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 	}
 
+	/*
+	 * Inventory section below \/
+	 */
+
+
 	public static class Animated extends InventoryElement {
+
+		private final LabyrinthMap<Integer, Slide> slides = new LabyrinthEntryMap<>();
+		private TaskPredicate<?>[] predicates = new TaskPredicate<?>[0];
+		private long repeat;
 
 		public Animated(String title, Menu menu) {
 			super(title, menu, true);
 		}
 
+		public Animated addItem(Slide element) {
+			slides.put(slides.size(), element);
+			return this;
+		}
 
+		public Animated setRepeat(long repeat) {
+			this.repeat = repeat;
+			return this;
+		}
 
+		public Animated setPredicates(TaskPredicate<?>... predicates) {
+			this.predicates = predicates;
+			return this;
+		}
+
+		public long getRepeat() {
+			return repeat;
+		}
+
+		public LabyrinthCollection<Slide> getSlides() {
+			return slides.values();
+		}
+
+		@Override
+		public synchronized void open(Player player) {
+			TaskScheduler.of(() -> {
+				slides.stream().sorted(Comparator.comparingInt(SimpleKeyedValue::getKey)).forEach(entry -> {
+					TaskScheduler.of(() -> {
+						getElement().clear();
+						BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
+						if (border != null) {
+							for (ItemElement<?> element : border.getAttachment()) {
+								Optional<Integer> i = element.getSlot();
+								i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
+							}
+						}
+						for (ItemElement<?> element : getContents()) {
+							Optional<Integer> in = element.getSlot();
+							if (in.isPresent()) {
+								getElement().setItem(in.get(), element.getElement());
+							} else {
+								if (!getElement().contains(element.getElement())) {
+									getElement().addItem(element.getElement());
+								}
+							}
+						}
+						for (ItemElement<?> element : items) {
+							Optional<Integer> in = element.getSlot();
+							in.ifPresent(integer -> getElement().setItem(integer, element.getElement()));
+						}
+						FillerElement<?> filler = (FillerElement<?>) getElement(e -> e instanceof FillerElement);
+						if (filler != null) {
+							for (ItemElement<?> el : filler.getAttachment()) {
+								int slot = el.getSlot().orElse(0);
+								if (getElement().getItem(slot) == null) {
+									getElement().setItem(slot, el.getElement());
+								}
+							}
+						}
+						entry.getValue().getAttachment().forEach(entry2 -> getElement().setItem(entry2.getKey(), entry2.getValue().getElement()));
+					}).scheduleLater(entry.getValue().changeInterval);
+				});
+			}).scheduleTimerAsync("Labyrinth:" + getParent().hashCode() + ";slide-" + player.getUniqueId(), 0, getRepeat(), predicates).next(() -> player.openInventory(getElement())).scheduleLater(2L);
+		}
 	}
 
 	public static class Paginated extends InventoryElement {
@@ -428,12 +585,12 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		public int getTotalPages() {
 			int totalPageCount = 1;
-			if ((getWorkflow().size() % this.limit) == 0) {
-				if (getWorkflow().size() > 0) {
-					totalPageCount = getWorkflow().size() / this.limit;
+			if ((getContents().size() % this.limit) == 0) {
+				if (getContents().size() > 0) {
+					totalPageCount = getContents().size() / this.limit;
 				}
 			} else {
-				totalPageCount = (getWorkflow().size() / this.limit) + 1;
+				totalPageCount = (getContents().size() / this.limit) + 1;
 			}
 			return totalPageCount;
 		}
@@ -617,7 +774,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 									i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
 								}
 							}
-							for (ItemElement<?> element : getWorkflow()) {
+							for (ItemElement<?> element : getContents()) {
 								Optional<Integer> in = element.getSlot();
 								if (in.isPresent()) {
 									getElement().setItem(in.get(), element.getElement());
@@ -665,7 +822,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 						i.ifPresent(integer -> inventory.setItem(integer, element.getElement()));
 					}
 				}
-				for (ItemElement<?> element : getWorkflow()) {
+				for (ItemElement<?> element : getContents()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
 						getElement().setItem(in.get(), element.getElement());
@@ -716,11 +873,6 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 				getViewer(player).setElement(null);
 			}
-
-			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
-				// TODO: setup animation slide stuff
-				return;
-			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
 				if (this.tasks.containsKey(player)) {
 					this.tasks.get(player).cancelTask();
@@ -737,7 +889,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 								i.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 							}
 						}
-						for (ItemElement<?> element : getWorkflow()) {
+						for (ItemElement<?> element : getContents()) {
 							Optional<Integer> in = element.getSlot();
 							if (in.isPresent()) {
 								getViewer(player).getElement().setItem(in.get(), element.getElement());
@@ -774,7 +926,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 						i.ifPresent(integer -> getViewer(player).getElement().setItem(integer, element.getElement()));
 					}
 				}
-				for (ItemElement<?> element : getWorkflow()) {
+				for (ItemElement<?> element : getContents()) {
 					Optional<Integer> in = element.getSlot();
 					if (in.isPresent()) {
 						getViewer(player).getElement().setItem(in.get(), element.getElement());

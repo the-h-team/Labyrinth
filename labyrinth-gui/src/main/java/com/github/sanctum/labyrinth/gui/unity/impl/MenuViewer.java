@@ -82,7 +82,7 @@ public class MenuViewer {
 							i.ifPresent(integer -> this.inventory.setItem(integer, element.getElement()));
 						}
 					}
-					for (ItemElement<?> element : getInventory().getWorkflow()) {
+					for (ItemElement<?> element : getInventory().getContents()) {
 						if (!inventory.contains(element.getElement())) {
 							inventory.addItem(element.getElement());
 						}

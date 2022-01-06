@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.data.FileType;
@@ -11,6 +12,7 @@ import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.formatting.string.SpecialID;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
 import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.labyrinth.library.TimeWatch;
 import java.util.Arrays;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -23,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class PlayerSearch implements Nameable {
 
-	static final Plugin access = LabyrinthProvider.getInstance().getPluginInstance();
-	static final FileManager users = FileList.search(access).get("users", "Persistent", FileType.JSON);
 	static final LabyrinthMap<String, PlayerSearch> lookups = new LabyrinthEntryMap<>();
 
 	@Override
@@ -32,25 +32,36 @@ public abstract class PlayerSearch implements Nameable {
 
 	public abstract @NotNull OfflinePlayer getPlayer();
 
+	@Deprecated
 	public abstract @NotNull UUID getRecordedId();
+
+	public final UUID getId() {
+		return getRecordedId();
+	}
 
 	public abstract @NotNull SpecialID getSpecialId();
 
+	public final TimeWatch.Recording getPlaytime() {
+		return TimeWatch.Recording.subtract(getPlayer().getFirstPlayed());
+	}
+
 	public static PlayerSearch of(@NotNull OfflinePlayer player) {
-		return lookups.computeIfAbsent(player.getName(), s -> new PlayerSearch() {
+		String name = player.getName();
+		if (name == null) {
+			LabyrinthProvider.getInstance().getLogger().severe("- Attempted and failed to register corrupt player data (" + player + "), this is not the fault of labyrinth.");
+			return null;
+		}
+		return lookups.computeIfAbsent(name, s -> new PlayerSearch() {
 
 			final OfflinePlayer parent;
 			final String name;
 			final UUID reference;
+			final boolean online;
 			{
 				this.parent = validate(player);
-				this.name = validate(player.getName());
-				if (users.read(c -> c.isNode(name))) {
-					reference = users.read(c -> UUID.fromString(c.getNode(name).getNode("id").toPrimitive().getString()));
-				} else {
-					reference = player.getUniqueId();
-					users.write(t -> t.set(name + ".id", reference.toString()));
-				}
+				this.online = Bukkit.getOnlineMode();
+				this.name = s;
+				reference = player.getUniqueId();
 			}
 
 			<T> T validate(T t) {
@@ -65,15 +76,16 @@ public abstract class PlayerSearch implements Nameable {
 
 			@Override
 			public @NotNull OfflinePlayer getPlayer() {
-				return parent;
+				return online ? parent : Bukkit.getOfflinePlayer(getName());
 			}
 
 			@Override
 			public @NotNull UUID getRecordedId() {
-				return reference;
+				return online ? reference : getPlayer().getUniqueId();
 			}
 
 			@Override
+			@Note("Length of 12 (HUID)")
 			public @NotNull SpecialID getSpecialId() {
 				return SpecialID.builder().setLength(12).build(name);
 			}

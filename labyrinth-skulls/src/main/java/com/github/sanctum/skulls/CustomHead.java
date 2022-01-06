@@ -3,9 +3,11 @@ package com.github.sanctum.skulls;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.task.Schedule;
+import com.github.sanctum.labyrinth.task.TaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,36 @@ public abstract class CustomHead implements SkullObject {
 
 	protected CustomHead(UUID owner) {
 		this.owner = owner;
+	}
+
+	static {
+
+		if (LabyrinthOptions.HEAD_PRE_CACHE.enabled()) {
+
+			HEADS = new LinkedList<>(CustomHead.Manager.loadOffline());
+
+			TaskScheduler.of(() -> {
+
+				HEADS.stream().filter(h -> h.getType() == SkullType.PLAYER).forEach(h -> TaskScheduler.of(() -> HEADS.remove(h)).schedule());
+				HEADS.addAll(CustomHead.Manager.loadOffline());
+
+			}).scheduleTimerAsync(HUID.randomID().toString(), 0, 88000, TaskPredicate.cancelAfter(task -> {
+				Plugin pl = Bukkit.getPluginManager().getPlugin("Labyrinth");
+				if (pl == null || !pl.isEnabled()) {
+					task.cancel();
+					return false;
+				}
+				return true;
+			}));
+
+		} else {
+
+			HEADS = new LinkedList<>();
+
+		}
+
+		LOADED = true;
+
 	}
 
 	@Override
@@ -341,22 +373,6 @@ public abstract class CustomHead implements SkullObject {
 			return head != null ? new Item.Edit(head.get()).setTitle(item.getItemMeta() != null ? item.getItemMeta().getDisplayName() : head.name()).setLore(item.getItemMeta() != null && item.getItemMeta().getLore() != null ? item.getItemMeta().getLore().toArray(new String[0]) : new String[]{""}).build() : item;
 
 		}
-
-	}
-
-	static {
-
-		if (LabyrinthOptions.HEAD_PRE_CACHE.enabled()) {
-
-			HEADS = new LinkedList<>(CustomHead.Manager.loadOffline());
-
-		} else {
-
-			HEADS = new LinkedList<>();
-
-		}
-
-		LOADED = true;
 
 	}
 

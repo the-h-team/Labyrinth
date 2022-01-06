@@ -75,7 +75,6 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				TaskScheduler.of(() -> {
 					Region region = getInstance().get("spawn");
 					if (region != null) {
-						event.getPlayer().teleport(region.getCenter());
 						r.setSpawnTagged(true);
 						r.setPastSpawn(false);
 					}

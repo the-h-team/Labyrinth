@@ -152,7 +152,7 @@ public class TimeWatch {
 		}
 
 		public long getDays() {
-			return time / (60 * 60 * 1000 * 24);
+			return (time / (1000 * 60 * 60 * 24));
 		}
 
 	}

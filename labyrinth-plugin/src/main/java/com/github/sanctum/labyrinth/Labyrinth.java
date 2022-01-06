@@ -37,6 +37,10 @@ import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
 import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.ContainerQuery;
@@ -79,6 +83,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -276,8 +281,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 
 	Deployable<Labyrinth> registerImplementations() {
 		return Deployable.of(this, plugin -> {
-			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(165)
-					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(165)
+			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(240)
+					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(240)
 					.next(() -> {
 						if (getServer().getPluginManager().isPluginEnabled("Vault")) {
 							VaultImplementation bridge = new VaultImplementation();
@@ -372,7 +377,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		}
 	}
 
-	@Subscribe(priority = Vent.Priority.READ_ONLY)
+	@Subscribe(priority = Vent.Priority.LOW)
 	public void onJoin(DefaultEvent.Join e) {
 		PlayerSearch.of(e.getPlayer());
 	}

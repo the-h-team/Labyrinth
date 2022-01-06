@@ -67,13 +67,13 @@ public abstract class UpdateChecker {
 			String[] version_split = version.split("\\.");
 			String[] new_version_split = latest.split("\\.");
 
-			if (precision == 1) {
+			if (precision == BASIC) {
 				int current_1 = Integer.parseInt(version_split[0]);
 				int latest_1 = Integer.parseInt(new_version_split[0]);
 				return latest_1 > current_1;
 			}
 
-			if (precision == 2) {
+			if (precision == SIMPLE) {
 				int current_1 = Integer.parseInt(version_split[0]);
 				int latest_1 = Integer.parseInt(new_version_split[0]);
 				int current_2 = Integer.parseInt(version_split[1]);
@@ -90,7 +90,7 @@ public abstract class UpdateChecker {
 
 			}
 
-			if (precision == 3) {
+			if (precision == STANDARD) {
 				int current_1 = Integer.parseInt(version_split[0]);
 				int latest_1 = Integer.parseInt(new_version_split[0]);
 				int current_2 = Integer.parseInt(version_split[1]);

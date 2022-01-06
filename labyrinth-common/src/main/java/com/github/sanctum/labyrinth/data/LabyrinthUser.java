@@ -27,7 +27,7 @@ public class LabyrinthUser implements Nameable {
 	public LabyrinthUser(String name) {
 		this.name = name;
 		PlayerSearch lookup = PlayerSearch.of(name);
-		this.id = lookup.getRecordedId();
+		this.id = lookup.getId();
 		this.target = lookup.getPlayer();
 	}
 
@@ -35,7 +35,7 @@ public class LabyrinthUser implements Nameable {
 		this.name = pl.getName();
 		PlayerSearch lookup = PlayerSearch.of(pl);
 		this.target = lookup.getPlayer();
-		this.id = lookup.getRecordedId();
+		this.id = lookup.getId();
 	}
 
 	@Deprecated

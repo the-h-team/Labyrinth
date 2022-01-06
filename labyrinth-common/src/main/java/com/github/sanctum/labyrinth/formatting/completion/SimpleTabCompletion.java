@@ -65,7 +65,7 @@ public interface SimpleTabCompletion {
 				if (non_predicates.containsKey(index)) {
 					non_predicates.get(index).addAll(completions);
 				} else {
-					non_predicates.put(index, completions);
+					non_predicates.put(index, new ArrayList<>(completions));
 				}
 				return this;
 			}
@@ -135,7 +135,7 @@ public interface SimpleTabCompletion {
 						map.get(index).addAll(completions);
 					}
 				} else {
-					map.put(index, completions);
+					map.put(index, new ArrayList<>(completions));
 				}
 				return this;
 			}
@@ -164,7 +164,7 @@ public interface SimpleTabCompletion {
 						map.get(index).addAll(completions);
 					}
 				} else {
-					map.put(index, completions);
+					map.put(index, new ArrayList<>(completions));
 				}
 				return this;
 			}

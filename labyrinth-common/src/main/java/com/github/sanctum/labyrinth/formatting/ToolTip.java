@@ -1,16 +1,17 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.ListUtils;
-import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -207,90 +208,70 @@ public abstract class ToolTip<T> {
 
 	public static class Item extends ToolTip<ItemStack> {
 
+		private final @Experimental Supplier<Class<?>> ITEMSTACK_NMS = () -> {
+			String name = Bukkit.getServer().getClass().getPackage().getName();
+			String clazzName = "org.bukkit.craftbukkit." + (name.substring(name.lastIndexOf('.') + 1) + ".") + "inventory.CraftItemStack";
+			try {
+				return Class.forName(clazzName);
+			} catch (Throwable t) {
+				t.printStackTrace();
+				return null;
+			}
+		};
+		private final Supplier<Method> NMS_COPY = () -> getMethod(ITEMSTACK_NMS.get(), "asNMSCopy", ItemStack.class);
+
 		private final ItemStack message;
 		private final String json;
 
 		public Item(ItemStack message) {
 			this.message = message;
-			this.json = convertItemStackToJson(message);
+			this.json = itemToJson(message);
 		}
 
-		private Class<?> getItemClass() {
+		private Class<?> getNMSClass(String nmsClass) {
 			String name = Bukkit.getServer().getClass().getPackage().getName();
 			String version = name.substring(name.lastIndexOf('.') + 1) + ".";
-			String clazzName = "org.bukkit.craftbukkit." + version + "inventory.CraftItemStack";
-			Class<?> clazz;
-
+			String clazzName = "net.minecraft.server." + version + nmsClass;
 			try {
-				clazz = Class.forName(clazzName);
+				return Class.forName(clazzName);
 			} catch (Throwable t) {
-				t.printStackTrace();
+				LabyrinthProvider.getInstance().getLogger().severe("- You should never see this message, class '" + nmsClass + "' not found.");
 				return null;
 			}
-			return clazz;
 		}
 
-
-
-		private Class<?> getNMSClass(String nmsClassName) {
-			String name = Bukkit.getServer().getClass().getPackage().getName();
-			String version = name.substring(name.lastIndexOf('.') + 1) + ".";
-			String clazzName = "net.minecraft.server." + version + nmsClassName;
-			Class<?> clazz;
+		private Class<?> getNewClass(String nonNMSClass) {
 			try {
-				clazz = Class.forName(clazzName);
+				return Class.forName(nonNMSClass);
 			} catch (Throwable t) {
-				t.printStackTrace();
+				LabyrinthProvider.getInstance().getLogger().severe("- You should never see this message, class '" + nonNMSClass + "' not found.");
 				return null;
 			}
-			return clazz;
-		}
-
-		private Class<?> getNewClass(String nmsClassName) {
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(nmsClassName);
-			} catch (Throwable t) {
-				t.printStackTrace();
-				return null;
-			}
-			return clazz;
 		}
 
 		private Method getMethod(Class<?> clazz, String methodName, Class<?>... params) {
 			try {
 				return clazz.getMethod(methodName, params);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (Exception ignored) {
+				LabyrinthProvider.getInstance().getLogger().severe("- Method with name '" + methodName + "' doesn't exist on runtime.");
 				return null;
 			}
 		}
 
-		private String convertItemStackToJson(ItemStack itemStack) {
-			// ItemStack methods to get a net.minecraft.server.ItemStack object for serialization
-			Class<?> craftItemStackClazz = getItemClass();
-			Method asNMSCopyMethod = getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
-
-			// NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
-			Class<?> nmsItemStackClazz = Bukkit.getVersion().contains("1.17") ? getNewClass("net.minecraft.world.item.ItemStack") : getNMSClass("ItemStack");
-			Class<?> nbtTagCompoundClazz = Bukkit.getVersion().contains("1.17") ? getNewClass("net.minecraft.nbt.NBTTagCompound") : getNMSClass("NBTTagCompound");
-			Method saveNmsItemStackMethod = getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
-
-			Object nmsNbtTagCompoundObj; // This will just be an empty NBTTagCompound instance to invoke the saveNms method
-			Object nmsItemStackObj; // This is the net.minecraft.server.ItemStack object received from the asNMSCopy method
-			Object itemAsJsonObject; // This is the net.minecraft.server.ItemStack after being put through saveNmsItem method
-
+		private String itemToJson(ItemStack itemStack) {
+			boolean isBrandNew = Bukkit.getVersion().contains("1.18");
+			boolean isNew = Bukkit.getVersion().contains("1.17") || isBrandNew;
+			Class<?> itemStackClass = isNew ? getNewClass("net.minecraft.world.item.ItemStack") : getNMSClass("ItemStack");
+			Class<?> nbtTagCompoundClass = isNew ? getNewClass("net.minecraft.nbt.NBTTagCompound") : getNMSClass("NBTTagCompound");
+			// on runtime some 1.18 bukkit source is still obfuscated for some reason, so we have to use it's obfuscated name 'b'
+			Method saveNBT = getMethod(itemStackClass, isBrandNew ? "b" : "save", nbtTagCompoundClass);
+			if (saveNBT == null || nbtTagCompoundClass == null) return null;
 			try {
-				nmsNbtTagCompoundObj = nbtTagCompoundClazz.getDeclaredConstructor().newInstance();
-				nmsItemStackObj = asNMSCopyMethod.invoke(null, itemStack);
-				itemAsJsonObject = saveNmsItemStackMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj);
+				return saveNBT.invoke(NMS_COPY.get().invoke(null, itemStack), nbtTagCompoundClass.getDeclaredConstructor().newInstance()).toString();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				return null;
 			}
-
-			// Return a string representation of the serialized object
-			return itemAsJsonObject.toString();
 		}
 
 		@Override
