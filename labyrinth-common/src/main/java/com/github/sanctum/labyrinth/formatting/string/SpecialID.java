@@ -8,6 +8,11 @@ public abstract class SpecialID implements CharSequence {
 	@Override
 	public abstract String toString();
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		return obj instanceof SpecialID ? ((SpecialID)obj).toString().equals(toString()) : obj.toString().equals(toString());
+	}
 
 	public static Builder builder() {
 		return new Builder();

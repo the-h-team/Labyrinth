@@ -37,13 +37,8 @@ import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
 import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
-import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
-import com.github.sanctum.labyrinth.library.ContainerQuery;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;
@@ -83,7 +78,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -366,12 +360,12 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		getScheduler(SYNCHRONOUS).shutdown();
 
 		try {
-			Thread.sleep(1);
+			Thread.sleep(1); // let daemon catchup and remove background tasks
 		} catch (InterruptedException ignored) {
 		}
 
 		if (!isLegacy()) {
-			for (Item i : Item.getCache()) {
+			for (Item i : Item.getRegistered()) {
 				Item.removeEntry(i);
 			}
 		}

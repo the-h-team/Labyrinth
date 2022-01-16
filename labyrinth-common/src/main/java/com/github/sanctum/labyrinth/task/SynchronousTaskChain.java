@@ -28,6 +28,10 @@ public class SynchronousTaskChain extends TaskChain {
 		timer.schedule(new Task("dummy-" + task.getKey()) {
 			@Ordinal
 			public void execute() {
+				if (task.isCancelled()) {
+					cancel();
+					return;
+				}
 				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		}, 0);
@@ -52,6 +56,10 @@ public class SynchronousTaskChain extends TaskChain {
 		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
 			@Ordinal
 			public void execute() {
+				if (task.isCancelled()) {
+					cancel();
+					return;
+				}
 				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		};
@@ -79,6 +87,10 @@ public class SynchronousTaskChain extends TaskChain {
 		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
 			@Ordinal
 			public void execute() {
+				if (task.isCancelled()) {
+					cancel();
+					return;
+				}
 				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 			}
 		};
@@ -112,6 +124,11 @@ public class SynchronousTaskChain extends TaskChain {
 						return;
 					}
 
+					if (task.isCancelled()) {
+						cancel();
+						return;
+					}
+
 					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 				}
 			};
@@ -131,6 +148,7 @@ public class SynchronousTaskChain extends TaskChain {
 						this.cancel();
 						return;
 					}
+
 					Bukkit.getScheduler().runTask(host, () -> consumer.accept(this));
 				}
 			};
@@ -151,6 +169,12 @@ public class SynchronousTaskChain extends TaskChain {
 						this.cancel();
 						return;
 					}
+
+					if (task.isCancelled()) {
+						cancel();
+						return;
+					}
+
 					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
 				}
 			};

@@ -115,6 +115,16 @@ public final class CommandUtils {
     }
 
     /**
+     * Register a command into the server command map.
+     * 
+     * @param command The command to be registered.
+     */
+    public static void register(@NotNull Command command) {
+        Plugin plugin = JavaPlugin.getProvidingPlugin(command.getClass());
+        read(entry -> entry.getKey().register(command.getLabel(), plugin.getName(), command));
+    }
+
+    /**
      * Inject custom sub commands into any plugin on the server!
      *
      * @param subCommand The sub command to inject.

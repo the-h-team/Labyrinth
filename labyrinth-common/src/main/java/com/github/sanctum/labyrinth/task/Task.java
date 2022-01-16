@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.util.TimerTask;
 import org.intellij.lang.annotations.MagicConstant;
 
@@ -14,6 +15,7 @@ public abstract class Task extends TimerTask {
 	protected TaskChain parent;
 	private final String key;
 	private final int type;
+	private boolean cancelled;
 
 	public Task(String key) {
 		this.type = SINGULAR;
@@ -35,6 +37,14 @@ public abstract class Task extends TimerTask {
 		return this.key;
 	}
 
+	public final <T> T cast(TypeFlag<T> flag) {
+		return flag.cast(this);
+	}
+
+	public final boolean isCancelled() {
+		return cancelled;
+	}
+
 	@Override
 	public final void run() {
 		OrdinalProcedure.process(this, 0);
@@ -47,9 +57,13 @@ public abstract class Task extends TimerTask {
 
 	@Override
 	public final boolean cancel() {
-		if (parent != null) {
-			parent.map.remove(this.key);
+		if (!cancelled) {
+			if (parent != null) {
+				parent.map.remove(this.key);
+			}
+			cancelled = true;
+			return super.cancel();
 		}
-		return super.cancel();
+		return false;
 	}
 }

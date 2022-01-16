@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data.container;
 import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Represents a {@link LabyrinthMap} that cannot be modified only read from.
@@ -99,6 +100,21 @@ public abstract class ImmutableLabyrinthMap<K, V> extends LabyrinthMapBase<K, V>
 
 		public Builder<K, V> put(K key, V value) {
 			internal.put(key, value);
+			return this;
+		}
+
+		public Builder<K, V> computeIfAbsent(K k, V v) {
+			internal.computeIfAbsent(k, v);
+			return this;
+		}
+
+		public Builder<K, V> computeIfAbsent(K k, Supplier<V> v) {
+			internal.computeIfAbsent(k, v);
+			return this;
+		}
+
+		public Builder<K, V> computeIfAbsent(K k, Function<K, V> v) {
+			internal.computeIfAbsent(k, v);
 			return this;
 		}
 

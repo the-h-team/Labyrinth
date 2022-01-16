@@ -278,7 +278,7 @@ public class Item {
 		Bukkit.addRecipe(recipe);
 	}
 
-	public static List<Item> getCache() {
+	public static List<Item> getRegistered() {
 		return Collections.unmodifiableList(cache);
 	}
 

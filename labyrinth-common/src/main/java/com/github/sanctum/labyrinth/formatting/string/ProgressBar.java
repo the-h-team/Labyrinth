@@ -138,6 +138,10 @@ public class ProgressBar implements JsonIntermediate {
 		return this;
 	}
 
+	public double getPercentage() {
+		return Math.round(progress * 100.0 / maxProgress * 100.0) / 100.0;
+	}
+
 	@Json(key = "prefix")
 	String getPrefix() {
 		return prefix;

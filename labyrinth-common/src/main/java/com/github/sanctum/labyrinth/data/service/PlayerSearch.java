@@ -2,22 +2,23 @@ package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.data.FileList;
-import com.github.sanctum.labyrinth.data.FileManager;
-import com.github.sanctum.labyrinth.data.FileType;
-import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.data.container.CollectionTask;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
 import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
+import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.SpecialID;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Arrays;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,6 +46,8 @@ public abstract class PlayerSearch implements Nameable {
 		return TimeWatch.Recording.subtract(getPlayer().getFirstPlayed());
 	}
 
+	public abstract ImageBreakdown getHeadImage();
+
 	public static PlayerSearch of(@NotNull OfflinePlayer player) {
 		String name = player.getName();
 		if (name == null) {
@@ -54,19 +57,16 @@ public abstract class PlayerSearch implements Nameable {
 		return lookups.computeIfAbsent(name, s -> new PlayerSearch() {
 
 			final OfflinePlayer parent;
+			ImageBreakdown image;
 			final String name;
 			final UUID reference;
 			final boolean online;
 			{
-				this.parent = validate(player);
+				this.parent = player;
 				this.online = Bukkit.getOnlineMode();
 				this.name = s;
-				reference = player.getUniqueId();
-			}
-
-			<T> T validate(T t) {
-				if (t != null) return t;
-				throw new IllegalArgumentException("User cannot be null, this is not a fault of labyrinth!");
+				this.reference = player.getUniqueId();
+				TaskScheduler.of(() -> this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID){}).scheduleLaterAsync(1L);
 			}
 
 			@Override
@@ -89,6 +89,11 @@ public abstract class PlayerSearch implements Nameable {
 			public @NotNull SpecialID getSpecialId() {
 				return SpecialID.builder().setLength(12).build(name);
 			}
+
+			@Override
+			public ImageBreakdown getHeadImage() {
+				return new ImageBreakdown(image){};
+			}
 		});
 	}
 
@@ -97,14 +102,28 @@ public abstract class PlayerSearch implements Nameable {
 	}
 
 	public static LabyrinthCollection<PlayerSearch> values() {
-		return ImmutableLabyrinthCollection.of(lookups.values());
+		return lookups.values();
 	}
 
 	public static Deployable<Void> reload() {
-
 		return Deployable.of(null, unused -> {
 			PlayerSearch.lookups.clear();
-			Arrays.stream(Bukkit.getOfflinePlayers()).forEach(PlayerSearch::of);
+			OfflinePlayer[] players = Bukkit.getOfflinePlayers();
+			if (players.length >= 500) {
+				CollectionTask<OfflinePlayer> cacher = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
+				LabyrinthAPI api = LabyrinthProvider.getInstance();
+				api.getLogger().warning("- Whoa large amounts of people, splitting the workload...");
+				api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cacher, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
+				while (cacher.getCompletion() < 100) {
+					try {
+						Thread.sleep(1L);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				for (OfflinePlayer op : players) PlayerSearch.of(op);
+			}
 		});
 	}
 
