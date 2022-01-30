@@ -4,18 +4,17 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
 import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
-import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
+import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
 import com.github.sanctum.labyrinth.formatting.string.SpecialID;
-import com.github.sanctum.labyrinth.interfacing.Nameable;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import java.util.Arrays;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A replacement to the old provision, provide consistent UUID allocation to target usernames!
  */
-public abstract class PlayerSearch implements Nameable {
+public abstract class PlayerSearch implements LabyrinthUser {
 
 	static final LabyrinthMap<String, PlayerSearch> lookups = new LabyrinthEntryMap<>();
 
@@ -33,12 +32,7 @@ public abstract class PlayerSearch implements Nameable {
 
 	public abstract @NotNull OfflinePlayer getPlayer();
 
-	@Deprecated
-	public abstract @NotNull UUID getRecordedId();
-
-	public final UUID getId() {
-		return getRecordedId();
-	}
+	public abstract @NotNull UUID getId();
 
 	public abstract @NotNull SpecialID getSpecialId();
 
@@ -61,12 +55,14 @@ public abstract class PlayerSearch implements Nameable {
 			final String name;
 			final UUID reference;
 			final boolean online;
+
 			{
 				this.parent = player;
 				this.online = Bukkit.getOnlineMode();
 				this.name = s;
 				this.reference = player.getUniqueId();
-				TaskScheduler.of(() -> this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID){}).scheduleLaterAsync(1L);
+				TaskScheduler.of(() -> this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
+				}).scheduleAsync();
 			}
 
 			@Override
@@ -80,7 +76,7 @@ public abstract class PlayerSearch implements Nameable {
 			}
 
 			@Override
-			public @NotNull UUID getRecordedId() {
+			public @NotNull UUID getId() {
 				return online ? reference : getPlayer().getUniqueId();
 			}
 
@@ -92,13 +88,19 @@ public abstract class PlayerSearch implements Nameable {
 
 			@Override
 			public ImageBreakdown getHeadImage() {
-				return new ImageBreakdown(image){};
+				if (image == null) return null;
+				return new ImageBreakdown(image) {
+				};
 			}
 		});
 	}
 
 	public static PlayerSearch of(String name) {
 		return lookups.get(name);
+	}
+
+	public static void register(@NotNull PlayerSearch search) {
+		lookups.put(search.getName(), search);
 	}
 
 	public static LabyrinthCollection<PlayerSearch> values() {
@@ -108,15 +110,15 @@ public abstract class PlayerSearch implements Nameable {
 	public static Deployable<Void> reload() {
 		return Deployable.of(null, unused -> {
 			PlayerSearch.lookups.clear();
-			OfflinePlayer[] players = Bukkit.getOfflinePlayers();
+			final OfflinePlayer[] players = Bukkit.getOfflinePlayers();
+			final LabyrinthAPI api = LabyrinthProvider.getInstance();
 			if (players.length >= 500) {
-				CollectionTask<OfflinePlayer> cacher = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
-				LabyrinthAPI api = LabyrinthProvider.getInstance();
+				CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
 				api.getLogger().warning("- Whoa large amounts of people, splitting the workload...");
-				api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cacher, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
-				while (cacher.getCompletion() < 100) {
+				api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
+				while (cache.getCompletion() < 100) {
 					try {
-						Thread.sleep(1L);
+						Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.service.Check;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,17 +21,17 @@ public class VaultPlayer {
 
 	private static final List<VaultPlayer> CACHE = new LinkedList<>();
 
-	private final LabyrinthUser player;
+	private final PlayerSearch player;
 
 	static Permission getPerms() {
 		return Bukkit.getServicesManager().load(Permission.class);
 	}
 
 	protected VaultPlayer(@NotNull OfflinePlayer player) {
-		this.player = LabyrinthUser.get(Check.forNull(player.getName(), "Invalid user provided! Name cannot be null"));
+		this.player = PlayerSearch.of(Check.forNull(player.getName(), "Invalid user provided! Name cannot be null"));
 	}
 
-	protected VaultPlayer(@NotNull LabyrinthUser player) {
+	protected VaultPlayer(@NotNull PlayerSearch player) {
 		this.player = player;
 	}
 
@@ -44,7 +45,7 @@ public class VaultPlayer {
 		return pl;
 	}
 
-	public static VaultPlayer wrap(LabyrinthUser player) {
+	public static VaultPlayer wrap(PlayerSearch player) {
 		VaultPlayer play = CACHE.stream().filter(p -> p.player.getId().equals(player.getId())).findFirst().orElse(null);
 		if (play != null) {
 			return play;
@@ -58,56 +59,56 @@ public class VaultPlayer {
 		if (getPerms() == null) {
 			return new VaultGroup("no-vault", world);
 		}
-		return new VaultGroup(getPerms().getPrimaryGroup(world, player.toBukkit()), world);
+		return new VaultGroup(getPerms().getPrimaryGroup(world, player.getPlayer()), world);
 	}
 
 	public VaultGroup[] getGroups(String world) {
 		if (getPerms() == null) {
 			return new VaultGroup[]{new VaultGroup("no-vault", world)};
 		}
-		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.toBukkit())).map(s -> new VaultGroup(s, world)).toArray(VaultGroup[]::new);
+		return Arrays.stream(getPerms().getPlayerGroups(world, this.player.getPlayer())).map(s -> new VaultGroup(s, world)).toArray(VaultGroup[]::new);
 	}
 
 	public boolean has(org.bukkit.permissions.Permission permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerHas(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerHas(world, this.player.getPlayer(), permission.getName());
 	}
 
 	public boolean give(org.bukkit.permissions.Permission permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerAdd(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerAdd(world, this.player.getPlayer(), permission.getName());
 	}
 
 	public boolean take(org.bukkit.permissions.Permission permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerRemove(world, this.player.toBukkit(), permission.getName());
+		return getPerms().playerRemove(world, this.player.getPlayer(), permission.getName());
 	}
 
 	public boolean has(String permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerHas(world, this.player.toBukkit(), permission);
+		return getPerms().playerHas(world, this.player.getPlayer(), permission);
 	}
 
 	public boolean give(String permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerAdd(world, this.player.toBukkit(), permission);
+		return getPerms().playerAdd(world, this.player.getPlayer(), permission);
 	}
 
 	public boolean take(String permission, String world) {
 		if (getPerms() == null) {
 			return false;
 		}
-		return getPerms().playerRemove(world, this.player.toBukkit(), permission);
+		return getPerms().playerRemove(world, this.player.getPlayer(), permission);
 	}
 
 	public org.bukkit.permissions.Permission[] getKnownPermissions(String world) {

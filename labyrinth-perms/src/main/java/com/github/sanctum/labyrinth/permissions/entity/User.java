@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.permissions.entity;
 
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 
 public interface User extends Permissible {
 
-	LabyrinthUser getLabyrinth();
+	PlayerSearch toLabyrinth();
 
 	Group getGroup();
 

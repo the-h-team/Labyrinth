@@ -35,21 +35,6 @@ public class HFEncoded {
 		this.obj = obj;
 	}
 
-	/**
-	 * Convert a serialized object from its string form back into an object of desired type
-	 * while retaining all originally saved values.
-	 *
-	 * <p>WARNING: Making changes to objects then attempting to attach/reuse older un-modified objects
-	 * could have negative effects, ensure you have proper object handling when dealing with serialization.</p>
-	 *
-	 * @param objSerial The serialized object string to convert
-	 */
-	@Deprecated
-	@Removal(because = "of new delegation", inVersion = "1.7.5")
-	public HFEncoded(String objSerial) {
-		this.obj = objSerial;
-	}
-
 	@Note("Delegate for both serialization transactions")
 	public static HFEncoded of(@NotNull Object obj) {
 		return new HFEncoded(obj);

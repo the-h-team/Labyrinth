@@ -1,12 +1,9 @@
 package com.github.sanctum.labyrinth.event.custom;
 
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.CommandUtils;
-import com.github.sanctum.labyrinth.library.ContainerQuery;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -455,7 +451,7 @@ public class DefaultEvent extends Vent {
 				return;
 			}
 
-			if (LabyrinthOptions.IMPL_AFK.enabled()) {
+			if (LabyrinthOption.IMPL_AFK.enabled()) {
 
 				AFK.supply(e.getPlayer());
 

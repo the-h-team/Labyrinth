@@ -55,11 +55,6 @@ public class VaultImplementation implements Permissions {
 	}
 
 	@Override
-	public User getUser(LabyrinthUser user) {
-		return users.computeIfAbsent(user.getName(), UserImpl::new);
-	}
-
-	@Override
 	public Group getGroup(String name) {
 		return groups.computeIfAbsent(name, GroupImpl::new);
 	}
@@ -86,57 +81,57 @@ public class VaultImplementation implements Permissions {
 
 	class UserImpl implements User {
 
-		private final LabyrinthUser user;
+		private final PlayerSearch user;
 		private final Inheritance groupInheritance;
 
 		UserImpl(String name) {
-			this.user = LabyrinthUser.get(name);
+			this.user = PlayerSearch.of(name);
 			this.groupInheritance = new UserInheritance(user);
 		}
 
 		@Override
-		public LabyrinthUser getLabyrinth() {
+		public PlayerSearch toLabyrinth() {
 			return this.user;
 		}
 
 		@Override
 		public Group getGroup() {
-			return VaultImplementation.this.getGroup(api.getProvider().getPrimaryGroup(Bukkit.getWorlds().get(0).getName(), user.toBukkit()));
+			return VaultImplementation.this.getGroup(api.getProvider().getPrimaryGroup(Bukkit.getWorlds().get(0).getName(), user.getPlayer()));
 		}
 
 		@Override
 		public Group getGroup(String world) {
-			return VaultImplementation.this.getGroup(api.getProvider().getPrimaryGroup(world, user.toBukkit()));
+			return VaultImplementation.this.getGroup(api.getProvider().getPrimaryGroup(world, user.getPlayer()));
 		}
 
 		@Override
 		public boolean has(String node) {
-			return api.getProvider().playerHas(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), node);
+			return api.getProvider().playerHas(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), node);
 		}
 
 		@Override
 		public boolean has(String node, String world) {
-			return api.getProvider().playerHas(world, user.toBukkit(), node);
+			return api.getProvider().playerHas(world, user.getPlayer(), node);
 		}
 
 		@Override
 		public boolean give(String node) {
-			return api.getProvider().playerAdd(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), node);
+			return api.getProvider().playerAdd(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), node);
 		}
 
 		@Override
 		public boolean give(String node, String world) {
-			return api.getProvider().playerAdd(world, user.toBukkit(), node);
+			return api.getProvider().playerAdd(world, user.getPlayer(), node);
 		}
 
 		@Override
 		public boolean take(String node) {
-			return api.getProvider().playerRemove(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), node);
+			return api.getProvider().playerRemove(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), node);
 		}
 
 		@Override
 		public boolean take(String node, String world) {
-			return api.getProvider().playerRemove(world, user.toBukkit(), node);
+			return api.getProvider().playerRemove(world, user.getPlayer(), node);
 		}
 
 		@Override
@@ -218,16 +213,16 @@ public class VaultImplementation implements Permissions {
 
 	class UserInheritance implements Inheritance {
 
-		private final LabyrinthUser user;
+		private final PlayerSearch user;
 
-		UserInheritance(LabyrinthUser user) {
+		UserInheritance(PlayerSearch user) {
 			this.user = user;
 		}
 
 		@Override
 		public Group[] getSubGroups() {
 			List<Group> groups = new ArrayList<>();
-			for (String playerGroup : api.getProvider().getPlayerGroups(Bukkit.getWorlds().get(0).getName(), user.toBukkit())) {
+			for (String playerGroup : api.getProvider().getPlayerGroups(Bukkit.getWorlds().get(0).getName(), user.getPlayer())) {
 				Group g = VaultImplementation.this.getGroup(playerGroup);
 				if (g != null) {
 					groups.add(g);
@@ -239,7 +234,7 @@ public class VaultImplementation implements Permissions {
 		@Override
 		public Group[] getSubGroups(String world) {
 			List<Group> groups = new ArrayList<>();
-			for (String playerGroup : api.getProvider().getPlayerGroups(world, user.toBukkit())) {
+			for (String playerGroup : api.getProvider().getPlayerGroups(world, user.getPlayer())) {
 				Group g = VaultImplementation.this.getGroup(playerGroup);
 				if (g != null) {
 					groups.add(g);
@@ -250,17 +245,17 @@ public class VaultImplementation implements Permissions {
 
 		@Override
 		public boolean has(String group) {
-			return api.getProvider().playerInGroup(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), group);
+			return api.getProvider().playerInGroup(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), group);
 		}
 
 		@Override
 		public boolean has(String group, String world) {
-			return api.getProvider().playerInGroup(world, user.toBukkit(), group);
+			return api.getProvider().playerInGroup(world, user.getPlayer(), group);
 		}
 
 		@Override
 		public boolean has(Permission node) {
-			return api.getProvider().has(user.toBukkit().getPlayer(), node.getName());
+			return api.getProvider().has(user.getPlayer().getPlayer(), node.getName());
 		}
 
 		@Override
@@ -270,22 +265,22 @@ public class VaultImplementation implements Permissions {
 
 		@Override
 		public boolean give(String group) {
-			return api.getProvider().playerAddGroup(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), group);
+			return api.getProvider().playerAddGroup(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), group);
 		}
 
 		@Override
 		public boolean give(String group, String world) {
-			return api.getProvider().playerAddGroup(world, user.toBukkit(), group);
+			return api.getProvider().playerAddGroup(world, user.getPlayer(), group);
 		}
 
 		@Override
 		public boolean take(String group) {
-			return api.getProvider().playerRemoveGroup(Bukkit.getWorlds().get(0).getName(), user.toBukkit(), group);
+			return api.getProvider().playerRemoveGroup(Bukkit.getWorlds().get(0).getName(), user.getPlayer(), group);
 		}
 
 		@Override
 		public boolean take(String group, String world) {
-			return api.getProvider().playerRemoveGroup(world, user.toBukkit(), group);
+			return api.getProvider().playerRemoveGroup(world, user.getPlayer(), group);
 		}
 	}
 

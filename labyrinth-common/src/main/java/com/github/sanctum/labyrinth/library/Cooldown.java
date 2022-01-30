@@ -137,6 +137,10 @@ public abstract class Cooldown implements ParsedTimeFormat {
 				.replace("{SECONDS}", "" + getSeconds());
 	}
 
+	public synchronized final void remove() {
+		SERVICE.remove(this);
+	}
+
 	/**
 	 * Save the cooldown to Labyrinth cache.
 	 * <p>
@@ -198,59 +202,6 @@ public abstract class Cooldown implements ParsedTimeFormat {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		return month + " " + day + ", " + year + " @ " + clock + (calendar.get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am");
-	}
-
-	@Deprecated
-	@Removal(because = "of the new Cooldown#getDays() method.", inVersion = "1.7.[?6-7]")
-	public final int getDaysLeft() {
-		return (int) getDays();
-	}
-
-	@Deprecated
-	@Removal(because = "of the new Cooldown#getHours() method.", inVersion = "1.7.[?6-7]")
-	public final long getHoursLeft() {
-		return getHours();
-	}
-
-	@Deprecated
-	@Removal(because = "of the new Cooldown#getMinutes() method.", inVersion = "1.7.[?6-7]")
-	public final long getMinutesLeft() {
-		return getMinutes();
-	}
-
-	@Deprecated
-	@Removal(because = "of the new Cooldown#getSeconds() method.", inVersion = "1.7.[?6-7]")
-	public final long getSecondsLeft() {
-		return getSeconds();
-	}
-
-	@Deprecated
-	@Removal(because = "of the new Cooldown#toFormat() method.", inVersion = "1.7.[?6-7]")
-	public String fullTimeLeft() {
-		return toFormat();
-	}
-
-	/**
-	 * Get a native cooldown object by its set delimiter-id.
-	 *
-	 * @param id the custom delimiter to search for
-	 * @return a cooldown based object retaining original values from save
-	 * @deprecated use {@link com.github.sanctum.labyrinth.api.CooldownService#getCooldown(String)} instead!
-	 */
-	@Deprecated
-	public static Cooldown getById(String id) {
-		return SERVICE.getCooldown(id);
-	}
-
-	/**
-	 * Remove an object of Cooldown inheritance from Labyrinth cache.
-	 *
-	 * @param c the cooldown representative to remove from cache
-	 * @deprecated Use {@link com.github.sanctum.labyrinth.api.CooldownService#remove(Cooldown)} instead!
-	 */
-	@Deprecated
-	public static void remove(Cooldown c) {
-		SERVICE.remove(c);
 	}
 
 

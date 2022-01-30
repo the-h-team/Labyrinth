@@ -24,7 +24,7 @@ import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
-import com.github.sanctum.labyrinth.data.service.LabyrinthOptions;
+import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
@@ -298,7 +298,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 			}
 
-			if (LabyrinthOptions.IMPL_REGION_SERVICES.enabled()) {
+			if (LabyrinthOption.IMPL_REGION_SERVICES.enabled()) {
 				RegionServicesManagerImpl.initialize(plugin);
 			}
 		});

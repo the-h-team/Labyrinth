@@ -1,89 +1,63 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.formatting.TablistInstance;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
-import com.github.sanctum.labyrinth.library.AFK;
-import com.github.sanctum.labyrinth.library.VaultPlayer;
-import java.util.ArrayList;
-import java.util.List;
+import com.github.sanctum.labyrinth.library.Cooldown;
+import com.github.sanctum.labyrinth.library.ParsedTimeFormat;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Deprecated
-public class LabyrinthUser implements Nameable {
+public interface LabyrinthUser extends Nameable {
 
-	static final LabyrinthMap<String, LabyrinthUser> users = new LabyrinthEntryMap<>();
-	private OfflinePlayer target = null;
-	private final String name;
-	private final List<String> names = new ArrayList<>();
-	private final UUID id;
+	@NotNull String getName();
 
-	// The problem with serving offline (cracked) users is its near impossible to keep track of conversions etc. But im trying :/
-	public LabyrinthUser(String name) {
-		this.name = name;
-		PlayerSearch lookup = PlayerSearch.of(name);
-		this.id = lookup.getId();
-		this.target = lookup.getPlayer();
+	@NotNull UUID getId();
+
+	@NotNull OfflinePlayer getPlayer();
+
+	default TablistInstance getTablist() {
+		return isOnline() ? TablistInstance.get(getPlayer().getPlayer()) : null;
 	}
 
-	public LabyrinthUser(OfflinePlayer pl) {
-		this.name = pl.getName();
-		PlayerSearch lookup = PlayerSearch.of(pl);
-		this.target = lookup.getPlayer();
-		this.id = lookup.getId();
+	default @Nullable Cooldown getCooldown(@NotNull String key) {
+		return LabyrinthProvider.getInstance().getCooldown(getId().toString() + "-" + key);
 	}
 
-	@Deprecated
-	public static LabyrinthUser get(@NotNull String name) {
-		return users.computeIfAbsent(name, LabyrinthUser::new);
-	}
-
-	@Deprecated
-	public static LabyrinthUser get(@NotNull OfflinePlayer player) {
-		return Optional.ofNullable(users.get(player.getName())).orElseGet(() -> {
-			LabyrinthUser n = new LabyrinthUser(player);
-			users.put(player.getName(), n);
-			return n;
+	default @NotNull Cooldown getOrCreate(@NotNull String key, @NotNull ParsedTimeFormat format) {
+		return Optional.ofNullable(getCooldown(key)).orElseGet(() -> {
+			Cooldown c = newCooldown(key, format);
+			c.save();
+			return c;
 		});
 	}
 
-	public UUID getId() {
-		return this.id;
+	default @NotNull Cooldown newCooldown(@NotNull String key, @NotNull ParsedTimeFormat format) {
+		return new Cooldown() {
+
+			long cooldown;
+
+			{
+				abv(format.toSeconds());
+			}
+
+			@Override
+			public String getId() {
+				return key;
+			}
+
+			@Override
+			public long getCooldown() {
+				return cooldown;
+			}
+		};
 	}
 
-	@Override
-	public @NotNull String getName() {
-		return this.name;
-	}
-
-	@Note("May provide unwanted effects (If you don't want multiple afk plugins running), an active AFK impl will be supplied if not found.")
-	public AFK toAFK() {
-		return AFK.supply(toBukkit().getPlayer());
-	}
-
-	public OfflinePlayer toBukkit() {
-		return target;
-	}
-
-	public boolean isOnline() {
-		return toBukkit().getPlayer() != null;
-	}
-
-	public boolean isValid() {
-		return id != null;
-	}
-
-	public VaultPlayer toVault() {
-		return VaultPlayer.wrap(this);
-	}
-
-	public List<String> getKnownNames() {
-		return names;
+	default boolean isOnline() {
+		return getPlayer().getPlayer() != null;
 	}
 
 }

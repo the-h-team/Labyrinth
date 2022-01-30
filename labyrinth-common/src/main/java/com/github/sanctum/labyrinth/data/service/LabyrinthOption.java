@@ -4,9 +4,11 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 
-public enum  LabyrinthOptions {
+public enum LabyrinthOption {
 
-	HEAD_PRE_CACHE, IMPL_REGION_SERVICES, IMPL_AFK;
+	HEAD_PRE_CACHE,
+	IMPL_REGION_SERVICES,
+	IMPL_AFK;
 
 	public boolean enabled() {
 

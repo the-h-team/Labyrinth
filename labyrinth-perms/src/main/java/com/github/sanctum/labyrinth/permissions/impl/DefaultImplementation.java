@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.permissions.impl;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +41,6 @@ public class DefaultImplementation implements Permissions {
 	}
 
 	@Override
-	public com.github.sanctum.labyrinth.permissions.entity.User getUser(LabyrinthUser user) {
-		return users.computeIfAbsent(user.getName(), User::new);
-	}
-
-	@Override
 	public com.github.sanctum.labyrinth.permissions.entity.Group getGroup(String name) {
 		return groups.computeIfAbsent(name, Group::new);
 	}
@@ -61,14 +57,14 @@ public class DefaultImplementation implements Permissions {
 
 	static class User implements com.github.sanctum.labyrinth.permissions.entity.User {
 
-		private final LabyrinthUser user;
+		private final PlayerSearch user;
 
 		User(String name) {
-			this.user = LabyrinthUser.get(name);
+			this.user = PlayerSearch.of(name);
 		}
 
 		@Override
-		public LabyrinthUser getLabyrinth() {
+		public PlayerSearch toLabyrinth() {
 			return this.user;
 		}
 
