@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
@@ -12,15 +13,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -185,7 +189,7 @@ public class JsonConfiguration extends Configurable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object checkObject(Type type, Object object) {
+	Object checkObject(Type type, boolean array, Object object) {
 		Object target = object;
 		try {
 			Class<?> cl = Class.forName(type.getTypeName());
@@ -200,8 +204,7 @@ public class JsonConfiguration extends Configurable {
 						Object ob = j.get(d.getKey());
 						Object o;
 						if (ob instanceof String) {
-							Map<String, Object> map = g.fromJson((String) ob, new TypeToken<Map<String, Object>>() {
-							}.getType());
+							Map<String, Object> map = g.fromJson((String) ob, new EasyTypeAdapter<Map<String, Object>>());
 							o = d.getValue().read(map);
 						} else {
 							o = d.getValue().read((Map<String, Object>) ob);
@@ -209,7 +212,25 @@ public class JsonConfiguration extends Configurable {
 						if (o != null) {
 							target = o;
 						}
+					} else {
+						Object o = d.getValue().read(j);
+						if (o != null) {
+							target = o;
+						}
 					}
+				}
+				return target;
+			}
+			if (target instanceof JSONArray && array) {
+				JSONArray j = (JSONArray) object;
+				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> cl.isAssignableFrom(de.getValue().getSubClass())).findFirst().orElse(null);
+				if (d != null) {
+					Object[] copy = (Object[]) Array.newInstance(cl, j.size());
+					for (int i = 0; i < j.size(); i++) {
+						Map<String, Object> map = (Map<String, Object>) j.get(i);
+						copy[i] = d.getValue().read(map.containsKey(d.getKey()) ? (Map<String, Object>) map.get(d.getKey()) : map);
+					}
+					target = copy;
 				}
 			}
 		} catch (ClassNotFoundException exception) {
@@ -254,22 +275,23 @@ public class JsonConfiguration extends Configurable {
 			if (obj instanceof JSONObject) {
 				JSONObject js = (JSONObject) obj;
 				if (js.containsKey(k)) {
-					ob = checkObject(type, js.get(k));
+					ob = checkObject(type, false, js.get(k));
 					stop = true;
 				} else {
 					o = js;
 				}
 			} else {
-				ob = checkObject(type, obj);
+				ob = checkObject(type.isArray() ? type.getComponentType() : type, obj instanceof JSONArray, obj);
 				stop = true;
 			}
 		}
 		if (!stop) {
-			ob = checkObject(type, o.get(k));
+			Object object = o.get(k);
+			ob = checkObject(type.isArray() ? type.getComponentType() : type, (object instanceof JSONArray), object);
 		}
 		if (ob == null) return null;
-		if (!type.isAssignableFrom(ob.getClass())) return null;
-		return (T) ob;
+		if (!type.isArray() && !type.isAssignableFrom(ob.getClass())) return null;
+		return type.cast(ob);
 	}
 
 	@Override
