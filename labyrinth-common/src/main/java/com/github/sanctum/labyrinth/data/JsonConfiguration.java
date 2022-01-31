@@ -212,11 +212,6 @@ public class JsonConfiguration extends Configurable {
 						if (o != null) {
 							target = o;
 						}
-					} else {
-						Object o = d.getValue().read(j);
-						if (o != null) {
-							target = o;
-						}
 					}
 				}
 				return target;
