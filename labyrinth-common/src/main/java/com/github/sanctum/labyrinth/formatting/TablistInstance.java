@@ -218,7 +218,7 @@ public interface TablistInstance {
 						return;
 					}
 
-					getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
+					getGroups().stream().filter(TabGroup::isActive).forEach(tabGroup -> {
 						tabGroup.nextDisplayIndex(TabInfo.HEADER);
 						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
 						getHolder().setPlayerListHeaderFooter(StringUtils.use(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString()).translate(getHolder()), StringUtils.use(tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString()).translate(getHolder()));
