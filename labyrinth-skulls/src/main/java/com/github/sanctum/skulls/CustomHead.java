@@ -1,8 +1,13 @@
 package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.MemorySpace;
+import com.github.sanctum.labyrinth.data.container.CollectionTask;
+import com.github.sanctum.labyrinth.data.service.Counter;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
@@ -108,19 +113,21 @@ public abstract class CustomHead implements SkullObject {
 			HEADS.add(object);
 		}
 
-		protected static List<CustomHead> loadOffline() {
+		static List<CustomHead> loadOffline() {
 			List<CustomHead> list = new LinkedList<>();
 			if (!LOADED) {
-				TaskScheduler.of(() -> {
-					for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+				final OfflinePlayer[] players = Bukkit.getOfflinePlayers();
+				final LabyrinthAPI api = LabyrinthProvider.getInstance();
+				if (players.length >= 500) {
+					Counter<Long> count = Counter.newInstance();
+					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, player -> {
 						OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
 						if (search.getResult() != null) {
 							if (player.getName() != null) {
 								list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
 							}
 						} else {
-							LabyrinthProvider.getInstance().getLogger().severe("- " + player.getName() + " has no information provided by mojang or a valid internet connection wasn't established");
-
+							count.add();
 							OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
 							if (search2.getResult() != null) {
 								if (player.getName() != null) {
@@ -128,8 +135,44 @@ public abstract class CustomHead implements SkullObject {
 								}
 							}
 						}
+					});
+					api.getLogger().warning("- A-lot of players, splitting the workload...");
+					api.getLogger().warning("- You can turn off skull pre-caching in the labyrinth config.");
+					api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
+					while (cache.getCompletion() < 100) {
+						try {
+							Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
-				}).scheduleAsync();
+					if (count.get() > 0) {
+						api.getLogger().warning(count.get() + " non-premium players accounted for.");
+					}
+				} else {
+					TaskScheduler.of(() -> {
+						int count = 0;
+						for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+							OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+							if (search.getResult() != null) {
+								if (player.getName() != null) {
+									list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
+								}
+							} else {
+								count++;
+								OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
+								if (search2.getResult() != null) {
+									if (player.getName() != null) {
+										list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult()));
+									}
+								}
+							}
+						}
+						if (count > 0) {
+							api.getLogger().warning(count + " non-premium players accounted for.");
+						}
+					}).scheduleAsync();
+				}
 			}
 			return list;
 		}

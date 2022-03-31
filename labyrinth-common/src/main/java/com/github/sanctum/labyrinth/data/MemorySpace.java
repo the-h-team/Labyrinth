@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.annotation.See;
+import com.github.sanctum.labyrinth.data.container.LabyrinthAtlas;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,6 +11,7 @@ import java.util.Set;
  * @author Hempfest
  * @version 1.0
  */
+@See({Node.class, Configurable.class, Atlas.class, LabyrinthAtlas.class})
 public interface MemorySpace {
 
 	/**

@@ -6,9 +6,11 @@ import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +33,10 @@ public interface RenderedTask {
 	@Nullable String getId();
 
 	@NotNull Type getType();
+
+	default @NotNull Task getTask() {
+		return Objects.requireNonNull(TaskMonitor.getLocalInstance().get(Objects.requireNonNull(getId())));
+	}
 
 	@NotNull TimeWatch getLastRendered();
 

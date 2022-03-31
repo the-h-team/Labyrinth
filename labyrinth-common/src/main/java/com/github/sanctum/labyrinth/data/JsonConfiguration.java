@@ -198,7 +198,7 @@ public class JsonConfiguration extends Configurable {
 				JSONObject j = (JSONObject) object;
 				Gson g = JsonAdapter.getJsonBuilder().create();
 
-				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getSubClass())).findFirst().orElse(null);
+				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> de.getKey().equals(cl.getTypeName()) || cl.isAssignableFrom(de.getValue().getClassType())).findFirst().orElse(null);
 				if (d != null) {
 					if (j.containsKey(d.getKey())) {
 						Object ob = j.get(d.getKey());
@@ -218,7 +218,7 @@ public class JsonConfiguration extends Configurable {
 			}
 			if (target instanceof JSONArray && array) {
 				JSONArray j = (JSONArray) object;
-				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> cl.isAssignableFrom(de.getValue().getSubClass())).findFirst().orElse(null);
+				Map.Entry<String, JsonAdapterInput<?>> d = serializers.entrySet().stream().filter(de -> cl.isAssignableFrom(de.getValue().getClassType())).findFirst().orElse(null);
 				if (d != null) {
 					Object[] copy = (Object[]) Array.newInstance(cl, j.size());
 					for (int i = 0; i < j.size(); i++) {

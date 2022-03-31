@@ -4,10 +4,12 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.data.JsonAdapter;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
@@ -15,6 +17,12 @@ import com.github.sanctum.labyrinth.formatting.string.SpecialID;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.google.gson.JsonArray;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -44,7 +52,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 
 	public static PlayerSearch of(@NotNull OfflinePlayer player) {
 		String name = player.getName();
-		if (name == null) {
+		if (name == null || name.contains("CMI") || name.contains(".") || name.contains(",") || name.contains("!") || name.contains("?")) {
 			LabyrinthProvider.getInstance().getLogger().severe("- Attempted and failed to register corrupt player data (" + player + "), this is not the fault of labyrinth.");
 			return null;
 		}
@@ -53,6 +61,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			final OfflinePlayer parent;
 			ImageBreakdown image;
 			final String name;
+			String[] names;
 			final UUID reference;
 			final boolean online;
 
@@ -63,11 +72,47 @@ public abstract class PlayerSearch implements LabyrinthUser {
 				this.reference = player.getUniqueId();
 				TaskScheduler.of(() -> this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
 				}).scheduleAsync();
+				TaskScheduler.of(() -> {
+					URL url;
+					BufferedReader in = null;
+					StringBuilder sb = new StringBuilder();
+					try {
+						url = new URL("https://api.mojang.com/user/profiles/" + reference.toString() + "/names");
+						in = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+						String str;
+						while ((str = in.readLine()) != null) {
+							sb.append(str);
+						}
+					} catch (Exception ignored) {
+					} finally {
+						try {
+							if (in != null) {
+								in.close();
+							}
+						} catch (IOException ignored) {
+						}
+					}
+					if (sb.length() > 0) {
+						JsonArray array = JsonAdapter.getJsonBuilder().create().fromJson(sb.toString(), JsonArray.class);
+						LabyrinthCollection<String> names = new LabyrinthList<>();
+						array.forEach(element -> {
+							if (element.isJsonObject()) {
+								names.add(element.getAsJsonObject().get("name").getAsString());
+							}
+						});
+						this.names = names.stream().toArray(String[]::new);
+					}
+				}).scheduleAsync();
 			}
 
 			@Override
 			public @NotNull String getName() {
 				return name;
+			}
+
+			@Override
+			public String[] getPreviousNames() {
+				return names;
 			}
 
 			@Override

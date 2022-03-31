@@ -1,7 +1,12 @@
 package com.github.sanctum.labyrinth.data.service;
 
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.api.Service;
+import java.util.Objects;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Wraps versions to be able to easily use different NMS server versions
@@ -9,7 +14,7 @@ import org.bukkit.inventory.Inventory;
  * @author Wesley Smith
  * @since 1.0
  */
-public interface AnvilMechanics {
+public interface AnvilMechanics extends Service {
 
 	/**
 	 * Gets the next available NMS container id for the player
@@ -91,5 +96,9 @@ public interface AnvilMechanics {
 	 * @return The Container instance
 	 */
 	Object newContainerAnvil(Player player, String title);
+
+	static @Note @NotNull AnvilMechanics getInstance() {
+		return Objects.requireNonNull(Bukkit.getServicesManager().load(AnvilMechanics.class));
+	}
 
 }

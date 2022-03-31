@@ -49,7 +49,7 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 
 	public String getKey() {
 		String test = AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((r, u) -> r.value());
-		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getSubClass()).mapFromClass((r, u) -> r.value());
+		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getClassType()).mapFromClass((r, u) -> r.value());
 	}
 
 	@Override

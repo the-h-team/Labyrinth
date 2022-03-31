@@ -1,5 +1,9 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.interfacing.ResourceCheck;
+import com.github.sanctum.labyrinth.interfacing.WebResponse;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
@@ -7,13 +11,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import org.intellij.lang.annotations.MagicConstant;
 
 /**
  * @author Hempfest
  */
-public abstract class UpdateChecker {
+public abstract class UpdateChecker implements ResourceCheck {
 
 	/**
 	 * Format: X.X.X
@@ -33,6 +36,11 @@ public abstract class UpdateChecker {
 	private String LATEST;
 	private final Plugin PLUGIN;
 
+	@Note("Used to update labyrinth specifically")
+	public UpdateChecker() {
+		this(LabyrinthProvider.getInstance().getPluginInstance(), 97679);
+	}
+
 	public UpdateChecker(Plugin plugin, int id) {
 		this.PROJECT_ID = id;
 		this.PLUGIN = plugin;
@@ -47,13 +55,19 @@ public abstract class UpdateChecker {
 		return PLUGIN;
 	}
 
+	@Override
 	public String getCurrent() {
 		return LATEST;
 	}
 
-	public String getLatest() throws IOException {
-		URLConnection con = URL.openConnection();
-		return this.LATEST = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
+	@Override
+	public String getLatest() {
+		try {
+			return this.LATEST = new BufferedReader(new InputStreamReader(URL.openConnection().getInputStream())).readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String getResource() {
@@ -125,4 +139,10 @@ public abstract class UpdateChecker {
 		return hasUpdate(UpdateChecker.STANDARD);
 	}
 
+	@Override
+	public void run() {
+		if (hasUpdate()) {
+			WebResponse.download(this, "labyrinth", getResource() + "-LU" + getLatest(), ".jar");
+		}
+	}
 }

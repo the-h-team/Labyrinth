@@ -18,19 +18,12 @@ public interface TaskPredicate<T extends Task> {
 
 
 	static <T extends Task> TaskPredicate<T> cancelEmpty() {
-		return new TaskPredicate<T>() {
-			private final Object LOCK_OBJ = new Object();
-
-			@Override
-			public boolean accept(Task task) {
-				synchronized (LOCK_OBJ) {
-					if (Bukkit.getOnlinePlayers().size() == 0) {
-						task.cancel();
-						return false;
-					}
-				}
-				return true;
+		return task -> {
+			if (Bukkit.getOnlinePlayers().size() == 0) {
+				task.cancel();
+				return false;
 			}
+			return true;
 		};
 	}
 
@@ -62,6 +55,22 @@ public interface TaskPredicate<T extends Task> {
 
 	static <T extends Task> TaskPredicate<T> cancelAfter(Function<T, Boolean> consumer) {
 		return consumer::apply;
+	}
+
+	static <T extends Task> TaskPredicate<T> reduceEmpty() {
+		return new TaskPredicate<T>() {
+			private final Object LOCK_OBJ = new Object();
+
+			@Override
+			public boolean accept(Task task) {
+				synchronized (LOCK_OBJ) {
+					if (Bukkit.getOnlinePlayers().size() == 0) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
 	}
 
 }

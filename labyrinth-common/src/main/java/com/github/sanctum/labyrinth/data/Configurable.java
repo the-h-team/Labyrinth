@@ -156,7 +156,7 @@ public abstract class Configurable implements MemorySpace, Root {
 	 * @return The desired Json element adapter or null if non existent.
 	 */
 	public static <V> JsonAdapter<V> getAdapter(@NotNull Class<V> type) {
-		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName()) || type.isAssignableFrom(e.getValue().getSubClass())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
+		return serializers.entrySet().stream().filter(e -> e.getKey().equals(type.getName()) || type.isAssignableFrom(e.getValue().getClassType())).map(Map.Entry::getValue).map(c -> (JsonAdapter<V>) c).findFirst().orElse(null);
 	}
 
 	public static <V> JsonAdapter<V> getAdapter(@NotNull String pointer) {

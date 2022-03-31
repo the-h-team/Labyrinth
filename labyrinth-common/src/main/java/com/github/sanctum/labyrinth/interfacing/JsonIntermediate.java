@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A helpful utility class designed for easy json conversions
@@ -254,6 +255,10 @@ public interface JsonIntermediate {
 			}
 		}
 		return map;
+	}
+
+	static Json.Reducer deform(Function<Object, Object> function) {
+		return function::apply;
 	}
 
 }

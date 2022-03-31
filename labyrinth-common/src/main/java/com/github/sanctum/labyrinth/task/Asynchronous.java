@@ -39,9 +39,9 @@ public class Asynchronous {
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
-						applicable.apply();
+						applicable.run();
 						if (apply != null) {
-							apply.apply();
+							apply.run();
 						}
 						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						return;
@@ -71,9 +71,9 @@ public class Asynchronous {
 								return;
 							}
 						}
-						applicable.apply();
+						applicable.run();
 						if (apply != null) {
-							apply.apply();
+							apply.run();
 						}
 						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 					} else {
@@ -105,9 +105,9 @@ public class Asynchronous {
 									return;
 								}
 							}
-							applicable.apply();
+							applicable.run();
 							if (apply != null) {
-								apply.apply();
+								apply.run();
 							}
 							labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						} else {

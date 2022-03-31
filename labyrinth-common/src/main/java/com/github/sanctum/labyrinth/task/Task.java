@@ -2,15 +2,19 @@ package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.util.TimerTask;
 import org.intellij.lang.annotations.MagicConstant;
 
-@Note("This class requires one method with the ordinal level 0")
-public abstract class Task extends TimerTask {
+@Note("This class requires a void method with ordinal level 0")
+public abstract class Task extends TimerTask implements Applicable {
+
+	public static final TypeFlag<Task> FLAG = () -> Task.class;
 
 	public static final int SINGULAR = 0;
 	public static final int REPEATABLE = 1;
+	private static final long serialVersionUID = 5781615452181138418L;
 
 	protected TaskChain parent;
 	private final String key;

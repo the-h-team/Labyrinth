@@ -17,8 +17,8 @@ public interface Applicable extends Runnable, Serializable {
 	/**
 	 * Execute any information applied within reference.
 	 */
-	@Deprecated
-	default void apply() {
+	default void apply(Applicable applicable) {
 		run();
+		applicable.run();
 	}
 }

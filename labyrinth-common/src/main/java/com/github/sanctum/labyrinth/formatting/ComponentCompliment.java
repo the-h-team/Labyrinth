@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.formatting;
 /**
  * @author Hempfest
  */
+@Deprecated
 public interface ComponentCompliment<T> {
 
 	@SuppressWarnings("EmptyMethod")

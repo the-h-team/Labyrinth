@@ -40,9 +40,9 @@ public class Synchronous {
 				try {
 					if (cancellation != null) {
 						cancellation.execute(new ScheduledTask(this));
-						applicable.apply();
+						applicable.run();
 						if (apply != null) {
-							apply.apply();
+							apply.run();
 						}
 						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						return;
@@ -72,9 +72,9 @@ public class Synchronous {
 								return;
 							}
 						}
-						applicable.apply();
+						applicable.run();
 						if (apply != null) {
-							apply.apply();
+							apply.run();
 						}
 						labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 					} else {
@@ -106,9 +106,9 @@ public class Synchronous {
 									return;
 								}
 							}
-							applicable.apply();
+							applicable.run();
 							if (apply != null) {
-								apply.apply();
+								apply.run();
 							}
 							labyrinthAPI.getConcurrentTaskIds().remove(getTaskId());
 						} else {

@@ -88,6 +88,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleLater(Applicable data, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -98,6 +99,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleLater(Applicable data, String key, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -108,6 +110,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -118,6 +121,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, String key, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -128,6 +132,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimer(Applicable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
+		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -138,6 +143,7 @@ public final class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimerAsync(Applicable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
+		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}

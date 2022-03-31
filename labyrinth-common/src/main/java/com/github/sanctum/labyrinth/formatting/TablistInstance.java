@@ -218,10 +218,13 @@ public interface TablistInstance {
 						return;
 					}
 
-					getGroups().stream().filter(TabGroup::isActive).forEach(tabGroup -> {
+					getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
 						tabGroup.nextDisplayIndex(TabInfo.HEADER);
 						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
-						getHolder().setPlayerListHeaderFooter(StringUtils.use(tabGroup.getHeader(tabGroup.getCurrentHeaderIndex()).toString()).translate(getHolder()), StringUtils.use(tabGroup.getFooter(tabGroup.getCurrentFooterIndex()).toString()).translate(getHolder()));
+						TabInfo header = tabGroup.getHeader(tabGroup.getCurrentHeaderIndex());
+						TabInfo footer = tabGroup.getFooter(tabGroup.getCurrentFooterIndex());
+						getHolder().setPlayerListHeaderFooter(StringUtils.use(header.toString()).translate(getHolder()), StringUtils.use(footer.toString()).translate(getHolder()));
+						getHolder().setPlayerListName(StringUtils.use(getHolder().getDisplayName()).translate());
 						consumer.accept(getHolder());
 					});
 				}, getHolder().getName() + "-tablist", unit.toMillis(period), unit.toMillis(period));
