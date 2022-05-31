@@ -1,19 +1,35 @@
 package com.github.sanctum.labyrinth.command;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollectionBase;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
+import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+/**
+ * A class designed for easy bukkit sub command flow. Append or remove sub labels to registered commands.
+ *
+ * @author Hempfest
+ */
 public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand> {
 	protected final Crossover parent;
 
@@ -22,8 +38,69 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 		this.parent = new Crossover(parent);
 	}
 
-	public final String getCommand() {
+	/**
+	 * Get the main command label this sub command belongs to.
+	 *
+	 * @return The main command this sub command is for.
+	 */
+	public final @NotNull String getCommand() {
 		return parent.getLabel();
+	}
+
+	/**
+	 * Get a sub command from this list by its label.
+	 *
+	 * @param label The label of the sub command.
+	 * @return a sub command match or null if not found.
+	 */
+	public final @Nullable SubCommand getSubCommand(@NotNull String label) {
+		return stream().filter(s -> s.getLabel().equalsIgnoreCase(label)).findFirst().orElse(null);
+	}
+
+	/**
+	 * Register a sub command into this list.
+	 *
+	 * @param subCommand The command to register.
+	 */
+	public final void register(@NotNull SubCommand subCommand) {
+		if (subCommand.getCommand().equalsIgnoreCase(getCommand())) {
+			final Command parent = CommandUtils.getCommandByLabel(subCommand.getCommand());
+			if (parent != null) {
+				final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
+					if (parent instanceof PluginCommand) {
+						return ((PluginCommand)parent).getPlugin();
+					} else return LabyrinthProvider.getInstance().getPluginInstance();
+				});
+				CommandUtils.read(entry -> {
+					Map<String, Command> commandMappings = entry.getValue();
+					CommandMap map = entry.getKey();
+					commandMappings.remove(parent.getName());
+					for (String alias : parent.getAliases()) {
+						if (commandMappings.containsKey(alias) && commandMappings.get(alias).getAliases().contains(alias)) {
+							commandMappings.remove(alias);
+						}
+					}
+					parent.unregister(map);
+					map.register(getCommand(), plugin.getName(), parent);
+					if (!contains(subCommand)) add(subCommand);
+					return this;
+				});
+			} else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
+		}
+	}
+
+	/**
+	 * Unregister a sub command from this list.
+	 *
+	 * @param subCommand The command to unregister.
+	 */
+	public final void unregister(@NotNull SubCommand subCommand) {
+		if (subCommand.getCommand().equalsIgnoreCase(getCommand())) {
+			final Command parent = CommandUtils.getCommandByLabel(subCommand.getCommand());
+			if (parent != null) {
+				if (contains(subCommand)) remove(subCommand);
+			} else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
+		}
 	}
 
 	class Crossover extends Command {

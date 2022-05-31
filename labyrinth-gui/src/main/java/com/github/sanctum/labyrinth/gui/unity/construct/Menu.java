@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.MenuRegistration;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -13,9 +12,10 @@ import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.task.Asynchronous;
+import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -391,6 +391,10 @@ public abstract class Menu {
 	public enum Type {
 
 		/**
+		 * *NEW* This menu type represents that of a modded inventory space.
+		 */
+		MODDED,
+		/**
 		 * This menu type represents that of a multi-paged inventory space.
 		 */
 		PAGINATED,
@@ -754,9 +758,9 @@ public abstract class Menu {
 				Player p = (Player) e.getPlayer();
 
 				if (getProperties().contains(Property.LIVE_META) || getProperties().contains(Property.ANIMATED)) {
-					Asynchronous task = getInventory().getTask(p);
+					RenderedTask task = getInventory().getViewer(p).getTask();
 					if (task != null) {
-						task.cancelTask();
+						task.getTask().cancel();
 					}
 					Task t = TaskMonitor.getLocalInstance().get("Labyrinth:" + Menu.this.hashCode() + ";slide-" + p.getUniqueId());
 					if (t != null) {
@@ -775,11 +779,11 @@ public abstract class Menu {
 				}
 				Inventory finalTarget = target;
 				if (!getProperties().contains(Property.CACHEABLE)) {
-					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					TaskScheduler.of(() -> {
 						if (finalTarget.getViewers().stream().noneMatch(v -> v instanceof Player)) {
 							unRegisterHandlers();
 						}
-					}, getKey().orElse("dummy") + "-menu", 2);
+					}).scheduleLater(2);
 				}
 			}
 		}

@@ -3,12 +3,12 @@ package com.github.sanctum.labyrinth.task;
 import com.github.sanctum.labyrinth.library.Applicable;
 import org.jetbrains.annotations.NotNull;
 
-final class LabyrinthTaskScheduler implements TaskScheduler {
+final class NormalTaskScheduler implements TaskScheduler {
 
 	private static final TaskMonitor manager = TaskMonitor.getLocalInstance();
-	private final Applicable data;
+	private final Runnable data;
 
-	LabyrinthTaskScheduler(@NotNull Applicable data) {
+	NormalTaskScheduler(@NotNull Runnable data) {
 		this.data = data;
 	}
 

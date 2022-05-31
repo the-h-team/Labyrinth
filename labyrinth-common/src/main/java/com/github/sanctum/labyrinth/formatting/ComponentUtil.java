@@ -13,7 +13,7 @@ public class ComponentUtil {
 		if (component.getHoverEvent() == null) {
 			component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(StringUtils.use(context).translate()))));
 		} else {
-			component.getHoverEvent().addContent(new Text(StringUtils.use(context).translate()));
+			component.getHoverEvent().addContent(new Text(TextComponent.fromLegacyText(StringUtils.use(context).translate())));
 		}
 	}
 

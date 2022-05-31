@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,11 +88,21 @@ public final class CommandUtils {
     /**
      * Get a Command object directly from the server command map by its label.
      *
-     * @param name label of the command
+     * @param label label of the command
      * @return Command object if found or null
      */
-    public static @Nullable Command getCommandByLabel(@NotNull String name) {
-        return commands.get(name);
+    public static @Nullable Command getCommandByLabel(@NotNull String label) {
+        return commands.get(label);
+    }
+
+    /**
+     * Get a sub command list for a given command by label.
+     *
+     * @param label label of the command.
+     * @return Sub command list if found or null.
+     */
+    public static @Nullable SubCommandList getSubCommandList(@NotNull String label) {
+        return wrappers.get(label);
     }
 
     /**
@@ -132,7 +143,11 @@ public final class CommandUtils {
     public static void register(@NotNull SubCommand subCommand) {
         final Command parent = getCommandByLabel(subCommand.getCommand());
         if (parent != null) {
-            final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElse(LabyrinthProvider.getInstance().getPluginInstance());
+            final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
+                if (parent instanceof PluginCommand) {
+                    return ((PluginCommand)parent).getPlugin();
+                } else return LabyrinthProvider.getInstance().getPluginInstance();
+            });
             SubCommandList wrapper = wrappers.computeIfAbsent(subCommand.getCommand(), s -> {
                 SubCommandList w = new SubCommandList(parent){
                     @Ordinal(24)

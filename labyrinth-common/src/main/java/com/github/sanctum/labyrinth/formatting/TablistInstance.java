@@ -4,9 +4,6 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.task.Schedule;
-import com.github.sanctum.labyrinth.task.Synchronous;
-import com.github.sanctum.labyrinth.task.Task;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,8 +90,8 @@ public interface TablistInstance {
 	 * Activate this tab list display instance and include custom meta within the task, alternating displays every x y (x being time and y being the unit.)
 	 *
 	 * @param consumer The meta to include.
-	 * @param unit The time unit to use
-	 * @param period The amount of time to use.
+	 * @param unit     The time unit to use
+	 * @param period   The amount of time to use.
 	 * @return true if the instance was activated, false if already running.
 	 */
 	boolean enable(Consumer<Player> consumer, TimeUnit unit, long period);
@@ -200,7 +197,8 @@ public interface TablistInstance {
 
 			@Override
 			public boolean enable() {
-				return enable(player1 -> {}, TimeUnit.MILLISECONDS, 40);
+				return enable(player1 -> {
+				}, TimeUnit.MILLISECONDS, 40);
 			}
 
 			@Override

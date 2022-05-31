@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
-import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.task.TaskScheduler;

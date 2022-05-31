@@ -1,11 +1,17 @@
 package com.github.sanctum.labyrinth.api;
 
+import com.github.sanctum.labyrinth.library.StringUtils;
 import org.bukkit.Bukkit;
 
 /**
  * Detects legacy server environments.
  */
 public interface LegacyCheckService extends Service {
+
+    default boolean isModded() {
+        return StringUtils.use(Bukkit.getServer().getName()).containsIgnoreCase("forge", "magma");
+    }
+
     /**
      * Check if the environment of the server is legacy.
      *

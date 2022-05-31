@@ -3,6 +3,8 @@ package com.github.sanctum.labyrinth.library;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -35,6 +37,28 @@ public enum DirectivePoint {
 
 	public float getCenteredPitch() {
 		return pitch;
+	}
+
+	public BlockFace toFace() {
+		switch (this) {
+			case North_East:
+				return BlockFace.NORTH_EAST;
+			case North:
+				return BlockFace.NORTH;
+			case North_West:
+				return BlockFace.NORTH_WEST;
+			case West:
+				return BlockFace.WEST;
+			case South_West:
+				return BlockFace.SOUTH_WEST;
+			case South:
+				return BlockFace.SOUTH;
+			case South_East:
+				return BlockFace.SOUTH_EAST;
+			case East:
+				return BlockFace.EAST;
+		}
+		return null;
 	}
 
 	public Chunk getChunk(Location start, int distanceInChunks) {
@@ -153,63 +177,50 @@ public enum DirectivePoint {
 	}
 
 	public static DirectivePoint get(Player p) {
-		DirectivePoint result = null;
-		float y = p.getLocation().getYaw();
+		return get(p.getLocation());
+	}
+
+	static DirectivePoint get(Location loc) {
+		DirectivePoint result;
+		float y = loc.getYaw();
 		if (y < 0) {
 			y += 360;
 		}
 		y %= 360;
 		int i = (int) ((y + 8) / 22.5);
-		if (i == 0) {
-			result = DirectivePoint.South;
-		}
-		if (i == 1) {
-			result = DirectivePoint.South_West;
-		}
-		if (i == 2) {
-			result = DirectivePoint.South_West;
-		}
-		if (i == 3) {
-			result = DirectivePoint.South_West;
-		}
-		if (i == 4) {
-			result = DirectivePoint.West;
-		}
-		if (i == 5) {
-			result = DirectivePoint.North_West;
-		}
-		if (i == 6) {
-			result = DirectivePoint.North_West;
-		}
-		if (i == 7) {
-			result = DirectivePoint.North_West;
-		}
-		if (i == 8) {
-			result = DirectivePoint.North;
-		}
-		if (i == 9) {
-			result = DirectivePoint.North_East;
-		}
-		if (i == 10) {
-			result = DirectivePoint.North_East;
-		}
-		if (i == 11) {
-			result = DirectivePoint.North_East;
-		}
-		if (i == 12) {
-			result = DirectivePoint.East;
-		}
-		if (i == 13) {
-			result = DirectivePoint.South_East;
-		}
-		if (i == 14) {
-			result = DirectivePoint.South_East;
-		}
-		if (i == 15) {
-			result = DirectivePoint.South_East;
-		}
-		if (result == null) {
-			result = DirectivePoint.South;
+		switch (i) {
+			case 1:
+			case 2:
+			case 3:
+				result = DirectivePoint.South_West;
+				break;
+			case 4:
+				result = DirectivePoint.West;
+				break;
+			case 5:
+			case 6:
+			case 7:
+				result = DirectivePoint.North_West;
+				break;
+			case 8:
+				result = DirectivePoint.North;
+				break;
+			case 9:
+			case 10:
+			case 11:
+				result = DirectivePoint.North_East;
+				break;
+			case 12:
+				result = DirectivePoint.East;
+				break;
+			case 13:
+			case 14:
+			case 15:
+				result = DirectivePoint.South_East;
+				break;
+			default:
+				result = DirectivePoint.South;
+				break;
 		}
 		return result;
 	}

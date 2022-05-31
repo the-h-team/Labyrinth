@@ -1,4 +1,4 @@
-package com.github.sanctum.labyrinth.api;
+package com.github.sanctum.labyrinth.gui.unity.construct;
 
 public class MenuNotCacheableException extends RuntimeException {
 

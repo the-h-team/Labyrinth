@@ -124,7 +124,7 @@ public class Mailer {
 	 */
 	public Deployable<Mailer> action(@NotNull String text) {
 		if (!this.prefix.isEmpty()) {
-			return new Mailable(this.sender, MailType.ACTION, prefix + " " + text);
+			return new Mailable(this.sender, MailType.ACTION, prefix.join() + " " + text);
 		}
 		return new Mailable(this.sender, MailType.ACTION, text);
 	}

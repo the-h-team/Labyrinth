@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -40,9 +42,10 @@ public class AddonLoader {
 
         private AddonClassLoader(URL[] urls) {
             super(urls, javaPlugin.getClass().getClassLoader());
+            Bukkit.getLogger().severe(javaPlugin.getClass().getClassLoader().getClass().getName());
         }
 
-        final Class<?> resolveClass(String name) throws ClassNotFoundException {
+        Class<?> resolveClass(String name) throws ClassNotFoundException {
             return loadClass(name, true);
         }
 

@@ -6,12 +6,9 @@ import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.formatting.string.RandomID;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +44,7 @@ public interface RenderedTask {
 		return getId() != null;
 	}
 
-	default @NotNull TaskScheduler next(@NotNull Applicable data) {
+	default @NotNull TaskScheduler next(@NotNull Runnable data) {
 		return TaskScheduler.of(data);
 	}
 
@@ -77,15 +74,125 @@ public interface RenderedTask {
 
 	}
 
-	static @NotNull RenderedTask of(Applicable data, @MagicConstant(valuesFromClass = TaskService.class) int runtime) {
+	static @NotNull <T extends Task> RenderedTask of(T data, @MagicConstant(valuesFromClass = TaskService.class) int runtime) {
 		return new RenderedTask() {
-			private final Task task = new Task(new RandomID().generate()) {
 
-				@Ordinal
-				void execute() {
-					data.run();
+			@Override
+			public int getRuntime() {
+				return runtime;
+			}
+
+			@Override
+			public long getDelay() {
+				return 0;
+			}
+
+			@Override
+			public long getPeriod() {
+				return 0;
+			}
+
+			@Override
+			public boolean isRunning() {
+				return data != null && !data.isCancelled();
+			}
+
+			@Ordinal
+			public @NotNull Task getTask() {
+				return data;
+			}
+
+			@Override
+			public @Nullable String getId() {
+				return null;
+			}
+
+			@Override
+			public @NotNull Type getType() {
+				return Type.SINGULAR;
+			}
+
+			@Override
+			public @NotNull TimeWatch getLastRendered() {
+				return TimeWatch.start(getTask().scheduledExecutionTime());
+			}
+
+			@Override
+			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+				data.listen(intent);
+				return this;
+			}
+		};
+	}
+
+	static @NotNull <T extends Task> RenderedTask of(T data, @Nullable String key, @MagicConstant(valuesFromClass = TaskService.class) int runtime, long delay, long period) {
+		return new RenderedTask() {
+
+			@Override
+			public int getRuntime() {
+				return runtime;
+			}
+
+			@Override
+			public boolean isRunning() {
+				return data != null && !data.isCancelled();
+			}
+
+			@Ordinal
+			public @NotNull Task getTask() {
+				return data;
+			}
+
+			@Override
+			public @Nullable String getId() {
+				return key;
+			}
+
+			@Override
+			public @NotNull Type getType() {
+				return isConcurrent() && getDelay() != 0 && getPeriod() != 0 ? Type.REPEATABLE : Type.DELAYED;
+			}
+
+			@Override
+			public @NotNull TimeWatch getLastRendered() {
+				return TimeWatch.start(getTask().scheduledExecutionTime());
+			}
+
+			@Override
+			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+				switch (getRuntime()) {
+					case 0:
+						TaskScheduler.of(() -> data.listen(intent)).schedule();
+						break;
+					case 1:
+						TaskScheduler.of(() -> data.listen(intent)).scheduleAsync();
+						break;
 				}
+				return this;
+			}
 
+			@Override
+			public long getDelay() {
+				if (delay != -1) {
+					return delay;
+				}
+				return 0;
+			}
+
+			@Override
+			public long getPeriod() {
+				if (period != -1) {
+					return period;
+				}
+				return 0;
+			}
+		};
+	}
+
+	static @NotNull RenderedTask of(Runnable data, @MagicConstant(valuesFromClass = TaskService.class) int runtime) {
+		return new RenderedTask() {
+			private final Task task = new Task(new RandomID().generate(), runtime, data) {
+				private static final long serialVersionUID = 87916092504686934L;
 			};
 
 			@Override
@@ -135,25 +242,10 @@ public interface RenderedTask {
 		};
 	}
 
-	static @NotNull RenderedTask of(Applicable data, @Nullable String key, @MagicConstant(valuesFromClass = TaskService.class) int runtime, long delay, long period) {
+	static @NotNull RenderedTask of(Runnable data, @Nullable String key, @MagicConstant(valuesFromClass = TaskService.class) int runtime, long delay, long period) {
 		return new RenderedTask() {
-			private final Set<TaskPredicate<? super Task>> flags = new HashSet<>();
-			private final Task task = new Task(new RandomID().generate()) {
-
-				@Ordinal
-				void execute() {
-					boolean stop = false;
-					for (TaskPredicate<? super Task> flag : flags) {
-						if (!flag.accept(this)) {
-							stop = true;
-							break;
-						}
-					}
-					if (!stop) {
-						data.run();
-					}
-				}
-
+			private final Task task = new Task(key != null ? key : new RandomID().generate(), runtime, data) {
+				private static final long serialVersionUID = 2948251326991055359L;
 			};
 
 			@Override
@@ -190,10 +282,10 @@ public interface RenderedTask {
 			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
 				switch (getRuntime()) {
 					case 0:
-						TaskScheduler.of(() -> flags.add(intent)).schedule();
+						TaskScheduler.of(() -> task.listen(intent)).schedule();
 						break;
 					case 1:
-						TaskScheduler.of(() -> flags.add(intent)).scheduleAsync();
+						TaskScheduler.of(() -> task.listen(intent)).scheduleAsync();
 						break;
 				}
 				return this;

@@ -2,12 +2,8 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.task.Schedule;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +65,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public int getInt() {
-		return  config.getInt(this.key);
+		return config.getInt(this.key);
 	}
 
 	@Override
@@ -237,7 +233,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 		if (config.getType() == FileType.JSON) {
 			set(new Object());
 		} else {
-			((YamlConfiguration)config).getConfig().createSection(this.key);
+			((YamlConfiguration) config).getConfig().createSection(this.key);
 		}
 		save();
 		return false;
@@ -286,17 +282,17 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 			Set<String> keys = new HashSet<>();
 			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
-				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
+				Map<String, Object> map1 = (Map<String, Object>) json.get(this.key);
 				if (deep) {
 					for (Map.Entry<String, Object> entry : map1.entrySet()) {
 						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
 							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
 								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
 									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
 										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
 											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
 												keys.add(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey());
 											}
@@ -331,17 +327,17 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 			Map<String, Object> map = new HashMap<>();
 			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
-				Map<String, Object> map1 = (Map<String, Object>)json.get(this.key);
+				Map<String, Object> map1 = (Map<String, Object>) json.get(this.key);
 				if (deep) {
 					for (Map.Entry<String, Object> entry : map1.entrySet()) {
 						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
 							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
 								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
 									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
 										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
 											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
 												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
 											}
@@ -359,13 +355,13 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 				} else {
 					for (Map.Entry<String, Object> entry : map1.entrySet()) {
 						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>)entry.getValue();
+							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
 							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
 								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>)entry2.getValue();
+									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
 									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
 										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>)entry2.getValue();
+											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
 											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
 												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
 											}

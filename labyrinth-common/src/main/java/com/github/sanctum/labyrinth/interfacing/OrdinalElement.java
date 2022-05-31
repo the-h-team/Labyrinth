@@ -29,4 +29,8 @@ public interface OrdinalElement<E> {
 	 */
 	GenericOrdinalElement select(int ordinal, Object... args);
 
+	default GenericOrdinalElement toGeneric() {
+		return this instanceof GenericOrdinalElement ? (GenericOrdinalElement) this : null;
+	}
+
 }

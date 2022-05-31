@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
@@ -10,145 +11,268 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class TaskMonitor {
+public class TaskMonitor {
 
 	private static TaskMonitor instance;
-	private final TypeFlag<TaskPredicate<Task>[]> flagClass;
-	private final Map<Integer, TaskChain> map = new HashMap<>();
+	protected final TypeFlag<TaskPredicate<Task>[]> flagClass;
+	protected final Map<Integer, TaskChain> map = new HashMap<>();
 
 	TaskMonitor() {
 		this.flagClass = TypeFlag.get();
-		map.put(0, LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS));
-		map.put(1, LabyrinthProvider.getInstance().getScheduler(TaskService.ASYNCHRONOUS));
+		LabyrinthAPI api = LabyrinthProvider.getInstance();
+		map.put(0, api.getScheduler(TaskService.SYNCHRONOUS));
+		map.put(1, api.getScheduler(TaskService.ASYNCHRONOUS));
 	}
 
 	public boolean shutdown() {
-		return map.get(0).shutdown() && map.get(1).shutdown();
+		return map.get(TaskService.SYNCHRONOUS).shutdown() && map.get(TaskService.ASYNCHRONOUS).shutdown();
 	}
 
 	public @Nullable Task get(@NotNull String key) {
-		return map.get(0).get(key) != null ? map.get(0).get(key) : map.get(1).get(key);
+		return map.get(TaskService.SYNCHRONOUS).get(key) != null ? map.get(TaskService.SYNCHRONOUS).get(key) : map.get(TaskService.ASYNCHRONOUS).get(key);
 	}
 
-	public @NotNull RenderedTask schedule(Applicable data) {
+	public @NotNull RenderedTask schedule(Runnable data) {
 		RenderedTask execution = RenderedTask.of(data, TaskService.SYNCHRONOUS);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).run(task);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).run(task);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleAsync(Applicable data) {
+	public @NotNull RenderedTask scheduleAsync(Runnable data) {
 		RenderedTask execution = RenderedTask.of(data, TaskService.ASYNCHRONOUS);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).run(task);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).run(task);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Applicable data, long delay) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, long delay) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Applicable data, String key, long delay) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, String key, long delay) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, long delay) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, long delay) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, String key, long delay) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, String key, long delay) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimer(Applicable data, String key, long delay, long period) {
+	public @NotNull RenderedTask scheduleTimer(Runnable data, String key, long delay, long period) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).repeat(task, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).repeat(task, delay * 50, period * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(Applicable data, String key, long delay, long period) {
+	public @NotNull RenderedTask scheduleTimerAsync(Runnable data, String key, long delay, long period) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).repeat(task, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).repeat(task, delay * 50, period * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Applicable data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
 		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Applicable data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, String key, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
 		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
 		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Applicable data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, String key, long delay, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
 		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).wait(task, delay * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimer(Applicable data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
 		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(0).repeat(task, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).repeat(task, delay * 50, period * 50);
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(Applicable data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
 		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
-		Task task = OrdinalProcedure.select(execution, 0).cast(() -> Task.class);
-		map.get(1).repeat(task, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).repeat(task, delay * 50, period * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask schedule(Task data) {
+		RenderedTask execution = RenderedTask.of(data, TaskService.SYNCHRONOUS);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).run(task);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleAsync(Task data) {
+		RenderedTask execution = RenderedTask.of(data, TaskService.ASYNCHRONOUS);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).run(task);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLater(Task data, long delay) {
+		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLater(Task data, String key, long delay) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, long delay) {
+		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, String key, long delay) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleTimer(Task data, String key, long delay, long period) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).repeat(task, delay * 50, period * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleTimerAsync(Task data, String key, long delay, long period) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).repeat(task, delay * 50, period * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLater(Task data, long delay, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLater(Task data, String key, long delay, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, long delay, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, String key, long delay, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).wait(task, delay * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleTimer(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
+		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.SYNCHRONOUS).repeat(task, delay * 50, period * 50);
+		return execution;
+	}
+
+	public @NotNull RenderedTask scheduleTimerAsync(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
+		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
+		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+			execution.dependOn(flag);
+		}
+		Task task = execution.getTask();
+		map.get(TaskService.ASYNCHRONOUS).repeat(task, delay * 50, period * 50);
 		return execution;
 	}
 
@@ -172,6 +296,10 @@ public final class TaskMonitor {
 
 	public static TaskMonitor getLocalInstance() {
 		return instance != null ? instance : (instance = new TaskMonitor());
+	}
+
+	public static void setInstance(@NotNull TaskMonitor monitor) {
+		instance = monitor;
 	}
 
 }

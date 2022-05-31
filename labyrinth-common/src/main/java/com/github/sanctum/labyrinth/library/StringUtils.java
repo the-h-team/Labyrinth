@@ -42,7 +42,7 @@ public final class StringUtils {
 	 * Here is where you specify either a regex for total completion results or a delimiter to separate
 	 * strings by. It is the premise for all string-based utility.
 	 *
-	 * @param context the star context to provide for usage
+	 * @param context the start context to provide for usage
 	 * @return a string utility
 	 */
 	public static StringUtils use(String context) {
@@ -50,20 +50,35 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Check if the provided context exists (using case insensitive options) a target regex.
+	 * Check if the provided context exists at the same time ignoring case sensitivity.
+	 *
+	 * @param regex The target regex to check for
+	 * @return true if all provided character sequences are contained within the provided sub context.
+	 */
+	public boolean containsAnd(CharSequence... regex) {
+		for (CharSequence c : regex) {
+			if (!containsIgnoreCase(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Check if the provided context exists (using case-insensitive options) a target regex.
 	 *
 	 * @param regex the target regex to check for
-	 * @return true if the provided regex exists a case insensitive match from the target regex
+	 * @return true if the provided sub context contains a case-insensitive match from the target regex
 	 */
 	public boolean containsIgnoreCase(CharSequence regex) {
 		return Pattern.compile(Pattern.quote(regex.toString()), Pattern.CASE_INSENSITIVE).matcher(this.context).find();
 	}
 
 	/**
-	 * Check if the provided context exists (using case insensitive options) a target regex.
+	 * Check if the provided context exists (using case-insensitive options) a target regex.
 	 *
 	 * @param regex the target regex to check for
-	 * @return true if the provided regex exists a case insensitive match from the target regex
+	 * @return true if the provided sub context contains a case-insensitive match from the target regex
 	 */
 	public boolean containsIgnoreCase(CharSequence... regex) {
 		for (CharSequence sequence : regex) {
@@ -77,67 +92,28 @@ public final class StringUtils {
 	public @NotNull ParsedTimeFormat parseTime() throws IllegalTimeFormatException {
 		Pattern pattern = Pattern.compile("(\\d+)(d|hr|m|s)");
 		Matcher matcher = pattern.matcher(context);
-		long days = 0;
-		long hours = 0;
-		long minutes = 0;
-		long seconds = 0;
+		String days = null;
+		String hours = null;
+		String minutes = null;
+		String seconds = null;
 		while (matcher.find()) {
 			switch (matcher.group(2)) {
 				case "d":
-					days = Long.parseLong(matcher.group(1));
+					days = matcher.group(1);
 					break;
 				case "hr":
-					hours = Long.parseLong(matcher.group(1));
+					hours = matcher.group(1);
 					break;
 				case "m":
-					minutes = Long.parseLong(matcher.group(1));
+					minutes = matcher.group(1);
 					break;
 				case "s":
-					seconds = Long.parseLong(matcher.group(1));
+					seconds = matcher.group(1);
 					break;
 			}
 		}
-		if (days == 0 && hours == 0 && minutes == 0 && seconds == 0) throw new IllegalTimeFormatException("Time format cannot be empty!");
-		long finalDays = days;
-		long finalHours = hours;
-		long finalMinutes = minutes;
-		long finalSeconds = seconds;
-		return new ParsedTimeFormat() {
-			@Override
-			public long getDays() {
-				return finalDays;
-			}
-
-			@Override
-			public long getHours() {
-				return finalHours;
-			}
-
-			@Override
-			public long getMinutes() {
-				return finalMinutes;
-			}
-
-			@Override
-			public long getSeconds() {
-				return finalSeconds;
-			}
-
-			@Override
-			public String toString() {
-				ZonedDateTime time = new Date().toInstant().atZone(ZoneId.systemDefault());
-				String month = time.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-				String year = String.valueOf(time.getYear());
-				String day = String.valueOf(time.getDayOfMonth() + getDays());
-				Date date = getDate();
-				ZonedDateTime current = date.toInstant().atZone(ZoneId.systemDefault());
-				String clock = current.getHour() + ":" + current.getMinute();
-				// format 'Month day, year @ clock'
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(date);
-				return month + " " + day + ", " + year + " @ " + clock + (calendar.get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am");
-			}
-		};
+		if (days == null || hours == null || minutes == null || seconds == null) throw new IllegalTimeFormatException("Time format cannot be empty!");
+		return ParsedTimeFormat.of(Long.parseLong(days), Long.parseLong(hours), Long.parseLong(minutes), Long.parseLong(seconds));
 	}
 
 	/**

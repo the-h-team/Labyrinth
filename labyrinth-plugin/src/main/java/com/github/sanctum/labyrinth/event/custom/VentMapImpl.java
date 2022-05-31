@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.event.custom;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.event.EasyListener;
-
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,15 +17,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.task.Schedule;
 
 public final class VentMapImpl extends VentMap implements Service {
 
@@ -48,7 +45,7 @@ public final class VentMapImpl extends VentMap implements Service {
 						.map(s -> s.flatMap(Collection::stream)).orElse(Stream.empty())
 		).filter(s -> s.getKey().map(key::equals).orElse(false)).findFirst();
 		subscription.ifPresent(sub ->
-				Schedule.sync(() -> subscriptions.get(sub.getUser()).get(eventType).get(sub.getPriority()).remove(sub))
+				TaskScheduler.of(() -> subscriptions.get(sub.getUser()).get(eventType).get(sub.getPriority()).remove(sub)).schedule()
 		);
 	}
 
@@ -59,9 +56,9 @@ public final class VentMapImpl extends VentMap implements Service {
 						.map(Map::values)
 						.map(Collection::stream)
 						.ifPresent(s ->
-								s.forEachOrdered(set -> Schedule.sync(
+								s.forEachOrdered(set -> TaskScheduler.of(
 										() -> set.removeIf(sub -> sub.getKey().map(key::equals).orElse(false))
-								).waitReal(1))));
+								).scheduleLater(1))));
 	}
 
 	@Override
@@ -93,7 +90,7 @@ public final class VentMapImpl extends VentMap implements Service {
 	@Override
 	public void unsubscribeAll(Predicate<Vent.Subscription<?>> fun) {
 		subscriptions.values().forEach(v -> v.values().forEach(m -> m.values().forEach(
-				set -> Schedule.sync(() -> set.removeIf(fun)).run()
+				set -> TaskScheduler.of(() -> set.removeIf(fun)).schedule()
 		)));
 	}
 
@@ -109,10 +106,10 @@ public final class VentMapImpl extends VentMap implements Service {
 		if (listenerOptional.isPresent()) {
 			VentListener ventListener = listenerOptional.get();
 			if (Listener.class.isAssignableFrom(ventListener.getListener().getClass())) {
-				HandlerList.unregisterAll((Listener)ventListener.getListener());
+				HandlerList.unregisterAll((Listener) ventListener.getListener());
 			}
-			Schedule.sync(() -> listeners.get(ventListener.getHost()).get(ventListener.getKey()).remove(ventListener))
-					.run();
+			TaskScheduler.of(() -> listeners.get(ventListener.getHost()).get(ventListener.getKey()).remove(ventListener))
+					.schedule();
 		}
 	}
 
@@ -124,12 +121,12 @@ public final class VentMapImpl extends VentMap implements Service {
 	@Override
 	public void unsubscribe(Plugin host, @NotNull String key) {
 		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
-				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
+				.ifPresent(s -> TaskScheduler.of(() -> s.removeIf(l -> {
 					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
-						HandlerList.unregisterAll((Listener)l.getListener());
+						HandlerList.unregisterAll((Listener) l.getListener());
 					}
 					return l.getKey().equals(key);
-				})).run());
+				})).schedule());
 	}
 
 	public void unregister(Plugin host, @Nullable String key, Object listener) {
@@ -139,12 +136,12 @@ public final class VentMapImpl extends VentMap implements Service {
 	@Override
 	public void unsubscribe(Plugin host, @Nullable String key, Object listener) {
 		Optional.ofNullable(listeners.get(host)).map(m -> m.get(key))
-				.ifPresent(s -> Schedule.sync(() -> s.removeIf(l -> {
+				.ifPresent(s -> TaskScheduler.of(() -> s.removeIf(l -> {
 					if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
-						HandlerList.unregisterAll((Listener)l.getListener());
+						HandlerList.unregisterAll((Listener) l.getListener());
 					}
 					return listener.equals(l.getListener());
-				})).run());
+				})).schedule());
 	}
 
 	@Override
@@ -157,7 +154,7 @@ public final class VentMapImpl extends VentMap implements Service {
 		Optional.ofNullable(listeners.get(host)).ifPresent(m -> {
 			m.values().forEach(set -> set.forEach(l -> {
 				if (Listener.class.isAssignableFrom(l.getListener().getClass())) {
-					HandlerList.unregisterAll((Listener)l.getListener());
+					HandlerList.unregisterAll((Listener) l.getListener());
 				}
 			}));
 		});
@@ -275,7 +272,7 @@ public final class VentMapImpl extends VentMap implements Service {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends Vent> Stream<Vent.Subscription<T>> getSubscriptions(final Class<T> tClass,
-																		  final Vent.Priority priority) {
+	                                                                      final Vent.Priority priority) {
 		return subscriptions.values().stream().map(m -> Optional.ofNullable(m.get(tClass)).map(v -> v.get(priority))
 						.orElse(Collections.emptySet()))
 				.flatMap(Collection::stream).map(s -> (Vent.Subscription<T>) s);

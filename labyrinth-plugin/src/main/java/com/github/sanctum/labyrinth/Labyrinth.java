@@ -45,6 +45,7 @@ import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.github.sanctum.labyrinth.permissions.Permissions;
@@ -364,7 +365,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		} catch (InterruptedException ignored) {
 		}
 
-		if (!isLegacy()) {
+		if (!isLegacy() && !StringUtils.use(getServer().getName()).containsIgnoreCase("forge", "magma")) {
 			for (Item i : Item.getRegistered()) {
 				Item.removeEntry(i);
 			}
@@ -374,6 +375,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Subscribe(priority = Vent.Priority.LOW)
 	public void onJoin(DefaultEvent.Join e) {
 		PlayerSearch.of(e.getPlayer());
+
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -15,7 +15,6 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> A type of annotation.
  * @param <R> A listener to use.
  */
-public final class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Method>{
+public final class AnnotationDiscovery<T extends Annotation, R> implements Iterable<Method> {
 
 	private final int count;
 	private final Class<T> annotation;
@@ -41,7 +40,8 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 		for (Method method : rClass.getDeclaredMethods()) {
 			try {
 				method.setAccessible(true);
-			} catch (Exception ignored) {}
+			} catch (Exception ignored) {
+			}
 			if (method.isAnnotationPresent(annotation)) {
 				annotated++;
 			}
@@ -59,7 +59,8 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 		for (Method method : rClass.getDeclaredMethods()) {
 			try {
 				method.setAccessible(true);
-			} catch (Exception ignored) {}
+			} catch (Exception ignored) {
+			}
 			if (method.isAnnotationPresent(annotation)) {
 				annotated++;
 			}
@@ -105,7 +106,7 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 	 * Filter the methods and only work with ones of interest.
 	 *
 	 * @param predicate The filtration.
-	 * @param hard whether or not to breach accessibility.
+	 * @param hard      whether or not to breach accessibility.
 	 * @return The same annotation discovery object.
 	 */
 	public AnnotationDiscovery<T, R> filter(Predicate<? super Method> predicate, boolean hard) {
@@ -118,7 +119,8 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 				methods.addAll(Arrays.stream(this.rClass.getDeclaredMethods()).filter(m -> {
 					try {
 						m.setAccessible(true);
-					} catch (Exception ignored){}
+					} catch (Exception ignored) {
+					}
 					return m.isAnnotationPresent(annotation) && predicate.test(m);
 				}).collect(Collectors.toList()));
 			}
@@ -140,25 +142,25 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 	 */
 	public void ifPresent(WideConsumer<T, Method> function) {
 		if (isPresent()) {
-			for (Method m : methods) {
+			methods.forEach(m -> {
 				for (Annotation a : m.getAnnotations()) {
 					if (annotation.isAssignableFrom(a.annotationType())) {
 						function.accept((T) a, m);
 					}
 				}
-			}
+			});
 		}
 	}
 
 	/**
 	 * Get information from the leading source objects located annotation.
-	 *
+	 * <p>
 	 * This method gives you access to an annotation and the source object itself.
 	 *
-	 * @deprecated Use {@link AnnotationDiscovery#mapFromClass(AnnotativeConsumer)} instead!
 	 * @param function The function.
-	 * @param <U> The desired return value.
+	 * @param <U>      The desired return value.
 	 * @return A value from an annotation.
+	 * @deprecated Use {@link AnnotationDiscovery#mapFromClass(AnnotativeConsumer)} instead!
 	 */
 	@Deprecated
 	public <U> U map(AnnotativeConsumer<T, R, U> function) {
@@ -167,11 +169,11 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 
 	/**
 	 * Get information from the leading source objects located annotation.
-	 *
+	 * <p>
 	 * This method gives you access to an annotation and the source object itself.
 	 *
 	 * @param function The function.
-	 * @param <U> The desired return value.
+	 * @param <U>      The desired return value.
 	 * @return A value from an annotation.
 	 */
 	public <U> U mapFromClass(AnnotativeConsumer<T, R, U> function) {
@@ -183,11 +185,11 @@ public final class AnnotationDiscovery<T extends Annotation, R> implements Itera
 
 	/**
 	 * Get information from the leading source objects methods found with the specified annotation.
-	 *
+	 * <p>
 	 * This method gives you access to an annotation and the source object itself.
 	 *
 	 * @param function The function.
-	 * @param <U> The desired return value.
+	 * @param <U>      The desired return value.
 	 * @return A value from an annotation.
 	 */
 	public <U> List<U> mapFromMethods(AnnotativeConsumer<T, R, U> function) {

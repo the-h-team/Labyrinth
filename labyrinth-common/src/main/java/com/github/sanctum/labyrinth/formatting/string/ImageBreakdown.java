@@ -15,7 +15,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Newly improved by hemp with full rgb support depending on version.
+ * An object dedicated to converting imagery to pixel art. Improved upon by Hempfest allowing support for RGB.
  *
  * @author bobacadodl
  * @author Hempfest

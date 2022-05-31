@@ -1,6 +1,7 @@
-package com.github.sanctum.labyrinth.api;
+package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
@@ -9,7 +10,6 @@ import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.data.service.Check;
-import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.Deployable;
 import java.util.function.Supplier;
 import org.bukkit.plugin.Plugin;

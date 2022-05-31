@@ -25,25 +25,18 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain run(final @NotNull Task task) {
 		task.parent = this;
-		timer.schedule(new Task("dummy-" + task.getKey()) {
-			@Ordinal
-			public void execute() {
-				if (task.isCancelled()) {
-					cancel();
-					return;
-				}
-				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
-			}
-		}, 0);
+		timer.schedule(task, 0);
 		return this;
 	}
 
 	@Override
 	public SynchronousTaskChain run(final @NotNull Runnable data) {
 		Task task = new Task("dummy", Task.SINGULAR, this) {
+			private static final long serialVersionUID = 8068952665686647490L;
+
 			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, data);
+				data.run();
 			}
 		};
 		timer.schedule(task, 0);
@@ -53,27 +46,19 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Task task, long delay) {
 		task.parent = this;
-		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
-			@Ordinal
-			public void execute() {
-				if (task.isCancelled()) {
-					cancel();
-					return;
-				}
-				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
-			}
-		};
-		timer.schedule(t, delay);
-		map.put(task.getKey(), t);
+		timer.schedule(task, delay);
+		map.put(task.getKey(), task);
 		return this;
 	}
 
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Runnable data, String key, long milli) {
 		Task task = new Task(key, Task.SINGULAR, this) {
+			private static final long serialVersionUID = 4057999550419202270L;
+
 			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, data);
+				data.run();
 			}
 		};
 		map.put(key, task);
@@ -84,27 +69,19 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Task task, @NotNull Date start) {
 		task.parent = this;
-		Task t = new Task(task.getKey(), Task.SINGULAR, this) {
-			@Ordinal
-			public void execute() {
-				if (task.isCancelled()) {
-					cancel();
-					return;
-				}
-				Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
-			}
-		};
-		map.put(task.getKey(), t);
-		timer.schedule(t, start);
+		map.put(task.getKey(), task);
+		timer.schedule(task, start);
 		return this;
 	}
 
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Runnable data, String key, @NotNull Date start) {
 		Task task = new Task(key, Task.SINGULAR, this) {
+			private static final long serialVersionUID = 3310911037523100957L;
+
 			@Ordinal
 			public void execute() {
-				Bukkit.getScheduler().runTask(host, data);
+				data.run();
 			}
 		};
 		map.put(key, task);
@@ -115,25 +92,8 @@ public class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain repeat(final @NotNull Task task, long delay, long period) {
 		if (!map.containsKey(task.getKey())) {
-			Task t = new Task(task.getKey(), Task.REPEATABLE, this) {
-				@Ordinal
-				public void execute() {
-
-					if (!host.isEnabled()) {
-						this.cancel();
-						return;
-					}
-
-					if (task.isCancelled()) {
-						cancel();
-						return;
-					}
-
-					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
-				}
-			};
-			map.put(task.getKey(), t);
-			timer.scheduleAtFixedRate(t, delay, period);
+			map.put(task.getKey(), task);
+			timer.scheduleAtFixedRate(task, delay, period);
 		}
 		return this;
 	}
@@ -142,14 +102,11 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, long delay, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
+				private static final long serialVersionUID = 6685875459466218624L;
+
 				@Ordinal
 				public void execute() {
-					if (!host.isEnabled()) {
-						this.cancel();
-						return;
-					}
-
-					Bukkit.getScheduler().runTask(host, () -> consumer.accept(this));
+					consumer.accept(this);
 				}
 			};
 			map.put(key, task);
@@ -162,24 +119,8 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Task task, @NotNull Date start, long period) {
 		task.parent = this;
 		if (!map.containsKey(task.getKey())) {
-			Task t = new Task(task.getKey(), Task.REPEATABLE, this) {
-				@Ordinal
-				public void execute() {
-					if (!host.isEnabled()) {
-						this.cancel();
-						return;
-					}
-
-					if (task.isCancelled()) {
-						cancel();
-						return;
-					}
-
-					Bukkit.getScheduler().runTask(host, () -> OrdinalProcedure.process(task, 0));
-				}
-			};
-			map.put(task.getKey(), t);
-			timer.scheduleAtFixedRate(t, start, period);
+			map.put(task.getKey(), task);
+			timer.scheduleAtFixedRate(task, start, period);
 		}
 		return this;
 	}
@@ -188,13 +129,11 @@ public class SynchronousTaskChain extends TaskChain {
 	public SynchronousTaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, @NotNull Date start, long period) {
 		if (!map.containsKey(key)) {
 			Task task = new Task(key, Task.REPEATABLE, this) {
+				private static final long serialVersionUID = 4614422706913899876L;
+
 				@Ordinal
 				public void execute() {
-					if (!host.isEnabled()) {
-						this.cancel();
-						return;
-					}
-					Bukkit.getScheduler().runTask(host, () -> consumer.accept(this));
+					consumer.accept(this);
 				}
 			};
 			map.put(key, task);

@@ -18,7 +18,7 @@ public class PrintableMenu extends Menu {
 			addElement(new InventoryElement.Printable(title, mechanics, this));
 		} else {
 			LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
-			addElement(new InventoryElement.Normal(title, this));
+			addElement(new InventoryElement.Printable(title, null, this));
 		}
 
 	}

@@ -33,8 +33,11 @@ public interface TaskScheduler {
 	@NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, TaskPredicate<?>... flags);
 
 	static @NotNull TaskScheduler of(@NotNull Runnable runnable) {
-		return new LabyrinthTaskScheduler(runnable::run);
+		return new NormalTaskScheduler(runnable);
 	}
 
+	static @NotNull TaskScheduler of(@NotNull Task task) {
+		return new CustomTaskScheduler(task);
+	}
 
 }

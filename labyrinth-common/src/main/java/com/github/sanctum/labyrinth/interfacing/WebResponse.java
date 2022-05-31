@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.interfacing;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,6 +21,7 @@ public interface WebResponse {
 
 	static WebResponse download(ResourceCheck check, String output, String file, String type) {
 		try {
+			TaskScheduler.of(check).scheduleAsync();
 			URL url = new URL("https://github.com/" + check.getAuthor() + "/" + check.getResource() + "/releases/download/" + check.getLatest() + "/" + check.getResource() + ".jar");
 			if (new File("downloads/" + output + "/" + file + "." + type).exists()) return () -> "Latest version already downloaded.";
 			ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
