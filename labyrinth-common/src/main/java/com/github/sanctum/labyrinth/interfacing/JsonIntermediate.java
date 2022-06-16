@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.NodePointer;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
 import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.data.service.DummyReducer;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,6 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A helpful utility class designed for easy json conversions
@@ -41,7 +46,7 @@ public interface JsonIntermediate {
 	 */
 	default JsonArray toJsonArray() {
 		if (this instanceof Iterable) {
-			return toJsonArray((Iterable<?>) this);
+			return toJsonArray(this);
 		}
 		return null;
 	}
@@ -58,24 +63,29 @@ public interface JsonIntermediate {
 	/**
 	 * Attempt to map all linked values from the provided iterable to a json object array.
 	 *
-	 * @param collection The iterable to use.
+	 * @param object The iterable or string to use.
 	 * @return A new json array.
 	 */
-	static JsonArray toJsonArray(Iterable<?> collection) {
+	static JsonArray toJsonArray(Object object) {
 		JsonArray array = new JsonArray();
-		for (Object o : Check.forNull(collection)) {
-			if (o instanceof Number) {
-				JsonElement element = new JsonPrimitive((Number) o);
-				array.add(element);
-			} else if (o instanceof Boolean) {
-				JsonElement element = new JsonPrimitive((Boolean) o);
-				array.add(element);
-			} else if (o instanceof String) {
-				JsonElement element = new JsonPrimitive((String) o);
-				array.add(element);
-			} else {
-				JsonElement element = toJsonObject(o);
-				array.add(element);
+		if (object instanceof String && Check.isJson((String) object)) {
+			return JsonAdapter.getJsonBuilder().create().fromJson((String)object, JsonArray.class);
+		}
+		if (object instanceof Iterable) {
+			for (Object o : Check.forNull((Iterable<?>)object)) {
+				if (o instanceof Number) {
+					JsonElement element = new JsonPrimitive((Number) o);
+					array.add(element);
+				} else if (o instanceof Boolean) {
+					JsonElement element = new JsonPrimitive((Boolean) o);
+					array.add(element);
+				} else if (o instanceof String) {
+					JsonElement element = new JsonPrimitive((String) o);
+					array.add(element);
+				} else {
+					JsonElement element = toJsonObject(o);
+					array.add(element);
+				}
 			}
 		}
 		return array;
@@ -84,11 +94,14 @@ public interface JsonIntermediate {
 	/**
 	 * Attempt to map all values from an object into a fresh json object.
 	 *
-	 * @param o The object to use.
+	 * @param o The object or string to use.
 	 * @return A new json object.
 	 */
 	static JsonObject toJsonObject(Object o) {
 		JsonObject object = new JsonObject();
+		if (o instanceof String && Check.isJson((String) o)) {
+			return JsonAdapter.getJsonBuilder().create().fromJson((String)o, JsonObject.class);
+		}
 		if (o instanceof Map) {
 			for (Map.Entry<String, Object> entry : ((Map<String, Object>) o).entrySet()) {
 				if (entry.getValue() instanceof String) {
@@ -123,7 +136,7 @@ public interface JsonIntermediate {
 					} else if (invoke instanceof Double) {
 						object.addProperty(annotation.key(), (Double) invoke);
 					} else if (invoke instanceof Iterable) {
-						object.add(annotation.key(), toJsonArray((Iterable<?>) invoke));
+						object.add(annotation.key(), toJsonArray(invoke));
 					} else {
 						if (!annotation.reducer().equals(DummyReducer.class)) {
 							Class<? extends Json.Reducer> clazz = annotation.reducer();
@@ -190,7 +203,7 @@ public interface JsonIntermediate {
 	 */
 	static String toJsonString(Object o) {
 		if (o instanceof Iterable) {
-			return toJsonArray((Iterable<?>)o).toString();
+			return toJsonArray(o).toString();
 		} else
 		return toJsonObject(o).toString();
 	}
@@ -255,10 +268,6 @@ public interface JsonIntermediate {
 			}
 		}
 		return map;
-	}
-
-	static Json.Reducer deform(Function<Object, Object> function) {
-		return function::apply;
 	}
 
 }

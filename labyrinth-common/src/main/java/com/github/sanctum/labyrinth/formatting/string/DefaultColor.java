@@ -96,6 +96,16 @@ public enum DefaultColor implements CustomColor {
 		return new TextColor[]{new TextColor(this.start.toString()), new TextColor(this.end.toString())};
 	}
 
+	@Override
+	public String getStart() {
+		return start.toString();
+	}
+
+	@Override
+	public String getEnd() {
+		return end.toString();
+	}
+
 	public BaseComponent[] build(String context) {
 		return TextComponent.fromLegacyText(translate(context));
 	}
@@ -108,6 +118,12 @@ public enum DefaultColor implements CustomColor {
 	public String translate(String context) {
 		return new ColoredString(join(context), ColoredString.ColorType.HEX).toString();
 	}
+
+	public String getName() {
+		return name();
+	}
+
+
 
 	@Override
 	public String toString() {

@@ -68,7 +68,7 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public String toJson() {
-		Gson g = new GsonBuilder().create();
+		Gson g = JsonAdapter.getJsonBuilder().create();
 		return g.toJson(get());
 	}
 

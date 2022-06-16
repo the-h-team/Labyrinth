@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Ordinal;
+import com.github.sanctum.labyrinth.annotation.Removal;
 import com.github.sanctum.labyrinth.command.CommandVisibilityCalculation;
 import com.github.sanctum.labyrinth.command.SubCommandList;
 import com.github.sanctum.labyrinth.command.SubCommand;
@@ -34,12 +35,12 @@ import java.util.Set;
  *
  * @author ms5984, Hempfest
  */
+@Removal(inVersion = "1.7.9")
 public final class CommandUtils {
 
     static Map<String, Command> commands;
     static CommandMap commandMap;
     private static final LabyrinthCollection<CommandVisibilityCalculation> calculations = new LabyrinthSet<>();
-    private static final LabyrinthMap<String, SubCommandList> wrappers = new LabyrinthEntryMap<>();
 
     static {
         Plugin main = LabyrinthProvider.getInstance().getPluginInstance();
@@ -59,13 +60,6 @@ public final class CommandUtils {
         }
         commandMap = theMap;
         commands = commandMappings;
-    }
-
-    /**
-     * @return An immutable map of all registered sub command holders.
-     */
-    public static LabyrinthMap<String, SubCommandList> getSubCommandHolders() {
-        return ImmutableLabyrinthMap.of(wrappers);
     }
 
     /**
@@ -96,16 +90,6 @@ public final class CommandUtils {
     }
 
     /**
-     * Get a sub command list for a given command by label.
-     *
-     * @param label label of the command.
-     * @return Sub command list if found or null.
-     */
-    public static @Nullable SubCommandList getSubCommandList(@NotNull String label) {
-        return wrappers.get(label);
-    }
-
-    /**
      * Read and or modify data from the servers command map possibly registering new commands into it.
      *
      * @param function The operation to run
@@ -133,59 +117,6 @@ public final class CommandUtils {
     public static void register(@NotNull Command command) {
         Plugin plugin = JavaPlugin.getProvidingPlugin(command.getClass());
         read(entry -> entry.getKey().register(command.getLabel(), plugin.getName(), command));
-    }
-
-    /**
-     * Inject custom sub commands into any plugin on the server!
-     *
-     * @param subCommand The sub command to inject.
-     */
-    public static void register(@NotNull SubCommand subCommand) {
-        final Command parent = getCommandByLabel(subCommand.getCommand());
-        if (parent != null) {
-            final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
-                if (parent instanceof PluginCommand) {
-                    return ((PluginCommand)parent).getPlugin();
-                } else return LabyrinthProvider.getInstance().getPluginInstance();
-            });
-            SubCommandList wrapper = wrappers.computeIfAbsent(subCommand.getCommand(), s -> {
-                SubCommandList w = new SubCommandList(parent){
-                    @Ordinal(24)
-                    Command getCrossover() {
-                        return this.parent;
-                    }
-                };
-                Command wrapped = OrdinalProcedure.select(w, 24).cast(() -> Command.class);
-                if (wrapped == null) throw new IllegalArgumentException("Cannot process non existent command base.");
-                return read(entry -> {
-                    Map<String, Command> commandMappings = entry.getValue();
-                    CommandMap map = entry.getKey();
-                    commandMappings.remove(parent.getName());
-                    for (String alias : parent.getAliases()) {
-                        if (commandMappings.containsKey(alias) && commandMappings.get(alias).getAliases().contains(alias)) {
-                            commandMappings.remove(alias);
-                        }
-                    }
-                    parent.unregister(map);
-                    map.register(w.getCommand(), plugin.getName(), wrapped);
-                    return w;
-                });
-            });
-            if (!wrapper.contains(subCommand)) wrapper.add(subCommand);
-        } else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
-    }
-
-    /**
-     * Unregister a cached sub command.
-     *
-     * @param subCommand The sub command to remove
-     */
-    public static void unregister(@NotNull SubCommand subCommand) {
-        final Command parent = getCommandByLabel(subCommand.getCommand());
-        if (parent != null) {
-            SubCommandList wrapper = wrappers.get(subCommand.getCommand());
-            if (wrapper != null && wrapper.contains(subCommand)) wrapper.remove(subCommand);
-        } else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
     }
 
     /**

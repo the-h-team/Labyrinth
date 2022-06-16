@@ -31,6 +31,13 @@ public class Check {
 		return string;
 	}
 
+	public static boolean isNull(Object... o) {
+		for (Object ob : o) {
+			if (ob != null) return false;
+		}
+		return true;
+	}
+
 	public static <T> T forNull(T t) {
 		if (t == null) throw new NullPointerException("Value cannot be null!");
 		return forWarnings(t);

@@ -1,7 +1,5 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.google.gson.JsonElement;
-import java.util.Map;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.chat.TextColor;

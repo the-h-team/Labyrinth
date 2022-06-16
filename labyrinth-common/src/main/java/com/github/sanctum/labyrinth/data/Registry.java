@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Note;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -38,7 +40,7 @@ public class Registry<T> {
 	/**
 	 * Select a class type to provide in a search of relevance.
 	 *
-	 * @param cl the class to search for inheritance of
+	 * @param cl  the class to search for inheritance of
 	 * @param <T> the type of search this will inquire
 	 * @return this Registry instance
 	 */
@@ -60,9 +62,9 @@ public class Registry<T> {
 	/**
 	 * Optionally search in a targeted package name.
 	 *
-	 * @deprecated Use {@link Registry#filter(String)} instead!!
 	 * @param packageName the name of the package to search
 	 * @return this Registry instance
+	 * @deprecated Use {@link Registry#filter(String)} instead!!
 	 */
 	@Deprecated
 	public Registry<T> pick(String packageName) {
@@ -96,7 +98,9 @@ public class Registry<T> {
 			}
 		}
 
-		List<JarEntry> entries = Collections.list(jarFile.entries());
+		if (jarFile == null) throw new IllegalStateException("Invalid jar file");
+
+		Stream<JarEntry> entries = jarFile.stream();
 
 		if (this.FILTER != null) {
 			entries.forEach(entry -> {
@@ -176,11 +180,12 @@ public class Registry<T> {
 			try {
 				jarFile = new JarFile(URLDecoder.decode(this.handle.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
 			} catch (IOException e) {
-				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
+				throw new IllegalStateException("Directory not valid", e);
 			}
 		}
+		if (jarFile == null) throw new IllegalStateException("Invalid jar file");
 
-		List<JarEntry> entries = Collections.list(jarFile.entries());
+		Stream<JarEntry> entries = jarFile.stream();
 
 		if (this.FILTER != null) {
 			entries.forEach(entry -> {
@@ -250,15 +255,15 @@ public class Registry<T> {
 
 	/**
 	 * Using {@link com.github.sanctum.labyrinth.data.AddonLoader} internally delegate information to instantiate loaded jar classes.
+	 * This class will attempt to locate and resolve all target class types from the specified file directory.
 	 *
 	 * @param <T> The type of class to load.
 	 */
 	public static class Loader<T> {
 
 		private final Class<T> type;
-
+		private AddonLoader loader;
 		private Plugin plugin;
-
 		private String directory;
 
 		public Loader(Class<T> type) {
@@ -275,12 +280,25 @@ public class Registry<T> {
 			return this;
 		}
 
+		@Note("New! Unload all classes relative to this loader.")
+		public boolean unravel() {
+			if (this.loader != null) {
+				try {
+					return loader.unload(FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile().getPath());
+				} catch (ClassNotFoundException e) {
+					LabyrinthProvider.getInstance().getLogger().severe("Unable to unload classes for path '" + directory + "'");
+				}
+			}
+			return false;
+		}
+
 		public RegistryData<T> confine() {
 
 			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
 
-			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
-					.loadFolder(file);
+			AddonLoader l = loader != null ? loader : (loader = AddonLoader.newInstance(this.plugin));
+
+			List<Class<?>> classes = l.loadFolder(file);
 
 			List<T> data = new LinkedList<>();
 
@@ -301,8 +319,9 @@ public class Registry<T> {
 
 			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
 
-			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
-					.loadFolder(file);
+			AddonLoader l = loader != null ? loader : (loader = AddonLoader.newInstance(this.plugin));
+
+			List<Class<?>> classes = l.loadFolder(file);
 
 			List<T> data = new LinkedList<>();
 
@@ -322,8 +341,9 @@ public class Registry<T> {
 
 		public RegistryData<T> construct(Object... o) {
 			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
-			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
-					.loadFolder(file);
+			AddonLoader l = loader != null ? loader : (loader = AddonLoader.newInstance(this.plugin));
+
+			List<Class<?>> classes = l.loadFolder(file);
 			List<T> data = new LinkedList<>();
 
 			Constructor<T> constructor = null;
@@ -363,8 +383,9 @@ public class Registry<T> {
 
 		public RegistryData<T> construct(Consumer<T> action, Object... o) {
 			File file = FileList.search(this.plugin).get("dummy", this.directory).getRoot().getParent().getParentFile();
-			List<Class<?>> classes = AddonLoader.forPlugin(this.plugin)
-					.loadFolder(file);
+			AddonLoader l = loader != null ? loader : (loader = AddonLoader.newInstance(this.plugin));
+
+			List<Class<?>> classes = l.loadFolder(file);
 			List<T> data = new LinkedList<>();
 
 			Constructor<T> constructor = null;

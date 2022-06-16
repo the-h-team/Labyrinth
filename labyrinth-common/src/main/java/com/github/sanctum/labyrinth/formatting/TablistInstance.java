@@ -222,7 +222,6 @@ public interface TablistInstance {
 						TabInfo header = tabGroup.getHeader(tabGroup.getCurrentHeaderIndex());
 						TabInfo footer = tabGroup.getFooter(tabGroup.getCurrentFooterIndex());
 						getHolder().setPlayerListHeaderFooter(StringUtils.use(header.toString()).translate(getHolder()), StringUtils.use(footer.toString()).translate(getHolder()));
-						getHolder().setPlayerListName(StringUtils.use(getHolder().getDisplayName()).translate());
 						consumer.accept(getHolder());
 					});
 				}, getHolder().getName() + "-tablist", unit.toMillis(period), unit.toMillis(period));

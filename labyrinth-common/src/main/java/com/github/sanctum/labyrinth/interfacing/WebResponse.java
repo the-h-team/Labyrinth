@@ -21,11 +21,10 @@ public interface WebResponse {
 
 	static WebResponse download(ResourceCheck check, String output, String file, String type) {
 		try {
-			TaskScheduler.of(check).scheduleAsync();
 			URL url = new URL("https://github.com/" + check.getAuthor() + "/" + check.getResource() + "/releases/download/" + check.getLatest() + "/" + check.getResource() + ".jar");
-			if (new File("downloads/" + output + "/" + file + "." + type).exists()) return () -> "Latest version already downloaded.";
-			ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
 			File f = new File(LabyrinthProvider.getInstance().getPluginInstance().getDataFolder(), "downloads/" + output + "/" + file + "." + type);
+			if (f.exists()) return () -> "Latest version already downloaded.";
+			ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
 			File parent = f.getParentFile();
 			if (!parent.exists() && !parent.mkdirs()) return () -> "Unable to access output location.";
 			FileOutputStream fileOutputStream = new FileOutputStream(f);
@@ -34,7 +33,7 @@ public interface WebResponse {
 			return () -> "SUCCESS";
 		} catch (IOException ex) {
 			try {
-				File f = new File("log.txt");
+				File f = new File(LabyrinthProvider.getInstance().getPluginInstance().getDataFolder(), "downloads/" + output + "/log.txt");
 				PrintWriter myWriter = new PrintWriter(f);
 				for (StackTraceElement trace : ex.getStackTrace()) {
 					Date now = new Date();
@@ -44,7 +43,7 @@ public interface WebResponse {
 			} catch (FileNotFoundException e) {
 				return () -> "Unable to locate target file from url & log failure.";
 			}
-			return () -> "Resource " + check.getResource() + " doesn't have a release available.";
+			return () -> "Unable to get " + check.getResource() + " latest release, connection not found.";
 		}
 	}
 

@@ -1,11 +1,10 @@
 package com.github.sanctum.labyrinth.command;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollectionBase;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.labyrinth.interfacing.MessageInListener;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import java.util.Arrays;
@@ -60,17 +59,14 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 	/**
 	 * Register a sub command into this list.
 	 *
+	 * @throws IllegalArgumentException if the subcommand provided doesn't belong to this command or if the command is not found or not yet loaded.
 	 * @param subCommand The command to register.
 	 */
 	public final void register(@NotNull SubCommand subCommand) {
 		if (subCommand.getCommand().equalsIgnoreCase(getCommand())) {
 			final Command parent = CommandUtils.getCommandByLabel(subCommand.getCommand());
-			if (parent != null) {
-				final Plugin plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
-					if (parent instanceof PluginCommand) {
-						return ((PluginCommand)parent).getPlugin();
-					} else return LabyrinthProvider.getInstance().getPluginInstance();
-				});
+			if (this.parent.command.equals(parent)) {
+				final Plugin plugin = this.parent.getPlugin();
 				CommandUtils.read(entry -> {
 					Map<String, Command> commandMappings = entry.getValue();
 					CommandMap map = entry.getKey();
@@ -81,11 +77,11 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 						}
 					}
 					parent.unregister(map);
-					map.register(getCommand(), plugin.getName(), parent);
-					if (!contains(subCommand)) add(subCommand);
+					map.register(getCommand(), plugin.getName(), this.parent);
 					return this;
 				});
-			} else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
+				if (!contains(subCommand)) add(subCommand);
+			} else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found, not loaded or mismatched.");
 		}
 	}
 
@@ -97,7 +93,7 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 	public final void unregister(@NotNull SubCommand subCommand) {
 		if (subCommand.getCommand().equalsIgnoreCase(getCommand())) {
 			final Command parent = CommandUtils.getCommandByLabel(subCommand.getCommand());
-			if (parent != null) {
+			if (this.parent.command.equals(parent)) {
 				if (contains(subCommand)) remove(subCommand);
 			} else throw new IllegalArgumentException("Command " + subCommand.getCommand() + " either not found or not loaded yet.");
 		}
@@ -106,10 +102,16 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 	class Crossover extends Command {
 
 		private final Command command;
+		private final Plugin plugin;
 
 		Crossover(Command pass) {
 			super(pass.getName());
 			this.command = pass;
+			this.plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
+				if (pass instanceof PluginCommand) {
+					return ((PluginCommand)pass).getPlugin();
+				} else return LabyrinthProvider.getInstance().getPluginInstance();
+			});
 			if (!this.command.getAliases().isEmpty()) {
 				setAliases(this.command.getAliases());
 			}
@@ -119,11 +121,18 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 			if (this.command.getPermissionMessage() != null) setPermissionMessage(this.command.getPermissionMessage());
 		}
 
+		public Plugin getPlugin() {
+			return plugin;
+		}
+
 		@NotNull
 		@Override
 		public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
 			LabyrinthCollection<String> labels = new LabyrinthList<>();
 			if (args.length > 0) {
+				if (SubCommandList.this instanceof MessageInListener) {
+					((MessageInListener)SubCommandList.this).onReceiveSuggestion(String.join(" ", args));
+				}
 				for (SubCommand sub : SubCommandList.this) {
 					if (args.length == 1) {
 						Stream.of(sub.getLabel()).filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase())).forEach(labels::add);
@@ -142,6 +151,9 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 		@Override
 		public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
 			if (args.length > 0) {
+				if (SubCommandList.this instanceof MessageInListener) {
+					((MessageInListener)SubCommandList.this).onReceiveMessage(String.join(" ", args));
+				}
 				for (SubCommand sub : SubCommandList.this) {
 					if (args[0].equalsIgnoreCase(sub.getLabel())) {
 						List<String> t = new LinkedList<>(Arrays.asList(args));

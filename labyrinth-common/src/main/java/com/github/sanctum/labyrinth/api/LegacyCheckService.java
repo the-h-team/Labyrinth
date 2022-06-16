@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
  */
 public interface LegacyCheckService extends Service {
 
+    String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
+
     default boolean isModded() {
         return StringUtils.use(Bukkit.getServer().getName()).containsIgnoreCase("forge", "magma");
     }
@@ -18,9 +20,13 @@ public interface LegacyCheckService extends Service {
      * @return true if the server version is 1.13 or lower
      */
     default boolean isLegacy() {
-        return Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.9")
-                || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11")
-                || Bukkit.getVersion().contains("1.12") || Bukkit.getVersion().contains("1.13");
+        String num = String.valueOf(VERSION.charAt(2));
+        String num2 = String.valueOf(VERSION.charAt(3));
+        if (StringUtils.use(num2).isInt()) {
+             num += num2;
+        }
+        int fin = Integer.parseInt(num);
+        return fin >= 8 && fin < 14;
     }
 
     /**
@@ -29,7 +35,13 @@ public interface LegacyCheckService extends Service {
      * @return true if the server version is 1.16 or higher
      */
     default boolean isNew() {
-        return Bukkit.getVersion().contains("1.16") || Bukkit.getVersion().contains("1.17") || Bukkit.getVersion().contains("1.18");
+        String num = String.valueOf(VERSION.charAt(2));
+        String num2 = String.valueOf(VERSION.charAt(3));
+        if (StringUtils.use(num2).isInt()) {
+            num += num2;
+        }
+        int fin = Integer.parseInt(num);
+        return fin >= 16;
     }
 
     /**
@@ -40,6 +52,12 @@ public interface LegacyCheckService extends Service {
      * @return true if the server version is 1.14 or lower.
      */
     default boolean isLegacyVillager() {
-        return isLegacy() || Bukkit.getVersion().contains("1.14");
+        String num = String.valueOf(VERSION.charAt(2));
+        String num2 = String.valueOf(VERSION.charAt(3));
+        if (StringUtils.use(num2).isInt()) {
+            num += num2;
+        }
+        int fin = Integer.parseInt(num);
+        return fin >= 8 && fin < 15;
     }
 }

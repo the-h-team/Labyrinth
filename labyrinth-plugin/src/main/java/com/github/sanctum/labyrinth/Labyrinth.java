@@ -32,11 +32,17 @@ import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
+import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
 import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.formatting.string.DefaultColor;
+import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
+import com.github.sanctum.labyrinth.gui.unity.simple.Docket;
+import com.github.sanctum.labyrinth.gui.unity.simple.MemoryDocket;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -48,13 +54,13 @@ import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.labyrinth.library.WrittenBook;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
 import com.github.sanctum.labyrinth.placeholders.Placeholder;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
 import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
-import com.github.sanctum.labyrinth.placeholders.factory.WorldPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskChain;
@@ -153,7 +159,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		registerJsonAdapters().deploy();
 		registerFileConfigurationAdapters().deploy();
 		getEventMap().subscribeAll(this, new DefaultEvent.Controller(), this);
-
 		getLogger().info("===================================================================");
 		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("===================================================================");
@@ -254,7 +259,8 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 						List<String> placeholders = new ArrayList<>();
 						PlaceholderRegistration.getInstance().getHistory().entries().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
 							for (Placeholder placeholder : e.getValue()) {
-								placeholders.add(placeholder.toRaw().replace(String.valueOf(placeholder.start()), placeholder.start() + e.getKey().get()));
+								String result = placeholder.toRaw();
+								placeholders.add(placeholder.start() + e.getKey().get() + result.substring(1));
 							}
 						});
 						completion.then(TabCompletionIndex.TWO, "placeholder", TabCompletionIndex.ONE, placeholders);
@@ -318,7 +324,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
 
 			registration.registerTranslation(new PlayerPlaceholders()).deploy();
-			registration.registerTranslation(new WorldPlaceholders()).deploy();
 		});
 	}
 
@@ -375,7 +380,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Subscribe(priority = Vent.Priority.LOW)
 	public void onJoin(DefaultEvent.Join e) {
 		PlayerSearch.of(e.getPlayer());
-
+		//Docket.newInstance(FileList.search(this).get("test").getRoot()).add(() -> Arrays.asList(DefaultColor.values())).load().toMenu().open(e.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

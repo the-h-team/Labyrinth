@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthMap;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
 import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.formatting.pagination.AbstractPaginatedCollection;
@@ -57,14 +58,15 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		this.lazy = lazy;
 	}
 
-	public synchronized void open(Player player) {
-	}
+	public synchronized void open(Player player) {}
+
+	public synchronized void close(Player player) {}
 
 	@Override
 	public Inventory getElement() {
 
 		if (this.inventory == null) {
-			this.inventory = Bukkit.createInventory(null, menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
+			this.inventory = Bukkit.createInventory(Menu.Instance.of(menu), menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 		}
 
 		if (this.menu.getProperties().contains(Menu.Property.REFILLABLE)) {
@@ -505,6 +507,24 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
+		public synchronized void close(Player player) {
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+
+				if (element.isCancelled()) {
+					getParent().open(player);
+				} else {
+					player.closeInventory();
+				}
+				close.apply(element);
+			} else {
+				player.closeInventory();
+			}
+		}
+
+		@Override
 		public synchronized void open(Player player) {
 			TaskScheduler.of(() -> {
 				slides.stream().sorted(Comparator.comparingInt(SimpleKeyedValue::getKey)).forEach(entry -> {
@@ -593,6 +613,24 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
+		public synchronized void close(Player player) {
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+
+				if (element.isCancelled()) {
+					getParent().open(player);
+				} else {
+					player.closeInventory();
+				}
+				close.apply(element);
+			} else {
+				player.closeInventory();
+			}
+		}
+
+		@Override
 		public synchronized void open(Player player) {
 			MenuViewer viewer = getViewer(player);
 			if (lazy) {
@@ -669,12 +707,30 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
+		public synchronized void close(Player player) {
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+
+				if (element.isCancelled()) {
+					getParent().open(player);
+				} else {
+					player.closeInventory();
+				}
+				close.apply(element);
+			} else {
+				player.closeInventory();
+			}
+		}
+
+		@Override
 		public synchronized void open(Player player) {
 			viewers.add(player);
 			MenuViewer viewer = getViewer(player);
 			if (lazy) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
+				this.inventory = Bukkit.createInventory(Menu.Instance.of(menu), this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, getTotalPages())).translate());
 			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
 				getElement().setMaxStackSize(1);
@@ -738,12 +794,30 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
+		public synchronized void close(Player player) {
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+
+				if (element.isCancelled()) {
+					getParent().open(player);
+				} else {
+					player.closeInventory();
+				}
+				close.apply(element);
+			} else {
+				player.closeInventory();
+			}
+		}
+
+		@Override
 		public synchronized void open(Player player) {
 			viewers.add(player);
 			MenuViewer viewer = getViewer(player);
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
+				this.inventory = Bukkit.createInventory(Menu.Instance.of(menu), this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 			}
 
 			if (this.menu.getProperties().contains(Menu.Property.ANIMATED)) {
@@ -856,11 +930,29 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
+		public synchronized void close(Player player) {
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+
+				if (element.isCancelled()) {
+					getParent().open(player);
+				} else {
+					player.closeInventory();
+				}
+				close.apply(element);
+			} else {
+				player.closeInventory();
+			}
+		}
+
+		@Override
 		public synchronized void open(Player player) {
 			MenuViewer viewer = getViewer(player);
 			if (lazy && getParent().getProperties().contains(Menu.Property.RECURSIVE)) {
 				// This area dictates that our inventory is "lazy" and needs to be instantiated
-				this.inventory = Bukkit.createInventory(null, this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
+				this.inventory = Bukkit.createInventory(Menu.Instance.of(menu), this.menu.getSize().getSize(), StringUtils.use(MessageFormat.format(this.title, page, 0)).translate());
 				viewer.setElement(null);
 			}
 			if (this.menu.getProperties().contains(Menu.Property.LIVE_META)) {
@@ -945,15 +1037,47 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		private int containerId;
 
-		private boolean visible;
+		private final LabyrinthCollection<Player> visible = new LabyrinthSet<>();
 
 		public Printable(String title, AnvilMechanics mechanics, Menu menu) {
 			super(StringUtils.use(title).translate(), menu, true);
 			this.nms = mechanics;
 		}
 
-		public boolean isVisible() {
-			return visible;
+		public boolean isVisible(Player player) {
+			return visible.contains(player);
+		}
+
+		@Override
+		public synchronized void close(Player player) {
+			if (nms == null || !visible.contains(player)) return;
+			Menu.Close close = getParent().getCloseEvent().orElse(null);
+			if (close != null) {
+				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
+				close.apply(element);
+				if (!element.isCancelled()) {
+					visible.remove(player);
+					nms.handleInventoryCloseEvent(player);
+					nms.setActiveContainerDefault(player);
+					nms.sendPacketCloseWindow(player, containerId);
+				}
+				close.apply(element);
+			} else {
+				visible.remove(player);
+				nms.handleInventoryCloseEvent(player);
+				nms.setActiveContainerDefault(player);
+				nms.sendPacketCloseWindow(player, containerId);
+			}
+		}
+
+		public void close(Player player, boolean sendPacket) {
+			if (nms == null || !visible.contains(player)) return;
+			visible.remove(player);
+			if (sendPacket) {
+				nms.handleInventoryCloseEvent(player);
+			}
+			nms.setActiveContainerDefault(player);
+			nms.sendPacketCloseWindow(player, containerId);
 		}
 
 		@Override
@@ -996,21 +1120,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			nms.setActiveContainer(player, container);
 			nms.setActiveContainerId(container, containerId);
 			nms.addActiveContainerSlotListener(container, player);
-
-			visible = true;
-		}
-
-		public void close(Player player, boolean sendPacket) {
-			if (nms == null) return;
-			if (!visible)
-				throw new IllegalArgumentException("You can't close an inventory that isn't open!");
-			visible = false;
-
-			if (!sendPacket) {
-				nms.handleInventoryCloseEvent(player);
-			}
-			nms.setActiveContainerDefault(player);
-			nms.sendPacketCloseWindow(player, containerId);
+			visible.add(player);
 		}
 
 	}

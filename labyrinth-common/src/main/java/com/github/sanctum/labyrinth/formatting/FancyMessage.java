@@ -274,4 +274,18 @@ public class FancyMessage extends MessageBuilder {
 		return this;
 	}
 
+	@Override
+	public FancyMessage append(Chunk text) {
+		return (FancyMessage) super.append(text);
+	}
+
+	@Override
+	public FancyMessage append(Message message) {
+		return (FancyMessage) super.append(message);
+	}
+
+	@Override
+	public FancyMessage append(String message) {
+		return (FancyMessage) super.append(message);
+	}
 }

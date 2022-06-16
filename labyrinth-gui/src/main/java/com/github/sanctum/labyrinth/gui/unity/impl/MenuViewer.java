@@ -49,7 +49,7 @@ public class MenuViewer {
 			if (getInventory().isPaginated()) {
 				total = ((InventoryElement.Paginated)getInventory()).getTotalPages();
 			}
-			this.inventory = Bukkit.createInventory(null, getInventory().getParent().getSize().getSize(), StringUtils.use(MessageFormat.format(getInventory().title, getPage().toNumber(), total)).translate());
+			this.inventory = Bukkit.createInventory(Menu.Instance.of(element.menu), getInventory().getParent().getSize().getSize(), StringUtils.use(MessageFormat.format(getInventory().title, getPage().toNumber(), total)).translate());
 		}
 		if (getInventory().getParent().getProperties().contains(Menu.Property.REFILLABLE)) {
 			if (!UniformedComponents.accept(Arrays.asList(inventory.getContents())).filter(Objects::nonNull).findAny().isPresent()) {

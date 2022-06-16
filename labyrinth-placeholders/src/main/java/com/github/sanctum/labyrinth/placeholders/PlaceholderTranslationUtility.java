@@ -40,10 +40,18 @@ abstract class PlaceholderTranslationUtility {
 
 			@Override
 			public Deployable<PlaceholderTranslation> registerTranslation(@NotNull File file) {
-				AddonLoader loader = AddonLoader.forPlugin(LabyrinthProvider.getInstance().getPluginInstance());
+				AddonLoader loader = AddonLoader.newInstance(LabyrinthProvider.getInstance().getPluginInstance());
 				List<Class<?>> classes = loader.loadFile(file);
-				if (classes.stream().noneMatch(PlaceholderTranslation.class::isAssignableFrom))
+				if (classes.stream().noneMatch(PlaceholderTranslation.class::isAssignableFrom)) {
+					if (!classes.isEmpty()) {
+						try {
+							loader.unload(file.getPath());
+						} catch (ClassNotFoundException e) {
+							LabyrinthProvider.getInstance().getLogger().severe("Uh-oh this is weird, some class(es) failed to unload.");
+						}
+					}
 					throw new IllegalArgumentException("No translation found from the specified file!");
+				}
 				PlaceholderTranslation translation = classes.stream().filter(PlaceholderTranslation.class::isAssignableFrom).map(aClass -> {
 					try {
 						return (PlaceholderTranslation) aClass.getDeclaredConstructor().newInstance();
@@ -202,10 +210,10 @@ abstract class PlaceholderTranslationUtility {
 				PlaceholderTranslation conversion = PlaceholderRegistration.getInstance().getTranslation(identifier);
 				if (conversion != null) {
 					String translation = conversion.onTranslation(parameters, receiver != null ? receiver : () -> null);
-					Map<String, Placeholder> mapMap = PlaceholderRegistration.history.get(identifier.get() + identifier.spacer());
+					Map<String, Placeholder> placeholderMap = PlaceholderRegistration.history.get(identifier.get() + identifier.spacer());
 					final boolean valid = translation != null && !translation.equals(parameters) && !translation.isEmpty();
-					if (mapMap != null) {
-						if (mapMap.get(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end()) == null) {
+					if (placeholderMap != null) {
+						if (placeholderMap.get(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end()) == null) {
 							if (valid) {
 								Placeholder record = new Placeholder() {
 									@Override
@@ -223,7 +231,7 @@ abstract class PlaceholderTranslationUtility {
 										return placeholder.end();
 									}
 								};
-								mapMap.put(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end(), record);
+								placeholderMap.put(placeholder.start() + parameters.toLowerCase(Locale.ROOT) + placeholder.end(), record);
 							}
 						}
 					} else {

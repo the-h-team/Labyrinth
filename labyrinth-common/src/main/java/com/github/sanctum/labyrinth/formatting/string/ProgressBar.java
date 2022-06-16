@@ -27,8 +27,7 @@ public class ProgressBar implements JsonIntermediate {
 	private String suffix;
 
 	public static ProgressBar fromJson(@Json String json) throws IllegalArgumentException {
-		JsonObject object = new JsonParser().parse(json).getAsJsonObject();
-		return fromJson(object);
+		return fromJson(JsonIntermediate.toJsonObject(json));
 	}
 
 	public static ProgressBar fromJson(JsonObject object) throws IllegalArgumentException {
@@ -196,7 +195,7 @@ public class ProgressBar implements JsonIntermediate {
 
 	/**
 	 * Method usage here is restricted.
-	 * @apiNote A non collective object cannot be converted to an array.
+	 * @apiNote A non-collective object cannot be converted to an array.
 	 *
 	 * @return null
 	 */

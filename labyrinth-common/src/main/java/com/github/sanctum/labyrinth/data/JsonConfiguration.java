@@ -599,4 +599,9 @@ public class JsonConfiguration extends Configurable {
 	public FileExtension getType() {
 		return FileType.JSON;
 	}
+
+	@Override
+	public String toString() {
+		return json.toString();
+	}
 }

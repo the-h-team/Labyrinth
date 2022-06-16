@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import org.bukkit.entity.Player;
@@ -44,6 +45,16 @@ public class SingularMenu extends Menu {
 		if (this.process != null) {
 			PreProcessElement element = new PreProcessElement(this, player, player.getOpenInventory());
 			this.process.apply(element);
+		}
+		if (open != null) {
+			OpeningElement element = new OpeningElement(this, player, player.getOpenInventory());
+
+			open.apply(element);
+
+			if (element.isCancelled()) {
+				element.getElement().closeInventory();
+			}
+
 		}
 		getInventory().open(player);
 	}

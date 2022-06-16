@@ -11,7 +11,9 @@ import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -52,13 +56,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class Menu {
 
+	protected static Controller controller;
+	protected AnvilController anvil;
 	protected final Set<Element<?, ?>> elements;
 	protected final Rows rows;
 	protected final Type type;
 	protected final Plugin host;
 	protected final String title;
 	protected final Set<Property> properties;
-	protected Controller controller;
 	protected String key;
 	private boolean retrieved;
 
@@ -84,11 +89,17 @@ public abstract class Menu {
 	 */
 	public abstract InventoryElement getInventory();
 
-
 	public abstract void open(Player player);
 
+	public void close(Player player) {
+		getInventory().close(player);
+	}
+
+	/**
+	 * @return The listener for anvil events.
+	 */
 	public Listener getController() {
-		return this.controller;
+		return this.anvil;
 	}
 
 	/**
@@ -132,14 +143,16 @@ public abstract class Menu {
 	}
 
 	protected final void registerController() throws InstantiationException {
-		if (this.controller == null) {
-
+		if (controller == null) {
+			controller = new Controller();
+			Bukkit.getPluginManager().registerEvents(controller, LabyrinthProvider.getInstance().getPluginInstance());
+		}
+		if (anvil == null && this instanceof PrintableMenu) {
 			if (this.host == null) {
 				throw new InstantiationException("Menu host cannot be null!");
 			}
-
-			this.controller = new Controller();
-			Bukkit.getPluginManager().registerEvents(this.controller, host);
+			anvil = new AnvilController();
+			Bukkit.getPluginManager().registerEvents(anvil, host);
 		}
 	}
 
@@ -729,7 +742,27 @@ public abstract class Menu {
 
 	}
 
-	final class Controller implements Listener {
+	@FunctionalInterface
+	public interface Instance extends InventoryHolder {
+
+		@NotNull Menu getMenu();
+
+		@NotNull
+		@Override
+		default Inventory getInventory() {
+			return getMenu().getInventory().getElement();
+		}
+
+		static @NotNull Instance of(@NotNull Menu menu) {
+			return () -> menu;
+		}
+
+	}
+
+	/**
+	 * Private listener construction for anvil usage.
+	 */
+	class AnvilController implements Listener {
 
 		private void unRegisterHandlers() {
 			HandlerList.unregisterAll(getController());
@@ -754,7 +787,16 @@ public abstract class Menu {
 			}
 
 			if (e.getInventory().equals(target)) {
-
+				if (LabyrinthProvider.getInstance().isModded()) {
+					TaskScheduler.of(() -> {
+						Arrays.stream(e.getPlayer().getInventory().getContents()).filter(i -> i != null && i.getType() != Material.AIR).forEach(i -> {
+							if (i.hasItemMeta() && !i.getItemMeta().hasDisplayName() && i.getType() == (Items.findMaterial("playerhead") == null ? Items.findMaterial("skullitem") : Items.findMaterial("playerhead"))) {
+								i.setAmount(0);
+								i.setType(Material.AIR);
+							}
+						});
+					}).scheduleLater(1);
+				}
 				Player p = (Player) e.getPlayer();
 
 				if (getProperties().contains(Property.LIVE_META) || getProperties().contains(Property.ANIMATED)) {
@@ -1355,6 +1397,551 @@ public abstract class Menu {
 						}
 					}
 
+				}
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Private listener construction.
+	 */
+	static class Controller implements Listener {
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onClose(InventoryCloseEvent e) {
+			if (!(e.getInventory().getHolder() instanceof Instance)) return;
+			if (!(e.getPlayer() instanceof Player))	return;
+			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			if (menu.getType() != Type.PRINTABLE) {
+				if (e.getView().getTopInventory().getSize() < menu.rows.slots) return;
+			}
+
+			Player p = (Player) e.getPlayer();
+
+			if (menu.getProperties().contains(Property.LIVE_META) || menu.getProperties().contains(Property.ANIMATED)) {
+				RenderedTask task = menu.getInventory().getViewer(p).getTask();
+				if (task != null) {
+					task.getTask().cancel();
+				}
+				Task t = TaskMonitor.getLocalInstance().get("Labyrinth:" + menu.hashCode() + ";slide-" + p.getUniqueId());
+				if (t != null) {
+					t.cancel();
+				}
+			}
+
+			if (menu instanceof PrintableMenu) {
+				menu.close(p); // verify that the correct packets are sent.
+			}
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onClick(InventoryClickEvent e) {
+			if (!(e.getInventory().getHolder() instanceof Instance)) return;
+			if (!(e.getWhoClicked() instanceof Player))	return;
+			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+
+			if (menu.getType() != Type.PRINTABLE) {
+				if (e.getView().getTopInventory().getSize() < menu.rows.slots) return;
+			}
+
+			Player p = (Player) e.getWhoClicked();
+			if (e.getCurrentItem() != null) {
+				ItemStack item = e.getCurrentItem();
+				ItemElement<?> element = menu.getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
+				if (element != null) {
+					Click click = element.getAttachment();
+					ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getCursor(), e.getView());
+					if (click != null) {
+						click.apply(clickElement);
+					}
+					if (clickElement.getResult() != null) {
+						e.setResult(clickElement.getResult());
+					}
+					if (e.getHotbarButton() != -1) {
+						if (!clickElement.isHotbarAllowed()) {
+							e.setCancelled(true);
+						}
+					}
+
+					if (element.getType() != null) {
+						ClickElement.Consumer consumer = clickElement.getConsumer();
+						switch (element.getType()) {
+							case TAKEAWAY:
+								element.remove(false);
+								break;
+							case BUTTON_EXIT:
+								if (consumer != null) {
+									consumer.accept(clickElement.getElement(), false);
+								}
+								break;
+							case BUTTON_NEXT:
+								if (menu instanceof PaginatedMenu) {
+									PaginatedMenu m = (PaginatedMenu) menu;
+
+									if (menu.getProperties().contains(Property.SAVABLE)) {
+										if (!menu.getProperties().contains(Property.SHAREABLE)) {
+											m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+										} else {
+											m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+										}
+										if (consumer != null) {
+											consumer.accept(clickElement.getElement(), true);
+										}
+									} else {
+										if (!menu.getProperties().contains(Property.SHAREABLE)) {
+											if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										} else {
+											if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										}
+									}
+									break;
+								}
+								if (consumer != null) {
+									consumer.accept(clickElement.getElement(), false);
+								}
+								break;
+							case BUTTON_BACK:
+								if (menu instanceof PaginatedMenu) {
+									PaginatedMenu m = (PaginatedMenu) menu;
+
+									if (menu.getProperties().contains(Property.SAVABLE)) {
+
+										if (!menu.getProperties().contains(Property.SHAREABLE)) {
+											if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 0) {
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										} else {
+											if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										}
+									} else {
+										if (!menu.getProperties().contains(Property.SHAREABLE)) {
+											if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										} else {
+											if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), true);
+												}
+											} else {
+												if (consumer != null) {
+													consumer.accept(clickElement.getElement(), false);
+												}
+											}
+										}
+									}
+									break;
+								}
+								if (consumer != null) {
+									consumer.accept(clickElement.getElement(), false);
+								}
+								break;
+						}
+					}
+
+					if (clickElement.isCancelled()) {
+						e.setCancelled(true);
+					}
+				} else {
+
+					ItemElement<?> el = menu.getInventory().getItem(e.getRawSlot());
+					if (el != null) {
+						Click click = el.getAttachment();
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
+						if (click != null) {
+							click.apply(clickElement);
+						}
+
+						if (clickElement.getResult() != null) {
+							e.setResult(clickElement.getResult());
+						}
+						if (e.getHotbarButton() != -1) {
+							if (!clickElement.isHotbarAllowed()) {
+								e.setCancelled(true);
+							}
+						}
+
+						if (el.getType() != null) {
+							ClickElement.Consumer consumer = clickElement.getConsumer();
+							switch (el.getType()) {
+								case TAKEAWAY:
+									el.remove(false);
+									break;
+								case BUTTON_EXIT:
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+								case BUTTON_NEXT:
+									if (menu instanceof PaginatedMenu) {
+										PaginatedMenu m = (PaginatedMenu) menu;
+
+										if (menu.getProperties().contains(Property.SAVABLE)) {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+											} else {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+											}
+											if (consumer != null) {
+												consumer.accept(clickElement.getElement(), true);
+											}
+										} else {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										}
+										break;
+									}
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+								case BUTTON_BACK:
+									if (menu instanceof PaginatedMenu) {
+										PaginatedMenu m = (PaginatedMenu) menu;
+
+										if (menu.getProperties().contains(Property.SAVABLE)) {
+
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 0) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										} else {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										}
+										break;
+									}
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+							}
+						}
+
+						if (clickElement.isCancelled()) {
+							e.setCancelled(true);
+						}
+					}
+
+					ItemElement<?> element2 = menu.getInventory().getItem(item);
+					if (element2 != null) {
+						Click click = element2.getAttachment();
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getCursor(), e.getView());
+						if (click == null) {
+							if (menu.click != null) {
+								menu.click.apply(clickElement);
+							}
+						} else {
+							click.apply(clickElement);
+						}
+
+						if (clickElement.getResult() != null) {
+							e.setResult(clickElement.getResult());
+						}
+
+						if (e.getHotbarButton() != -1) {
+							if (!clickElement.isHotbarAllowed()) {
+								e.setCancelled(true);
+							}
+						}
+
+						if (element2.getType() != null) {
+							ClickElement.Consumer consumer = clickElement.getConsumer();
+							switch (element2.getType()) {
+								case TAKEAWAY:
+									element2.remove(false);
+									break;
+								case BUTTON_EXIT:
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+								case BUTTON_NEXT:
+									if (menu instanceof PaginatedMenu) {
+										PaginatedMenu m = (PaginatedMenu) menu;
+
+										if (menu.getProperties().contains(Property.SAVABLE)) {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+											} else {
+												m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+											}
+											if (consumer != null) {
+												consumer.accept(clickElement.getElement(), true);
+											}
+										} else {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() + 1) <= m.getInventory().getTotalPages()) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() + 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										}
+										break;
+									}
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+								case BUTTON_BACK:
+									if (menu instanceof PaginatedMenu) {
+										PaginatedMenu m = (PaginatedMenu) menu;
+
+										if (menu.getProperties().contains(Property.SAVABLE)) {
+
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 0) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										} else {
+											if (!menu.getProperties().contains(Property.SHAREABLE)) {
+												if ((m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1) >= 1) {
+													m.getInventory().getViewer(clickElement.getElement()).setPage(m.getInventory().getViewer(clickElement.getElement()).getPage().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											} else {
+												if ((m.getInventory().getGlobalSlot().toNumber() - 1) < m.getInventory().getTotalPages() && (m.getInventory().getGlobalSlot().toNumber() - 1) >= 0) {
+													m.getInventory().setGlobalSlot(m.getInventory().getGlobalSlot().toNumber() - 1);
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), true);
+													}
+												} else {
+													if (consumer != null) {
+														consumer.accept(clickElement.getElement(), false);
+													}
+												}
+											}
+										}
+										break;
+									}
+									if (consumer != null) {
+										consumer.accept(clickElement.getElement(), false);
+									}
+									break;
+							}
+						}
+						if (clickElement.isCancelled()) {
+							e.setCancelled(true);
+						}
+						return;
+					}
+
+					if (!e.isCancelled()) {
+
+						ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCurrentItem());
+						if (menu.getProperties().contains(Property.SHAREABLE)) {
+							if (menu.getInventory().isPaginated()) {
+								InventoryElement.Paginated inv = (InventoryElement.Paginated) menu.getInventory();
+								element1.setPage(inv.getGlobalSlot());
+							}
+
+						} else {
+							element1.setPage(menu.getInventory().getViewer((Player) e.getWhoClicked()).getPage());
+						}
+
+						if (menu.click != null) {
+							ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), element1, e.getCursor(), e.getView());
+							menu.click.apply(element3);
+
+							if (element3.getResult() != null) {
+								e.setResult(element3.getResult());
+							}
+
+							if (e.getHotbarButton() != -1) {
+								if (!element3.isHotbarAllowed()) {
+									e.setCancelled(true);
+								}
+							}
+
+							if (element3.isCancelled()) {
+								e.setCancelled(true);
+							}
+						}
+
+					}
+
+				}
+
+			}
+
+			if (!e.isCancelled()) {
+
+				ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCursor());
+				if (menu.getProperties().contains(Property.SHAREABLE)) {
+					if (menu.getInventory().isPaginated()) {
+						InventoryElement.Paginated inv = (InventoryElement.Paginated) menu.getInventory();
+						el.setPage(inv.getGlobalSlot());
+					}
+
+				} else {
+					el.setPage(menu.getInventory().getViewer((Player) e.getWhoClicked()).getPage());
+				}
+
+				if (menu.click != null) {
+					ClickElement element3 = new ClickElement((Player) e.getWhoClicked(), e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
+					menu.click.apply(element3);
+
+					if (element3.getResult() != null) {
+						e.setResult(element3.getResult());
+					}
+
+					if (e.getHotbarButton() != -1) {
+						if (!element3.isHotbarAllowed()) {
+							e.setCancelled(true);
+						}
+					}
+
+					if (element3.isCancelled()) {
+						e.setCancelled(true);
+					}
 				}
 
 			}
