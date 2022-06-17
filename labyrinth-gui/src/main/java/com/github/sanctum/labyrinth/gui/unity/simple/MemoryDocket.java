@@ -41,11 +41,12 @@ public class MemoryDocket<T> implements Docket<T> {
 	protected String title;
 	protected String key;
 	protected MemoryItem pagination, next, previous, exit, filler, border;
-	protected T target;
+	protected Object target;
 	protected Supplier<List<T>> supplier;
 	protected Comparator<T> comparator;
 	protected Predicate<T> predicate;
 	protected WideFunction<String, T, String> function = (s, t) -> s;
+	protected WideFunction<String, Object, String> extraFunction = (s, t) -> s;
 	protected Menu.Rows rows;
 	protected Menu instance;
 
@@ -73,8 +74,9 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
-	public MemoryDocket<T> select(T t) {
+	public <V> MemoryDocket<T> replaceFirst(V t, WideFunction<String, V, String> function) {
 		this.target = t;
+		this.extraFunction = (WideFunction<String, Object, String>) function;
 		return this;
 	}
 
@@ -82,14 +84,14 @@ public class MemoryDocket<T> implements Docket<T> {
 	public @NotNull Docket<T> load() {
 		this.title = memory.getNode("title").toPrimitive().getString();
 		if (this.target != null) {
-			this.title = function.accept(title, target);
+			this.title = extraFunction.accept(title, target);
 		}
 		this.rows = Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString());
 		this.type = Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString());
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
 			if (this.target != null) {
-				this.key = function.accept(memory.getNode("id").toPrimitive().getString(), target);
+				this.key = extraFunction.accept(memory.getNode("id").toPrimitive().getString(), target);
 			} else {
 				this.key = memory.getNode("id").toPrimitive().getString();
 			}
@@ -380,9 +382,9 @@ public class MemoryDocket<T> implements Docket<T> {
 		return instance;
 	}
 
-	protected String append(MemoryItem item, String context, T value) {
+	protected String append(Map<String, String> map, String context, Object value) {
 		final FormattedString string = new FormattedString(context);
-		for (Map.Entry<String, String> entry : item.getReplacements().entrySet()) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
 			try {
 				if (entry.getValue().contains(".")) {
 					// Here we invoke method-ception, allow the jvm to point to each specified method result.
@@ -407,6 +409,10 @@ public class MemoryDocket<T> implements Docket<T> {
 			}
 		}
 		return string.get();
+	}
+
+	protected String append(MemoryItem item, String context, T value) {
+		return append(item.getReplacements(), context, value);
 	}
 
 	@Override
