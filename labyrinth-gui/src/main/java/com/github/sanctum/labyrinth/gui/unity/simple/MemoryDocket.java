@@ -2,10 +2,10 @@ package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.MemorySpace;
+import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.WideFunction;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
 import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
@@ -19,7 +19,6 @@ import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
-import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.Mailer;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -42,11 +40,12 @@ public class MemoryDocket<T> implements Docket<T> {
 	protected boolean shared;
 	protected String title;
 	protected String key;
-	protected MemoryItem pagination, next, back, filler, border;
+	protected MemoryItem pagination, next, previous, exit, filler, border;
+	protected T target;
 	protected Supplier<List<T>> supplier;
 	protected Comparator<T> comparator;
 	protected Predicate<T> predicate;
-	protected WideFunction<String, T, String> function;
+	protected WideFunction<String, T, String> function = (s, t) -> s;
 	protected Menu.Rows rows;
 	protected Menu instance;
 
@@ -74,14 +73,26 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
+	public MemoryDocket<T> select(T t) {
+		this.target = t;
+		return this;
+	}
+
 	@Override
 	public @NotNull Docket<T> load() {
 		this.title = memory.getNode("title").toPrimitive().getString();
+		if (this.target != null) {
+			this.title = function.accept(title, target);
+		}
 		this.rows = Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString());
 		this.type = Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString());
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
-			this.key = memory.getNode("id").toPrimitive().getString();
+			if (this.target != null) {
+				this.key = function.accept(memory.getNode("id").toPrimitive().getString(), target);
+			} else {
+				this.key = memory.getNode("id").toPrimitive().getString();
+			}
 		}
 		if (memory.isNode("filler")) {
 			this.filler = new MemoryItem(memory.getNode("filler"));
@@ -91,11 +102,13 @@ public class MemoryDocket<T> implements Docket<T> {
 		}
 		if (memory.isNode("pagination")) {
 			pagination = new MemoryItem(memory.getNode("pagination"));
-			if (memory.getNode("pagination").isNode("next_button")) {
-				next = new MemoryItem(memory.getNode("pagination").getNode("next_button"));
-			}
-			if (memory.getNode("pagination").isNode("back_button")) {
-				back = new MemoryItem(memory.getNode("pagination").getNode("back_button"));
+			if (memory.getNode("pagination").isNode("navigation")) {
+				Node parent = memory.getNode("pagination").getNode("navigation");
+				next = new MemoryItem(parent.getNode("next"));
+				previous = new MemoryItem(parent.getNode("previous"));
+				if (parent.isNode("exit")) {
+					exit = new MemoryItem(parent.getNode("exit"));
+				}
 			}
 		}
 		if (memory.isNode("items")) {
@@ -268,9 +281,9 @@ public class MemoryDocket<T> implements Docket<T> {
 						}
 					});
 					i.addItem(element);
-					if (!Check.isNull(next, back)) {
+					if (!Check.isNull(next, previous)) {
 						i.addItem(b -> b.setElement(it -> it.setItem(next.toItem()).build()).setType(ItemElement.ControlType.BUTTON_NEXT).setSlot(next.getSlot()))
-								.addItem(b -> b.setElement(it -> it.setItem(back.toItem()).build()).setType(ItemElement.ControlType.BUTTON_BACK).setSlot(back.getSlot()));
+								.addItem(b -> b.setElement(it -> it.setItem(previous.toItem()).build()).setType(ItemElement.ControlType.BUTTON_BACK).setSlot(previous.getSlot()));
 					}
 				});
 				this.instance = paginated.join();
