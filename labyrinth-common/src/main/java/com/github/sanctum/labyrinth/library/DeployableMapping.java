@@ -1,22 +1,25 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Comment;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+@Comment("A delegate to deployable interfacing, conforming one object type into another.")
 public final class DeployableMapping<R> implements Deployable<R> {
 
 	private final Function<? super Object, ? extends R> function;
 	private final Object parent;
 	private R value;
 
-	DeployableMapping(Object o, Function<? super Object, ? extends R> function) {
+	DeployableMapping(Supplier<Object> o, Function<? super Object, ? extends R> function) {
 		this.function = function;
-		this.parent = o;
+		this.parent = o.get();
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public final class DeployableMapping<R> implements Deployable<R> {
 
 	@Override
 	public <O> DeployableMapping<O> map(Function<? super R, ? extends O> mapper) {
-		return new DeployableMapping<>(submit().join(), (Function<? super Object, ? extends O>) mapper);
+		return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
 	}
 
 	@Override

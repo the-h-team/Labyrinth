@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Comment;
+import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.annotation.Voluntary;
 import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.WideFunction;
@@ -22,7 +25,6 @@ import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.skulls.CustomHead;
-import com.github.sanctum.skulls.SkullType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,73 +36,119 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A type of unity docket that conforms written gui structure into a usable menu instance.
+ *
+ * @param <T> The type of docket.
+ */
 public class MemoryDocket<T> implements Docket<T> {
 
 	protected final LabyrinthCollection<ItemElement<?>> items = new LabyrinthList<>();
-	protected final MemorySpace memory;
 	protected Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
-	protected Menu.Type type;
-	protected boolean shared;
-	protected String title;
-	protected String key;
 	protected MemoryItem pagination, next, previous, exit, filler, border;
-	protected Object target;
+	protected WideFunction<String, T, String> dataConverter = (s, t) -> s;
+	protected WideFunction<String, Object, String> uniqueDataConverter = (s, t) -> s;
+	protected final MemorySpace memory;
 	protected Supplier<List<T>> supplier;
 	protected Comparator<T> comparator;
 	protected Predicate<T> predicate;
-	protected WideFunction<String, T, String> function = (s, t) -> s;
-	protected WideFunction<String, Object, String> extraFunction = (s, t) -> s;
+	protected Object uniqueData;
+	protected boolean shared;
+	protected String title;
+	protected String key;
+	protected String nameHolder;
+	protected Menu.Type type;
 	protected Menu.Rows rows;
 	protected Menu instance;
-	protected String nameHolder;
 
 	public MemoryDocket(MemorySpace memorySpace) {
 		this.memory = memorySpace;
 	}
 
-	public MemoryDocket<T> add(Supplier<List<T>> supplier) {
+	@Voluntary("Used only in tandem with pagination.")
+	public MemoryDocket<T> setList(@NotNull Supplier<List<T>> supplier) {
 		this.supplier = supplier;
 		return this;
 	}
 
-	public MemoryDocket<T> sort(Comparator<T> comparator) {
+	@Voluntary("Used only in tandem with pagination.")
+	public MemoryDocket<T> setComparator(Comparator<T> comparator) {
 		this.comparator = comparator;
 		return this;
 	}
 
-	public MemoryDocket<T> filter(Predicate<T> predicate) {
+	@Voluntary("Used only in tandem with pagination.")
+	public MemoryDocket<T> setFilter(Predicate<T> predicate) {
 		this.predicate = predicate;
 		return this;
 	}
 
-	public MemoryDocket<T> replace(WideFunction<String, T, String> function) {
-		this.function = function;
-		return this;
-	}
-
-	public MemoryDocket<T> heads(String placeholder) {
+	@Comment("This method is used for translating player names for skull items, it is expected to be the placeholder for returning a player username and is used in tandem with a Unique Data Converter")
+	public MemoryDocket<T> setNamePlaceholder(@NotNull String placeholder) {
 		this.nameHolder = placeholder;
 		return this;
 	}
 
-	public <V> MemoryDocket<T> replaceFirst(V t, WideFunction<String, V, String> function) {
-		this.target = t;
-		this.extraFunction = (WideFunction<String, Object, String>) function;
+	@Voluntary("This method allows you to setup custom placeholders, used only in tandem with pagination.")
+	public MemoryDocket<T> setDataConverter(@NotNull WideFunction<String, T, String> function) {
+		this.dataConverter = function;
 		return this;
+	}
+
+	@Comment("This method is used for setting up unique translations. Example; a singular parent object being attached for extra placeholders.")
+	public <V> MemoryDocket<T> setUniqueDataConverter(@NotNull V t, @NotNull WideFunction<String, V, String> function) {
+		this.uniqueData = t;
+		this.uniqueDataConverter = (WideFunction<String, Object, String>) function;
+		return this;
+	}
+
+	private void handleClickEvent(MemoryItem item, ItemElement<?> ed) {
+		if (item.isNotRemovable()) {
+			ed.setClick(click -> {
+				click.setCancelled(true);
+				if (item.isExitOnClick()) click.getParent().getParent().getParent().close(click.getElement());
+				if (item.getMessage() != null) {
+					String message = item.getMessage();
+					if (uniqueData != null) {
+						message = uniqueDataConverter.accept(message, uniqueData);
+					}
+					Mailer.empty(click.getElement()).chat(message).deploy();
+				}
+				if (item.getOpenOnClick() != null) {
+					String open = item.getOpenOnClick();
+					if (uniqueData != null) {
+						open = uniqueDataConverter.accept(open, uniqueData);
+					}
+					MenuRegistration registration = MenuRegistration.getInstance();
+					Menu registered = registration.get(open).get();
+					if (registered != null) {
+						registered.open(click.getElement());
+					} else {
+						if (item.getOpenOnClick().startsWith("/")) {
+							String command = item.getOpenOnClick().replace("/", "");
+							if (uniqueData != null) {
+								command = uniqueDataConverter.accept(command, uniqueData);
+							}
+							click.getElement().performCommand(command);
+						}
+					}
+				}
+			});
+		}
 	}
 
 	@Override
 	public @NotNull Docket<T> load() {
 		this.title = memory.getNode("title").toPrimitive().getString();
-		if (this.target != null) {
-			this.title = extraFunction.accept(title, target);
+		if (this.uniqueData != null) {
+			this.title = uniqueDataConverter.accept(title, uniqueData);
 		}
 		this.rows = Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString());
 		this.type = Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString());
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
-			if (this.target != null) {
-				this.key = extraFunction.accept(memory.getNode("id").toPrimitive().getString(), target);
+			if (this.uniqueData != null) {
+				this.key = uniqueDataConverter.accept(memory.getNode("id").toPrimitive().getString(), uniqueData);
 			} else {
 				this.key = memory.getNode("id").toPrimitive().getString();
 			}
@@ -127,29 +175,28 @@ public class MemoryDocket<T> implements Docket<T> {
 				MemoryItem i = new MemoryItem(memory.getNode("items").getNode(item));
 				ItemStack result = i.toItem();
 				ItemElement<?> element = new ItemElement<>();
+				element.setElement(result);
 				if (i.getSlot() > -1) {
 					element.setSlot(i.getSlot());
 				}
-				if (i.isNotRemovable()) {
-					element.setClick(click -> {
-						click.setCancelled(true);
-						if (i.isExitOnClick()) click.getElement().closeInventory();
-						if (i.getMessage() != null) Mailer.empty(click.getElement()).chat(i.getMessage()).deploy();
-						if (i.getOpenOnClick() != null) {
-							MenuRegistration registration = MenuRegistration.getInstance();
-							Menu registered = registration.get(i.getOpenOnClick()).get();
-							if (registered != null) {
-								registered.open(click.getElement());
-							} else {
-								if (i.getOpenOnClick().startsWith("/")) {
-									click.getElement().performCommand(i.getOpenOnClick().replace("/", ""));
-								}
-							}
+				handleClickEvent(i, element);
+				if (element.getElement().hasItemMeta() && element.getElement().getItemMeta().hasLore()) {
+					List<String> lore = new ArrayList<>();
+					for (String s : element.getElement().getItemMeta().getLore()) {
+						String res = s;
+						if (uniqueData != null) {
+							res = uniqueDataConverter.accept(res, uniqueData);
 						}
-					});
+						lore.add(res);
+					}
+					element.setElement(edit -> edit.setLore(lore).build());
 				}
-				element.setElement(result);
-
+				String res = element.getName();
+				if (uniqueData != null ) {
+					res = uniqueDataConverter.accept(res, uniqueData);
+				}
+				String finalRes = res;
+				element.setElement(edit -> edit.setTitle(finalRes).build());
 				items.add(element);
 			}
 		}
@@ -174,29 +221,7 @@ public class MemoryDocket<T> implements Docket<T> {
 							border.add(p, ed -> {
 								ItemStack built = this.border.toItem();
 								ed.setElement(built);
-								if (pagination != null) {
-									if (pagination.isNotRemovable()) {
-										ed.setClick(click -> {
-											click.setCancelled(true);
-											if (pagination.isExitOnClick()) click.getElement().closeInventory();
-											if (pagination.getMessage() != null) {
-												Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
-											}
-											if (pagination.getOpenOnClick() != null) {
-												MenuRegistration registration = MenuRegistration.getInstance();
-												Menu registered = registration.get(pagination.getOpenOnClick()).get();
-												if (registered != null) {
-													registered.open(click.getElement());
-												} else {
-													if (pagination.getOpenOnClick().startsWith("/")) {
-														String command = pagination.getOpenOnClick().replace("/", "");
-														click.getElement().performCommand(command);
-													}
-												}
-											}
-										});
-									}
-								}
+								handleClickEvent(this.border, ed);
 								ed.setType(ItemElement.ControlType.ITEM_BORDER);
 							});
 						}
@@ -207,40 +232,7 @@ public class MemoryDocket<T> implements Docket<T> {
 						filler.add(ed -> {
 							ItemStack built = this.filler.toItem();
 							ed.setElement(built);
-							if (pagination != null) {
-								if (pagination.isNotRemovable()) {
-									ed.setClick(click -> {
-										click.setCancelled(true);
-										if (pagination.isExitOnClick()) click.getElement().closeInventory();
-										if (pagination.getMessage() != null) {
-											String message = pagination.getMessage();
-											if (target != null) {
-												message = extraFunction.accept(message, target);
-											}
-											Mailer.empty(click.getElement()).chat(message).deploy();
-										}
-										if (pagination.getOpenOnClick() != null) {
-											String open = pagination.getOpenOnClick();
-											if (target != null) {
-												open = extraFunction.accept(open, target);
-											}
-											MenuRegistration registration = MenuRegistration.getInstance();
-											Menu registered = registration.get(open).get();
-											if (registered != null) {
-												registered.open(click.getElement());
-											} else {
-												if (pagination.getOpenOnClick().startsWith("/")) {
-													String command = pagination.getOpenOnClick().replace("/", "");
-													if (target != null) {
-														command = extraFunction.accept(command, target);
-													}
-													click.getElement().performCommand(command);
-												}
-											}
-										}
-									});
-								}
-							}
+							handleClickEvent(this.filler, ed);
 							ed.setType(ItemElement.ControlType.ITEM_FILLER);
 						});
 						i.addItem(filler);
@@ -250,29 +242,39 @@ public class MemoryDocket<T> implements Docket<T> {
 					element.setLimit(pagination.getLimit());
 					element.setPopulate((value, item) -> {
 						item.setElement(built);
-						if (function != null && nameHolder != null && built.isSimilar(SkullType.PLAYER.get())) {
-							String name = function.accept(nameHolder, value);
+						if (dataConverter != null && nameHolder != null && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
+							String name = dataConverter.accept(nameHolder, value);
 							PlayerSearch search = PlayerSearch.of(name);
-							item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
+							if (search != null) {
+								item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
+								if (built.hasItemMeta()) {
+									if (built.getItemMeta().hasDisplayName()) {
+										item.setElement(edit -> edit.setTitle(built.getItemMeta().getDisplayName()).build());
+									}
+									if (built.getItemMeta().hasLore()) {
+										item.setElement(edit -> edit.setLore(built.getItemMeta().getLore()).build());
+									}
+								}
+							}
 						}
 						String title = item.getName();
 						if (pagination != null) {
 							if (pagination.isNotRemovable()) {
 								item.setClick(click -> {
 									click.setCancelled(true);
-									if (pagination.isExitOnClick()) click.getElement().closeInventory();
+									if (pagination.isExitOnClick()) click.getParent().getParent().getParent().close(click.getElement());
 									if (pagination.getMessage() != null) {
-										String res = append(pagination, pagination.getMessage(), value);
-										if (function != null) {
-											res = function.accept(res, value);
+										String res = handlePaginationReplacements(pagination, pagination.getMessage(), value);
+										if (dataConverter != null) {
+											res = dataConverter.accept(res, value);
 										}
 										Mailer.empty(click.getElement()).chat(res).deploy();
 									}
 									if (pagination.getOpenOnClick() != null) {
 										String open = pagination.getOpenOnClick();
-										String r = append(pagination, open, value);
-										if (function != null) {
-											r = function.accept(r, value);
+										String r = handlePaginationReplacements(pagination, open, value);
+										if (dataConverter != null) {
+											r = dataConverter.accept(r, value);
 										}
 										MenuRegistration registration = MenuRegistration.getInstance();
 										Menu registered = registration.get(r).get();
@@ -281,9 +283,9 @@ public class MemoryDocket<T> implements Docket<T> {
 										} else {
 											if (pagination.getOpenOnClick().startsWith("/")) {
 												String command = pagination.getOpenOnClick().replace("/", "");
-												String res = append(pagination, command, value);
-												if (function != null) {
-													res = function.accept(res, value);
+												String res = handlePaginationReplacements(pagination, command, value);
+												if (dataConverter != null) {
+													res = dataConverter.accept(res, value);
 												}
 												click.getElement().performCommand(res);
 											}
@@ -295,17 +297,17 @@ public class MemoryDocket<T> implements Docket<T> {
 								if (item.getElement().hasItemMeta() && item.getElement().getItemMeta().hasLore()) {
 									List<String> lore = new ArrayList<>();
 									for (String s : item.getElement().getItemMeta().getLore()) {
-										String res = append(pagination, s, value);
-										if (function != null) {
-											res = function.accept(res, value);
+										String res = handlePaginationReplacements(pagination, s, value);
+										if (dataConverter != null) {
+											res = dataConverter.accept(res, value);
 										}
 										lore.add(res);
 									}
 									item.setElement(edit -> edit.setLore(lore).build());
 								}
-								String res = append(pagination, title, value);
-								if (function != null ) {
-									res = function.accept(res, value);
+								String res = handlePaginationReplacements(pagination, title, value);
+								if (dataConverter != null ) {
+									res = dataConverter.accept(res, value);
 								}
 								String finalRes = res;
 								item.setElement(edit -> edit.setTitle(finalRes).build());
@@ -314,8 +316,20 @@ public class MemoryDocket<T> implements Docket<T> {
 					});
 					i.addItem(element);
 					if (!Check.isNull(next, previous)) {
-						i.addItem(b -> b.setElement(it -> it.setItem(next.toItem()).build()).setType(ItemElement.ControlType.BUTTON_NEXT).setSlot(next.getSlot()))
-								.addItem(b -> b.setElement(it -> it.setItem(previous.toItem()).build()).setType(ItemElement.ControlType.BUTTON_BACK).setSlot(previous.getSlot()));
+						i.addItem(b -> {
+									b.setElement(it -> it.setItem(next.toItem()).build()).setType(ItemElement.ControlType.BUTTON_NEXT).setSlot(next.getSlot());
+									handleClickEvent(next, b);
+								})
+								.addItem(b -> {
+									b.setElement(it -> it.setItem(previous.toItem()).build()).setType(ItemElement.ControlType.BUTTON_BACK).setSlot(previous.getSlot());
+									handleClickEvent(previous, b);
+								});
+					}
+					if (exit != null) {
+						i.addItem(b -> {
+							b.setElement(it -> it.setItem(exit.toItem()).build()).setType(ItemElement.ControlType.BUTTON_EXIT).setSlot(exit.getSlot());
+							handleClickEvent(exit, b);
+						});
 					}
 				});
 				this.instance = paginated.join();
@@ -331,6 +345,7 @@ public class MemoryDocket<T> implements Docket<T> {
 				Menu.Builder<SingularMenu, InventoryElement.Normal> singular = MenuType.SINGULAR.build().setHost(plugin).setTitle(title).setSize(rows);
 				if (key != null) singular.setKey(key).setProperty(Menu.Property.CACHEABLE);
 				if (shared) singular.setProperty(Menu.Property.SHAREABLE);
+				singular.setProperty(Menu.Property.RECURSIVE);
 				singular.setStock(i -> {
 					items.forEach(i::addItem);
 					if (this.border != null) {
@@ -340,28 +355,8 @@ public class MemoryDocket<T> implements Docket<T> {
 							border.add(p, ed -> {
 								ItemStack built = this.border.toItem();
 								ed.setElement(built);
-								if (pagination != null) {
-									if (pagination.isNotRemovable()) {
-										ed.setClick(click -> {
-											click.setCancelled(true);
-											if (pagination.isExitOnClick()) click.getElement().closeInventory();
-											if (pagination.getMessage() != null) {
-												Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
-											}
-											if (pagination.getOpenOnClick() != null) {
-												MenuRegistration registration = MenuRegistration.getInstance();
-												Menu registered = registration.get(pagination.getOpenOnClick()).get();
-												if (registered != null) {
-													registered.open(click.getElement());
-												} else {
-													if (pagination.getOpenOnClick().startsWith("/")) {
-														String command = pagination.getOpenOnClick().replace("/", "");
-														click.getElement().performCommand(command);
-													}
-												}
-											}
-										});
-									}
+								if (this.border != null) {
+									handleClickEvent(this.border, ed);
 								}
 								ed.setType(ItemElement.ControlType.ITEM_BORDER);
 							});
@@ -373,28 +368,8 @@ public class MemoryDocket<T> implements Docket<T> {
 						filler.add(ed -> {
 							ItemStack built = this.filler.toItem();
 							ed.setElement(built);
-							if (pagination != null) {
-								if (pagination.isNotRemovable()) {
-									ed.setClick(click -> {
-										click.setCancelled(true);
-										if (pagination.isExitOnClick()) click.getElement().closeInventory();
-										if (pagination.getMessage() != null) {
-											Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
-										}
-										if (pagination.getOpenOnClick() != null) {
-											MenuRegistration registration = MenuRegistration.getInstance();
-											Menu registered = registration.get(pagination.getOpenOnClick()).get();
-											if (registered != null) {
-												registered.open(click.getElement());
-											} else {
-												if (pagination.getOpenOnClick().startsWith("/")) {
-													String command = pagination.getOpenOnClick().replace("/", "");
-													click.getElement().performCommand(command);
-												}
-											}
-										}
-									});
-								}
+							if (this.filler != null) {
+								handleClickEvent(this.filler, ed);
 							}
 							ed.setType(ItemElement.ControlType.ITEM_FILLER);
 						});
@@ -412,9 +387,9 @@ public class MemoryDocket<T> implements Docket<T> {
 		return instance;
 	}
 
-	protected String append(Map<String, String> map, String context, Object value) {
+	protected String handlePaginationReplacements(MemoryItem item, String context, T value) {
 		final FormattedString string = new FormattedString(context);
-		for (Map.Entry<String, String> entry : map.entrySet()) {
+		for (Map.Entry<String, String> entry : item.getReplacements().entrySet()) {
 			try {
 				if (entry.getValue().contains(".")) {
 					// Here we invoke method-ception, allow the jvm to point to each specified method result.
@@ -439,10 +414,6 @@ public class MemoryDocket<T> implements Docket<T> {
 			}
 		}
 		return string.get();
-	}
-
-	protected String append(MemoryItem item, String context, T value) {
-		return append(item.getReplacements(), context, value);
 	}
 
 	@Override

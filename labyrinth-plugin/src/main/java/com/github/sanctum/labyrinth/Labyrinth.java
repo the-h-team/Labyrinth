@@ -380,7 +380,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Subscribe(priority = Vent.Priority.LOW)
 	public void onJoin(DefaultEvent.Join e) {
 		PlayerSearch.of(e.getPlayer());
-		//Docket.newInstance(FileList.search(this).get("test").getRoot()).add(() -> Arrays.asList(DefaultColor.values())).load().toMenu().open(e.getPlayer());
+		Docket.newInstance(FileList.search(this).get("test").getRoot()).setList(() -> Arrays.asList(DefaultColor.values())).load().toMenu().open(e.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -757,6 +757,21 @@ public abstract class Menu {
 			return () -> menu;
 		}
 
+		static @NotNull Instance of(@NotNull Menu menu, Player player) {
+			return new Instance() {
+
+				@Override
+				public @NotNull Inventory getInventory() {
+					return player != null ? menu.getInventory().getViewer(player).getInventory().getElement() : menu.getInventory().getElement();
+				}
+
+				@Override
+				public @NotNull Menu getMenu() {
+					return menu;
+				}
+			};
+		}
+
 	}
 
 	/**
@@ -854,9 +869,6 @@ public abstract class Menu {
 					}
 
 				}
-
-
-				p.updateInventory();
 			}
 		}
 
@@ -1458,7 +1470,7 @@ public abstract class Menu {
 				menu.open.apply(element);
 
 				if (element.isCancelled()) {
-					element.getElement().closeInventory();
+					menu.close((Player) e.getPlayer());
 				}
 
 			}

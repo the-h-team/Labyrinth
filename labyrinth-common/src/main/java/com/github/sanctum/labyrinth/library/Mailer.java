@@ -486,7 +486,7 @@ public class Mailer {
 
 		@Override
 		public <O> DeployableMapping<O> map(Function<? super Mailer, ? extends O> mapper) {
-			return new DeployableMapping<>(Mailer.this, (Function<? super Object, ? extends O>) mapper);
+			return new DeployableMapping<>(() -> Mailer.this, (Function<? super Object, ? extends O>) mapper);
 		}
 
 		@Override

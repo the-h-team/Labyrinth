@@ -176,7 +176,7 @@ public interface Deployable<T> {
 
 			@Override
 			public <O> DeployableMapping<O> map(Function<? super T, ? extends O> mapper) {
-				return new DeployableMapping<>(submit().join(), (Function<? super Object, ? extends O>) mapper);
+				return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
 			}
 
 			@Override
