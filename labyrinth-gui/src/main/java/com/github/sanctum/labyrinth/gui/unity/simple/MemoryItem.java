@@ -6,9 +6,13 @@ import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.skulls.CustomHead;
+import com.github.sanctum.skulls.CustomHeadLoader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -58,8 +62,21 @@ public class MemoryItem {
 		return replacements;
 	}
 
+	private ItemStack improvise(String value) {
+		Material mat = Items.findMaterial(value);
+		if (mat != null) {
+			return new ItemStack(mat);
+		} else {
+			if (value.length() < 26) {
+				return CustomHead.Manager.getHeads().stream().filter(h -> StringUtils.use(h.name()).containsIgnoreCase(value)).map(CustomHead::get).findFirst().orElse(null);
+			} else {
+				return CustomHeadLoader.provide(value);
+			}
+		}
+	}
+
 	public @NotNull ItemStack toItem() {
-		Item.Edit edit = new Item.Edit(Items.findMaterial(node.getNode("type").toPrimitive().getString()));
+		Item.Edit edit = new Item.Edit(improvise(node.getNode("type").toPrimitive().getString()));
 		String label = node.getPath();
 		String[] split = label.split("\\.");
 		String c = split[split.length - 1];

@@ -137,11 +137,6 @@
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
-            <artifactId>labyrinth-skulls</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.the-h-team</groupId>
             <artifactId>templates</artifactId>
             <version>${templates.version}</version>
             <scope>compile</scope>

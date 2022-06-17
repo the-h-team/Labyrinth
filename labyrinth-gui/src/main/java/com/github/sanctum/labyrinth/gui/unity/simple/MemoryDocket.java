@@ -7,6 +7,7 @@ import com.github.sanctum.labyrinth.data.WideFunction;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.data.service.Check;
+import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
@@ -20,6 +21,8 @@ import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Mailer;
+import com.github.sanctum.skulls.CustomHead;
+import com.github.sanctum.skulls.SkullType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,6 +52,7 @@ public class MemoryDocket<T> implements Docket<T> {
 	protected WideFunction<String, Object, String> extraFunction = (s, t) -> s;
 	protected Menu.Rows rows;
 	protected Menu instance;
+	protected String nameHolder;
 
 	public MemoryDocket(MemorySpace memorySpace) {
 		this.memory = memorySpace;
@@ -71,6 +75,11 @@ public class MemoryDocket<T> implements Docket<T> {
 
 	public MemoryDocket<T> replace(WideFunction<String, T, String> function) {
 		this.function = function;
+		return this;
+	}
+
+	public MemoryDocket<T> heads(String placeholder) {
+		this.nameHolder = placeholder;
 		return this;
 	}
 
@@ -204,16 +213,27 @@ public class MemoryDocket<T> implements Docket<T> {
 										click.setCancelled(true);
 										if (pagination.isExitOnClick()) click.getElement().closeInventory();
 										if (pagination.getMessage() != null) {
-											Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
+											String message = pagination.getMessage();
+											if (target != null) {
+												message = extraFunction.accept(message, target);
+											}
+											Mailer.empty(click.getElement()).chat(message).deploy();
 										}
 										if (pagination.getOpenOnClick() != null) {
+											String open = pagination.getOpenOnClick();
+											if (target != null) {
+												open = extraFunction.accept(open, target);
+											}
 											MenuRegistration registration = MenuRegistration.getInstance();
-											Menu registered = registration.get(pagination.getOpenOnClick()).get();
+											Menu registered = registration.get(open).get();
 											if (registered != null) {
 												registered.open(click.getElement());
 											} else {
 												if (pagination.getOpenOnClick().startsWith("/")) {
 													String command = pagination.getOpenOnClick().replace("/", "");
+													if (target != null) {
+														command = extraFunction.accept(command, target);
+													}
 													click.getElement().performCommand(command);
 												}
 											}
@@ -230,6 +250,11 @@ public class MemoryDocket<T> implements Docket<T> {
 					element.setLimit(pagination.getLimit());
 					element.setPopulate((value, item) -> {
 						item.setElement(built);
+						if (function != null && nameHolder != null && built.isSimilar(SkullType.PLAYER.get())) {
+							String name = function.accept(nameHolder, value);
+							PlayerSearch search = PlayerSearch.of(name);
+							item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
+						}
 						String title = item.getName();
 						if (pagination != null) {
 							if (pagination.isNotRemovable()) {
@@ -244,8 +269,13 @@ public class MemoryDocket<T> implements Docket<T> {
 										Mailer.empty(click.getElement()).chat(res).deploy();
 									}
 									if (pagination.getOpenOnClick() != null) {
+										String open = pagination.getOpenOnClick();
+										String r = append(pagination, open, value);
+										if (function != null) {
+											r = function.accept(r, value);
+										}
 										MenuRegistration registration = MenuRegistration.getInstance();
-										Menu registered = registration.get(pagination.getOpenOnClick()).get();
+										Menu registered = registration.get(r).get();
 										if (registered != null) {
 											registered.open(click.getElement());
 										} else {
