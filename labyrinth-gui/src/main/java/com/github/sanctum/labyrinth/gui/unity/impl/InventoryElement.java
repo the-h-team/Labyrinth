@@ -508,20 +508,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-
-				if (element.isCancelled()) {
-					getParent().open(player);
-				} else {
-					player.closeInventory();
-				}
-				close.apply(element);
-			} else {
-				player.closeInventory();
-			}
+			player.closeInventory();
 		}
 
 		@Override
@@ -614,20 +601,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-
-				if (element.isCancelled()) {
-					getParent().open(player);
-				} else {
-					player.closeInventory();
-				}
-				close.apply(element);
-			} else {
-				player.closeInventory();
-			}
+			player.closeInventory();
 		}
 
 		@Override
@@ -708,20 +682,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-
-				if (element.isCancelled()) {
-					getParent().open(player);
-				} else {
-					player.closeInventory();
-				}
-				close.apply(element);
-			} else {
-				player.closeInventory();
-			}
+			player.closeInventory();
 		}
 
 		@Override
@@ -795,20 +756,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-
-				if (element.isCancelled()) {
-					getParent().open(player);
-				} else {
-					player.closeInventory();
-				}
-				close.apply(element);
-			} else {
-				player.closeInventory();
-			}
+			player.closeInventory();
 		}
 
 		@Override
@@ -931,20 +879,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-
-				if (element.isCancelled()) {
-					getParent().open(player);
-				} else {
-					player.closeInventory();
-				}
-				close.apply(element);
-			} else {
-				player.closeInventory();
-			}
+			player.closeInventory();
 		}
 
 		@Override
@@ -1050,24 +985,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		@Override
 		public synchronized void close(Player player) {
-			if (nms == null || !visible.contains(player)) return;
-			Menu.Close close = getParent().getCloseEvent().orElse(null);
-			if (close != null) {
-				ClosingElement element = new ClosingElement(getParent(), player, player.getOpenInventory());
-				close.apply(element);
-				if (!element.isCancelled()) {
-					visible.remove(player);
-					nms.handleInventoryCloseEvent(player);
-					nms.setActiveContainerDefault(player);
-					nms.sendPacketCloseWindow(player, containerId);
-				}
-				close.apply(element);
-			} else {
-				visible.remove(player);
-				nms.handleInventoryCloseEvent(player);
-				nms.setActiveContainerDefault(player);
-				nms.sendPacketCloseWindow(player, containerId);
-			}
+			close(player, true);
 		}
 
 		public void close(Player player, boolean sendPacket) {

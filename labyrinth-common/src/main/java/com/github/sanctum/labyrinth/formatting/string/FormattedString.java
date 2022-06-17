@@ -64,7 +64,7 @@ public final class FormattedString {
 	}
 
 	public FormattedString replace(@NotNull String regex, @NotNull String replacement) {
-		this.formatted = Pattern.compile(regex, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(this.context)
+		this.formatted = Pattern.compile(regex, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(formatted)
 				.replaceAll(Matcher.quoteReplacement(replacement));
 		return this;
 	}

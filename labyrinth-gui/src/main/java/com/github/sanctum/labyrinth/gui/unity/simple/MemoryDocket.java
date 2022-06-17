@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.MemorySpace;
+import com.github.sanctum.labyrinth.data.WideFunction;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
@@ -12,17 +13,22 @@ import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
 import com.github.sanctum.labyrinth.gui.unity.construct.PaginatedMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PrintableMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.SingularMenu;
+import com.github.sanctum.labyrinth.gui.unity.impl.BorderElement;
+import com.github.sanctum.labyrinth.gui.unity.impl.FillerElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
+import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.Mailer;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -36,10 +42,11 @@ public class MemoryDocket<T> implements Docket<T> {
 	protected boolean shared;
 	protected String title;
 	protected String key;
-	protected String error;
-	protected MemoryItem pagination, next, back;
+	protected MemoryItem pagination, next, back, filler, border;
 	protected Supplier<List<T>> supplier;
 	protected Comparator<T> comparator;
+	protected Predicate<T> predicate;
+	protected WideFunction<String, T, String> function;
 	protected Menu.Rows rows;
 	protected Menu instance;
 
@@ -57,6 +64,16 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
+	public MemoryDocket<T> filter(Predicate<T> predicate) {
+		this.predicate = predicate;
+		return this;
+	}
+
+	public MemoryDocket<T> replace(WideFunction<String, T, String> function) {
+		this.function = function;
+		return this;
+	}
+
 	@Override
 	public @NotNull Docket<T> load() {
 		this.title = memory.getNode("title").toPrimitive().getString();
@@ -65,6 +82,12 @@ public class MemoryDocket<T> implements Docket<T> {
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
 			this.key = memory.getNode("id").toPrimitive().getString();
+		}
+		if (memory.isNode("filler")) {
+			this.filler = new MemoryItem(memory.getNode("filler"));
+		}
+		if (memory.isNode("border")) {
+			this.border = new MemoryItem(memory.getNode("border"));
 		}
 		if (memory.isNode("pagination")) {
 			pagination = new MemoryItem(memory.getNode("pagination"));
@@ -117,6 +140,77 @@ public class MemoryDocket<T> implements Docket<T> {
 					if (this.comparator != null) {
 						element.setComparator((o1, o2) -> comparator.compare(o2.getData().orElse(null), o1.getData().orElse(null)));
 					}
+					if (this.predicate != null) {
+						element.setFilter(tItemElement -> predicate.test(tItemElement.getData().orElse(null)));
+					}
+					if (this.border != null) {
+						BorderElement<?> border = new BorderElement<>(i);
+						for (Menu.Panel p : Menu.Panel.values()) {
+							if (p == Menu.Panel.MIDDLE) continue;
+							border.add(p, ed -> {
+								ItemStack built = this.border.toItem();
+								ed.setElement(built);
+								if (pagination != null) {
+									if (pagination.isNotRemovable()) {
+										ed.setClick(click -> {
+											click.setCancelled(true);
+											if (pagination.isExitOnClick()) click.getElement().closeInventory();
+											if (pagination.getMessage() != null) {
+												Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
+											}
+											if (pagination.getOpenOnClick() != null) {
+												MenuRegistration registration = MenuRegistration.getInstance();
+												Menu registered = registration.get(pagination.getOpenOnClick()).get();
+												if (registered != null) {
+													registered.open(click.getElement());
+												} else {
+													if (pagination.getOpenOnClick().startsWith("/")) {
+														String command = pagination.getOpenOnClick().replace("/", "");
+														click.getElement().performCommand(command);
+													}
+												}
+											}
+										});
+									}
+								}
+								ed.setType(ItemElement.ControlType.ITEM_BORDER);
+							});
+						}
+						i.addItem(border);
+					}
+					if (this.filler != null) {
+						FillerElement<?> filler = new FillerElement<>(i);
+						filler.add(ed -> {
+							ItemStack built = this.filler.toItem();
+							ed.setElement(built);
+							if (pagination != null) {
+								if (pagination.isNotRemovable()) {
+									ed.setClick(click -> {
+										click.setCancelled(true);
+										if (pagination.isExitOnClick()) click.getElement().closeInventory();
+										if (pagination.getMessage() != null) {
+											Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
+										}
+										if (pagination.getOpenOnClick() != null) {
+											MenuRegistration registration = MenuRegistration.getInstance();
+											Menu registered = registration.get(pagination.getOpenOnClick()).get();
+											if (registered != null) {
+												registered.open(click.getElement());
+											} else {
+												if (pagination.getOpenOnClick().startsWith("/")) {
+													String command = pagination.getOpenOnClick().replace("/", "");
+													click.getElement().performCommand(command);
+												}
+											}
+										}
+									});
+								}
+							}
+							ed.setType(ItemElement.ControlType.ITEM_FILLER);
+						});
+						i.addItem(filler);
+					}
+
 					final ItemStack built = pagination.toItem();
 					element.setLimit(pagination.getLimit());
 					element.setPopulate((value, item) -> {
@@ -128,7 +222,11 @@ public class MemoryDocket<T> implements Docket<T> {
 									click.setCancelled(true);
 									if (pagination.isExitOnClick()) click.getElement().closeInventory();
 									if (pagination.getMessage() != null) {
-										Mailer.empty(click.getElement()).chat(append(pagination, pagination.getMessage(), value)).deploy();
+										String res = append(pagination, pagination.getMessage(), value);
+										if (function != null) {
+											res = function.accept(res, value);
+										}
+										Mailer.empty(click.getElement()).chat(res).deploy();
 									}
 									if (pagination.getOpenOnClick() != null) {
 										MenuRegistration registration = MenuRegistration.getInstance();
@@ -138,7 +236,11 @@ public class MemoryDocket<T> implements Docket<T> {
 										} else {
 											if (pagination.getOpenOnClick().startsWith("/")) {
 												String command = pagination.getOpenOnClick().replace("/", "");
-												click.getElement().performCommand(append(pagination, command, value));
+												String res = append(pagination, command, value);
+												if (function != null) {
+													res = function.accept(res, value);
+												}
+												click.getElement().performCommand(res);
 											}
 										}
 									}
@@ -148,11 +250,20 @@ public class MemoryDocket<T> implements Docket<T> {
 								if (item.getElement().hasItemMeta() && item.getElement().getItemMeta().hasLore()) {
 									List<String> lore = new ArrayList<>();
 									for (String s : item.getElement().getItemMeta().getLore()) {
-										lore.add(append(pagination, s, value));
+										String res = append(pagination, s, value);
+										if (function != null) {
+											res = function.accept(res, value);
+										}
+										lore.add(res);
 									}
 									item.setElement(edit -> edit.setLore(lore).build());
 								}
-								item.setElement(edit -> edit.setTitle(append(pagination, title, value)).build());
+								String res = append(pagination, title, value);
+								if (function != null ) {
+									res = function.accept(res, value);
+								}
+								String finalRes = res;
+								item.setElement(edit -> edit.setTitle(finalRes).build());
 							}
 						}
 					});
@@ -163,7 +274,6 @@ public class MemoryDocket<T> implements Docket<T> {
 					}
 				});
 				this.instance = paginated.join();
-				plugin.getLogger().severe(error);
 				break;
 			case PRINTABLE:
 				Menu.Builder<PrintableMenu, InventoryElement.Printable> printable = MenuType.PRINTABLE.build().setHost(plugin).setTitle(title).setSize(rows);
@@ -176,7 +286,76 @@ public class MemoryDocket<T> implements Docket<T> {
 				Menu.Builder<SingularMenu, InventoryElement.Normal> singular = MenuType.SINGULAR.build().setHost(plugin).setTitle(title).setSize(rows);
 				if (key != null) singular.setKey(key).setProperty(Menu.Property.CACHEABLE);
 				if (shared) singular.setProperty(Menu.Property.SHAREABLE);
-				singular.setStock(i -> items.forEach(i::addItem));
+				singular.setStock(i -> {
+					items.forEach(i::addItem);
+					if (this.border != null) {
+						BorderElement<?> border = new BorderElement<>(i);
+						for (Menu.Panel p : Menu.Panel.values()) {
+							if (p == Menu.Panel.MIDDLE) continue;
+							border.add(p, ed -> {
+								ItemStack built = this.border.toItem();
+								ed.setElement(built);
+								if (pagination != null) {
+									if (pagination.isNotRemovable()) {
+										ed.setClick(click -> {
+											click.setCancelled(true);
+											if (pagination.isExitOnClick()) click.getElement().closeInventory();
+											if (pagination.getMessage() != null) {
+												Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
+											}
+											if (pagination.getOpenOnClick() != null) {
+												MenuRegistration registration = MenuRegistration.getInstance();
+												Menu registered = registration.get(pagination.getOpenOnClick()).get();
+												if (registered != null) {
+													registered.open(click.getElement());
+												} else {
+													if (pagination.getOpenOnClick().startsWith("/")) {
+														String command = pagination.getOpenOnClick().replace("/", "");
+														click.getElement().performCommand(command);
+													}
+												}
+											}
+										});
+									}
+								}
+								ed.setType(ItemElement.ControlType.ITEM_BORDER);
+							});
+						}
+						i.addItem(border);
+					}
+					if (this.filler != null) {
+						FillerElement<?> filler = new FillerElement<>(i);
+						filler.add(ed -> {
+							ItemStack built = this.filler.toItem();
+							ed.setElement(built);
+							if (pagination != null) {
+								if (pagination.isNotRemovable()) {
+									ed.setClick(click -> {
+										click.setCancelled(true);
+										if (pagination.isExitOnClick()) click.getElement().closeInventory();
+										if (pagination.getMessage() != null) {
+											Mailer.empty(click.getElement()).chat(pagination.getMessage()).deploy();
+										}
+										if (pagination.getOpenOnClick() != null) {
+											MenuRegistration registration = MenuRegistration.getInstance();
+											Menu registered = registration.get(pagination.getOpenOnClick()).get();
+											if (registered != null) {
+												registered.open(click.getElement());
+											} else {
+												if (pagination.getOpenOnClick().startsWith("/")) {
+													String command = pagination.getOpenOnClick().replace("/", "");
+													click.getElement().performCommand(command);
+												}
+											}
+										}
+									});
+								}
+							}
+							ed.setType(ItemElement.ControlType.ITEM_FILLER);
+						});
+						i.addItem(filler);
+					}
+				});
 				this.instance = singular.join();
 				break;
 		}
@@ -195,23 +374,23 @@ public class MemoryDocket<T> implements Docket<T> {
 				if (entry.getValue().contains(".")) {
 					// Here we invoke method-ception, allow the jvm to point to each specified method result.
 					String[] steps = entry.getValue().split("\\.");
-					Method method = value.getClass().getDeclaredMethod(steps[0]);
+					Method method = value.getClass().getMethod(steps[0]);
 					Object step = method.invoke(value);
 					int position = 1;
 					do {
-						method = step.getClass().getDeclaredMethod(steps[position]);
+						method = step.getClass().getMethod(steps[position]);
 						step = method.invoke(step);
 						position++;
 					} while (position != steps.length);
 					String rep = step.toString();
 					string.replace(entry.getKey(), rep);
 				} else {
-					Method m = value.getClass().getDeclaredMethod(entry.getValue());
+					Method m = value.getClass().getMethod(entry.getValue());
 					String rep = m.invoke(value).toString();
 					string.replace(entry.getKey(), rep);
 				}
 			} catch (Exception ex) {
-				error = "Unable to resolve method name " + '"' + entry.getValue() + '"' + " from class " + value.getClass().getSimpleName() + " in menu " + '"' + this.title + '"';
+				plugin.getLogger().severe("Unable to resolve method name " + '"' + entry.getValue() + '"' + " from class " + value.getClass().getSimpleName() + " in menu " + '"' + this.title + '"');
 			}
 		}
 		return string.get();

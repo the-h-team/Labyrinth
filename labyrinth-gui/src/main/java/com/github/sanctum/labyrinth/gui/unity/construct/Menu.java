@@ -1435,6 +1435,33 @@ public abstract class Menu {
 			if (menu instanceof PrintableMenu) {
 				menu.close(p); // verify that the correct packets are sent.
 			}
+
+			if (menu.close != null) {
+				ClosingElement element = new ClosingElement(menu, (Player) e.getPlayer(), e.getView());
+				menu.close.apply(element);
+
+				if (element.isCancelled()) {
+					menu.getInventory().open(p);
+				}
+
+			}
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
+		public void onOpen(InventoryOpenEvent e) {
+			if (!(e.getInventory().getHolder() instanceof Instance)) return;
+			if (!(e.getPlayer() instanceof Player)) return;
+			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			if (menu.open != null) {
+				OpeningElement element = new OpeningElement(menu, (Player) e.getPlayer(), e.getView());
+
+				menu.open.apply(element);
+
+				if (element.isCancelled()) {
+					element.getElement().closeInventory();
+				}
+
+			}
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)

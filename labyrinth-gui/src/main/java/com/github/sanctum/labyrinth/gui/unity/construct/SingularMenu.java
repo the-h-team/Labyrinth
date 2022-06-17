@@ -46,16 +46,6 @@ public class SingularMenu extends Menu {
 			PreProcessElement element = new PreProcessElement(this, player, player.getOpenInventory());
 			this.process.apply(element);
 		}
-		if (open != null) {
-			OpeningElement element = new OpeningElement(this, player, player.getOpenInventory());
-
-			open.apply(element);
-
-			if (element.isCancelled()) {
-				element.getElement().closeInventory();
-			}
-
-		}
 		getInventory().open(player);
 	}
 
