@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.data.MapDecompressionUtils;
 import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.Primitive;
 import com.google.gson.Gson;
@@ -54,13 +55,13 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Node getParent() {
-		String[] k = this.key.split("//.");
+		String[] k = this.key.split(MAP.dividerAdapt());
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < k.length - 1; i++) {
-			builder.append(k[i]).append(".");
+			builder.append(k[i]).append(MAP.divider);
 		}
 		String key = builder.toString();
-		if (key.endsWith(".")) {
+		if (key.endsWith(MAP.divider + "")) {
 			key = key.substring(0, builder.length() - 1);
 		}
 		if (key.equals(this.key)) return this;
@@ -80,14 +81,14 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public boolean isNode(String node) {
-		return MAP.isNode(this.key + "." + node);
+		return MAP.isNode(this.key + MAP.divider + node);
 	}
 
 	@Override
 	public Node getNode(String node) {
-		return (Node) Optional.ofNullable(MAP.QUERY.get(this.key + "." + node)).orElseGet(() -> {
-			LabyrinthAtlasNode n = new LabyrinthAtlasNode(this.key + "." + node, MAP);
-			MAP.QUERY.put(this.key + "." + node, n);
+		return (Node) Optional.ofNullable(MAP.QUERY.get(this.key + MAP.divider + node)).orElseGet(() -> {
+			LabyrinthAtlasNode n = new LabyrinthAtlasNode(this.key + MAP.divider + node, MAP);
+			MAP.QUERY.put(this.key + MAP.divider + node, n);
 			return n;
 		});
 	}
@@ -95,34 +96,12 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public Set<String> getKeys(boolean deep) {
 		Set<String> keys = new HashSet<>();
-		if (get() instanceof Map) {
-			Map<String, Object> map1 = (Map<String, Object>) get();
+		if (get() instanceof LabyrinthMap) {
+			LabyrinthMap<String, Object> map1 = (LabyrinthMap<String, Object>) get();
 			if (deep) {
-				for (Map.Entry<String, Object> entry : map1.entrySet()) {
-					if (entry.getValue() instanceof Map) {
-						Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-						for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-							if (entry2.getValue() instanceof Map) {
-								Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-								for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-									if (entry3.getValue() instanceof Map) {
-										Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-										for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-											keys.add(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey());
-										}
-									} else {
-										keys.add(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey());
-									}
-								}
-							} else {
-								keys.add(entry.getKey() + "." + entry2.getKey());
-							}
-						}
-					}
-					keys.add(entry.getKey());
-				}
+				return MapDecompressionUtils.getInstance().decompress(map1, MAP.divider, null).toSet();
 			} else {
-				for (Map.Entry<String, Object> entry : map1.entrySet()) {
+				for (Map.Entry<String, Object> entry : map1.entries()) {
 					keys.add(entry.getKey());
 				}
 			}
@@ -135,56 +114,13 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
 		Map<String, Object> map = new HashMap<>();
-		if (get() instanceof Map) {
-			Map<String, Object> map1 = (Map<String, Object>) get();
+		if (get() instanceof LabyrinthMap) {
+			LabyrinthMap<String, Object> map1 = (LabyrinthMap<String, Object>) get();
 			if (deep) {
-				for (Map.Entry<String, Object> entry : map1.entrySet()) {
-					if (entry.getValue() instanceof Map) {
-						Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-						for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-							if (entry2.getValue() instanceof Map) {
-								Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-								for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-									if (entry3.getValue() instanceof Map) {
-										Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-										for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-											map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
-										}
-									} else {
-										map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
-									}
-								}
-							} else {
-								map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
-							}
-						}
-					}
-					map.put(entry.getKey(), entry.getValue());
-				}
+				return MapDecompressionUtils.getInstance().decompress(map1, MAP.divider, null).toMap();
 			} else {
-				for (Map.Entry<String, Object> entry : map1.entrySet()) {
-					if (entry.getValue() instanceof Map) {
-						Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-						for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-							if (entry2.getValue() instanceof Map) {
-								Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-								for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-									if (entry3.getValue() instanceof Map) {
-										Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-										for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-											map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
-										}
-									} else {
-										map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
-									}
-								}
-							} else {
-								map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
-							}
-						}
-					} else {
-						map.put(entry.getKey(), entry.getValue());
-					}
+				for (Map.Entry<String, Object> entry : map1.entries()) {
+					map.put(entry.getKey(), entry.getValue());
 				}
 			}
 		} else {

@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import org.bukkit.entity.Player;
 
 public interface Workbench {
 
@@ -15,5 +16,9 @@ public interface Workbench {
 	}
 
 	LabyrinthCollection<SimpleKeyedValue<WorkbenchSlot, Character>> get();
+
+	static void open(Player player) {
+		player.openWorkbench(null, true);
+	}
 
 }

@@ -23,17 +23,6 @@ import org.jetbrains.annotations.NotNull;
 public interface MessagingService extends Service, Message.Factory {
 
 	/**
-	 * Get a new message operation instance.
-	 *
-	 * @see MessagingService#getEmptyMailer()
-	 * @deprecated This utility is being replaced, use {@link MessagingService#getEmptyMailer()} instead.
-	 * @return A new message instance.
-	 */
-	@Deprecated()
-	@NotNull com.github.sanctum.labyrinth.library.Message getNewMessage();
-
-
-	/**
 	 * Get a new object for sending numerous types of displayable messages!
 	 *
 	 * @return A new empty mailer instance.
@@ -59,7 +48,7 @@ public interface MessagingService extends Service, Message.Factory {
 	}
 
 	default <T> Deployable<Object> sendPluginMessage(Plugin plugin, T object, @FieldsFrom(LabyrinthPluginChannel.class) LabyrinthPluginChannel<?> channel) {
-		return Deployable.of(null, unused -> unused = new Vent.Call<>(new LabyrinthPluginMessageEvent(new LabyrinthPluginMessage<T>() {
+		return Deployable.of(() -> new Vent.Call<>(new LabyrinthPluginMessageEvent(new LabyrinthPluginMessage<T>() {
 			@Override
 			public Plugin getPlugin() {
 				return plugin;

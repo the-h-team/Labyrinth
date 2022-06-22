@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class ComponentChunk extends Message.Chunk {
 		TextComponent replace = new TextComponent();
 		List<BaseComponent> components = new ArrayList<>();
 		for (BaseComponent c : parent.getExtra()) {
-			TextComponent n = new TextComponent(StringUtils.use(c.toLegacyText()).replaceIgnoreCase(text, replacement));
+			TextComponent n = new TextComponent(new FormattedString(c.toLegacyText()).replace(text, replacement).get());
 			components.add(n);
 		}
 		replace.setExtra(components);
@@ -136,7 +137,6 @@ public class ComponentChunk extends Message.Chunk {
 
 	@Override
 	public String getText() {
-		Bukkit.broadcastMessage("Got text '" + parent.getText() + "'");
 		return parent.getText();
 	}
 

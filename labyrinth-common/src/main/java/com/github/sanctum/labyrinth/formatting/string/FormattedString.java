@@ -8,63 +8,61 @@ import org.jetbrains.annotations.NotNull;
 
 public final class FormattedString {
 
-	private final String context;
-	private String formatted;
+	private String context;
 
 	public FormattedString(@NotNull String context) {
 		this.context = context;
-		this.formatted = context;
 	}
 
 	public FormattedString append(char c) {
-		this.formatted += String.valueOf(c);
+		this.context += String.valueOf(c);
 		return this;
 	}
 
 	public FormattedString append(@NotNull CharSequence sequence) {
-		this.formatted += sequence.toString();
+		this.context += sequence.toString();
 		return this;
 	}
 
 	public FormattedString append(@NotNull Number number) {
 		if (number instanceof Double) {
-			this.formatted += number.doubleValue();
+			this.context += number.doubleValue();
 		}
 		if (number instanceof Long) {
-			this.formatted += number.longValue();
+			this.context += number.longValue();
 		}
 		if (number instanceof Integer) {
-			this.formatted += number.intValue();
+			this.context += number.intValue();
 		}
 		if (number instanceof Short) {
-			this.formatted += number.shortValue();
+			this.context += number.shortValue();
 		}
 		if (number instanceof Float) {
-			this.formatted += number.floatValue();
+			this.context += number.floatValue();
 		}
 		if (number instanceof Byte) {
-			this.formatted += number.byteValue();
+			this.context += number.byteValue();
 		}
 		return this;
 	}
 
 	public FormattedString color() {
-		this.formatted = new ColoredString(formatted).toString();
+		this.context = new ColoredString(context).toString();
 		return this;
 	}
 
 	public FormattedString translate() {
-		this.formatted = LabyrinthProvider.getService(PlaceholderFormatService.class).replaceAll(context, null);
+		this.context = LabyrinthProvider.getService(PlaceholderFormatService.class).replaceAll(context, null);
 		return this;
 	}
 
 	public FormattedString translate(@NotNull Object variable) {
-		this.formatted = LabyrinthProvider.getService(PlaceholderFormatService.class).replaceAll(context, variable);
+		this.context = LabyrinthProvider.getService(PlaceholderFormatService.class).replaceAll(context, variable);
 		return this;
 	}
 
 	public FormattedString replace(@NotNull String regex, @NotNull String replacement) {
-		this.formatted = Pattern.compile(regex, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(formatted)
+		this.context = Pattern.compile(regex, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(this.context)
 				.replaceAll(Matcher.quoteReplacement(replacement));
 		return this;
 	}
@@ -84,7 +82,7 @@ public final class FormattedString {
 	}
 
 	public String get() {
-		return formatted;
+		return context;
 	}
 
 }

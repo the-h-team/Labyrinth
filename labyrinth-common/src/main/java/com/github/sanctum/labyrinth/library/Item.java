@@ -47,7 +47,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author Hempfest
  */
-@SuppressWarnings("ConstantConditions")
 public class Item {
 
 	private static final LinkedList<Item> cache = new LinkedList<>();
@@ -164,54 +163,6 @@ public class Item {
 		SecretWorkbench workbench = new SecretWorkbench();
 		consumer.accept(workbench);
 		return shape(workbench);
-	}
-
-	@Deprecated
-	@Note("Use Item#process() or Item#edit() instead.")
-	public Item buildStack() {
-		ItemStack item = new ItemStack(mat);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(StringUtils.use(name).translate());
-		item.setItemMeta(meta);
-		this.item = item;
-		return this;
-	}
-
-	@Deprecated
-	@Note("Use Item#edit() instead.")
-	public Item attachLore(List<String> lore) {
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(lore.stream().map(s -> StringUtils.use(s).translate()).collect(Collectors.toList()));
-		item.setItemMeta(meta);
-		return this;
-	}
-
-	@Deprecated
-	@Note("Use Item#edit() instead.")
-	public Item addEnchant(Enchantment e, int level) {
-		ItemStack i = item;
-		i.addUnsafeEnchantment(e, level);
-		this.item = i;
-		return this;
-	}
-
-	@Deprecated
-	@Note("Use Item#shape(Consumer) or Item#shape(Workbench) instead.")
-	public Item shapeRecipe(String... shape) {
-		ShapedRecipe recipe = new ShapedRecipe(key, item);
-		String top = shape[0];
-		String middle = shape[1];
-		String bottom = shape[2];
-		recipe.shape(top, middle, bottom);
-		if (!this.recipeStackMap.isEmpty()) {
-			setupItemstacks(recipe, top, middle, bottom);
-		}
-		if (!this.recipeMap.isEmpty()) {
-			setupMaterials(recipe, top, middle, bottom);
-		}
-
-		this.recipe = recipe;
-		return this;
 	}
 
 	void setupItemstacks(ShapedRecipe recipe, String top, String middle, String bottom) {

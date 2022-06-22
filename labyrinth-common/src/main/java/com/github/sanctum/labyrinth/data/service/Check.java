@@ -6,7 +6,6 @@ import com.github.sanctum.labyrinth.annotation.Json;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.library.Mailer;
-import com.github.sanctum.labyrinth.library.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;

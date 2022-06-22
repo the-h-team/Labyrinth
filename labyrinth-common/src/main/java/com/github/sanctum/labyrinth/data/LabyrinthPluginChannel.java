@@ -6,7 +6,13 @@ import com.github.sanctum.labyrinth.library.TypeFlag;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+/**
+ * A labyrinth plugin channel designed to provide developers with a means to inquire desired object responses from output messaging through {@link LabyrinthPluginMessageEvent}
+ *
+ * @param <T> The type of object this channel references
+ */
 public final class LabyrinthPluginChannel<T> {
 
 	public static final LabyrinthPluginChannel<Message> MESSAGE = new LabyrinthPluginChannel<>("message", Message.class);
@@ -37,12 +43,12 @@ public final class LabyrinthPluginChannel<T> {
 		return this.tClass;
 	}
 
-	public Object getResponse(@NotNull Plugin plugin, @NotNull Object o) {
+	public @Nullable Object getResponse(@NotNull Plugin sender, @NotNull Object o) {
 		try {
 			return new Vent.Call<>(LabyrinthPluginMessageEvent.class.getDeclaredConstructor(LabyrinthPluginMessage.class, LabyrinthPluginChannel.class).newInstance(new LabyrinthPluginMessage<Object>() {
 				@Override
 				public Plugin getPlugin() {
-					return plugin;
+					return sender;
 				}
 
 				@Override

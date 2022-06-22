@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class TextChunk extends Message.Chunk {
 
 	@Override
 	public Message.Chunk replace(String text, String replacement) {
-		this.text = StringUtils.use(this.text).replaceIgnoreCase(text, replacement);
+		this.text = new FormattedString(this.text).replace(text, replacement).get();
 		return this;
 	}
 

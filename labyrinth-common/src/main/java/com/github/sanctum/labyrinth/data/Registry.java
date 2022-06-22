@@ -28,13 +28,13 @@ import org.bukkit.plugin.Plugin;
  */
 public class Registry<T> {
 
-	private final Class<T> CLASS;
-	private Predicate<? super String> FILTER;
+	private final Class<T> type;
+	private Predicate<? super String> filter;
 	private Object handle = null;
 	private String PACKAGE;
 
 	public Registry(Class<T> cl) {
-		this.CLASS = cl;
+		this.type = cl;
 	}
 
 	/**
@@ -64,30 +64,29 @@ public class Registry<T> {
 	 *
 	 * @param packageName the name of the package to search
 	 * @return this Registry instance
-	 * @deprecated Use {@link Registry#filter(String)} instead!!
 	 */
-	@Deprecated
-	public Registry<T> pick(String packageName) {
-		this.PACKAGE = packageName;
-		return this;
-	}
-
 	public Registry<T> filter(String packageName) {
 		this.PACKAGE = packageName;
 		return this;
 	}
 
+	/**
+	 * Optionally search using a provided predicate.
+	 *
+	 * @param predicate the search processor.
+	 * @return this Registry instance
+	 */
 	public Registry<T> filter(Predicate<? super String> predicate) {
-		this.FILTER = predicate;
+		this.filter = predicate;
 		return this;
 	}
 
 	/**
-	 * Specify actions on each element instantiated from query.
+	 * Acquire all instantiated elements from query.
 	 *
 	 * @return the leftover data from the registry data operation
 	 */
-	public RegistryData<T> operate() {
+	public RegistryData<T> confine() {
 		Set<Class<T>> classes = Sets.newHashSet();
 		JarFile jarFile = null;
 		if (this.handle != null) {
@@ -102,18 +101,18 @@ public class Registry<T> {
 
 		Stream<JarEntry> entries = jarFile.stream();
 
-		if (this.FILTER != null) {
+		if (this.filter != null) {
 			entries.forEach(entry -> {
 				String className = entry.getName().replace("/", ".");
 				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
-				if (this.FILTER.test(className)) {
+				if (this.filter.test(className)) {
 					Class<?> clazz = null;
 					try {
 						clazz = Class.forName(substring);
 					} catch (ClassNotFoundException ignored) {
 					}
 					if (clazz != null) {
-						if (CLASS.isAssignableFrom(clazz)) {
+						if (type.isAssignableFrom(clazz)) {
 							classes.add((Class<T>) clazz);
 						}
 					}
@@ -132,7 +131,7 @@ public class Registry<T> {
 						} catch (ClassNotFoundException ignored) {
 						}
 						if (clazz != null) {
-							if (CLASS.isAssignableFrom(clazz)) {
+							if (type.isAssignableFrom(clazz)) {
 								classes.add((Class<T>) clazz);
 							}
 						}
@@ -146,7 +145,7 @@ public class Registry<T> {
 						} catch (ClassNotFoundException ignored) {
 						}
 						if (clazz != null) {
-							if (CLASS.isAssignableFrom(clazz)) {
+							if (type.isAssignableFrom(clazz)) {
 								classes.add((Class<T>) clazz);
 							}
 						}
@@ -158,6 +157,214 @@ public class Registry<T> {
 		for (Class<T> aClass : classes) {
 			try {
 				T a = aClass.getDeclaredConstructor().newInstance();
+				additions.add(a);
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		return new RegistryData<>(additions, handle, PACKAGE);
+	}
+
+	/**
+	 * Acquire all instantiated elements from query using custom constructor arguments.
+	 *
+	 * @param args The constructor arguments to input.
+	 * @return the leftover data from the registry data operation
+	 */
+	public RegistryData<T> construct(Object... args) {
+		Set<Class<T>> classes = Sets.newHashSet();
+		JarFile jarFile = null;
+		if (this.handle != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.handle.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
+			} catch (IOException e) {
+				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
+			}
+		}
+
+		if (jarFile == null) throw new IllegalStateException("Invalid jar file");
+
+		Stream<JarEntry> entries = jarFile.stream();
+
+		if (this.filter != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.filter.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (type.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (type.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (type.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				}
+			});
+		}
+		Constructor<T> constructor = null;
+		for (Constructor<?> con : this.type.getConstructors()) {
+			if (args.length == con.getParameters().length) {
+				int success = 0;
+				for (int i = 0; i < args.length; i++) {
+					Class<?> objectClass = args[i].getClass();
+					Class<?> typeClass = con.getParameters()[i].getType();
+					if (objectClass.isAssignableFrom(typeClass)) {
+						success++;
+					}
+					if (success == args.length) {
+						constructor = (Constructor<T>) con;
+						break;
+					}
+				}
+			}
+		}
+		List<T> additions = new LinkedList<>();
+		for (Class<T> aClass : classes) {
+			try {
+				T a = constructor != null ? constructor.newInstance(args) : aClass.getDeclaredConstructor().newInstance();
+				additions.add(a);
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		return new RegistryData<>(additions, handle, PACKAGE);
+	}
+
+	/**
+	 * Acquire all instantiated elements from query using custom constructor arguments and run an operation.
+	 *
+	 * @param operation The operation to run on all initialized objects.
+	 * @param args The constructor arguments to input.
+	 * @return the leftover data from the registry data operation
+	 */
+	public RegistryData<T> construct(Consumer<T> operation, Object... args) {
+		Set<Class<T>> classes = Sets.newHashSet();
+		JarFile jarFile = null;
+		if (this.handle != null) {
+			try {
+				jarFile = new JarFile(URLDecoder.decode(this.handle.getClass().getProtectionDomain().getCodeSource().getLocation().getFile(), String.valueOf(StandardCharsets.UTF_8)));
+			} catch (IOException e) {
+				e.printStackTrace(); // TODO: Decide whether to return/rethrow at this point so as to avoid NPE on line 89
+			}
+		}
+
+		if (jarFile == null) throw new IllegalStateException("Invalid jar file");
+
+		Stream<JarEntry> entries = jarFile.stream();
+
+		if (this.filter != null) {
+			entries.forEach(entry -> {
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.filter.test(className)) {
+					Class<?> clazz = null;
+					try {
+						clazz = Class.forName(substring);
+					} catch (ClassNotFoundException ignored) {
+					}
+					if (clazz != null) {
+						if (type.isAssignableFrom(clazz)) {
+							classes.add((Class<T>) clazz);
+						}
+					}
+				}
+			});
+		} else {
+			entries.forEach(entry -> {
+
+				String className = entry.getName().replace("/", ".");
+				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
+				if (this.PACKAGE != null) {
+					if (className.startsWith(PACKAGE) && className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (type.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				} else {
+
+					if (className.endsWith(".class")) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(substring);
+						} catch (ClassNotFoundException ignored) {
+						}
+						if (clazz != null) {
+							if (type.isAssignableFrom(clazz)) {
+								classes.add((Class<T>) clazz);
+							}
+						}
+					}
+				}
+			});
+		}
+		Constructor<T> constructor = null;
+		for (Constructor<?> con : this.type.getConstructors()) {
+			if (args.length == con.getParameters().length) {
+				int success = 0;
+				for (int i = 0; i < args.length; i++) {
+					Class<?> objectClass = args[i].getClass();
+					Class<?> typeClass = con.getParameters()[i].getType();
+					if (objectClass.isAssignableFrom(typeClass)) {
+						success++;
+					}
+					if (success == args.length) {
+						constructor = (Constructor<T>) con;
+						break;
+					}
+				}
+			}
+		}
+		List<T> additions = new LinkedList<>();
+		for (Class<T> aClass : classes) {
+			try {
+				T a = constructor != null ? constructor.newInstance(args) : aClass.getDeclaredConstructor().newInstance();
+				operation.accept(a);
 				additions.add(a);
 			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 				e.printStackTrace();
@@ -187,18 +394,18 @@ public class Registry<T> {
 
 		Stream<JarEntry> entries = jarFile.stream();
 
-		if (this.FILTER != null) {
+		if (this.filter != null) {
 			entries.forEach(entry -> {
 				String className = entry.getName().replace("/", ".");
 				final String substring = className.substring(0, Math.max(className.length() - 6, 0));
-				if (this.FILTER.test(className)) {
+				if (this.filter.test(className)) {
 					Class<?> clazz = null;
 					try {
 						clazz = Class.forName(substring);
 					} catch (ClassNotFoundException ignored) {
 					}
 					if (clazz != null) {
-						if (CLASS.isAssignableFrom(clazz)) {
+						if (type.isAssignableFrom(clazz)) {
 							classes.add((Class<T>) clazz);
 						}
 					}
@@ -217,7 +424,7 @@ public class Registry<T> {
 						} catch (ClassNotFoundException ignored) {
 						}
 						if (clazz != null) {
-							if (CLASS.isAssignableFrom(clazz)) {
+							if (type.isAssignableFrom(clazz)) {
 								classes.add((Class<T>) clazz);
 							}
 						}
@@ -231,7 +438,7 @@ public class Registry<T> {
 						} catch (ClassNotFoundException ignored) {
 						}
 						if (clazz != null) {
-							if (CLASS.isAssignableFrom(clazz)) {
+							if (type.isAssignableFrom(clazz)) {
 								classes.add((Class<T>) clazz);
 							}
 						}
@@ -366,12 +573,7 @@ public class Registry<T> {
 			for (Class<?> cl : classes) {
 				if (this.type.isAssignableFrom(cl)) {
 					try {
-						T e;
-						if (constructor != null) {
-							e = (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o);
-						} else {
-							e = (T) cl.getDeclaredConstructor().newInstance();
-						}
+						T e = constructor != null ? constructor.newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
 						data.add(e);
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -408,12 +610,7 @@ public class Registry<T> {
 			for (Class<?> cl : classes) {
 				if (this.type.isAssignableFrom(cl)) {
 					try {
-						T e;
-						if (constructor != null) {
-							e = (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o);
-						} else {
-							e = (T) cl.getDeclaredConstructor().newInstance();
-						}
+						T e = constructor != null ? constructor.newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
 						action.accept(e);
 						data.add(e);
 					} catch (Exception ex) {

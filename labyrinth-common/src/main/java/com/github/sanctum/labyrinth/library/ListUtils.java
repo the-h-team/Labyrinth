@@ -37,7 +37,7 @@ public class ListUtils<T> {
 	 * @return a list utility for element appendage/replacement
 	 */
 	public static <T> ListUtils<T> use(T[] list) {
-		return use(Arrays.asList(list));
+		return new ListUtils<>(Arrays.asList(list));
 	}
 
 	/**

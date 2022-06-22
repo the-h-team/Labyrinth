@@ -15,4 +15,6 @@ public interface LabyrinthAtlas extends MemorySpace, LabyrinthMap<String, Object
 		return null;
 	}
 
+	char getDivider();
+
 }

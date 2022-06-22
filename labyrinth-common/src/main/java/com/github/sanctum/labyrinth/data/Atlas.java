@@ -14,4 +14,6 @@ public interface Atlas extends MemorySpace, Map<String, Object> {
 		return null;
 	}
 
+	char getDivider();
+
 }

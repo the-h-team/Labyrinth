@@ -74,7 +74,7 @@ public abstract class Configurable implements MemorySpace, Root {
 			} else
 				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
 		} catch (Exception e) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.");
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.").deploy();
 			e.printStackTrace();
 		}
 	}
@@ -141,7 +141,7 @@ public abstract class Configurable implements MemorySpace, Root {
 			} else
 				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
 		} catch (Exception e) {
-			LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.");
+			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.").deploy();
 			e.printStackTrace();
 		}
 	}

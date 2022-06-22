@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.data.MapDecompressionUtils;
 import com.github.sanctum.labyrinth.data.MemorySpace;
 import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
@@ -18,12 +19,25 @@ import org.jetbrains.annotations.Nullable;
 
 public class LabyrinthAtlasMap implements LabyrinthAtlas {
 
-	private final LabyrinthMap<String, Object> SOURCE = new LabyrinthEntryMap<>();
+	protected final LabyrinthMap<String, Object> SOURCE = new LabyrinthEntryMap<>();
 	protected final LabyrinthMap<String, MemorySpace> QUERY = new LabyrinthEntryMap<>();
+	protected final char divider;
+
+	public LabyrinthAtlasMap() {
+		this.divider = '.';
+	}
+
+	public LabyrinthAtlasMap(char divider) {
+		this.divider = divider;
+	}
+
+	String dividerAdapt() {
+		return divider == '.' ? "[" + divider + "]" : divider + "";
+	}
 
 	@Override
 	public boolean isNode(String key) {
-		String[] a = key.split("\\.");
+		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		LabyrinthMap<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -53,76 +67,34 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	@Override
 	public Set<String> getKeys(boolean deep) {
 		Set<String> keys = new HashSet<>();
-		for (Object o : SOURCE.entries()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+		SOURCE.forEach(e -> {
 			if (deep) {
-				if (entry.getValue() instanceof Map) {
-					Map<String, Object> obj = (Map<String, Object>) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof Map) {
-							Map<String, Object> j = (Map<String, Object>) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof Map) {
-									Map<String, Object> ja = (Map<String, Object>) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey());
-									}
-								} else {
-									keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey());
-								}
-							}
-						} else {
-							keys.add(entry.getKey() + "." + en.getKey());
-						}
-					}
+				if (e.getValue() instanceof LabyrinthMap) {
+					MapDecompressionUtils.getInstance().decompress((LabyrinthMap<String, Object>) e.getValue(), divider, null).toLabyrinthSet().forEach(keys::add);
 				} else {
-					keys.add(entry.getKey());
+					keys.add(e.getKey());
 				}
 			} else {
-				keys.add(entry.getKey());
+				keys.add(e.getKey());
 			}
-		}
+		});
 		return keys;
 	}
 
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
 		Map<String, Object> map = new HashMap<>();
-		for (Object o : SOURCE.entries()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+		SOURCE.forEach(e -> {
 			if (deep) {
-				if (entry.getValue() instanceof Map) {
-					Map<String, Object> obj = (Map<String, Object>) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof Map) {
-							Map<String, Object> j = (Map<String, Object>) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof Map) {
-									Map<String, Object> ja = (Map<String, Object>) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey(), entr.getValue());
-									}
-								} else {
-									map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey(), ent.getValue());
-								}
-							}
-						} else {
-							map.put(entry.getKey() + "." + en.getKey(), en.getValue());
-						}
-					}
+				if (e.getValue() instanceof LabyrinthMap) {
+					MapDecompressionUtils.getInstance().decompress((LabyrinthMap<String, Object>) e.getValue(), divider, null).toLabyrinthMap().forEach(ev -> map.put(ev.getKey(), ev.getValue()));
 				} else {
-					map.put(entry.getKey(), entry.getValue());
+					map.put(e.getKey(), e.getValue());
 				}
 			} else {
-				map.put(entry.getKey(), entry.getValue());
+				map.put(e.getKey(), e.getValue());
 			}
-		}
+		});
 		return map;
 	}
 
@@ -148,8 +120,7 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 
 	@Override
 	public Object get(String key) {
-		String ke = key;
-		String[] a = ke.split("\\.");
+		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		LabyrinthMap<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -172,7 +143,7 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	@Nullable
 	@Override
 	public Object put(String key, Object o) {
-		String[] a = key.split("\\.");
+		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		LabyrinthMap<String, Object> ob = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -219,5 +190,10 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	@Override
 	public Iterator<ReplaceableKeyedValue<String, Object>> iterator() {
 		return SOURCE.iterator();
+	}
+
+	@Override
+	public char getDivider() {
+		return divider;
 	}
 }

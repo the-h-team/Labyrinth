@@ -226,7 +226,7 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 			try {
 				config.create();
 			} catch (IOException ex) {
-				LabyrinthProvider.getService(Service.MESSENGER).getNewMessage().error("- An issue occurred while attempting to create the backing file for the '" + config.getName() + "' configuration.");
+				LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("- An issue occurred while attempting to create the backing file for the '" + config.getName() + "' configuration.").deploy();
 				ex.printStackTrace();
 			}
 		}
@@ -282,35 +282,11 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 			Set<String> keys = new HashSet<>();
 			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
-				Map<String, Object> map1 = (Map<String, Object>) json.get(this.key);
+				Map<String, Object> level1 = (Map<String, Object>) json.get(this.key);
 				if (deep) {
-					for (Map.Entry<String, Object> entry : map1.entrySet()) {
-						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-												keys.add(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey());
-											}
-										} else {
-											keys.add(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey());
-										}
-									}
-								} else {
-									keys.add(entry.getKey() + "." + entry2.getKey());
-								}
-							}
-						}
-						keys.add(entry.getKey());
-					}
+					return MapDecompressionUtils.getInstance().decompress(level1.entrySet(), '.', null).toSet();
 				} else {
-					for (Map.Entry<String, Object> entry : map1.entrySet()) {
-						keys.add(entry.getKey());
-					}
+					keys.addAll(level1.keySet());
 				}
 			} else {
 				keys.add(this.key);
@@ -327,56 +303,11 @@ final class ConfigurableNode implements Node, Primitive, Primitive.Bukkit {
 			Map<String, Object> map = new HashMap<>();
 			JsonConfiguration json = (JsonConfiguration) config;
 			if (json.get(this.key) instanceof Map) {
-				Map<String, Object> map1 = (Map<String, Object>) json.get(this.key);
+				Map<String, Object> level1 = (Map<String, Object>) json.get(this.key);
 				if (deep) {
-					for (Map.Entry<String, Object> entry : map1.entrySet()) {
-						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
-											}
-										} else {
-											map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
-										}
-									}
-								} else {
-									map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
-								}
-							}
-						}
-						map.put(entry.getKey(), entry.getValue());
-					}
+					return MapDecompressionUtils.getInstance().decompress(level1.entrySet(), '.', null).toMap();
 				} else {
-					for (Map.Entry<String, Object> entry : map1.entrySet()) {
-						if (entry.getValue() instanceof Map) {
-							Map<String, Object> map2 = (Map<String, Object>) entry.getValue();
-							for (Map.Entry<String, Object> entry2 : map2.entrySet()) {
-								if (entry2.getValue() instanceof Map) {
-									Map<String, Object> map3 = (Map<String, Object>) entry2.getValue();
-									for (Map.Entry<String, Object> entry3 : map3.entrySet()) {
-										if (entry3.getValue() instanceof Map) {
-											Map<String, Object> map4 = (Map<String, Object>) entry2.getValue();
-											for (Map.Entry<String, Object> entry4 : map4.entrySet()) {
-												map.put(this.key + "." + entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey() + "." + entry4.getKey(), entry4.getValue());
-											}
-										} else {
-											map.put(entry.getKey() + "." + entry2.getKey() + "." + entry3.getKey(), entry3.getValue());
-										}
-									}
-								} else {
-									map.put(entry.getKey() + "." + entry2.getKey(), entry2.getValue());
-								}
-							}
-						} else {
-							map.put(entry.getKey(), entry.getValue());
-						}
-					}
+					map.putAll(level1);
 				}
 			} else {
 				map.put(this.key, get());

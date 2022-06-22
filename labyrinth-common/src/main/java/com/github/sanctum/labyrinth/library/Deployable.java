@@ -4,10 +4,14 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.interfacing.UnknownGeneric;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -108,6 +112,15 @@ public interface Deployable<T> {
 	CompletableFuture<T> submit();
 
 	/**
+	 * Check if this deployable has been deployed.
+	 *
+	 * @return true if the resulting object of this deployable has already been processed.
+	 */
+	default boolean isDeployed() {
+		return get() != null;
+	}
+
+	/**
 	 * Complete the deployable information processing and get the object reference.
 	 *
 	 * @return The object reference from this deployable.
@@ -127,6 +140,26 @@ public interface Deployable<T> {
 	}
 
 	/**
+	 * Get the object reference or provide another one instead.
+	 *
+	 * @param other The other object to provide.
+	 * @return An object reference.
+	 */
+	default T orElse(T other) {
+		return Optional.ofNullable(get()).orElse(other);
+	}
+
+	/**
+	 * Get the object reference or provide another one instead.
+	 *
+	 * @param supplier The other object to provide.
+	 * @return An object reference.
+	 */
+	default T orElseGet(Supplier<T> supplier) {
+		return Optional.ofNullable(get()).orElseGet(supplier);
+	}
+
+	/**
 	 * Create a default deployable instance
 	 *
 	 * @param t      The source material.
@@ -136,7 +169,6 @@ public interface Deployable<T> {
 	 */
 	static <T> Deployable<T> of(@Nullable T t, final @NotNull Consumer<T> action) {
 		return new Deployable<T>() {
-
 			@Override
 			public Deployable<T> deploy() {
 				action.accept(t);
@@ -194,6 +226,148 @@ public interface Deployable<T> {
 			@Override
 			public CompletableFuture<T> submit() {
 				return CompletableFuture.supplyAsync(() -> t);
+			}
+		};
+	}
+
+	/**
+	 * Create a default deployable runnable instance
+	 *
+	 * @return A fresh deployable instance.
+	 */
+	static Deployable<UnknownGeneric> of(Runnable runnable) {
+		return new Deployable<UnknownGeneric>() {
+
+			final UnknownGeneric g = new UnknownGeneric(){};
+
+			@Override
+			public Deployable<UnknownGeneric> deploy() {
+				runnable.run();
+				return this;
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> deploy(Consumer<? super UnknownGeneric> consumer) {
+				deploy();
+				consumer.accept(g);
+				return this;
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> queue() {
+				TaskScheduler.of(runnable).schedule();
+				return this;
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> queue(Consumer<? super UnknownGeneric> consumer, long timeout) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					runnable.run();
+					consumer.accept(g);
+				}, HUID.randomID().toString(), timeout);
+				return this;
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> queue(Consumer<? super UnknownGeneric> consumer, Date date) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					runnable.run();
+					consumer.accept(g);
+				}, HUID.randomID().toString(), date);
+				return this;
+			}
+
+			@Override
+			public <O> DeployableMapping<O> map(Function<? super UnknownGeneric, ? extends O> mapper) {
+				return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> queue(long timeout) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(runnable, HUID.randomID().toString(), timeout);
+				return this;
+			}
+
+			@Override
+			public Deployable<UnknownGeneric> queue(Date date) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(runnable, HUID.randomID().toString(), date);
+				return this;
+			}
+
+			@Override
+			public CompletableFuture<UnknownGeneric> submit() {
+				return CompletableFuture.supplyAsync(() -> g);
+			}
+		};
+	}
+
+	/**
+	 * Create a default deployable supplier instance
+	 *
+	 * @return A fresh deployable instance.
+	 */
+	static <T> Deployable<T> of(Supplier<T> supplier) {
+		return new Deployable<T>() {
+
+			T element;
+
+			@Override
+			public Deployable<T> deploy() {
+				element = supplier.get();
+				return this;
+			}
+
+			@Override
+			public Deployable<T> deploy(Consumer<? super T> consumer) {
+				deploy();
+				consumer.accept(element);
+				return this;
+			}
+
+			@Override
+			public Deployable<T> queue() {
+				element = submit().join();
+				return this;
+			}
+
+			@Override
+			public Deployable<T> queue(Consumer<? super T> consumer, long timeout) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					deploy();
+					consumer.accept(element);
+				}, HUID.randomID().toString(), timeout);
+				return this;
+			}
+
+			@Override
+			public Deployable<T> queue(Consumer<? super T> consumer, Date date) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+					deploy();
+					consumer.accept(element);
+				}, HUID.randomID().toString(), date);
+				return this;
+			}
+
+			@Override
+			public <O> DeployableMapping<O> map(Function<? super T, ? extends O> mapper) {
+				return new DeployableMapping<>(() -> deploy().get(), (Function<? super Object, ? extends O>) mapper);
+			}
+
+			@Override
+			public Deployable<T> queue(long timeout) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(this::deploy, HUID.randomID().toString(), timeout);
+				return this;
+			}
+
+			@Override
+			public Deployable<T> queue(Date date) {
+				LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(this::deploy, HUID.randomID().toString(), date);
+				return this;
+			}
+
+			@Override
+			public CompletableFuture<T> submit() {
+				return CompletableFuture.supplyAsync(supplier);
 			}
 		};
 	}

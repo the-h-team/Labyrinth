@@ -102,30 +102,30 @@ public abstract class AbstractPaginatedCollection<T> implements Collection<Page<
 	 * @return A deployable reordering operation.
 	 */
 	public Deployable<AbstractPaginatedCollection<T>> reorder() {
-		return Deployable.of(this, collection1 -> {
-			collection1.sorted = true;
+		return Deployable.of(() -> {
+			sorted = true;
 			Set<Page<T>> toAdd = new HashSet<>();
 			List<T> toSort = new ArrayList<>();
 
-			if (collection1.predicate != null) {
-				toSort = collection1.collection.stream().filter(collection1.predicate).collect(Collectors.toList());
+			if (predicate != null) {
+				toSort = collection.stream().filter(predicate).collect(Collectors.toList());
 			}
-			if (collection1.comparator != null) {
+			if (comparator != null) {
 				if (toSort.isEmpty()) {
-					toSort = collection1.collection.stream().sorted(collection1.comparator).collect(Collectors.toList());
+					toSort = collection.stream().sorted(comparator).collect(Collectors.toList());
 				} else {
-					toSort = toSort.stream().sorted(collection1.comparator).collect(Collectors.toList());
+					toSort = toSort.stream().sorted(comparator).collect(Collectors.toList());
 				}
 			}
 			if (toSort.isEmpty()) {
-				toSort = new ArrayList<>(collection1.collection);
+				toSort = new ArrayList<>(collection);
 			}
-			collection1.collection = toSort;
+			collection = toSort;
 
-			int totalPageCount = collection1.size();
+			int totalPageCount = size();
 			for (int slot = 1; slot < totalPageCount + 1; slot++) {
 				int page = slot;
-				Page<T> newPage = new Page.Impl<>(collection1, slot);
+				Page<T> newPage = new Page.Impl<>(AbstractPaginatedCollection.this, slot);
 				if (page <= totalPageCount) {
 
 					if (!toSort.isEmpty()) {
@@ -134,7 +134,7 @@ public abstract class AbstractPaginatedCollection<T> implements Collection<Page<
 						for (T value : toSort) {
 
 							index++;
-							if ((((page * collection1.initialElementsPer) + placeholder + 1) == index) && (index != ((page * collection1.initialElementsPer) + collection1.initialElementsPer + 1))) {
+							if ((((page * initialElementsPer) + placeholder + 1) == index) && (index != ((page * initialElementsPer) + initialElementsPer + 1))) {
 								placeholder++;
 								newPage.add(value);
 							}
@@ -144,7 +144,8 @@ public abstract class AbstractPaginatedCollection<T> implements Collection<Page<
 				}
 				toAdd.add(newPage);
 			}
-			collection1.set.addAll(toAdd);
+			set.addAll(toAdd);
+			return AbstractPaginatedCollection.this;
 		});
 	}
 

@@ -1,5 +1,10 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
+import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -14,27 +19,31 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * A class dedicated to allowing developers to load external jars into memory.
+ *
+ * @param <T> The optional main class this loader needs to locate and instantiate.
+ */
 public abstract class AbstractClassLoader<T> extends URLClassLoader {
 
-	private static final Field PLUGIN_CLASS_MAP;
+	protected final Field PLUGIN_CLASS_MAP;
+	protected final List<Class<?>> classes;
+	protected final ClassLoader pluginClassLoader;
+	protected final T mainClass;
 
-	private final List<Class<?>> classes;
-	private final Plugin plugin;
-	final T mainClass;
-
-	static {
+	protected AbstractClassLoader(File file, ClassLoader parent, Object... args) throws IOException {
+		super(new URL[]{file.toURI().toURL()}, parent);
+		TypeFlag<T> flag = new EasyTypeAdapter<>();
+		Class<T> main = flag.getType();
 		try {
 			PLUGIN_CLASS_MAP = Class.forName("org.bukkit.plugin.java.PluginClassLoader").getDeclaredField("classes");
 			PLUGIN_CLASS_MAP.setAccessible(true);
 		} catch (NoSuchFieldException | ClassNotFoundException e) {
-			throw new IllegalStateException("Unable to reach class map", e);
+			throw new IllegalStateException("Unable to reach plugin class map", e);
 		}
-	}
-
-	protected AbstractClassLoader(Plugin plugin, File file, ClassLoader parent, Class<T> main, Object... args) throws IOException {
-		super(new URL[]{file.toURI().toURL()}, parent);
 		final List<Class<?>> loadedClasses = new ArrayList<>();
-		this.plugin = plugin;
+		final Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
+		this.pluginClassLoader = plugin.getClass().getClassLoader();
 		if (!file.isFile()) throw new IllegalArgumentException("The provided file is not a jar file!");
 		new JarFile(file).stream()
 				.map(ZipEntry::getName)
@@ -50,7 +59,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 						plugin.getLogger().warning(e::getMessage);
 						return;
 					}
-					getClassMap().put(s, resolvedClass);
+					getPluginClassMap().put(s, resolvedClass);
 					plugin.getLogger().finest(() -> "Loaded '" + s + "' successfully.");
 					loadedClasses.add(resolvedClass);
 				});
@@ -76,7 +85,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 							}
 						}
 					}
-					this.mainClass = addonClass.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(args);
+					this.mainClass = constructor != null ? constructor.newInstance(args) : addonClass.getDeclaredConstructor().newInstance();
 				} else {
 					this.mainClass = addonClass.getDeclaredConstructor().newInstance();
 				}
@@ -88,26 +97,61 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 		} else this.mainClass = null;
 	}
 
-	public AbstractClassLoader(Plugin plugin, File file, ClassLoader parent) throws IOException {
-		this(plugin, file, parent, null);
-	}
-
-	public Plugin getPlugin() {
-		return plugin;
-	}
-
-	public T getMain() {
+	/**
+	 * Get the main class for this class loader.
+	 *
+	 * @return the main class for this class loader if one exists.
+	 */
+	public T getMainClass() {
 		return mainClass;
 	}
 
+	/**
+	 * Get a list of all classes loaded by this class loader.
+	 *
+	 * @return all classes loaded by this class loader.
+	 */
 	public List<Class<?>> getClasses() {
-		return classes;
+		return ImmutableList.copyOf(classes);
 	}
 
-	public Map<String, Class<?>> getClassMap() throws IllegalStateException {
+	/**
+	 * Unload a class from memory. If the provided class is not found an exception will occur, if the provided string results in a path
+	 * this method will switch in an attempt at locating and removing the relative class files it belongs to.
+	 *
+	 * @param name The name of the class file or path.
+	 * @return true if the class(es) got removed from memory.
+	 * @throws ClassNotFoundException if the attempted class resolve fails and the included text doesn't result in a valid directory.
+	 */
+	@Experimental
+	public boolean unload(String name) throws ClassNotFoundException {
+		Map<String, Class<?>> classes = getPluginClassMap();
+		if (classes.containsKey(name)) {
+			classes.remove(name);
+			return true;
+		} else throw new ClassNotFoundException("Class " + name + " not found, cannot unload.");
+	}
+
+	/**
+	 * Simply unload a loaded class from this addon loader.
+	 *
+	 * @param clazz The class to unload.
+	 * @throws WrongLoaderUsedException when the class attempting removal belongs to a different loader instance.
+	 * @return true if the class was able to unload.
+	 */
+	@Experimental
+	public boolean unload(Class<?> clazz) throws WrongLoaderUsedException {
+		Map<String, Class<?>> classes = getPluginClassMap();
+		String name = clazz.getName().replace("/", ".").substring(0, clazz.getName().length() - 6);
+		classes.remove(name);
+		if (!this.classes.contains(clazz)) throw new WrongLoaderUsedException("Class " + clazz.getName() + " does not belong to this loader!");
+		return this.classes.remove(clazz);
+	}
+
+	public final Map<String, Class<?>> getPluginClassMap() throws IllegalStateException {
 		try {
 			//noinspection unchecked
-			return (Map<String, Class<?>>) PLUGIN_CLASS_MAP.get(plugin.getClass().getClassLoader());
+			return (Map<String, Class<?>>) PLUGIN_CLASS_MAP.get(this.pluginClassLoader);
 		} catch (ClassCastException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
@@ -116,7 +160,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 	@Override
 	public String toString() {
 		return "AbstractFileLoader{" +
-				"Main=" + (mainClass == null ? "N/A" : mainClass) +
+				"Main=" + mainClass +
 				'}';
 	}
 

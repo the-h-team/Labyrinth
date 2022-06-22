@@ -83,7 +83,7 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
-	@Comment("This method is used for translating player names for skull items, it is expected to be the placeholder for returning a player username and is used in tandem with a Unique Data Converter")
+	@Note("This method is used for translating player names for skull items, it is expected to be the placeholder for returning a player username and is used in tandem with a Unique Data Converter")
 	public MemoryDocket<T> setNamePlaceholder(@NotNull String placeholder) {
 		this.nameHolder = placeholder;
 		return this;
@@ -95,46 +95,11 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
-	@Comment("This method is used for setting up unique translations. Example; a singular parent object being attached for extra placeholders.")
+	@Note("This method is used for setting up unique translations. Example; a singular parent object being attached for extra placeholders.")
 	public <V> MemoryDocket<T> setUniqueDataConverter(@NotNull V t, @NotNull WideFunction<String, V, String> function) {
 		this.uniqueData = t;
 		this.uniqueDataConverter = (WideFunction<String, Object, String>) function;
 		return this;
-	}
-
-	private void handleClickEvent(MemoryItem item, ItemElement<?> ed) {
-		if (item.isNotRemovable()) {
-			ed.setClick(click -> {
-				click.setCancelled(true);
-				if (item.isExitOnClick()) click.getParent().getParent().getParent().close(click.getElement());
-				if (item.getMessage() != null) {
-					String message = item.getMessage();
-					if (uniqueData != null) {
-						message = uniqueDataConverter.accept(message, uniqueData);
-					}
-					Mailer.empty(click.getElement()).chat(message).deploy();
-				}
-				if (item.getOpenOnClick() != null) {
-					String open = item.getOpenOnClick();
-					if (uniqueData != null) {
-						open = uniqueDataConverter.accept(open, uniqueData);
-					}
-					MenuRegistration registration = MenuRegistration.getInstance();
-					Menu registered = registration.get(open).get();
-					if (registered != null) {
-						registered.open(click.getElement());
-					} else {
-						if (item.getOpenOnClick().startsWith("/")) {
-							String command = item.getOpenOnClick().replace("/", "");
-							if (uniqueData != null) {
-								command = uniqueDataConverter.accept(command, uniqueData);
-							}
-							click.getElement().performCommand(command);
-						}
-					}
-				}
-			});
-		}
 	}
 
 	@Override
@@ -176,6 +141,7 @@ public class MemoryDocket<T> implements Docket<T> {
 				ItemStack result = i.toItem();
 				ItemElement<?> element = new ItemElement<>();
 				element.setElement(result);
+				handlePlayerHeadLookup(true, result, element);
 				if (i.getSlot() > -1) {
 					element.setSlot(i.getSlot());
 				}
@@ -242,21 +208,7 @@ public class MemoryDocket<T> implements Docket<T> {
 					element.setLimit(pagination.getLimit());
 					element.setPopulate((value, item) -> {
 						item.setElement(built);
-						if (dataConverter != null && nameHolder != null && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
-							String name = dataConverter.accept(nameHolder, value);
-							PlayerSearch search = PlayerSearch.of(name);
-							if (search != null) {
-								item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
-								if (built.hasItemMeta()) {
-									if (built.getItemMeta().hasDisplayName()) {
-										item.setElement(edit -> edit.setTitle(built.getItemMeta().getDisplayName()).build());
-									}
-									if (built.getItemMeta().hasLore()) {
-										item.setElement(edit -> edit.setLore(built.getItemMeta().getLore()).build());
-									}
-								}
-							}
-						}
+						handlePlayerHeadLookup(false, built, item, value);
 						String title = item.getName();
 						if (pagination != null) {
 							if (pagination.isNotRemovable()) {
@@ -387,6 +339,62 @@ public class MemoryDocket<T> implements Docket<T> {
 		return instance;
 	}
 
+	protected void handleClickEvent(MemoryItem item, ItemElement<?> ed) {
+		if (item.isNotRemovable()) {
+			ed.setClick(click -> {
+				click.setCancelled(true);
+				if (item.isExitOnClick()) click.getParent().getParent().getParent().close(click.getElement());
+				if (item.getMessage() != null) {
+					String message = item.getMessage();
+					if (uniqueData != null) {
+						message = uniqueDataConverter.accept(message, uniqueData);
+					}
+					Mailer.empty(click.getElement()).chat(message).deploy();
+				}
+				if (item.getOpenOnClick() != null) {
+					String open = item.getOpenOnClick();
+					if (uniqueData != null) {
+						open = uniqueDataConverter.accept(open, uniqueData);
+					}
+					MenuRegistration registration = MenuRegistration.getInstance();
+					Menu registered = registration.get(open).get();
+					if (registered != null) {
+						registered.open(click.getElement());
+					} else {
+						if (item.getOpenOnClick().startsWith("/")) {
+							String command = item.getOpenOnClick().replace("/", "");
+							if (uniqueData != null) {
+								command = uniqueDataConverter.accept(command, uniqueData);
+							}
+							click.getElement().performCommand(command);
+						}
+					}
+				}
+			});
+		}
+	}
+
+	@Comment("Handle player head to user translations, local being a unique object instead of paginated.")
+	protected void handlePlayerHeadLookup(boolean local, ItemStack built, ItemElement<?> item, Object... args) {
+		boolean pass = local ? !Check.isNull(uniqueData, uniqueDataConverter, nameHolder) : !Check.isNull(dataConverter, nameHolder);
+		if (pass && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
+			String name = local ? uniqueDataConverter.accept(nameHolder, uniqueData) : dataConverter.accept(nameHolder, (T) args[0]);
+			PlayerSearch search = PlayerSearch.of(name);
+			if (search != null) {
+				item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
+				if (built.hasItemMeta()) {
+					if (built.getItemMeta().hasDisplayName()) {
+						item.setElement(edit -> edit.setTitle(built.getItemMeta().getDisplayName()).build());
+					}
+					if (built.getItemMeta().hasLore()) {
+						item.setElement(edit -> edit.setLore(built.getItemMeta().getLore()).build());
+					}
+				}
+			}
+		}
+	}
+
+	@Comment("Handle memory item placeholder translation on a string with a provided value")
 	protected String handlePaginationReplacements(MemoryItem item, String context, T value) {
 		final FormattedString string = new FormattedString(context);
 		for (Map.Entry<String, String> entry : item.getReplacements().entrySet()) {

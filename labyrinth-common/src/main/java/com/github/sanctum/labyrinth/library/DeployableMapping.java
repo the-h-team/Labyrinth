@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Comment;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.task.TaskScheduler;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -20,6 +21,11 @@ public final class DeployableMapping<R> implements Deployable<R> {
 	DeployableMapping(Supplier<Object> o, Function<? super Object, ? extends R> function) {
 		this.function = function;
 		this.parent = o.get();
+	}
+
+	@Override
+	public R get() {
+		return value;
 	}
 
 	@Override
@@ -41,7 +47,7 @@ public final class DeployableMapping<R> implements Deployable<R> {
 
 	@Override
 	public DeployableMapping<R> queue() {
-		deploy();
+		TaskScheduler.of(this::deploy).schedule();
 		return this;
 	}
 
@@ -77,7 +83,7 @@ public final class DeployableMapping<R> implements Deployable<R> {
 
 	@Override
 	public <O> DeployableMapping<O> map(Function<? super R, ? extends O> mapper) {
-		return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
+		return new DeployableMapping<>(() -> deploy().get(), (Function<? super Object, ? extends O>) mapper);
 	}
 
 	@Override

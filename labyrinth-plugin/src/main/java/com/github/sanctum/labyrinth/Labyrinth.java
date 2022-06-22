@@ -32,17 +32,11 @@ import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
-import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
 import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.formatting.string.DefaultColor;
-import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
-import com.github.sanctum.labyrinth.gui.unity.simple.Docket;
-import com.github.sanctum.labyrinth.gui.unity.simple.MemoryDocket;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -54,7 +48,6 @@ import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.library.TypeFlag;
-import com.github.sanctum.labyrinth.library.WrittenBook;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
@@ -312,11 +305,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	}
 
 	Deployable<Labyrinth> registerHandshake() {
-		return Deployable.of(this, plugin -> {
-			ExternalDataService.Handshake handshake = new ExternalDataService.Handshake(plugin);
-
-			TaskScheduler.of(handshake::locate).schedule().next(handshake::register).scheduleLater(1);
-		});
+		return Deployable.of(this, plugin -> TaskScheduler.of(ExternalDataService.Handshake.getInstance(plugin)).schedule());
 	}
 
 	Deployable<Labyrinth> registerDefaultPlaceholders() {
@@ -380,7 +369,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Subscribe(priority = Vent.Priority.LOW)
 	public void onJoin(DefaultEvent.Join e) {
 		PlayerSearch.of(e.getPlayer());
-		Docket.newInstance(FileList.search(this).get("test").getRoot()).setList(() -> Arrays.asList(DefaultColor.values())).load().toMenu().open(e.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -551,12 +539,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Override
 	public Plugin getPluginInstance() {
 		return this;
-	}
-
-	@Override
-	@NotNull
-	public com.github.sanctum.labyrinth.library.Message getNewMessage() {
-		return com.github.sanctum.labyrinth.library.Message.loggedFor(this);
 	}
 
 	@Override

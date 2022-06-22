@@ -14,12 +14,25 @@ import org.jetbrains.annotations.Nullable;
 
 public class AtlasMap implements Atlas {
 
-	private final Map<String, Object> SOURCE = new HashMap<>();
+	protected final Map<String, Object> SOURCE = new HashMap<>();
 	protected final Map<String, MemorySpace> QUERY = new HashMap<>();
+	protected final char divider;
+
+	public AtlasMap(char divider) {
+		this.divider = divider;
+	}
+
+	public AtlasMap() {
+		this.divider = '.';
+	}
+
+	String dividerAdapt() {
+		return divider == '.' ? "[" + divider + "]" : divider + "";
+	}
 
 	@Override
 	public boolean isNode(String key) {
-		String[] a = key.split("\\.");
+		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		Map<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -49,76 +62,34 @@ public class AtlasMap implements Atlas {
 	@Override
 	public Set<String> getKeys(boolean deep) {
 		Set<String> keys = new HashSet<>();
-		for (Object o : SOURCE.entrySet()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+		SOURCE.forEach((key, value) -> {
 			if (deep) {
-				if (entry.getValue() instanceof Map) {
-					Map<String, Object> obj = (Map<String, Object>) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof Map) {
-							Map<String, Object> j = (Map<String, Object>) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof Map) {
-									Map<String, Object> ja = (Map<String, Object>) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey());
-									}
-								} else {
-									keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey());
-								}
-							}
-						} else {
-							keys.add(entry.getKey() + "." + en.getKey());
-						}
-					}
+				if (value instanceof Map) {
+					keys.addAll(MapDecompressionUtils.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toSet());
 				} else {
-					keys.add(entry.getKey());
+					keys.add(key);
 				}
 			} else {
-				keys.add(entry.getKey());
+				keys.add(key);
 			}
-		}
+		});
 		return keys;
 	}
 
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
 		Map<String, Object> map = new HashMap<>();
-		for (Object o : SOURCE.entrySet()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
+		SOURCE.forEach((key, value) -> {
 			if (deep) {
-				if (entry.getValue() instanceof Map) {
-					Map<String, Object> obj = (Map<String, Object>) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof Map) {
-							Map<String, Object> j = (Map<String, Object>) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof Map) {
-									Map<String, Object> ja = (Map<String, Object>) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey(), entr.getValue());
-									}
-								} else {
-									map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey(), ent.getValue());
-								}
-							}
-						} else {
-							map.put(entry.getKey() + "." + en.getKey(), en.getValue());
-						}
-					}
+				if (value instanceof Map) {
+					map.putAll(MapDecompressionUtils.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toMap());
 				} else {
-					map.put(entry.getKey(), entry.getValue());
+					map.put(key, value);
 				}
 			} else {
-				map.put(entry.getKey(), entry.getValue());
+				map.put(key, value);
 			}
-		}
+		});
 		return map;
 	}
 
@@ -145,7 +116,7 @@ public class AtlasMap implements Atlas {
 	@Override
 	public Object get(Object key) {
 		String ke = (String) key;
-		String[] a = ke.split("\\.");
+		String[] a = ke.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		Map<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -168,7 +139,7 @@ public class AtlasMap implements Atlas {
 	@Nullable
 	@Override
 	public Object put(String key, Object o) {
-		String[] a = key.split("\\.");
+		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
 		Map<String, Object> ob = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
@@ -311,5 +282,10 @@ public class AtlasMap implements Atlas {
 	@Override
 	public Object merge(String key, @NotNull Object value, @NotNull BiFunction<? super Object, ? super Object, ?> remappingFunction) {
 		return SOURCE.merge(key, value, remappingFunction);
+	}
+
+	@Override
+	public char getDivider() {
+		return divider;
 	}
 }
