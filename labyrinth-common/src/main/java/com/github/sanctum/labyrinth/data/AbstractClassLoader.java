@@ -2,9 +2,8 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Experimental;
-import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
-import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -33,8 +32,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 
 	protected AbstractClassLoader(File file, ClassLoader parent, Object... args) throws IOException {
 		super(new URL[]{file.toURI().toURL()}, parent);
-		TypeFlag<T> flag = new EasyTypeAdapter<>();
-		Class<T> main = flag.getType();
+		Class<T> main = (Class<T>) new TypeToken<T>(getClass()){}.getRawType();
 		try {
 			PLUGIN_CLASS_MAP = Class.forName("org.bukkit.plugin.java.PluginClassLoader").getDeclaredField("classes");
 			PLUGIN_CLASS_MAP.setAccessible(true);
@@ -67,7 +65,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 		if (main != null) {
 			try {
 				Class<? extends T> addonClass = loadedClasses.stream().filter(main::isAssignableFrom).findFirst().map(aClass -> (Class<? extends T>) aClass).get();
-				if (args != null) {
+				if (args != null && args.length > 0) {
 					Constructor<T> constructor = null;
 					for (Constructor<?> con : main.getConstructors()) {
 						if (args.length == con.getParameters().length) {
@@ -85,7 +83,7 @@ public abstract class AbstractClassLoader<T> extends URLClassLoader {
 							}
 						}
 					}
-					this.mainClass = constructor != null ? constructor.newInstance(args) : addonClass.getDeclaredConstructor().newInstance();
+					this.mainClass = constructor != null ? addonClass.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(args) : addonClass.getDeclaredConstructor().newInstance();
 				} else {
 					this.mainClass = addonClass.getDeclaredConstructor().newInstance();
 				}

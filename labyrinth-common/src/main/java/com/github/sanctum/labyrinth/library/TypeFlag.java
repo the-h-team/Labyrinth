@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface TypeFlag<T> extends Type {

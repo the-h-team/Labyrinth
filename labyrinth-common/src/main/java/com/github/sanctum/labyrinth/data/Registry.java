@@ -259,7 +259,7 @@ public class Registry<T> {
 		List<T> additions = new LinkedList<>();
 		for (Class<T> aClass : classes) {
 			try {
-				T a = constructor != null ? constructor.newInstance(args) : aClass.getDeclaredConstructor().newInstance();
+				T a = constructor != null ? aClass.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(args) : aClass.getDeclaredConstructor().newInstance();
 				additions.add(a);
 			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 				e.printStackTrace();
@@ -363,7 +363,7 @@ public class Registry<T> {
 		List<T> additions = new LinkedList<>();
 		for (Class<T> aClass : classes) {
 			try {
-				T a = constructor != null ? constructor.newInstance(args) : aClass.getDeclaredConstructor().newInstance();
+				T a = constructor != null ? aClass.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(args) : aClass.getDeclaredConstructor().newInstance();
 				operation.accept(a);
 				additions.add(a);
 			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
@@ -573,7 +573,7 @@ public class Registry<T> {
 			for (Class<?> cl : classes) {
 				if (this.type.isAssignableFrom(cl)) {
 					try {
-						T e = constructor != null ? constructor.newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
+						T e = constructor != null ? (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
 						data.add(e);
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -610,7 +610,7 @@ public class Registry<T> {
 			for (Class<?> cl : classes) {
 				if (this.type.isAssignableFrom(cl)) {
 					try {
-						T e = constructor != null ? constructor.newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
+						T e = constructor != null ? (T) cl.getDeclaredConstructor(constructor.getParameterTypes()).newInstance(o) : (T) cl.getDeclaredConstructor().newInstance();
 						action.accept(e);
 						data.add(e);
 					} catch (Exception ex) {
