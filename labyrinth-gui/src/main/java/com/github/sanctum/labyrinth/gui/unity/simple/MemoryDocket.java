@@ -104,12 +104,12 @@ public class MemoryDocket<T> implements Docket<T> {
 
 	@Override
 	public @NotNull Docket<T> load() {
-		this.title = memory.getNode("title").toPrimitive().getString();
+		this.title = Check.forNull(memory.getNode("title").toPrimitive().getString(), "Configured menus cannot have null titles please correct under path '" + memory.getPath() + "'");
 		if (this.uniqueData != null) {
 			this.title = uniqueDataConverter.accept(title, uniqueData);
 		}
-		this.rows = Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString());
-		this.type = Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString());
+		this.rows = Check.forNull(Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString()), "Configured menus need a row size please correct under path '" + memory.getPath() + "'");
+		this.type = Check.forNull(Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString()), "Configured menus need a valid type please correct under path '" + memory.getPath() + "'");
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
 			if (this.uniqueData != null) {
@@ -175,7 +175,7 @@ public class MemoryDocket<T> implements Docket<T> {
 					items.forEach(i::addItem);
 					ListElement<T> element = new ListElement<>(supplier);
 					if (this.comparator != null) {
-						element.setComparator((o1, o2) -> comparator.compare(o2.getData().orElse(null), o1.getData().orElse(null)));
+						element.setComparator((o1, o2) -> comparator.compare(o1.getData().orElse(null), o2.getData().orElse(null)));
 					}
 					if (this.predicate != null) {
 						element.setFilter(tItemElement -> predicate.test(tItemElement.getData().orElse(null)));
