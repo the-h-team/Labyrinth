@@ -36,6 +36,15 @@ public interface Docket<T> extends JsonIntermediate {
 	 */
 	@NotNull Type getType();
 
+	/**
+	 * Check if this docket holds unique data.
+	 *
+	 * @return true if this docket handles unique data conversions.
+	 */
+	default boolean isUnique() {
+		return this instanceof UniqueHolder;
+	}
+
 	enum Type {
 		/**
 		 * Defines a docket type that requires being built.

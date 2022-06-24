@@ -4,7 +4,10 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
+import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
+import com.github.sanctum.labyrinth.gui.unity.event.MenuClickEvent;
+import com.github.sanctum.labyrinth.gui.unity.event.MenuDragItemEvent;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClickElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ClosingElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
@@ -891,6 +894,13 @@ public abstract class Menu {
 			if (e.getInventory().equals(target)) {
 				e.setResult(Event.Result.DENY);
 			}
+
+			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
+			ItemElement<?> element = getInventory().getItem(attempt);
+			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(attempt);
+			MenuDragItemEvent event = new Vent.Call<>(new MenuDragItemEvent(Menu.this, (Player) e.getWhoClicked(), element)).run();
+			if (event.isCancelled()) e.setCancelled(true);
+
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
@@ -915,10 +925,15 @@ public abstract class Menu {
 				Player p = (Player) e.getWhoClicked();
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
-					ItemElement<?> element = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
-					if (element != null) {
-						Click click = element.getAttachment();
-						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getCursor(), e.getView());
+					ItemElement<?> fixedSlotElement = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
+					if (fixedSlotElement != null) {
+						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, fixedSlotElement)).run();
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+							return;
+						}
+						Click click = fixedSlotElement.getAttachment();
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), fixedSlotElement, e.getCursor(), e.getView());
 						if (click != null) {
 							click.apply(clickElement);
 						}
@@ -931,11 +946,11 @@ public abstract class Menu {
 							}
 						}
 
-						if (element.getType() != null) {
+						if (fixedSlotElement.getType() != null) {
 							ClickElement.Consumer consumer = clickElement.getConsumer();
-							switch (element.getType()) {
+							switch (fixedSlotElement.getType()) {
 								case TAKEAWAY:
-									element.remove(false);
+									fixedSlotElement.remove(false);
 									break;
 								case BUTTON_EXIT:
 									if (consumer != null) {
@@ -1054,10 +1069,15 @@ public abstract class Menu {
 						}
 					} else {
 
-						ItemElement<?> el = getInventory().getItem(e.getRawSlot());
-						if (el != null) {
-							Click click = el.getAttachment();
-							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
+						ItemElement<?> hotKeyElement = getInventory().getItem(e.getRawSlot());
+						if (hotKeyElement != null) {
+							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, hotKeyElement)).run();
+							if (event.isCancelled()) {
+								e.setCancelled(true);
+								return;
+							}
+							Click click = hotKeyElement.getAttachment();
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), hotKeyElement, e.getCursor(), e.getView());
 							if (click != null) {
 								click.apply(clickElement);
 							}
@@ -1071,11 +1091,11 @@ public abstract class Menu {
 								}
 							}
 
-							if (el.getType() != null) {
+							if (hotKeyElement.getType() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
-								switch (el.getType()) {
+								switch (hotKeyElement.getType()) {
 									case TAKEAWAY:
-										el.remove(false);
+										hotKeyElement.remove(false);
 										break;
 									case BUTTON_EXIT:
 										if (consumer != null) {
@@ -1194,10 +1214,15 @@ public abstract class Menu {
 							}
 						}
 
-						ItemElement<?> element2 = getInventory().getItem(item);
-						if (element2 != null) {
-							Click click = element2.getAttachment();
-							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getCursor(), e.getView());
+						ItemElement<?> otherElement = getInventory().getItem(item);
+						if (otherElement != null) {
+							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, otherElement)).run();
+							if (event.isCancelled()) {
+								e.setCancelled(true);
+								return;
+							}
+							Click click = otherElement.getAttachment();
+							ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), otherElement, e.getCursor(), e.getView());
 							if (click == null) {
 								if (Menu.this.click != null) {
 									Menu.this.click.apply(clickElement);
@@ -1216,11 +1241,11 @@ public abstract class Menu {
 								}
 							}
 
-							if (element2.getType() != null) {
+							if (otherElement.getType() != null) {
 								ClickElement.Consumer consumer = clickElement.getConsumer();
-								switch (element2.getType()) {
+								switch (otherElement.getType()) {
 									case TAKEAWAY:
-										element2.remove(false);
+										otherElement.remove(false);
 										break;
 									case BUTTON_EXIT:
 										if (consumer != null) {
@@ -1342,6 +1367,11 @@ public abstract class Menu {
 						if (!e.isCancelled()) {
 
 							ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
+							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, element1)).run();
+							if (event.isCancelled()) {
+								e.setCancelled(true);
+								return;
+							}
 							if (getProperties().contains(Property.SHAREABLE)) {
 								if (getInventory().isPaginated()) {
 									InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
@@ -1380,6 +1410,11 @@ public abstract class Menu {
 				if (!e.isCancelled()) {
 
 					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
+					MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, el)).run();
+					if (event.isCancelled()) {
+						e.setCancelled(true);
+						return;
+					}
 					if (getProperties().contains(Property.SHAREABLE)) {
 						if (getInventory().isPaginated()) {
 							InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
@@ -1477,6 +1512,18 @@ public abstract class Menu {
 		}
 
 		@EventHandler(priority = EventPriority.NORMAL)
+		public void onDrag(InventoryDragEvent e) {
+			if (!(e.getInventory().getHolder() instanceof Instance)) return;
+			if (!(e.getWhoClicked() instanceof Player))	return;
+			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
+			ItemElement<?> element = menu.getInventory().getItem(attempt);
+			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(attempt);
+			MenuDragItemEvent event = new Vent.Call<>(new MenuDragItemEvent(menu, (Player) e.getWhoClicked(), element)).run();
+			if (event.isCancelled()) e.setCancelled(true);
+		}
+
+		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getInventory().getHolder() instanceof Instance)) return;
 			if (!(e.getWhoClicked() instanceof Player))	return;
@@ -1489,10 +1536,15 @@ public abstract class Menu {
 			Player p = (Player) e.getWhoClicked();
 			if (e.getCurrentItem() != null) {
 				ItemStack item = e.getCurrentItem();
-				ItemElement<?> element = menu.getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
-				if (element != null) {
-					Click click = element.getAttachment();
-					ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element, e.getCursor(), e.getView());
+				ItemElement<?> fixedSlotElement = menu.getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
+				if (fixedSlotElement != null) {
+					MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, fixedSlotElement)).run();
+					if (event.isCancelled()) {
+						e.setCancelled(true);
+						return;
+					}
+					Click click = fixedSlotElement.getAttachment();
+					ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), fixedSlotElement, e.getCursor(), e.getView());
 					if (click != null) {
 						click.apply(clickElement);
 					}
@@ -1505,11 +1557,11 @@ public abstract class Menu {
 						}
 					}
 
-					if (element.getType() != null) {
+					if (fixedSlotElement.getType() != null) {
 						ClickElement.Consumer consumer = clickElement.getConsumer();
-						switch (element.getType()) {
+						switch (fixedSlotElement.getType()) {
 							case TAKEAWAY:
-								element.remove(false);
+								fixedSlotElement.remove(false);
 								break;
 							case BUTTON_EXIT:
 								if (consumer != null) {
@@ -1628,10 +1680,15 @@ public abstract class Menu {
 					}
 				} else {
 
-					ItemElement<?> el = menu.getInventory().getItem(e.getRawSlot());
-					if (el != null) {
-						Click click = el.getAttachment();
-						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), el, e.getCursor(), e.getView());
+					ItemElement<?> hotKeyElement = menu.getInventory().getItem(e.getRawSlot());
+					if (hotKeyElement != null) {
+						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, hotKeyElement)).run();
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+							return;
+						}
+						Click click = hotKeyElement.getAttachment();
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), hotKeyElement, e.getCursor(), e.getView());
 						if (click != null) {
 							click.apply(clickElement);
 						}
@@ -1645,11 +1702,11 @@ public abstract class Menu {
 							}
 						}
 
-						if (el.getType() != null) {
+						if (hotKeyElement.getType() != null) {
 							ClickElement.Consumer consumer = clickElement.getConsumer();
-							switch (el.getType()) {
+							switch (hotKeyElement.getType()) {
 								case TAKEAWAY:
-									el.remove(false);
+									hotKeyElement.remove(false);
 									break;
 								case BUTTON_EXIT:
 									if (consumer != null) {
@@ -1768,10 +1825,15 @@ public abstract class Menu {
 						}
 					}
 
-					ItemElement<?> element2 = menu.getInventory().getItem(item);
-					if (element2 != null) {
-						Click click = element2.getAttachment();
-						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), element2, e.getCursor(), e.getView());
+					ItemElement<?> otherElement = menu.getInventory().getItem(item);
+					if (otherElement != null) {
+						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, otherElement)).run();
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+							return;
+						}
+						Click click = otherElement.getAttachment();
+						ClickElement clickElement = new ClickElement(p, e.getRawSlot(), e.getAction(), e.getClick(), otherElement, e.getCursor(), e.getView());
 						if (click == null) {
 							if (menu.click != null) {
 								menu.click.apply(clickElement);
@@ -1790,11 +1852,11 @@ public abstract class Menu {
 							}
 						}
 
-						if (element2.getType() != null) {
+						if (otherElement.getType() != null) {
 							ClickElement.Consumer consumer = clickElement.getConsumer();
-							switch (element2.getType()) {
+							switch (otherElement.getType()) {
 								case TAKEAWAY:
-									element2.remove(false);
+									otherElement.remove(false);
 									break;
 								case BUTTON_EXIT:
 									if (consumer != null) {
@@ -1916,6 +1978,11 @@ public abstract class Menu {
 					if (!e.isCancelled()) {
 
 						ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCurrentItem());
+						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, element1)).run();
+						if (event.isCancelled()) {
+							e.setCancelled(true);
+							return;
+						}
 						if (menu.getProperties().contains(Property.SHAREABLE)) {
 							if (menu.getInventory().isPaginated()) {
 								InventoryElement.Paginated inv = (InventoryElement.Paginated) menu.getInventory();
@@ -1954,6 +2021,11 @@ public abstract class Menu {
 			if (!e.isCancelled()) {
 
 				ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCursor());
+				MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, el)).run();
+				if (event.isCancelled()) {
+					e.setCancelled(true);
+					return;
+				}
 				if (menu.getProperties().contains(Property.SHAREABLE)) {
 					if (menu.getInventory().isPaginated()) {
 						InventoryElement.Paginated inv = (InventoryElement.Paginated) menu.getInventory();

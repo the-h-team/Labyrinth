@@ -264,8 +264,10 @@ abstract class PlaceholderTranslationUtility {
 			} else {
 				PlaceholderRegistration.getInstance().runAction(conversion -> {
 					String parameters = matcher.group("parameters");
-					String translation = conversion.onTranslation(parameters, receiver != null ? receiver : () -> null);
-					matcher.appendReplacement(builder, translation != null && !translation.isEmpty() ? translation : (placeholder.start() + parameters + placeholder.end()));
+					if (parameters != null && !parameters.isEmpty()) {
+						String translation = conversion.onTranslation(parameters, receiver != null ? receiver : () -> null);
+						matcher.appendReplacement(builder, translation != null && !translation.isEmpty() ? translation : (placeholder.start() + parameters + placeholder.end()));
+					}
 				});
 			}
 		} while (matcher.find());

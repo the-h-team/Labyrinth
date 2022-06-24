@@ -41,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of docket.
  */
-public class MemoryDocket<T> implements Docket<T> {
+public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 
 	protected final LabyrinthCollection<ItemElement<?>> items = new LabyrinthList<>();
 	protected Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
@@ -83,6 +83,7 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
+	@Override
 	@Note("This method is used for translating player names for skull items, it is expected to be the placeholder for returning a player username and is used in tandem with a Unique Data Converter")
 	public MemoryDocket<T> setNamePlaceholder(@NotNull String placeholder) {
 		this.nameHolder = placeholder;
@@ -95,6 +96,7 @@ public class MemoryDocket<T> implements Docket<T> {
 		return this;
 	}
 
+	@Override
 	@Note("This method is used for setting up unique translations. Example; a singular parent object being attached for extra placeholders.")
 	public <V> MemoryDocket<T> setUniqueDataConverter(@NotNull V t, @NotNull WideFunction<String, V, String> function) {
 		this.uniqueData = t;
@@ -103,7 +105,7 @@ public class MemoryDocket<T> implements Docket<T> {
 	}
 
 	@Override
-	public @NotNull Docket<T> load() {
+	public @NotNull MemoryDocket<T> load() {
 		this.title = Check.forNull(memory.getNode("title").toPrimitive().getString(), "Configured menus cannot have null titles please correct under path '" + memory.getPath() + "'");
 		if (this.uniqueData != null) {
 			this.title = uniqueDataConverter.accept(title, uniqueData);

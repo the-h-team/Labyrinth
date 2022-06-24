@@ -27,8 +27,9 @@ import org.jetbrains.annotations.Nullable;
  * Wraps around any objects, detects methods annotated with {@link Subscribe} and creates SubscriberCalls with it.
  * Also, it recognises methods annotated with {@link Extend} and adds them to the method linking pool
  * Always has s string as key, which may be "null", when not specified by {@link LabeledAs};
+ *
+ * @author Rigo
  */
-
 public class VentListener {
 
 	/**

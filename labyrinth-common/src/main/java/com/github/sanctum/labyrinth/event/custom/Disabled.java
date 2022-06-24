@@ -9,6 +9,14 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * An annotation marking a {@link VentListener} subscription not valid for runtime usage.
+ *
+ * Example:
+ * <pre>{@code
+ *    @Disabled
+ *    @Subscribe
+ *    public void onMyEvent(Vent e) {
+ *
+ *    }}</pre>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,5 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public @interface Disabled {
 
 	String until() default "N/A";
+
+
 
 }

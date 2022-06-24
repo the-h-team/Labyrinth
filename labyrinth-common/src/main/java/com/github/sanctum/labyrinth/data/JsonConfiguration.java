@@ -301,38 +301,11 @@ public class JsonConfiguration extends Configurable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Set<String> getKeys(boolean deep) {
-		Set<String> keys = new HashSet<>();
-		for (Object o : json.entrySet()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
-			if (deep) {
-				if (entry.getValue() instanceof JSONObject) {
-					JSONObject obj = (JSONObject) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof JSONObject) {
-							JSONObject j = (JSONObject) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof JSONObject) {
-									JSONObject ja = (JSONObject) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey());
-									}
-								} else {
-									keys.add(entry.getKey() + "." + en.getKey() + "." + ent.getKey());
-								}
-							}
-						} else {
-							keys.add(entry.getKey() + "." + en.getKey());
-						}
-					}
-				} else {
-					keys.add(entry.getKey());
-				}
-			} else {
-				keys.add(entry.getKey());
-			}
+		Set<String> keys;
+		if (deep) {
+			return MapDecompressionUtils.getInstance().decompress((Set<Map.Entry<String, Object>>)json.entrySet(), '.', null).toSet();
+		} else {
+			keys = new HashSet<>((Set<String>) json.keySet());
 		}
 		return keys;
 	}
@@ -341,37 +314,13 @@ public class JsonConfiguration extends Configurable {
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
 		Map<String, Object> map = new HashMap<>();
-		for (Object o : json.entrySet()) {
-			Map.Entry<String, Object> entry = (Map.Entry<String, Object>) o;
-			if (deep) {
-				if (entry.getValue() instanceof JSONObject) {
-					JSONObject obj = (JSONObject) entry.getValue();
-					for (Object ob : obj.entrySet()) {
-						Map.Entry<String, Object> en = (Map.Entry<String, Object>) ob;
-						if (en.getValue() instanceof JSONObject) {
-							JSONObject j = (JSONObject) entry.getValue();
-							for (Object e : j.entrySet()) {
-								Map.Entry<String, Object> ent = (Map.Entry<String, Object>) e;
-								if (ent.getValue() instanceof JSONObject) {
-									JSONObject ja = (JSONObject) ent.getValue();
-									for (Object ex : ja.entrySet()) {
-										Map.Entry<String, Object> entr = (Map.Entry<String, Object>) ex;
-										map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey() + "." + entr.getKey(), entr.getValue());
-									}
-								} else {
-									map.put(entry.getKey() + "." + en.getKey() + "." + ent.getKey(), ent.getValue());
-								}
-							}
-						} else {
-							map.put(entry.getKey() + "." + en.getKey(), en.getValue());
-						}
-					}
-				} else {
-					map.put(entry.getKey(), entry.getValue());
-				}
-			} else {
+		if (deep) {
+			return MapDecompressionUtils.getInstance().decompress((Set<Map.Entry<String, Object>>)json.entrySet(), '.', null).toMap();
+		} else {
+			json.entrySet().forEach(e -> {
+				Map.Entry<String, Object> entry = (Map.Entry<String, Object>)e;
 				map.put(entry.getKey(), entry.getValue());
-			}
+			});
 		}
 		return map;
 	}

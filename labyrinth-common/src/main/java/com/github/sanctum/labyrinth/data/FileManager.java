@@ -85,6 +85,17 @@ public class FileManager {
 	}
 
 	/**
+	 * Set/Replace & save multiple keyed value spaces within this file.
+	 *
+	 * @see FileManager#write(DataTable, boolean) 
+	 * @param table The data table to use when setting values.
+	 */
+	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
+	public void write(@Note("Provided table gets cleared upon finalization.") DataTable table) {
+		write(table, true);
+	}
+
+	/**
 	 * Set & save multiple keyed value spaces within this file.
 	 *
 	 * <p>After all inquires have been transferred the inquiry object is cleared and discarded due to
@@ -95,19 +106,11 @@ public class FileManager {
 	 * <p>By default this method is set to override any already existing nodes store
 	 * within the configurable</p>
 	 *
-	 * @param table The data table to use when setting values.
-	 */
-	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
-	public void write(@Note("Custom implementations will work here!") DataTable table) {
-		write(table, true);
-	}
-
-	/**
 	 * @param replace Whether to replace already set values from file with ones from the table
 	 * @see FileManager#write(DataTable)
 	 */
 	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
-	public void write(@Note("Custom implementations will work here!") DataTable table, boolean replace) {
+	public void write(@Note("Provided table gets cleared upon finalization.") DataTable table, boolean replace) {
 		for (Map.Entry<String, Object> entry : table.values().entrySet()) {
 			if (replace) {
 				if (entry.getValue().equals("NULL")) {
@@ -123,65 +126,89 @@ public class FileManager {
 				}
 			}
 		}
-		// instantly clear up space (help GC)
+		// instantly clear up space (help GC, we don't need these elements anymore.)
 		table.clear();
 		configuration.save();
 	}
 
-	public @NotNull FileManager toJSON(String name, String dir) {
+	/**
+	 * Copy all values from this yml file to a json file of similar stature.
+	 *
+	 * @param name The new name of the file.
+	 * @param dir The optional new directory, null places in base folder.
+	 * @return a new json file containing all values from this yml file.
+	 */
+	public @NotNull FileManager toJSON(@NotNull String name, String dir) {
 		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
 		Configurable c = getRoot();
 		if (c instanceof YamlConfiguration) {
-			DataTable inquiry = DataTable.newTable();
-			for (String entry : c.getKeys(true)) {
-				if (c.isNode(entry)) {
-					ConfigurationSection s = c.getNode(entry).get(ConfigurationSection.class);
-					for (String e : s.getKeys(true)) {
-						if (s.isConfigurationSection(e)) {
-							ConfigurationSection a = s.getConfigurationSection(e);
-							inquiry.set(e, a.get(e));
-						}
-					}
-				} else {
-					inquiry.set(entry, c.getNode(entry).get());
-				}
-			}
-			n.write(inquiry, false);
+			n.write(copy(), false);
 			return n;
 		}
 		return this;
 	}
 
-	public @NotNull FileManager toYaml(String name, String dir) {
+	/**
+	 * Copy all values from this json file to a yml file of similar stature.
+	 *
+	 * @param name The new name of the file.
+	 * @param dir The optional new directory, null places in base folder.
+	 * @return a new yml file containing all values from this json file.
+	 */
+	public @NotNull FileManager toYaml(@NotNull String name, String dir) {
 		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
 		Configurable c = getRoot();
 		if (c instanceof JsonConfiguration) {
-			DataTable inquiry = DataTable.newTable();
-			for (String entry : c.getKeys(true)) {
-				if (c.isNode(entry)) {
-					Node s = c.getNode(entry);
-					for (String e : s.getKeys(true)) {
-						if (s.isNode(e)) {
-							Node a = s.getNode(e);
-							inquiry.set(e, a.get());
-						}
-					}
-				} else {
-					inquiry.set(entry, c.getNode(entry).get());
-				}
-			}
-			n.write(inquiry, false);
+			n.write(copy(), false);
 			return n;
 		}
 		return this;
 	}
 
+	/**
+	 * Copy all values from this yml file to a json file of similar stature.
+	 *
+	 * @return a new json file containing all values from this yml file.
+	 */
 	public @NotNull FileManager toJSON() {
 		return toJSON(getRoot().getName(), getRoot().getDirectory());
 	}
 
+	/**
+	 * Copy all values from this json file to a yml file of similar stature.
+	 *
+	 * @return a new yml file containing all values from this json file.
+	 */
 	public @NotNull FileManager toYaml() {
 		return toYaml(getRoot().getName(), getRoot().getDirectory());
+	}
+
+	/**
+	 * Move this file to another location. Retains all values but doesn't retain comments, only headers.
+	 * *Automatically deletes old file when moved*
+	 *
+	 * @param dir The optional new directory to move to, null places in base folder.
+	 * @return a new file containing all the values from this file.
+	 */
+	public @NotNull FileManager toMoved(String dir) {
+		// gotta love our api sometimes, just look at how clean it is to copy ALL values from a config to another location.
+		final FileManager n = FileList.search(plugin).get(getRoot().getName(), dir, getRoot().getType());
+		Configurable c = getRoot();
+		n.write(copy(), false);
+		c.delete();
+		return n;
+	}
+
+	/**
+	 * Copy all contents to a datatable.
+	 *
+	 * @return a fresh datatable containing all values from this file.
+	 */
+	public @NotNull DataTable copy() {
+		Configurable c = getRoot();
+		DataTable inquiry = DataTable.newTable();
+		c.getValues(true).forEach(inquiry::set);
+		return inquiry;
 	}
 
 	@Override

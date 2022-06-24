@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LabyrinthList;
+import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.StringUtils;
@@ -20,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class MemoryItem {
 
-	private final Node node;
-	private Map<String, String> replacements;
-	private boolean notRemovable;
-	private boolean exitOnClick;
-	private String openOnClick;
-	private String message;
-	private int slot = -1;
-	private int limit = 5;
+	protected final Node node;
+	protected Map<String, String> replacements;
+	protected boolean notRemovable;
+	protected boolean exitOnClick;
+	protected String openOnClick;
+	protected String message;
+	protected int slot = -1;
+	protected int limit = 5;
 
 	public MemoryItem(Node node) {
 		this.node = node;
@@ -76,7 +77,9 @@ public class MemoryItem {
 	}
 
 	public @NotNull ItemStack toItem() {
-		Item.Edit edit = new Item.Edit(improvise(node.getNode("type").toPrimitive().getString()));
+		String type = node.getNode("type").toPrimitive().getString();
+		ItemStack test = improvise(type);
+		Item.Edit edit = new Item.Edit(Check.forNull(test, "Item '" + type + "' not found. Key:" + node.getPath()));
 		String label = node.getPath();
 		String[] split = label.split("\\.");
 		String c = split[split.length - 1];
