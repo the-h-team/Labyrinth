@@ -259,7 +259,7 @@ public abstract class ToolTip<T> {
 		}
 
 		private String itemToJson(ItemStack itemStack) {
-			boolean isBrandNew = Bukkit.getVersion().contains("1.18");
+			boolean isBrandNew = Bukkit.getVersion().contains("1.18") || Bukkit.getVersion().contains("1.19");
 			boolean isNew = Bukkit.getVersion().contains("1.17") || isBrandNew;
 			Class<?> itemStackClass = isNew ? getNewClass("net.minecraft.world.item.ItemStack") : getNMSClass("ItemStack");
 			Class<?> nbtTagCompoundClass = isNew ? getNewClass("net.minecraft.nbt.NBTTagCompound") : getNMSClass("NBTTagCompound");
