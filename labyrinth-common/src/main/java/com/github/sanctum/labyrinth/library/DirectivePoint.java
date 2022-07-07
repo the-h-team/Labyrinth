@@ -88,7 +88,10 @@ public enum DirectivePoint {
 		start.setDirection(new Vector(x, y, z));
 		start.setYaw(getCenteredYaw());
 		start.setPitch(getCenteredPitch());
-		return start.add(start.getDirection().normalize().multiply(distanceInBlocks));
+		for (int i = 0; i < distanceInBlocks; i++) {
+			start.add(start.getDirection().normalize());
+		}
+		return start;
 	}
 
 	public Chunk getChunk(Chunk start, int distanceInChunks) {

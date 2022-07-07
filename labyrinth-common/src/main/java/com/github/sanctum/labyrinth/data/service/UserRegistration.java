@@ -32,11 +32,11 @@ public interface UserRegistration extends Service {
 			}
 
 			public Deployable<LabyrinthUser> get(@NotNull String name) {
-				return Deployable.of(Optional.ofNullable(cache.get(name)).orElseGet(() -> PlayerSearch.of(name)), user -> {});
+				return Deployable.of(() -> Optional.ofNullable(cache.get(name)).orElseGet(() -> PlayerSearch.of(name)));
 			}
 
 			public Deployable<LabyrinthCollection<LabyrinthUser>> getAll() {
-				return Deployable.of(cache.values(), labyrinthUsers -> {});
+				return Deployable.of(cache::values);
 			}
 		};
 		UserRegistration finalTest = test;

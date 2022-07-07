@@ -24,4 +24,5 @@ public class ServiceType<T extends Service> {
 	public Supplier<T> getLoader() {
 		return supplier;
 	}
+
 }

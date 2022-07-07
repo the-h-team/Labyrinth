@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Experimental;
+import com.github.sanctum.labyrinth.data.service.DummyAdapter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import java.io.File;

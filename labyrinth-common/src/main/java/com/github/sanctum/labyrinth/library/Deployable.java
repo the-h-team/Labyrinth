@@ -369,6 +369,17 @@ public interface Deployable<T> {
 			public CompletableFuture<T> submit() {
 				return CompletableFuture.supplyAsync(supplier);
 			}
+
+			@Override
+			public T get() {
+				return this.element != null ? this.element : Deployable.super.get();
+			}
+
+			@Override
+			public T complete() {
+				deploy();
+				return this.element;
+			}
 		};
 	}
 

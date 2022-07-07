@@ -2,7 +2,12 @@ package com.github.sanctum.labyrinth.library;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,7 +115,7 @@ public class TimeWatch {
 	/**
 	 * Encapsulates stop-watch like data.
 	 */
-	public static class Recording {
+	public static class Recording implements ParsedTimeFormat {
 
 		private final long time;
 
@@ -153,6 +158,11 @@ public class TimeWatch {
 
 		public long getDays() {
 			return (time / (1000 * 60 * 60 * 24));
+		}
+
+		@Override
+		public String toString() {
+			return getDays() + " days " + getHours() + " hours " + getMinutes() + " minutes " + getSeconds() + " seconds.";
 		}
 
 	}

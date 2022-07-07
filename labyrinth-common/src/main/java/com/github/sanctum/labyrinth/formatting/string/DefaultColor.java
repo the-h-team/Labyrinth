@@ -47,7 +47,7 @@ public enum DefaultColor implements CustomColor {
 	}
 
 	@Note("Easily convert any color into a game only color")
-	public static @NotNull ChatColor fromAwt(Color color) {
+	public static @NotNull ChatColor fromAwt(@NotNull Color color) {
 		int index = 0;
 		double best = -1;
 		for (int i = 0; i < ImageBreakdown.VANILLA_COLORS.length; i++) {

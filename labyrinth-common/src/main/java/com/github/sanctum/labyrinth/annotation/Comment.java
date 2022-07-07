@@ -17,4 +17,6 @@ public @interface Comment {
 	 */
 	String value() default "no comment";
 
+	String author() default "N/A";
+
 }

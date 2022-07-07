@@ -88,7 +88,7 @@ public class Mailer {
 	}
 
 	/**
-	 * Send a message to the configured command sender {@linkplain this#accept(CommandSender)}
+	 * Send a message to the configured command sender {@linkplain Mailer#accept(CommandSender)}
 	 * 
 	 * @param text The message to mail to the sender.
 	 * @return A mailer deployable.
@@ -101,7 +101,7 @@ public class Mailer {
 	}
 
 	/**
-	 * Send a message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 * Send a message to the registered command sender {@linkplain Mailer#accept(CommandSender)}
 	 *
 	 * @param components The message components to mail to the sender.
 	 * @return A mailer deployable.
@@ -115,7 +115,7 @@ public class Mailer {
 	}
 
 	/**
-	 * Send an action bar message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 * Send an action bar message to the registered command sender {@linkplain Mailer#accept(CommandSender)}
 	 *
 	 * NOTE: Sender must be a {@linkplain Player}
 	 *
@@ -130,7 +130,7 @@ public class Mailer {
 	}
 
 	/**
-	 * Send an action bar message to the registered command sender {@linkplain this#accept(CommandSender)}
+	 * Send an action bar message to the registered command sender {@linkplain Mailer#accept(CommandSender)}
 	 *
 	 * NOTE: Sender must be a {@linkplain Player}
 	 *
@@ -146,7 +146,7 @@ public class Mailer {
 	}
 
 	/**
-	 * Send a title to the registered command sender {@linkplain this#accept(CommandSender)}
+	 * Send a title to the registered command sender {@linkplain Mailer#accept(CommandSender)}
 	 *
 	 * @param title The initial title
 	 * @param subtitle The sub title.
@@ -289,14 +289,18 @@ public class Mailer {
 				if (timeout <= 0) {
 					switch (type) {
 						case ACTION:
-							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+							if (text != null) {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+							} else {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+							}
 							consumer.accept(Mailer.this);
 							break;
 						case CHAT:
 							if (components != null) {
 								((Player)toSender(result.getSource())).spigot().sendMessage(components);
 							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 							}
 
 							consumer.accept(Mailer.this);
@@ -308,7 +312,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 									}
 								}
 							}
@@ -317,9 +321,9 @@ public class Mailer {
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
 							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 							}
 							consumer.accept(Mailer.this);
 							break;
@@ -328,7 +332,11 @@ public class Mailer {
 					switch (type) {
 						case ACTION:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+								if (text != null) {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+								} else {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
 						case CHAT:
@@ -336,7 +344,7 @@ public class Mailer {
 								if (components != null) {
 									((Player)toSender(result.getSource())).spigot().sendMessage(components);
 								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
@@ -349,7 +357,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate());
+											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 										}
 									}
 								}
@@ -360,9 +368,9 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								Player player = ((Player) toSender(result.getSource()));
 								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), timeout);
@@ -390,14 +398,18 @@ public class Mailer {
 				if (date == null) {
 					switch (type) {
 						case ACTION:
-							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+							if (text != null) {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+							} else {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+							}
 							consumer.accept(Mailer.this);
 							break;
 						case CHAT:
 							if (components != null) {
 								((Player)toSender(result.getSource())).spigot().sendMessage(components);
 							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 							}
 							consumer.accept(Mailer.this);
 							break;
@@ -408,7 +420,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 									}
 								}
 							}
@@ -417,9 +429,9 @@ public class Mailer {
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
 							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 							}
 							consumer.accept(Mailer.this);
 							break;
@@ -428,7 +440,11 @@ public class Mailer {
 					switch (type) {
 						case ACTION:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+								if (text != null) {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+								} else {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
 						case CHAT:
@@ -436,7 +452,7 @@ public class Mailer {
 								if (components != null) {
 									((Player)toSender(result.getSource())).spigot().sendMessage(components);
 								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
@@ -449,7 +465,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate());
+											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 										}
 									}
 								}
@@ -460,9 +476,9 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								Player player = ((Player) toSender(result.getSource()));
 								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 								}
 								consumer.accept(Mailer.this);
 							}, HUID.randomID().toString(), date);
@@ -495,13 +511,17 @@ public class Mailer {
 				if (timeout <= 0) {
 					switch (type) {
 						case ACTION:
-							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+							if (text != null) {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+							} else {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+							}
 							break;
 						case CHAT:
 							if (components != null) {
 								((Player)toSender(result.getSource())).spigot().sendMessage(components);
 							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 							}
 							break;
 						case BROADCAST:
@@ -511,7 +531,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 									}
 								}
 							}
@@ -519,16 +539,22 @@ public class Mailer {
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
 							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 							}
 							break;
 					}
 				} else {
 					switch (type) {
 						case ACTION:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> ((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate())), HUID.randomID().toString(), timeout);
+							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+								if (text != null) {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+								} else {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+								}
+							}, HUID.randomID().toString(), timeout);
 							break;
 						case CHAT:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
@@ -537,7 +563,7 @@ public class Mailer {
 										((Player) toSender(result.getSource())).spigot().sendMessage(components);
 									}
 								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 								}
 							}, HUID.randomID().toString(), timeout);
 							break;
@@ -549,7 +575,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate());
+											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 										}
 									}
 								}
@@ -559,9 +585,9 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								Player player = ((Player) toSender(result.getSource()));
 								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 								}
 							}, HUID.randomID().toString(), timeout);
 							break;
@@ -584,13 +610,17 @@ public class Mailer {
 				if (date == null) {
 					switch (type) {
 						case ACTION:
-							((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate()));
+							if (text != null) {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+							} else {
+								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+							}
 							break;
 						case CHAT:
 							if (components != null) {
 								((Player)toSender(result.getSource())).spigot().sendMessage(components);
 							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 							}
 							break;
 						case BROADCAST:
@@ -600,7 +630,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 									}
 								}
 							}
@@ -608,22 +638,28 @@ public class Mailer {
 						case TITLE:
 							Player player = ((Player) toSender(result.getSource()));
 							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 							}
 							break;
 					}
 				} else {
 					switch (type) {
 						case ACTION:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> ((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate())), HUID.randomID().toString(), date);
+							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
+								if (text != null) {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
+								} else {
+									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
+								}
+							}, HUID.randomID().toString(), date);
 						case CHAT:
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								if (components != null) {
 									((Player)toSender(result.getSource())).spigot().sendMessage(components);
 								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate());
+									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
 								}
 							}, HUID.randomID().toString(), date);
 							break;
@@ -631,7 +667,7 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								for (Player online : Bukkit.getOnlinePlayers()) {
 									if (predicate.getAttachment().test(online)) {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate());
+										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
 									}
 								}
 							}, HUID.randomID().toString(), date);
@@ -640,9 +676,9 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								Player player = ((Player) toSender(result.getSource()));
 								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), StringUtils.use(this.title.getAttachment()).translate(), 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
 								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate(), "", 60, 60, 60);
+									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
 								}
 							}, HUID.randomID().toString(), date);
 							break;

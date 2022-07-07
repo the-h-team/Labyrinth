@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.formatting.string.ColoredString;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.library.ListUtils;
@@ -11,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -128,8 +130,35 @@ public class ComponentChunk extends Message.Chunk {
 		List<BaseComponent> components = new ArrayList<>();
 		for (BaseComponent c : parent.getExtra()) {
 			TextComponent n = new TextComponent(new FormattedString(c.toLegacyText()).replace(text, replacement).get());
+			ComponentUtil.copyMeta(c, n);
 			components.add(n);
 		}
+		replace.setExtra(components);
+		this.parent = replace;
+		return this;
+	}
+
+	List<BaseComponent> getAll(Function<String, String> function, List<BaseComponent> list) {
+		List<BaseComponent> components = new ArrayList<>();
+		for (BaseComponent c : list) {
+			if (c.getExtra() != null) {
+				for (BaseComponent inner : getAll(function, c.getExtra())) {
+					TextComponent t = new ColoredString(function.apply(inner.toLegacyText()), ColoredString.ColorType.MC_COMPONENT).toComponent();
+					ComponentUtil.copyMeta(inner, t);
+					components.add(t);
+				}
+			} else {
+				TextComponent t = new ColoredString(function.apply(c.toLegacyText()), ColoredString.ColorType.MC_COMPONENT).toComponent();
+				ComponentUtil.copyMeta(c, t);
+				components.add(t);
+			}
+		}
+		return components;
+	}
+
+	public Message.Chunk map(Function<String, String> function) {
+		TextComponent replace = new TextComponent();
+		List<BaseComponent> components = getAll(function, parent.getExtra());
 		replace.setExtra(components);
 		this.parent = replace;
 		return this;

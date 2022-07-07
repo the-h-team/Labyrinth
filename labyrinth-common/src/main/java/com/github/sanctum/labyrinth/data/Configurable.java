@@ -38,17 +38,18 @@ public abstract class Configurable implements MemorySpace, Root {
 	 * <p>All element adapters require a {@link NodePointer} annotation to resolve types when deserializing.
 	 * If a pointer is not present this adapter cannot properly register.</p>
 	 *
-	 * <p>All {@link JsonAdapter} object's require a bare accessible constructor through the use of this method. In the event of one missing an issue may occur.</p>
+	 * <p>All {@link JsonAdapter} object's require a no parameter accessible constructor through the use of this method. In the event of one missing an exception may occur.</p>
 	 *
+	 * @throws InvalidJsonAdapterException if the provided adapter class doesn't have a valid constructor.
 	 * @param c The adapter to register.
 	 */
-	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c) {
+	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c) throws InvalidJsonAdapterException {
 		try {
 			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
 			if (test.isPresent()) {
 				JsonAdapter<?> d = null;
 				String alias = test.mapFromClass((r, u) -> r.value());
-				if (alias != null) {
+				if (alias != null && !alias.isEmpty()) {
 					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (n != null) {
 						if (!DummyAdapter.class.isAssignableFrom(n)) {
@@ -67,12 +68,13 @@ public abstract class Configurable implements MemorySpace, Root {
 						} else {
 							d = c.getDeclaredConstructor().newInstance();
 						}
+						alias = c.getSimpleName();
 					}
 				}
-				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
+				if (d == null) throw new InvalidJsonAdapterException("NodePointer context missing, JSON object serialization requires either an alias or class.");
 				serializers.put(alias, new JsonAdapterInput.Impl<>(d));
 			} else
-				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
+				throw new InvalidJsonAdapterException("NodePointer annotation missing, JSON object serialization requires it.");
 		} catch (Exception e) {
 			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.").deploy();
 			e.printStackTrace();
@@ -85,18 +87,19 @@ public abstract class Configurable implements MemorySpace, Root {
 	 * <p>All element adapters require a {@link NodePointer} annotation to resolve types when deserializing.
 	 * If a pointer is not present this adapter cannot properly register.</p>
 	 *
-	 * <p>All {@link JsonAdapter} object's require a bare accessible constructor through the use of this method. In the event of one missing an issue may occur.</p>
+	 * <p>All {@link JsonAdapter} object's require a no parameter accessible constructor through the use of this method. In the event of one missing an exception may occur.</p>
 	 *
+	 * @throws InvalidJsonAdapterException if the provided adapter class doesn't have a valid constructor.
 	 * @param c The adapter to register.
 	 * @param objects The constructor arguments for adapter instantiation.
 	 */
-	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c, Object... objects) {
+	public static void registerClass(@NotNull Class<? extends JsonAdapter<?>> c, Object... objects) throws InvalidJsonAdapterException {
 		try {
-			Class<? extends JsonAdapter<?>> d;
+			Class<? extends JsonAdapter<?>> d = null;
 			AnnotationDiscovery<NodePointer, ? extends JsonAdapter<?>> test = AnnotationDiscovery.of(NodePointer.class, c);
 			if (test.isPresent()) {
 				String alias = test.mapFromClass((r, u) -> r.value());
-				if (alias != null) {
+				if (alias != null && !alias.isEmpty()) {
 					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
 					if (n != null) {
 						if (!DummyAdapter.class.isAssignableFrom(n)) {
@@ -109,13 +112,16 @@ public abstract class Configurable implements MemorySpace, Root {
 					}
 				} else {
 					Class<? extends JsonAdapter<?>> n = test.mapFromClass((r, u) -> r.type());
-					if (!DummyAdapter.class.isAssignableFrom(n)) {
-						d = n;
-					} else {
-						d = c;
+					if (n != null) {
+						if (!DummyAdapter.class.isAssignableFrom(n)) {
+							d = n;
+						} else {
+							d = c;
+						}
+						alias = c.getSimpleName();
 					}
 				}
-				if (d == null) throw new RuntimeException("NodePointer context missing, JSON object serialization requires either an alias or class.");
+				if (d == null) throw new InvalidJsonAdapterException("NodePointer context missing, JSON object serialization requires either an alias or class.");
 				Constructor<?> constructor = null;
 				for (Constructor<?> con : d.getConstructors()) {
 					if (objects.length == con.getParameters().length) {
@@ -139,7 +145,7 @@ public abstract class Configurable implements MemorySpace, Root {
 					serializers.put(alias, new JsonAdapterInput.Impl<>(d.getDeclaredConstructor().newInstance()));
 				}
 			} else
-				throw new RuntimeException("NodePointer annotation missing, JSON object serialization requires it.");
+				throw new InvalidJsonAdapterException("NodePointer annotation missing, JSON object serialization requires it.");
 		} catch (Exception e) {
 			LabyrinthProvider.getService(Service.MESSENGER).getEmptyMailer().error("Class " + c.getSimpleName() + " failed to register JSON serialization handlers.").deploy();
 			e.printStackTrace();

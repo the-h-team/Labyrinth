@@ -88,9 +88,11 @@ public final class HUID implements CharSequence, Serializable {
 		return new ParsedHUID() {
 
 			private final String test;
+			private final SpecialID.Builder builder;
 
 			{
 				test = value.toString().replace(String.valueOf(DIVIDER), WHITESPACE);
+				this.builder = SpecialID.builder().setLength(12);
 			}
 
 			@Override
@@ -106,12 +108,12 @@ public final class HUID implements CharSequence, Serializable {
 
 			@Override
 			public HUID newID() {
-				return new HUID(SpecialID.builder().setLength(12).build(value).toString());
+				return new HUID(builder.build(value).toString());
 			}
 
 			@Override
 			public HUID newID(Character... characters) {
-				return new HUID(SpecialID.builder().setLength(12).setOptions(characters).build(value).toString());
+				return new HUID(builder.setOptions(characters).build(value).toString());
 			}
 
 			@Override

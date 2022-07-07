@@ -206,6 +206,7 @@ abstract class PlaceholderTranslationUtility {
 		StringBuffer builder = new StringBuffer();
 		do {
 			if (identifier != null) {
+				String actualId = matcher.group("identifier");
 				String parameters = matcher.group("parameters");
 				PlaceholderTranslation conversion = PlaceholderRegistration.getInstance().getTranslation(identifier);
 				if (conversion != null) {
@@ -257,9 +258,9 @@ abstract class PlaceholderTranslationUtility {
 						}
 						PlaceholderRegistration.history.put(identifier.get() + identifier.spacer(), map);
 					}
-					matcher.appendReplacement(builder, translation != null ? translation : (placeholder.start() + identifier.get() + identifier.spacer() + parameters + placeholder.end()));
+					matcher.appendReplacement(builder, translation != null ? translation : (placeholder.start() + actualId + identifier.spacer() + parameters + placeholder.end()));
 				} else {
-					matcher.appendReplacement(builder, placeholder.start() + identifier.get() + identifier.spacer() + parameters + placeholder.end());
+					matcher.appendReplacement(builder, placeholder.start() + actualId + identifier.spacer() + parameters + placeholder.end());
 				}
 			} else {
 				PlaceholderRegistration.getInstance().runAction(conversion -> {

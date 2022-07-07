@@ -2,6 +2,8 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
+import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
+import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -14,6 +16,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
+import org.bukkit.Bukkit;
 
 /**
  * An internal adapter for Json serialization context.
@@ -24,11 +27,10 @@ import java.util.Map;
  */
 abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>, JsonDeserializer<T> {
 
-	protected final JsonAdapter<T> serializer;
+	final JsonAdapter<T> serializer;
+	final Gson gson = new GsonBuilder().create();
 
-	private final Gson gson = new GsonBuilder().create();
-
-	protected JsonAdapterInput(JsonAdapter<T> serializer) {
+	JsonAdapterInput(JsonAdapter<T> serializer) {
 		this.serializer = serializer;
 	}
 
@@ -49,7 +51,7 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 
 	public String getKey() {
 		String test = AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((r, u) -> r.value());
-		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, serializer.getClassType()).mapFromClass((r, u) -> r.value());
+		return test != null ? test : AnnotationDiscovery.of(NodePointer.class, getClassType()).mapFromClass((r, u) -> r.value());
 	}
 
 	@Override
@@ -67,9 +69,8 @@ abstract class JsonAdapterInput<T> implements JsonAdapter<T>, JsonSerializer<T>,
 		return AnnotationDiscovery.of(NodePointer.class, serializer).mapFromClass((annotation, source) -> annotation.value());
 	}
 
-	static class Impl<T> extends JsonAdapterInput<T> {
-
-		protected Impl(JsonAdapter<T> serializer) {
+	static final class Impl<T> extends JsonAdapterInput<T> {
+		Impl(JsonAdapter<T> serializer) {
 			super(serializer);
 		}
 

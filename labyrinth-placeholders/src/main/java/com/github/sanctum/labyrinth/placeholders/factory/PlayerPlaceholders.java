@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.placeholders.factory;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderIdentifier;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderTranslation;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderTranslationInformation;
@@ -95,7 +96,7 @@ public class PlayerPlaceholders implements PlaceholderTranslation {
 					case "ping":
 						int ping = getPing(p.getPlayer());
 						return  getPingColor(ping) + ping;
-					case "ping_pronounced": ;
+					case "ping_pronounced":
 						return getPingColorPronounced(getPing(p.getPlayer()));
 					case "name":
 						return p.getName();
@@ -105,6 +106,10 @@ public class PlayerPlaceholders implements PlaceholderTranslation {
 						return Optional.ofNullable(p.getPlayer().getWorld()).map(World::getName).orElse(null);
 					case "display_name":
 						return p.getPlayer().getDisplayName();
+					case "health_bar":
+						return new ProgressBar().setProgress(((Number)p.getPlayer().getHealth()).intValue()).setGoal(20).toString();
+					case "time_played":
+						return PlayerSearch.of(p.getName()).getPlaytime().toString();
 					case "hours_played":
 						return PlayerSearch.of(p.getName()).getPlaytime().getHours() + "";
 					case "health":

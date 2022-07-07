@@ -1,13 +1,18 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.labyrinth.annotation.Comment;
 import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An object capable of Json serialization & deserialization.
@@ -36,23 +41,16 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	 */
 	T read(Map<String, Object> object);
 
+	@Comment(value = "Would like to be able to remove this in the future. Don't think it'll be possible.", author = "Hempfest")
 	Class<T> getClassType();
 
-	/**
-	 * @return The class this serializer represents in relation to T.
-	 */
-	@Deprecated
-	default Class<? extends T> getSubClass() {
-		return getClassType();
-	}
-
 	@Override
-	@Note("Non bare constructors should have this method overridden!")
+	@Note("Non bare constructors should have this method overridden, but it is not required.")
 	default T createInstance(Type type) {
 		Class<?> c = TypeToken.get(type).getRawType();
 		if (getClassType().isAssignableFrom(c)) {
 			try {
-				return getClassType().cast(c.getDeclaredConstructor().newInstance());
+				return (T) c.getDeclaredConstructor().newInstance();
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
@@ -78,6 +76,12 @@ public interface JsonAdapter<T> extends InstanceCreator<T> {
 	 */
 	static void register(Class<? extends JsonAdapter<?>> adapterClass, Object... args) {
 		Configurable.registerClass(adapterClass, args);
+	}
+
+	static <T> LabyrinthCollection<T> read(@NotNull JsonAdapter<T> adapter, @NotNull List<Map<String, Object>> map) {
+		LabyrinthCollection<T> collection = new LabyrinthList<>();
+		map.forEach(m -> collection.add(adapter.read(m)));
+		return collection;
 	}
 
 	static <T> JsonAdapter<T> get(Class<T> c) {

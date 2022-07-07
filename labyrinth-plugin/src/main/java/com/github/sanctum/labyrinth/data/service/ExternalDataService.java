@@ -1,18 +1,14 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.FileList;
-import com.github.sanctum.labyrinth.data.Registry;
 import com.github.sanctum.labyrinth.task.Task;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,13 +31,13 @@ public abstract class ExternalDataService {
 		this.valid = true;
 	}
 
-	public static class Handshake extends Task {
+	public static final class Handshake extends Task {
 
 		private static final long serialVersionUID = -6080924258181953124L;
 		static Handshake handshake;
 		private final LabyrinthAPI instance;
 		private final String version;
-		private boolean located;
+		private boolean shook;
 
 		Handshake(LabyrinthAPI instance) {
 			super("Labyrinth-Handshake", TaskService.SYNCHRONOUS);
@@ -51,14 +47,12 @@ public abstract class ExternalDataService {
 
 		@Ordinal
 		private void initialize() {
-			if (!located) {
+			if (!shook) {
 				// create a stream containing the version jar.
 				InputStream stream = instance.getPluginInstance().getResource(version + ".jar");
 
 				if (stream == null) {
-					instance.getLogger().severe("===================================================================");
-					instance.getLogger().severe("- Version service " + version + " not supported. Consult labyrinth developers.");
-					instance.getLogger().severe("===================================================================");
+					instance.getLogger().severe("- Version " + version + " not supported correctly. Consult labyrinth developers.");
 					return;
 				}
 
@@ -78,41 +72,29 @@ public abstract class ExternalDataService {
 				}
 
 				if (!file.exists()) {
-					this.located = true;
+					this.shook = true;
+					instance.getLogger().info("- Compiling anvil mechanics for version " + version + ".");
 					// write the jar file to the service's directory.
 					FileList.copy(stream, file);
-					instance.getLogger().info("===================================================================");
-					instance.getLogger().info("- Compiling version " + version + ".");
-					instance.getLogger().info("===================================================================");
-
 					try {
-						AnvilMechhanicsLoader loader = new AnvilMechhanicsLoader(file);
+						AnvilMechanicsLoader loader = new AnvilMechanicsLoader(file);
 						ExternalDataService service = loader.getMainClass();
 						AnvilMechanics mechanics = service.getMechanics();
 						if (mechanics != null) {
 							if (!service.getServerVersion().contains(version)) {
-								instance.getLogger().severe("===================================================================");
 								instance.getLogger().severe("- Version service " + service.getServerVersion() + " invalid for " + version);
-								instance.getLogger().severe("===================================================================");
 								return;
 							}
-
 							Bukkit.getServicesManager().register(AnvilMechanics.class, mechanics, instance.getPluginInstance(), ServicePriority.High);
 
-							instance.getLogger().info("===================================================================");
 							instance.getLogger().info("- Version service " + service.getClass().getSimpleName() + " selected as primary anvil mechanics.");
-							instance.getLogger().info("===================================================================");
 
 							service.setValid();
 						} else {
-							instance.getLogger().warning("===================================================================");
-							instance.getLogger().warning("- Version service " + service.getClass().getSimpleName() + " has invalid anvil mechanics...");
-							instance.getLogger().warning("===================================================================");
+							instance.getLogger().severe("- Version service " + service.getClass().getSimpleName() + " has invalid anvil mechanics...");
 						}
 					} catch (IOException e) {
-						instance.getLogger().severe("===================================================================");
 						instance.getLogger().severe("- Unable to resolve version service " + version + ", contact labyrinth developers.");
-						instance.getLogger().severe("===================================================================");
 					}
 
 				}
@@ -123,7 +105,7 @@ public abstract class ExternalDataService {
 		public String toString() {
 			return "Handshake{" +
 					"version='" + version + '\'' +
-					", located=" + located +
+					", shook=" + shook +
 					'}';
 		}
 

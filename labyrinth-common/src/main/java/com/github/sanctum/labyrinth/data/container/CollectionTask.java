@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.annotation.Ordinal;
+import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
@@ -16,7 +17,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 	boolean paused;
 
 	public CollectionTask(String key) {
-		super(key, SINGULAR);
+		super(key, TaskService.SYNCHRONOUS);
 	}
 
 	protected final String correctDecimal(String s) {
@@ -139,6 +140,80 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 		};
 	}
 
+	public static <T> CollectionTask<T> processSilent(LabyrinthCollection<T> collection, String table, int interval, Consumer<T> action) {
+		return new CollectionTask<T>(table) {
+
+			private static final long serialVersionUID = -3595452685342615045L;
+			final LabyrinthCollection<T> collector = collection;
+			int index = 0;
+			long started = 0, lastRan = 0;
+			T current;
+
+			public double getCompletion() {
+				return Math.min(100.00, new ProgressBar().setProgress(index + 1).setGoal(collector.size()).getPercentage());
+			}
+
+			public T current() {
+				return current;
+			}
+
+			@Override
+			public long getTimeStarted() {
+				return started;
+			}
+
+			@Override
+			public long getRecentExecution() {
+				return lastRan;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return index < collector.size();
+			}
+
+			@Override
+			public boolean hasNext(int bounds) {
+				return index + bounds < collector.size();
+			}
+
+			@Ordinal
+			public T next() {
+				return next(interval);
+			}
+
+			@Ordinal(1)
+			public T next(int bounds) {
+				int processed = 0;
+				if (isPaused()) return current;
+				if (index < collector.size()) {
+					if (started == 0) started = System.currentTimeMillis();
+					lastRan = System.currentTimeMillis();
+					for (int i = index; i < collector.size(); i++) {
+						if (processed <= bounds) {
+							T o = collector.get(i);
+							current = o;
+							action.accept(o);
+							index++;
+							processed++;
+						}
+					}
+					return current;
+				}
+				cancel();
+				return current;
+			}
+
+			@Override
+			public void reset() {
+				index = 0;
+				started = 0;
+				lastRan = 0;
+				current = null;
+			}
+		};
+	}
+
 	public static <T> CollectionTask<T> process(List<T> collection, String table, int interval, Consumer<T> action) {
 		return new CollectionTask<T>(table) {
 
@@ -205,6 +280,80 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 				}
 				TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
 				LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
+				cancel();
+				return current;
+			}
+
+			@Override
+			public void reset() {
+				index = 0;
+				started = 0;
+				lastRan = 0;
+				current = null;
+			}
+		};
+	}
+
+	public static <T> CollectionTask<T> processSilent(List<T> collection, String table, int interval, Consumer<T> action) {
+		return new CollectionTask<T>(table) {
+
+			private static final long serialVersionUID = -3595452685342615045L;
+			final List<T> collector = collection;
+			int index = 0;
+			long started = 0, lastRan = 0;
+			T current;
+
+			public double getCompletion() {
+				return Math.min(100.00, new ProgressBar().setProgress(index + 1).setGoal(collector.size()).getPercentage());
+			}
+
+			public T current() {
+				return current;
+			}
+
+			@Override
+			public long getTimeStarted() {
+				return started;
+			}
+
+			@Override
+			public long getRecentExecution() {
+				return lastRan;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return index < collector.size();
+			}
+
+			@Override
+			public boolean hasNext(int bounds) {
+				return index + bounds < collector.size();
+			}
+
+			@Ordinal
+			public T next() {
+				return next(interval);
+			}
+
+			@Ordinal(1)
+			public T next(int bounds) {
+				int processed = 0;
+				if (isPaused()) return current;
+				if (index < collector.size()) {
+					if (started == 0) started = System.currentTimeMillis();
+					lastRan = System.currentTimeMillis();
+					for (int i = index; i < collector.size(); i++) {
+						if (processed <= bounds) {
+							T o = collector.get(i);
+							current = o;
+							action.accept(o);
+							index++;
+							processed++;
+						}
+					}
+					return current;
+				}
 				cancel();
 				return current;
 			}

@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.formatting.ActionbarInstance;
 import com.github.sanctum.labyrinth.formatting.ScoreboardInstance;
 import com.github.sanctum.labyrinth.formatting.TablistInstance;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
@@ -22,12 +23,16 @@ public interface LabyrinthUser extends Nameable {
 
 	@NotNull OfflinePlayer getPlayer();
 
-	default TablistInstance getTablist() {
+	default @Nullable("User must be online!") TablistInstance getTablist() {
 		return isOnline() ? TablistInstance.get(getPlayer().getPlayer()) : null;
 	}
 
-	default ScoreboardInstance getScoreboard() {
+	default @Nullable("User must be online!") ScoreboardInstance getScoreboard() {
 		return isOnline() ? ScoreboardInstance.get(getPlayer().getPlayer()) : null;
+	}
+
+	default @Nullable("User must be online!") ActionbarInstance getActionbar() {
+		return isOnline() ? ActionbarInstance.of(getPlayer().getPlayer()) : null;
 	}
 
 	default @Nullable Cooldown getCooldown(@NotNull String key) {

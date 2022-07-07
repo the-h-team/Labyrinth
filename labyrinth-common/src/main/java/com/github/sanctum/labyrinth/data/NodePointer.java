@@ -10,12 +10,10 @@ import java.lang.annotation.Target;
 /**
  * This annotation used to mark the exact package location of a JSON serializable object.
  *
- * But now with less restrictions than v1.0 you can serialize objects under any alias.
+ * But now with fewer restrictions than v1.0 you can serialize objects under any alias.
  *
  * @author Hempfest
  * @version 2.0
- * <p> Naming the value under this annotation anything other than the class it represents will result in
- * failure to to read.</p>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -25,7 +23,7 @@ public @interface NodePointer {
 	/**
 	 * @return The alias for this object.
 	 */
-	String value();
+	String value() default "";
 
 	/**
 	 * Optional re-direction.

@@ -211,7 +211,7 @@ public interface TablistInstance {
 				if (isEnabled()) return false;
 				LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).repeat(task1 -> {
 
-					if (getHolder() == null) {
+					if (getHolder() == null || !getHolder().isOnline()) {
 						task1.cancel();
 						return;
 					}

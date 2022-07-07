@@ -41,7 +41,7 @@ public class MessageBreakdown extends ImageBreakdown implements Iterable<Message
 					if (legacy) {
 						message.then(imgChar).color(DefaultColor.fromAwt(color));
 					} else {
-						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRGB()));
+						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRed(), color.getGreen(), color.getBlue()));
 					}
 				} else {
 					message.then(' ');
@@ -83,7 +83,7 @@ public class MessageBreakdown extends ImageBreakdown implements Iterable<Message
 					if (legacy) {
 						message.then(imgChar).color(DefaultColor.fromAwt(color));
 					} else {
-						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRGB()));
+						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRed(), color.getGreen(), color.getBlue()));
 					}
 				} else {
 					message.then(' ');
@@ -126,7 +126,7 @@ public class MessageBreakdown extends ImageBreakdown implements Iterable<Message
 					if (legacy) {
 						message.then(imgChar).color(DefaultColor.fromAwt(color));
 					} else {
-						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRGB()));
+						message.then(imgChar).color(org.bukkit.Color.fromRGB(color.getRed(), color.getGreen(), color.getBlue()));
 					}
 				} else {
 					message.then(' ');

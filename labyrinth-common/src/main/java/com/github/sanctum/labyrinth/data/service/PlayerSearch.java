@@ -29,7 +29,7 @@ import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A replacement to the old provision, provide consistent UUID allocation to target usernames!
+ * An object wrapper responsible for holding player information.
  */
 public abstract class PlayerSearch implements LabyrinthUser {
 
@@ -52,7 +52,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 
 	public static PlayerSearch of(@NotNull OfflinePlayer player) {
 		String name = player.getName();
-		if (name == null || name.contains("CMI") || name.contains(".") || name.contains(",") || name.contains("!") || name.contains("?")) {
+		if (name == null) {
 			LabyrinthProvider.getInstance().getLogger().severe("- Attempted and failed to register corrupt player data (" + player + "), this is not the fault of labyrinth.");
 			return null;
 		}
@@ -63,16 +63,19 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			final String name;
 			String[] names;
 			final UUID reference;
-			final boolean online;
+			final boolean isOnlineMode;
 
 			{
 				this.parent = player;
-				this.online = Bukkit.getOnlineMode();
+				this.isOnlineMode = Bukkit.getOnlineMode();
 				this.name = s;
 				this.reference = player.getUniqueId();
-				TaskScheduler.of(() -> this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
-				}).scheduleAsync();
 				TaskScheduler.of(() -> {
+					try {
+						this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
+						};
+					} catch (Exception ignored) {}
+				}).scheduleAsync().next(() -> {
 					URL url;
 					BufferedReader in = null;
 					StringBuilder sb = new StringBuilder();
@@ -117,12 +120,12 @@ public abstract class PlayerSearch implements LabyrinthUser {
 
 			@Override
 			public @NotNull OfflinePlayer getPlayer() {
-				return online ? parent : Bukkit.getOfflinePlayer(getName());
+				return isOnlineMode ? parent : Bukkit.getOfflinePlayer(getName());
 			}
 
 			@Override
 			public @NotNull UUID getId() {
-				return online ? reference : getPlayer().getUniqueId();
+				return isOnlineMode ? reference : getPlayer().getUniqueId();
 			}
 
 			@Override
@@ -153,7 +156,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 	}
 
 	public static Deployable<Void> reload() {
-		return Deployable.of(null, unused -> {
+		return Deployable.of(() -> {
 			PlayerSearch.lookups.clear();
 			final OfflinePlayer[] players = Bukkit.getOfflinePlayers();
 			final LabyrinthAPI api = LabyrinthProvider.getInstance();
@@ -171,6 +174,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			} else {
 				for (OfflinePlayer op : players) PlayerSearch.of(op);
 			}
+			return null;
 		});
 	}
 

@@ -64,7 +64,9 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 	 */
 	public final void register(@NotNull SubCommand subCommand) {
 		if (subCommand.getCommand().equalsIgnoreCase(getCommand())) {
+			// This should be a crossover object holding the original command.
 			final Command parent = CommandUtils.getCommandByLabel(subCommand.getCommand());
+			// Check if the provided sub command hasn't been wrapped yet.
 			if (this.parent.command.equals(parent)) {
 				final Plugin plugin = this.parent.getPlugin();
 				CommandUtils.read(entry -> {
@@ -107,7 +109,7 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 		Crossover(Command pass) {
 			super(pass.getName());
 			this.command = pass;
-			this.plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(parent.getClass())).orElseGet(() -> {
+			this.plugin = Optional.of((Plugin)JavaPlugin.getProvidingPlugin(pass.getClass())).orElseGet(() -> {
 				if (pass instanceof PluginCommand) {
 					return ((PluginCommand)pass).getPlugin();
 				} else return LabyrinthProvider.getInstance().getPluginInstance();

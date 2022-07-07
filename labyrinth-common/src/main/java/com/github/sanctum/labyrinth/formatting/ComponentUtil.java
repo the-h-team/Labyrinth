@@ -6,6 +6,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.jetbrains.annotations.NotNull;
 
 public class ComponentUtil {
 
@@ -21,6 +22,12 @@ public class ComponentUtil {
 		for (String c : context) {
 			addContent(component, c);
 		}
+	}
+
+	public static void copyMeta(@NotNull BaseComponent component, @NotNull TextComponent target) {
+		if (component.hasFormatting()) target.copyFormatting(component);
+		if (component.getHoverEvent() != null) target.setHoverEvent(component.getHoverEvent());
+		if (component.getClickEvent() != null) target.setClickEvent(component.getClickEvent());
 	}
 
 	public static String serialize(BaseComponent... components) {

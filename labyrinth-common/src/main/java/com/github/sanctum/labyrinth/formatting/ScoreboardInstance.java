@@ -18,27 +18,28 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ScoreboardInstance {
 
-	void update(@NotNull Scoreboard scoreboard);
+	ScoreboardInstance update(@NotNull Scoreboard scoreboard);
 
-	void update(@NotNull ScoreboardGroup group);
+	ScoreboardInstance update(@NotNull ScoreboardGroup group);
 
-	void update(@NotNull ScoreboardGroup group, long interval);
+	ScoreboardInstance update(@NotNull ScoreboardGroup group, long interval);
 
-	default void flip(@NotNull ScoreboardGroup group, @NotNull ScoreboardGroup group2, long interval, long flip) {
-		update(group, interval); // initialize return state.
-		update(group2); // update current status
+	default ScoreboardInstance flip(@NotNull ScoreboardGroup group, @NotNull ScoreboardGroup group2, long interval, long flip) {
+		update(group2, interval); // initialize return state.
+		update(group); // update current status
 		TaskScheduler.of(this::revert).scheduleLater(flip); // revert after flip interval
+		return this;
 	}
 
-	void add(@NotNull ScoreboardGroup group);
+	ScoreboardInstance add(@NotNull ScoreboardGroup group);
 
-	void remove(@NotNull ScoreboardGroup group);
+	ScoreboardInstance remove(@NotNull ScoreboardGroup group);
 
-	void revert();
+	ScoreboardInstance revert();
 
-	void resume();
+	ScoreboardInstance resume();
 
-	void stop();
+	ScoreboardInstance stop();
 
 	@NotNull Player getHolder();
 
@@ -62,7 +63,7 @@ public interface ScoreboardInstance {
 				this.last = player.getScoreboard();
 			}
 
-			public void update(@NotNull Scoreboard scoreboard) {
+			public ScoreboardInstance update(@NotNull Scoreboard scoreboard) {
 				this.last = player.getScoreboard();
 				Objective t = scoreboard.getObjective("Labyrinth-Board");
 				if (t != null) {
@@ -79,13 +80,14 @@ public interface ScoreboardInstance {
 					n.setDisplaySlot(DisplaySlot.SIDEBAR);
 				}
 				player.setScoreboard(scoreboard);
+				return this;
 			}
 
-			public void update(@NotNull ScoreboardGroup group) {
-				update(group, lastRecordedInt);
+			public ScoreboardInstance update(@NotNull ScoreboardGroup group) {
+				return update(group, lastRecordedInt);
 			}
 
-			public void update(@NotNull ScoreboardGroup group, long interval) {
+			public ScoreboardInstance update(@NotNull ScoreboardGroup group, long interval) {
 				if (now != null) {
 					now.setActive(false);
 				}
@@ -102,19 +104,22 @@ public interface ScoreboardInstance {
 
 					update(builder.toScoreboard());
 				}).scheduleTimer(player.getName() + "-scoreboard", interval, interval, TaskPredicate.cancelAfter(player));
+				return this;
 			}
 
 			@Override
-			public void add(@NotNull ScoreboardGroup group) {
+			public ScoreboardInstance add(@NotNull ScoreboardGroup group) {
 				groups.put(group.getKey(), group);
+				return this;
 			}
 
 			@Override
-			public void remove(@NotNull ScoreboardGroup group) {
+			public ScoreboardInstance remove(@NotNull ScoreboardGroup group) {
 				groups.remove(group.getKey());
+				return this;
 			}
 
-			public void revert() {
+			public ScoreboardInstance revert() {
 				if (previous == null) {
 					final Scoreboard now = player.getScoreboard();
 					player.setScoreboard(last);
@@ -122,21 +127,24 @@ public interface ScoreboardInstance {
 				} else {
 					update(previous, lastRecordedInt);
 				}
+				return this;
 			}
 
 			@Override
-			public void resume() {
+			public ScoreboardInstance resume() {
 				if (!getCurrent().isActive()) {
 					update(getCurrent());
 				}
+				return this;
 			}
 
 			@Override
-			public void stop() {
+			public ScoreboardInstance stop() {
 				if (getCurrent().isActive()) {
 					task.getTask().cancel();
 					getCurrent().setActive(false);
 				}
+				return this;
 			}
 
 			@Override

@@ -3,6 +3,8 @@ package com.github.sanctum.labyrinth;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.command.LabyrinthCommand;
+import com.github.sanctum.labyrinth.command.LabyrinthCommandToken;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
 import com.github.sanctum.labyrinth.data.Configurable;
@@ -27,17 +29,15 @@ import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
-import com.github.sanctum.labyrinth.event.custom.Disabled;
 import com.github.sanctum.labyrinth.event.custom.LabeledAs;
 import com.github.sanctum.labyrinth.event.custom.Subscribe;
 import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.event.custom.VentMap;
 import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
 import com.github.sanctum.labyrinth.formatting.Message;
-import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
-import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
+import com.github.sanctum.labyrinth.interfacing.Token;
 import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
@@ -48,11 +48,9 @@ import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
-import com.github.sanctum.labyrinth.library.TypeFlag;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
-import com.github.sanctum.labyrinth.placeholders.Placeholder;
 import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
 import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
@@ -64,9 +62,7 @@ import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,11 +76,8 @@ import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.boss.BossBar;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -138,6 +131,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final PrintManager manager = new PrintManager();
 	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
 	private final SynchronousTaskChain staskManager = new SynchronousTaskChain(this);
+	private Token<Labyrinth> validCommandToken;
 	private boolean cachedIsLegacy;
 	private boolean cachedIsNew;
 	private boolean cachedNeedsLegacyLocation;
@@ -145,19 +139,21 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private long time;
 
 	@Override
+	public void onLoad() {
+		this.validCommandToken = new LabyrinthCommandToken(this);
+	}
+
+	@Override
 	public void onEnable() {
 		this.time = System.currentTimeMillis();
 		LabyrinthProvider.instance = this;
-		getLogger().info("- Loading user cache system, please be patient...");
+		getLogger().info("- Copyright Team Sanctum 2020, Open-source spigot development tool.");
+		getLogger().info("- Loading user cache, please be patient...");
 		PlayerSearch.reload().deploy();
 		registerServices().deploy();
 		registerJsonAdapters().deploy();
-		registerFileConfigurationAdapters().deploy();
+		registerYamlAdapters().deploy();
 		getEventMap().subscribeAll(this, new DefaultEvent.Controller(), this);
-		getLogger().info("===================================================================");
-		getLogger().info("Labyrinth; copyright Sanctum 2020, Open-source spigot development tool.");
-		getLogger().info("===================================================================");
-
 		registerImplementations().deploy();
 		registerHandshake().deploy();
 		registerDefaultPlaceholders().deploy();
@@ -165,16 +161,16 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	}
 
 	Deployable<Labyrinth> registerServices() {
-		return Deployable.of(this, instance -> {
-			instance.serviceManager.load(Service.VENT);
-			instance.serviceManager.load(Service.TASK);
-			instance.serviceManager.load(Service.RECORDING);
-			instance.serviceManager.load(Service.DATA);
-			instance.serviceManager.load(Service.MESSENGER);
-			instance.serviceManager.load(Service.LEGACY);
-			instance.serviceManager.load(Service.COOLDOWNS);
-			instance.serviceManager.load(Service.COMPONENTS);
-			instance.serviceManager.load(new ServiceType<>(() -> (PlaceholderFormatService) (text, variable) -> {
+		return Deployable.of(() -> {
+			serviceManager.load(Service.VENT);
+			serviceManager.load(Service.TASK);
+			serviceManager.load(Service.RECORDING);
+			serviceManager.load(Service.DATA);
+			serviceManager.load(Service.MESSENGER);
+			serviceManager.load(Service.LEGACY);
+			serviceManager.load(Service.COOLDOWNS);
+			serviceManager.load(Service.COMPONENTS);
+			serviceManager.load(new ServiceType<>(() -> (PlaceholderFormatService) (text, variable) -> {
 				String result = text;
 				if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 					if (variable instanceof OfflinePlayer) {
@@ -183,115 +179,37 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 				}
 				return PlaceholderRegistration.getInstance().replaceAll(result, variable);
 			}));
-			instance.servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
-			CommandUtils.read(entry -> {
-
-				Command registration = new Command("labyrinth") {
-
-					private final SimpleTabCompletion completion = SimpleTabCompletion.empty();
-					private final TypeFlag<Player> conversion = TypeFlag.PLAYER;
-
-					@Override
-					public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-						Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
-
-						if (args.length == 0) {
-							mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).queue();
-							return true;
-						}
-
-						if (args.length == 1) {
-							String label = args[0];
-							if (label.equalsIgnoreCase("version")) {
-								mailer.chat("&6Currently running version &r" + Labyrinth.this.getDescription().getVersion()).queue();
-								return true;
-							}
-							if (label.equalsIgnoreCase("placeholder")) {
-								mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]").queue();
-								return true;
-							}
-							return true;
-						}
-
-						if (args.length == 2) {
-							String label = args[0];
-							String argument = args[1];
-
-							if (label.equalsIgnoreCase("placeholder")) {
-								if (sender instanceof Player) {
-									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
-								} else {
-									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
-								}
-								return true;
-							}
-							return true;
-						}
-
-						if (args.length == 3) {
-							String label = args[0];
-							String argument = args[1];
-
-							if (label.equalsIgnoreCase("placeholder")) {
-								if (sender instanceof Player) {
-									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, conversion.cast(sender)));
-								} else {
-									sender.sendMessage(PlaceholderRegistration.getInstance().replaceAll(argument, sender));
-								}
-								return true;
-							}
-							return true;
-						}
-
-						return false;
-					}
-
-					@NotNull
-					@Override
-					public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-						completion.fillArgs(args);
-						completion.then(TabCompletionIndex.ONE, "placeholder", "version");
-						List<String> placeholders = new ArrayList<>();
-						PlaceholderRegistration.getInstance().getHistory().entries().stream().sorted(Comparator.comparing(e -> e.getKey().get())).forEach(e -> {
-							for (Placeholder placeholder : e.getValue()) {
-								String result = placeholder.toRaw();
-								placeholders.add(placeholder.start() + e.getKey().get() + result.substring(1));
-							}
-						});
-						completion.then(TabCompletionIndex.TWO, "placeholder", TabCompletionIndex.ONE, placeholders);
-						completion.then(TabCompletionIndex.THREE, "placeholder", TabCompletionIndex.ONE, Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).collect(Collectors.toList()));
-
-						return completion.get();
-					}
-				};
-				entry.getKey().register(registration.getLabel(), getName(), registration);
-				return 4;
-			});
-
+			servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
+			try {
+				CommandUtils.register(new LabyrinthCommand((LabyrinthCommandToken) validCommandToken));
+			} catch (IllegalAccessException ignored) {
+			}
 			cachedIsLegacy = LabyrinthAPI.super.isLegacy();
 			cachedIsNew = LabyrinthAPI.super.isNew();
 			cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
-
+			return this;
 		});
 	}
 
 	Deployable<Labyrinth> registerImplementations() {
-		return Deployable.of(this, plugin -> {
-			TaskScheduler.of(() -> new AdvancedEconomyImplementation(plugin)).scheduleLater(240)
-					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(plugin)).scheduleLater(240)
+		return Deployable.of(() -> {
+			TaskScheduler.of(() -> new AdvancedEconomyImplementation(this)).scheduleLater(240)
+					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).scheduleLater(240)
 					.next(() -> {
 						if (getServer().getPluginManager().isPluginEnabled("Vault")) {
 							VaultImplementation bridge = new VaultImplementation();
 							getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
 						}
 						Permissions instance = getServicesManager().load(Permissions.class);
-						if (instance.getProvider().equals(plugin)) {
-							plugin.getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+						assert instance != null;
+						// we know it's not null because of the default implementation.
+						if (instance.getProvider().equals(this)) {
+							getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
 						} else {
 							if (instance instanceof VaultImplementation) {
-								plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+								getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
 							} else {
-								plugin.getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+								getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
 							}
 						}
 					}).scheduleLater(40);
@@ -301,25 +219,29 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			}
 
 			if (LabyrinthOption.IMPL_REGION_SERVICES.enabled()) {
-				RegionServicesManagerImpl.initialize(plugin);
+				RegionServicesManagerImpl.initialize(this);
 			}
+			return this;
 		});
 	}
 
 	Deployable<Labyrinth> registerHandshake() {
-		return Deployable.of(this, plugin -> TaskScheduler.of(ExternalDataService.Handshake.getInstance(plugin)).schedule());
+		return Deployable.of(() -> {
+			TaskScheduler.of(ExternalDataService.Handshake.getInstance(this)).schedule();
+			return this;
+		});
 	}
 
 	Deployable<Labyrinth> registerDefaultPlaceholders() {
-		return Deployable.of(this, plugin -> {
+		return Deployable.of(() -> {
 			PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
-
 			registration.registerTranslation(new PlayerPlaceholders()).deploy();
+			return this;
 		});
 	}
 
 	Deployable<Labyrinth> registerJsonAdapters() {
-		return Deployable.of(this, instance -> {
+		return Deployable.of(() -> {
 			Configurable.registerClass(ItemStackSerializable.class);
 			Configurable.registerClass(LocationSerializable.class);
 			Configurable.registerClass(TemplateSerializable.class);
@@ -327,11 +249,12 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 			Configurable.registerClass(MessageSerializable.class);
 			Configurable.registerClass(ChunkSerializable.class);
 			Configurable.registerClass(CustomColor.class);
+			return this;
 		});
 	}
 
-	Deployable<Labyrinth> registerFileConfigurationAdapters() {
-		return Deployable.of(this, instance -> {
+	Deployable<Labyrinth> registerYamlAdapters() {
+		return Deployable.of(() -> {
 			ConfigurationSerialization.registerClass(CustomColor.class);
 			ConfigurationSerialization.registerClass(Template.class);
 			ConfigurationSerialization.registerClass(MetaTemplate.class);
@@ -342,6 +265,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 				FileList.copy(stream, copy.getRoot().getParent());
 			}
 			this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
+			return this;
 		});
 	}
 
