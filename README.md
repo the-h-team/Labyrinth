@@ -14,6 +14,9 @@ otherwise have been far more time-consuming.
 ### Importing with Maven
 ```xml
 <project>
+    <properties>
+        <labyrinth.version>1.7.9</labyrinth.version>
+    </properties>
     <repositories>
         <!-- For snapshots/versions in development -->
         <repository>
@@ -32,56 +35,56 @@ otherwise have been far more time-consuming.
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-skulls</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for region related services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-regions</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for permission related services (Vault replacement). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-perms</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for pastebin/hastebin related services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-paste</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for placeholder provision services. -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-placeholders</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-plugin</artifactId>
-            <version>1.7.3</version>
+            <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
