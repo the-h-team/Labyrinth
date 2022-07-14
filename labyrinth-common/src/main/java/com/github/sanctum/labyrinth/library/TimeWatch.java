@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;

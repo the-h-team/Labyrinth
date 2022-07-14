@@ -1,8 +1,9 @@
 package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.data.MapDecompressionUtils;
-import com.github.sanctum.labyrinth.data.Node;
-import com.github.sanctum.labyrinth.data.Primitive;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.file.Primitive;
+import com.github.sanctum.panther.util.MapDecompression;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.HashMap;
@@ -11,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
+class LabyrinthAtlasNode implements Node, Primitive {
 
 	private final LabyrinthAtlasMap MAP;
 	private final String key;
@@ -32,11 +31,6 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Primitive toPrimitive() {
-		return this;
-	}
-
-	@Override
-	public Bukkit toBukkit() {
 		return this;
 	}
 
@@ -96,10 +90,10 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public Set<String> getKeys(boolean deep) {
 		Set<String> keys = new HashSet<>();
-		if (get() instanceof LabyrinthMap) {
-			LabyrinthMap<String, Object> map1 = (LabyrinthMap<String, Object>) get();
+		if (get() instanceof PantherMap) {
+			PantherMap<String, Object> map1 = (PantherMap<String, Object>) get();
 			if (deep) {
-				return MapDecompressionUtils.getInstance().decompress(map1, MAP.divider, null).toSet();
+				return MapDecompression.getInstance().decompress(map1, MAP.divider, null).toSet();
 			} else {
 				for (Map.Entry<String, Object> entry : map1.entries()) {
 					keys.add(entry.getKey());
@@ -114,10 +108,10 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public Map<String, Object> getValues(boolean deep) {
 		Map<String, Object> map = new HashMap<>();
-		if (get() instanceof LabyrinthMap) {
-			LabyrinthMap<String, Object> map1 = (LabyrinthMap<String, Object>) get();
+		if (get() instanceof PantherMap) {
+			PantherMap<String, Object> map1 = (PantherMap<String, Object>) get();
 			if (deep) {
-				return MapDecompressionUtils.getInstance().decompress(map1, MAP.divider, null).toMap();
+				return MapDecompression.getInstance().decompress(map1, MAP.divider, null).toMap();
 			} else {
 				for (Map.Entry<String, Object> entry : map1.entries()) {
 					map.put(entry.getKey(), entry.getValue());
@@ -322,31 +316,5 @@ class LabyrinthAtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public boolean isLongList() {
 		return getLongList() != null && !getLongList().isEmpty();
-	}
-
-	@Override
-	public boolean isLocation() {
-		return get() instanceof Location;
-	}
-
-	@Override
-	public boolean isItemStack() {
-		return get() instanceof ItemStack;
-	}
-
-	@Override
-	public Location getLocation() {
-		Object o = get();
-		if (o == null) return null;
-		if (!Location.class.isAssignableFrom(o.getClass())) return null;
-		return (Location) o;
-	}
-
-	@Override
-	public ItemStack getItemStack() {
-		Object o = get();
-		if (o == null) return null;
-		if (!ItemStack.class.isAssignableFrom(o.getClass())) return null;
-		return (ItemStack) o;
 	}
 }

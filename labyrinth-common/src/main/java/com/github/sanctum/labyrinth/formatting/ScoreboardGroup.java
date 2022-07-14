@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
 import java.util.Arrays;
 
 public interface ScoreboardGroup {
@@ -70,7 +70,7 @@ public interface ScoreboardGroup {
 	static ScoreboardGroup fromInfo(String key, ScoreboardBuilder... builders) {
 		return new ScoreboardGroup() {
 
-			private final LabyrinthCollection<ScoreboardBuilder> headerlist = new LabyrinthList<>();
+			private final PantherCollection<ScoreboardBuilder> headerlist = new PantherList<>();
 			private int headerPos;
 			private boolean isWindable = true;
 			private boolean isActive = true;

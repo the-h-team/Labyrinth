@@ -1,12 +1,14 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
-import com.github.sanctum.labyrinth.annotation.Json;
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.annotation.See;
-import com.github.sanctum.labyrinth.data.MemorySpace;
+import com.github.sanctum.labyrinth.data.AtlasMap;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
+import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.annotation.See;
+import com.github.sanctum.panther.file.MemorySpace;
 import java.util.Map;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -68,7 +70,9 @@ public interface Docket<T> extends JsonIntermediate {
 	 * @return A fresh docket instance.
 	 */
 	static <V> @NotNull MapDocket<V> newInstance(@NotNull Map<String, Object> map) {
-		return new MapDocket<>(map);
+		AtlasMap m = new AtlasMap();
+		m.putAll(map);
+		return new MapDocket<>(m);
 	}
 
 	/**
@@ -90,7 +94,11 @@ public interface Docket<T> extends JsonIntermediate {
 	 * @return A fresh docket instance.
 	 */
 	static <V> @NotNull JsonDocket<V> newInstance(@NotNull @Json String json) {
-		return new JsonDocket<>(json);
+		return new JsonDocket<>(json, s -> {
+			AtlasMap map = new AtlasMap();
+			map.putAll(JsonIntermediate.convertToMap(JsonIntermediate.toJsonObject(json)));
+			return map;
+		});
 	}
 
 	/**

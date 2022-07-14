@@ -1,11 +1,11 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
-import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PaginatedMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.PrintableMenu;
 import com.github.sanctum.labyrinth.gui.unity.construct.SingularMenu;
+import com.github.sanctum.panther.annotation.Experimental;
 import java.util.function.Predicate;
 
 public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu.Builder<T, K>> {

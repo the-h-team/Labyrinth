@@ -1,5 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.file.Primitive;
+import com.github.sanctum.panther.util.MapDecompression;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,11 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-class AtlasNode implements Node, Primitive, Primitive.Bukkit {
+class AtlasNode implements Node, Primitive {
 
 	private final AtlasMap MAP;
 	private final String key;
@@ -28,11 +30,6 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 
 	@Override
 	public Primitive toPrimitive() {
-		return this;
-	}
-
-	@Override
-	public Primitive.Bukkit toBukkit() {
 		return this;
 	}
 
@@ -95,7 +92,7 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 		if (get() instanceof Map) {
 			Map<String, Object> map1 = (Map<String, Object>) get();
 			if (deep) {
-				return MapDecompressionUtils.getInstance().decompress(map1.entrySet(), MAP.divider, null).toSet();
+				return MapDecompression.getInstance().decompress(map1.entrySet(), MAP.divider, null).toSet();
 			} else {
 				keys.addAll(map1.keySet());
 			}
@@ -111,7 +108,7 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 		if (get() instanceof Map) {
 			Map<String, Object> map1 = (Map<String, Object>) get();
 			if (deep) {
-				return MapDecompressionUtils.getInstance().decompressNormalValues(map1.entrySet(), MAP.divider, null);
+				return MapDecompression.getInstance().decompress(map1.entrySet(), MAP.divider, null).toMap();
 			} else {
 				map.putAll(map1);
 			}
@@ -314,31 +311,5 @@ class AtlasNode implements Node, Primitive, Primitive.Bukkit {
 	@Override
 	public boolean isLongList() {
 		return getLongList() != null && !getLongList().isEmpty();
-	}
-
-	@Override
-	public boolean isLocation() {
-		return get() instanceof Location;
-	}
-
-	@Override
-	public boolean isItemStack() {
-		return get() instanceof ItemStack;
-	}
-
-	@Override
-	public Location getLocation() {
-		Object o = get();
-		if (o == null) return null;
-		if (!Location.class.isAssignableFrom(o.getClass())) return null;
-		return (Location) o;
-	}
-
-	@Override
-	public ItemStack getItemStack() {
-		Object o = get();
-		if (o == null) return null;
-		if (!ItemStack.class.isAssignableFrom(o.getClass())) return null;
-		return (ItemStack) o;
 	}
 }

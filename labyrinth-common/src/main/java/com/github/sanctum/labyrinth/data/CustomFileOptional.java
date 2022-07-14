@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.Configurable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
@@ -10,9 +11,9 @@ public final class CustomFileOptional {
 	private final FileList list;
 	private final String name;
 	private final String directory;
-	private final FileExtension extension;
+	private final Configurable.Extension extension;
 
-	protected CustomFileOptional(FileList list, String name, String description, FileExtension extension) {
+	CustomFileOptional(FileList list, String name, String description, Configurable.Extension extension) {
 		this.list = list;
 		this.name = name;
 		this.directory = description;

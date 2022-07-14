@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth;
 
-import com.github.sanctum.labyrinth.annotation.FieldsFrom;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.ServiceType;
+import com.github.sanctum.panther.annotation.FieldsFrom;
+import com.github.sanctum.panther.annotation.Note;
 
 /**
  * ▄▄▌***▄▄▄·*▄▄▄▄·**▄·*▄▌▄▄▄**▪***▐*▄*▄▄▄▄▄*▄*.▄
@@ -63,7 +63,6 @@ public abstract class LabyrinthProvider {
 	 *     {@link Service#DATA}
 	 *     {@link Service#RECORDING}
 	 *     {@link Service#TASK}
-	 *     {@link Service#VENT}
 	 *     </pre>
 	 *
 	 * @param type The service to use.

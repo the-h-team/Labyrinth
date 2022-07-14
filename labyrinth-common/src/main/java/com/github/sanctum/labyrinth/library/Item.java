@@ -1,11 +1,12 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
 import com.github.sanctum.labyrinth.data.container.LegacyContainer;
-import com.github.sanctum.labyrinth.data.service.Check;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherEntry;
+import com.github.sanctum.panther.util.Check;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -131,10 +131,10 @@ public class Item {
 		StringBuilder top = new StringBuilder();
 		StringBuilder middle = new StringBuilder();
 		StringBuilder bottom = new StringBuilder();
-		LabyrinthCollection<SimpleKeyedValue<WorkbenchSlot, Character>> set = workbench.get();
+		PantherCollection<PantherEntry.Modifiable<WorkbenchSlot, Character>> set = workbench.get();
 		for (int i = 0; i < 9; i++) {
 			if (i <= set.size()) {
-				SimpleKeyedValue<WorkbenchSlot, Character> slot = set.get(i);
+				PantherEntry.Modifiable<WorkbenchSlot, Character> slot = set.get(i);
 				int key = slot.getKey().toInt();
 				if (key == 0 || key == 1 || key == 2) {
 					top.append(slot.getValue());

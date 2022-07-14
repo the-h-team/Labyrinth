@@ -4,8 +4,5 @@ automatic-head-cache: true
 # Allow for labyrinth to register its default region services manager implementation on startup.
 region-service-impl: false
 
-# Let the labyrinth provided AFK implementation run? Afk announce time is 5 minutes & kick time is 15 minutes.
-labyrinth-provided-afk: false
-
 # The amount of ticks it takes for an interactive component to become in-active (If you experience Unknown command errors a-lot you may want to bump this up some.)
 interactive-component-removal: 200

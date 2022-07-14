@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.Configurable;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
 import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.util.OrdinalProcedure;
+import com.github.sanctum.panther.util.TypeAdapter;
 import com.google.gson.JsonElement;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,7 +22,7 @@ final class LabyrinthObjectOutputStream extends BukkitObjectOutputStream {
 		if (!(obj instanceof Serializable) && !(obj instanceof ConfigurationSerializable)) {
 			JsonAdapter<Object> adapter = (JsonAdapter<Object>) Configurable.getAdapter(obj.getClass());
 			if (adapter != null) {
-				String pointer = OrdinalProcedure.select(adapter, 24).cast(TypeFlag.STRING);
+				String pointer = OrdinalProcedure.select(adapter, 24).cast(TypeAdapter.STRING);
 				JsonElement element = adapter.write(obj);
 				if (element.isJsonObject()) {
 					obj = new LabyrinthJsonObjectWrapper<>(JsonIntermediate.convertToMap(element.getAsJsonObject()), pointer);

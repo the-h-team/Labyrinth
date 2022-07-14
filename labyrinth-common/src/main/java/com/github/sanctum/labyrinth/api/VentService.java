@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.event.custom.VentMap;
+import com.github.sanctum.panther.event.VentMap;
 import org.jetbrains.annotations.NotNull;
 
 /**

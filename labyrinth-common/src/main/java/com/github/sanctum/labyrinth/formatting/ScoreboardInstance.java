@@ -1,11 +1,11 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -51,7 +51,7 @@ public interface ScoreboardInstance {
 
 	static ScoreboardInstance get(@NotNull Player p) {
 		return ScoreboardBuilder.instances.stream().filter(i -> i.getHolder().equals(p)).findFirst().orElse(new ScoreboardInstance() {
-			final LabyrinthMap<String, ScoreboardGroup> groups = new LabyrinthEntryMap<>();
+			final PantherMap<String, ScoreboardGroup> groups = new PantherEntryMap<>();
 			final Player player = p;
 			long lastRecordedInt = 1;
 			Scoreboard last;
@@ -68,7 +68,7 @@ public interface ScoreboardInstance {
 				Objective t = scoreboard.getObjective("Labyrinth-Board");
 				if (t != null) {
 					String title = t.getDisplayName();
-					LabyrinthMap<String, Integer> map = new LabyrinthEntryMap<>();
+					PantherMap<String, Integer> map = new PantherEntryMap<>();
 					scoreboard.getEntries().forEach(e -> {
 						scoreboard.getScores(e).forEach(s -> {
 							map.put(StringUtils.use(s.getEntry()).translate(player), s.getScore());

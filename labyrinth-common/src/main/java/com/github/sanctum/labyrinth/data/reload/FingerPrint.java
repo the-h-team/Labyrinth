@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth.data.reload;
 
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ public interface FingerPrint {
 
 	@Nullable Object get(String key);
 
-	default @Nullable <T> T get(String key, TypeFlag<T> type) throws ClassCastException {
+	default @Nullable <T> T get(String key, TypeAdapter<T> type) throws ClassCastException {
 		return type.cast(get(key));
 	}
 

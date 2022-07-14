@@ -1,8 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.panther.util.Check;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;

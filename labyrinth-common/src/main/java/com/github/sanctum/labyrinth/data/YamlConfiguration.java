@@ -1,14 +1,12 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.panther.file.Configurable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -132,7 +130,7 @@ public class YamlConfiguration extends Configurable {
 	@Override
 	public Node getNode(String key) {
 		return (Node) memory.entrySet().stream().filter(n -> n.getKey().equals(key)).map(Map.Entry::getValue).findFirst().orElseGet(() -> {
-			ConfigurableNode n = new ConfigurableNode(key, this);
+			Configurable.Node n = new Node(key, this);
 			memory.put(n.getPath(), n);
 			return n;
 		});
@@ -149,21 +147,6 @@ public class YamlConfiguration extends Configurable {
 	}
 
 	@Override
-	public Location getLocation(String key) {
-		if (LabyrinthProvider.getInstance().isLegacyVillager()) {
-			final Object o = getConfig().get(key);
-			if (!(o instanceof LegacyConfigLocation)) return null;
-			return ((LegacyConfigLocation) o).getLocation();
-		}
-		return getConfig().getLocation(key);
-	}
-
-	@Override
-	public ItemStack getItemStack(String key) {
-		return getConfig().getItemStack(key);
-	}
-
-	@Override
 	public String getString(String key) {
 		return getConfig().getString(key);
 	}
@@ -171,11 +154,6 @@ public class YamlConfiguration extends Configurable {
 	@Override
 	public boolean getBoolean(String key) {
 		return getConfig().getBoolean(key);
-	}
-
-	@Override
-	public boolean isLocation(String key) {
-		return getLocation(key) != null;
 	}
 
 	@Override
@@ -206,11 +184,6 @@ public class YamlConfiguration extends Configurable {
 	@Override
 	public boolean isIntegerList(String key) {
 		return !getConfig().getIntegerList(key).isEmpty();
-	}
-
-	@Override
-	public boolean isItemStack(String key) {
-		return getConfig().isItemStack(key);
 	}
 
 	@Override
@@ -313,8 +286,33 @@ public class YamlConfiguration extends Configurable {
 	}
 
 	@Override
-	public FileExtension getType() {
-		return FileType.YAML;
+	public Extension getType() {
+		return YamlExtension.INSTANCE;
+	}
+
+	public static class Node extends Configurable.Node {
+
+		public Node(String key, Configurable configuration) {
+			super(key, configuration);
+		}
+
+		@Override
+		public Set<String> getKeys(boolean deep) {
+			YamlConfiguration yaml = (YamlConfiguration) config;
+			if (yaml.getConfig().isConfigurationSection(getPath())) {
+				return yaml.getConfig().getConfigurationSection(getPath()).getKeys(deep);
+			}
+			return super.getKeys(deep);
+		}
+
+		@Override
+		public Map<String, Object> getValues(boolean deep) {
+			YamlConfiguration yaml = (YamlConfiguration) config;
+			if (yaml.getConfig().isConfigurationSection(getPath())) {
+				return yaml.getConfig().getConfigurationSection(getPath()).getValues(deep);
+			}
+			return super.getValues(deep);
+		}
 	}
 
 }

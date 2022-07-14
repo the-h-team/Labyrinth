@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Json;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.annotation.Json;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterator;

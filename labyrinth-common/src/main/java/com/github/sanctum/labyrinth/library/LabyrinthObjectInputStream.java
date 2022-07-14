@@ -1,32 +1,33 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.Configurable;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.util.HFEncoded;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamClass;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.jetbrains.annotations.NotNull;
 
-final class LabyrinthObjectInputStream extends BukkitObjectInputStream {
+final class LabyrinthObjectInputStream extends BukkitObjectInputStream implements HFEncoded.LoaderInput, HFEncoded.ClassLookup.Input {
 
-	private transient final LabyrinthCollection<ClassLookup> collection = new LabyrinthList<>();
+	private transient final PantherCollection<HFEncoded.ClassLookup> collection = new PantherList<>();
 	private transient ClassLoader classLoader;
 
 	LabyrinthObjectInputStream(InputStream in) throws IOException {
 		super(in);
 	}
 
-	public LabyrinthObjectInputStream add(ClassLookup lookup) {
+	@Override
+	public void add(HFEncoded. @NotNull ClassLookup lookup) {
 		collection.add(lookup);
-		return this;
 	}
 
-	public LabyrinthObjectInputStream setLoader(@NotNull ClassLoader loader) {
+	@Override
+	public void setLoader(@NotNull ClassLoader loader) {
 		this.classLoader = loader;
-		return this;
 	}
 
 	@Override

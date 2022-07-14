@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.task.Task;
+import com.github.sanctum.panther.annotation.Ordinal;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.data.service.Constant;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.Locale;
 import java.util.function.Consumer;
 import org.bukkit.Location;
@@ -131,7 +132,7 @@ public final class Entities {
 	 * @return the desired EntityType or null
 	 */
 	public static EntityType getEntity(String name) {
-		TypeFlag<Spawner<? extends Entity>> flag = TypeFlag.get();
+		TypeAdapter<Spawner<? extends Entity>> flag = TypeAdapter.get();
 		return Constant.values(Entities.class, flag).stream().filter(spawnerConstant -> spawnerConstant.getName().toLowerCase(Locale.ROOT).replace("_", "").equals(name.toLowerCase(Locale.ROOT).replace("_", ""))).findFirst().map(Constant::getValue).map(Spawner::getType).orElse(null);
 	}
 

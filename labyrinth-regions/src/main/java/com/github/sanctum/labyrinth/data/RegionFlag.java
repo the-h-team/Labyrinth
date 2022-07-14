@@ -1,9 +1,8 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
-import org.bukkit.plugin.Plugin;
+import com.github.sanctum.panther.event.Vent;
 
 public class RegionFlag extends Cuboid.Flag {
 

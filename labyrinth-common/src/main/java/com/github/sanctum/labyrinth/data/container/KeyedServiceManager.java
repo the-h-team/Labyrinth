@@ -1,6 +1,9 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherCollectors;
+import com.github.sanctum.panther.container.PantherSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -20,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class KeyedServiceManager<K> {
 
-	private final LabyrinthCollection<RegisteredKeyedService<?, K>> registry = new LabyrinthSet<>();
+	private final PantherCollection<RegisteredKeyedService<?, K>> registry = new PantherSet<>();
 
 	public <T> void register(@NotNull T service, @NotNull K key, @NotNull ServicePriority priority) {
 		this.registry.add(new RegisteredKeyedService<>(service, key, priority));
@@ -136,8 +139,8 @@ public class KeyedServiceManager<K> {
 	}
 
 
-	public @NotNull LabyrinthCollection<Class<?>> getKnownServices() {
-		return this.registry.stream().map(RegisteredKeyedService::getSuperClass).collect(LabyrinthCollectors.toImmutableSet());
+	public @NotNull PantherCollection<Class<?>> getKnownServices() {
+		return this.registry.stream().map(RegisteredKeyedService::getSuperClass).collect(PantherCollectors.toImmutableSet());
 	}
 
 

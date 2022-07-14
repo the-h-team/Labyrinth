@@ -3,9 +3,8 @@ package com.github.sanctum.labyrinth.task;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
-import com.github.sanctum.labyrinth.library.Applicable;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.util.OrdinalProcedure;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -14,11 +13,11 @@ import org.jetbrains.annotations.Nullable;
 public class TaskMonitor {
 
 	private static TaskMonitor instance;
-	protected final TypeFlag<TaskPredicate<Task>[]> flagClass;
+	protected final TypeAdapter<TaskPredicate<Task>[]> flagClass;
 	protected final Map<Integer, TaskChain> map = new HashMap<>();
 
 	TaskMonitor() {
-		this.flagClass = TypeFlag.get();
+		this.flagClass = TypeAdapter.get();
 		LabyrinthAPI api = LabyrinthProvider.getInstance();
 		map.put(0, api.getScheduler(TaskService.SYNCHRONOUS));
 		map.put(1, api.getScheduler(TaskService.ASYNCHRONOUS));
@@ -134,7 +133,8 @@ public class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimer(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -145,7 +145,8 @@ public class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimerAsync(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -256,7 +257,8 @@ public class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimer(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
@@ -267,7 +269,8 @@ public class TaskMonitor {
 
 	public @NotNull RenderedTask scheduleTimerAsync(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
+		execution.dependOn(TaskPredicate.reduceEmpty());
 		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}

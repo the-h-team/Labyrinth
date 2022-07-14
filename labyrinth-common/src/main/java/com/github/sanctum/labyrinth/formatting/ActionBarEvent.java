@@ -1,20 +1,19 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.DefaultEvent;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ActionBarEvent extends Vent {
+public class ActionBarEvent extends DefaultEvent {
 
-	final static LabyrinthCollection<ActionbarInstance> instances = new LabyrinthList<>();
-	final Player player;
+	final static PantherCollection<ActionbarInstance> instances = new PantherList<>();
+	final org.bukkit.entity.Player player;
 	BaseComponent[] text;
 	long repetition;
 
-	public ActionBarEvent(@NotNull BaseComponent[] text, @NotNull Player holder, long repetition) {
+	public ActionBarEvent(@NotNull BaseComponent[] text, @NotNull org.bukkit.entity.Player holder, long repetition) {
 		this.player = holder;
 		this.repetition = repetition;
 		this.text = text;
@@ -40,7 +39,7 @@ public class ActionBarEvent extends Vent {
 		return text;
 	}
 
-	public Player getPlayer() {
+	public org.bukkit.entity.Player getPlayer() {
 		return player;
 	}
 

@@ -10,7 +10,7 @@ public class MenuDragItemEvent extends MenuInteractEvent {
 	final ItemElement<?> itemElement;
 	final ItemStack item;
 
-	public MenuDragItemEvent(@NotNull Menu menu, @NotNull Player player, @NotNull ItemElement<?> itemElement) {
+	public MenuDragItemEvent(@NotNull Menu menu, @NotNull org.bukkit.entity.Player player, @NotNull ItemElement<?> itemElement) {
 		super(Type.DRAG, player, menu);
 		this.item = itemElement.getElement();
 		this.itemElement = itemElement;

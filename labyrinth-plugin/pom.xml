@@ -59,7 +59,25 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.github.the-h-team:labyrinth-paste</artifact>
+                                    <artifact>com.github.the-h-team:panther-common</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:panther-placeholders</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:panther-containers</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.github.the-h-team:panther-paste</artifact>
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
@@ -118,16 +136,6 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-perms</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.the-h-team</groupId>
-            <artifactId>labyrinth-placeholders</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.the-h-team</groupId>
-            <artifactId>labyrinth-paste</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

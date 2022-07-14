@@ -4,10 +4,10 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.ServiceType;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ public interface UserRegistration extends Service {
 		UserRegistration test = LabyrinthProvider.getService(UserRegistration.class);
 		if (test != null) return test;
 		test = new UserRegistration() {
-			final LabyrinthMap<String, LabyrinthUser> cache = new LabyrinthEntryMap<>();
+			final PantherMap<String, LabyrinthUser> cache = new PantherEntryMap<>();
 
 			public Deployable<LabyrinthUser> load(@NotNull LabyrinthUser user) {
 				return Deployable.of(user, u -> {
@@ -35,7 +35,7 @@ public interface UserRegistration extends Service {
 				return Deployable.of(() -> Optional.ofNullable(cache.get(name)).orElseGet(() -> PlayerSearch.of(name)));
 			}
 
-			public Deployable<LabyrinthCollection<LabyrinthUser>> getAll() {
+			public Deployable<PantherCollection<LabyrinthUser>> getAll() {
 				return Deployable.of(cache::values);
 			}
 		};
@@ -50,6 +50,6 @@ public interface UserRegistration extends Service {
 
 	Deployable<LabyrinthUser> get(@NotNull String name);
 
-	Deployable<LabyrinthCollection<LabyrinthUser>> getAll();
+	Deployable<PantherCollection<LabyrinthUser>> getAll();
 
 }

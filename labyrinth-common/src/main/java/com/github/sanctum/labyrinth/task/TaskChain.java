@@ -1,16 +1,14 @@
 package com.github.sanctum.labyrinth.task;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class TaskChain {
 
-	protected final LabyrinthMap<String, Task> map = new LabyrinthEntryMap<>();
+	protected final PantherMap<String, Task> map = new PantherEntryMap<>();
 
 	public abstract TaskChain run(final @NotNull Task task);
 
@@ -28,7 +26,7 @@ public abstract class TaskChain {
 
 	public abstract TaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, long delay, long period);
 
-	public abstract TaskChain repeat(final @NotNull Task task, @NotNull Date start, long period) ;
+	public abstract TaskChain repeat(final @NotNull Task task, @NotNull Date start, long period);
 
 	public abstract TaskChain repeat(final @NotNull Consumer<Task> consumer, @NotNull String key, @NotNull Date start, long period);
 

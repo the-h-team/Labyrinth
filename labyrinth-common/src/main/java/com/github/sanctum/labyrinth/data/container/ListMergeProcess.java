@@ -1,16 +1,17 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Ordinal;
-import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
-import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.util.ProgressBar;
+import com.github.sanctum.panther.util.RandomID;
 import java.text.NumberFormat;
 import java.util.List;
 
 final class ListMergeProcess<T> extends CollectionTask<T> {
 
+	private static final long serialVersionUID = 20298578539233353L;
 	List<T> collector;
 	List<T> child;
 	int index = 0, limit;

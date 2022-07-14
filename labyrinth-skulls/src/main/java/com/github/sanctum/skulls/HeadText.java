@@ -6,7 +6,7 @@ final class HeadText {
 
 	private final String category;
 
-	protected HeadText(String name, String category) {
+	HeadText(String name, String category) {
 		this.name = name;
 		this.category = category;
 	}

@@ -3,13 +3,15 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.TextChunk;
 import com.github.sanctum.labyrinth.formatting.ToolTip;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Map;
 
-@NodePointer("com.github.sanctum.Message.Chunk")
+@Node.Pointer("com.github.sanctum.Message.Chunk")
 public final class ChunkSerializable implements JsonAdapter<Message.Chunk> {
 	@Override
 	public JsonElement write(Message.Chunk toolTips) {
@@ -77,7 +79,7 @@ public final class ChunkSerializable implements JsonAdapter<Message.Chunk> {
 	}
 
 	@Override
-	public Class<Message.Chunk> getClassType() {
+	public Class<Message.Chunk> getSerializationSignature() {
 		return Message.Chunk.class;
 	}
 }

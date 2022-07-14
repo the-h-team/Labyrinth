@@ -1,12 +1,14 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-@NodePointer("org.bukkit.Location")
+@Node.Pointer("org.bukkit.Location")
 public final class LocationSerializable implements JsonAdapter<Location> {
 
 	@Override
@@ -36,7 +38,7 @@ public final class LocationSerializable implements JsonAdapter<Location> {
 	}
 
 	@Override
-	public Class<Location> getClassType() {
+	public Class<Location> getSerializationSignature() {
 		return Location.class;
 	}
 

@@ -8,6 +8,7 @@ import java.net.URL;
 
 public class SpigotUpdate implements ResourceCheck {
 
+	private static final long serialVersionUID = -1189891322392928733L;
 	final String project;
 	final String author;
 	String recent;

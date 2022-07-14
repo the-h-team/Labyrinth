@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.formatting.ComponentChunk;
+import com.github.sanctum.panther.annotation.Note;
 import java.awt.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.melion.rgbchat.api.RGBApi;

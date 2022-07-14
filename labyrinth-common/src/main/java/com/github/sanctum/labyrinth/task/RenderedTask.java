@@ -1,13 +1,12 @@
 package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.FieldsFrom;
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.formatting.string.RandomID;
-import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.panther.annotation.FieldsFrom;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.util.RandomID;
 import java.util.Objects;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface RenderedTask {
 
-	@MagicConstant(valuesFromClass = TaskService.class) @FieldsFrom(TaskService.class)
+	@MagicConstant(valuesFromClass = TaskService.class)
+	@FieldsFrom(TaskService.class)
 	int getRuntime();
 
 	long getDelay();

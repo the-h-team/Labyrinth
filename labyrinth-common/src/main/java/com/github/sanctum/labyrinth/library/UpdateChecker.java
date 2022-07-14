@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.interfacing.ResourceCheck;
 import com.github.sanctum.labyrinth.interfacing.WebResponse;
+import com.github.sanctum.panther.annotation.Note;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;

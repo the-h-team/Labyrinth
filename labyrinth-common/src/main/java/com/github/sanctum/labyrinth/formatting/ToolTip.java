@@ -1,13 +1,13 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.library.Applicable;
-import com.github.sanctum.labyrinth.library.HUID;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.annotation.Experimental;
+import com.github.sanctum.panther.util.HUID;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -208,7 +208,8 @@ public abstract class ToolTip<T> {
 
 	public static class Item extends ToolTip<ItemStack> {
 
-		private final @Experimental Supplier<Class<?>> ITEMSTACK_NMS = () -> {
+		private final @Experimental
+		Supplier<Class<?>> ITEMSTACK_NMS = () -> {
 			String name = Bukkit.getServer().getClass().getPackage().getName();
 			String clazzName = "org.bukkit.craftbukkit." + (name.substring(name.lastIndexOf('.') + 1) + ".") + "inventory.CraftItemStack";
 			try {

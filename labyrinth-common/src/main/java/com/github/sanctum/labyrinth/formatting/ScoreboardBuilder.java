@@ -1,18 +1,15 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.jetbrains.annotations.Nullable;
 
 public class ScoreboardBuilder {
 
-	final static LabyrinthCollection<ScoreboardInstance> instances = new LabyrinthList<>();
+	final static PantherCollection<ScoreboardInstance> instances = new PantherList<>();
 	final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 	Objective objective;
 

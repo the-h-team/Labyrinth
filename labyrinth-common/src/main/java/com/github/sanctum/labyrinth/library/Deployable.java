@@ -1,11 +1,12 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.interfacing.UnknownGeneric;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.annotation.Removal;
+import com.github.sanctum.panther.util.HUID;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +25,10 @@ import org.jetbrains.annotations.Nullable;
  * <p>Using one or more objects finalize data results, <strong>this object can be used as a staging process to object building/handling.</strong></p>
  *
  * @param <T> The data type this deployable references
+ * @deprecated While this will be safe until next version it is recommended to have panther imported using its Deployable interface.
  */
+@Deprecated
+@Removal(inVersion = "1.8.1")
 public interface Deployable<T> {
 
 	/**
@@ -102,7 +106,7 @@ public interface Deployable<T> {
 	 * @param <O>    The resulting type.
 	 * @return The desired return type.
 	 */
-	<O> DeployableMapping<O> map(Function<? super T, ? extends O> mapper);
+	<O> DeployableMapping<O> mapLabyrinth(Function<? super T, ? extends O> mapper);
 
 	/**
 	 * Run a completable future with the attached source material.
@@ -207,7 +211,7 @@ public interface Deployable<T> {
 			}
 
 			@Override
-			public <O> DeployableMapping<O> map(Function<? super T, ? extends O> mapper) {
+			public <O> DeployableMapping<O> mapLabyrinth(Function<? super T, ? extends O> mapper) {
 				return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
 			}
 
@@ -278,7 +282,7 @@ public interface Deployable<T> {
 			}
 
 			@Override
-			public <O> DeployableMapping<O> map(Function<? super UnknownGeneric, ? extends O> mapper) {
+			public <O> DeployableMapping<O> mapLabyrinth(Function<? super UnknownGeneric, ? extends O> mapper) {
 				return new DeployableMapping<>(() -> submit().join(), (Function<? super Object, ? extends O>) mapper);
 			}
 
@@ -349,7 +353,7 @@ public interface Deployable<T> {
 			}
 
 			@Override
-			public <O> DeployableMapping<O> map(Function<? super T, ? extends O> mapper) {
+			public <O> DeployableMapping<O> mapLabyrinth(Function<? super T, ? extends O> mapper) {
 				return new DeployableMapping<>(() -> deploy().get(), (Function<? super Object, ? extends O>) mapper);
 			}
 

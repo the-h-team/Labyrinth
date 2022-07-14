@@ -1,14 +1,14 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollectors;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherCollectors;
+import com.github.sanctum.panther.container.PantherEntry;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
 
 final class SecretWorkbench implements Workbench {
 
-	final LabyrinthMap<WorkbenchSlot, Character> map = new LabyrinthEntryMap<>(9);
+	final PantherMap<WorkbenchSlot, Character> map = new PantherEntryMap<>(9);
 
 	public SecretWorkbench put(WorkbenchSlot slot, char symbol) {
 		map.put(slot, symbol);
@@ -16,8 +16,8 @@ final class SecretWorkbench implements Workbench {
 	}
 
 	@Override
-	public LabyrinthCollection<SimpleKeyedValue<WorkbenchSlot, Character>> get() {
-		return map.stream().sorted((o1, o2) -> Integer.compare(o2.getKey().toInt(), o1.getKey().toInt())).collect(LabyrinthCollectors.toSet());
+	public PantherCollection<PantherEntry.Modifiable<WorkbenchSlot, Character>> get() {
+		return map.stream().sorted((o1, o2) -> Integer.compare(o2.getKey().toInt(), o1.getKey().toInt())).collect(PantherCollectors.toSet());
 	}
 
 }

@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.data.JsonAdapter;
-import com.github.sanctum.labyrinth.data.NodePointer;
 import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Hempfest
  */
-@NodePointer(value = "CustomColor", type = RandomHex.class)
+@Node.Pointer(value = "CustomColor", type = RandomHex.class)
 @SerializableAs("CustomColor")
 @DelegateDeserialization(RandomHex.class)
 public interface CustomColor extends JsonAdapter<CustomColor>, JsonIntermediate, ConfigurationSerializable {
@@ -73,7 +73,7 @@ public interface CustomColor extends JsonAdapter<CustomColor>, JsonIntermediate,
 	}
 
 	@Override
-	default Class<CustomColor> getClassType() {
+	default Class<CustomColor> getSerializationSignature() {
 		return CustomColor.class;
 	}
 }

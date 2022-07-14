@@ -7,8 +7,7 @@ import com.github.sanctum.labyrinth.data.FileManager;
 public enum LabyrinthOption {
 
 	HEAD_PRE_CACHE,
-	IMPL_REGION_SERVICES,
-	IMPL_AFK;
+	IMPL_REGION_SERVICES;
 
 	public boolean enabled() {
 
@@ -19,8 +18,6 @@ public enum LabyrinthOption {
 				return conf.read(f -> f.getBoolean("automatic-head-cache"));
 			case IMPL_REGION_SERVICES:
 				return conf.read(f -> f.getBoolean("region-service-impl"));
-			case IMPL_AFK:
-				return conf.read(f -> f.getBoolean("labyrinth-provided-afk"));
 			default:
 				return false;
 		}

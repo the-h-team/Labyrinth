@@ -1,12 +1,13 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Ordinal;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.Task;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.util.ProgressBar;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
 
 public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 
+	private static final long serialVersionUID = -3836578226377446193L;
 	boolean paused;
 
 	public CollectionTask(String key) {
@@ -60,10 +62,10 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 		return paused;
 	}
 
-	public static <T> CollectionTask<T> process(LabyrinthCollection<T> collection, String table, int interval, Consumer<T> action) {
+	public static <T> CollectionTask<T> process(PantherCollection<T> collection, String table, int interval, Consumer<T> action) {
 		return new CollectionTask<T>(table) {
 
-			final LabyrinthCollection<T> collector;
+			final PantherCollection<T> collector;
 			int index = 0;
 			long started = 0, lastRan = 0;
 			T current;
@@ -140,11 +142,11 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 		};
 	}
 
-	public static <T> CollectionTask<T> processSilent(LabyrinthCollection<T> collection, String table, int interval, Consumer<T> action) {
+	public static <T> CollectionTask<T> processSilent(PantherCollection<T> collection, String table, int interval, Consumer<T> action) {
 		return new CollectionTask<T>(table) {
 
 			private static final long serialVersionUID = -3595452685342615045L;
-			final LabyrinthCollection<T> collector = collection;
+			final PantherCollection<T> collector = collection;
 			int index = 0;
 			long started = 0, lastRan = 0;
 			T current;
@@ -519,8 +521,8 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 		};
 	}
 
-	public static <T> CollectionTask<T> merge(LabyrinthCollection<T> target, LabyrinthCollection<T> additive, String table, int interval) {
-		return new LabyrinthCollectionMergeProcess<>(target, additive, interval, table);
+	public static <T> CollectionTask<T> merge(PantherCollection<T> target, PantherCollection<T> additive, String table, int interval) {
+		return new PantherCollectionMergeProcess<>(target, additive, interval, table);
 	}
 
 	public static <T> CollectionTask<T> merge(List<T> target, List<T> additive, String table, int interval) {

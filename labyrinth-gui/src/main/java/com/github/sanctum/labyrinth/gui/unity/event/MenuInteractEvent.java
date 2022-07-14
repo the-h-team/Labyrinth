@@ -6,15 +6,15 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class MenuInteractEvent extends MenuEvent {
 	final Type type;
-	final Player player;
+	final org.bukkit.entity.Player player;
 
-	public MenuInteractEvent(@NotNull Type type, @NotNull Player player, @NotNull Menu menu) {
+	public MenuInteractEvent(@NotNull Type type, @NotNull org.bukkit.entity.Player player, @NotNull Menu menu) {
 		super(menu);
 		this.player = player;
 		this.type = type;
 	}
 
-	public @NotNull Player getPlayer() {
+	public @NotNull org.bukkit.entity.Player getPlayer() {
 		return player;
 	}
 

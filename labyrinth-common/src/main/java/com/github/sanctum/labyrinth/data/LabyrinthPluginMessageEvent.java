@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.data.LabyrinthPluginChannel;
-import com.github.sanctum.labyrinth.data.LabyrinthPluginMessage;
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
+import com.github.sanctum.labyrinth.event.DefaultEvent;
 
 /**
  * An event responsible for relaying messages containing different object-oriented information.

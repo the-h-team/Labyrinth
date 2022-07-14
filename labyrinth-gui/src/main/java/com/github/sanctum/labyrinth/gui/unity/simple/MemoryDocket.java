@@ -1,15 +1,6 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Comment;
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.annotation.Voluntary;
-import com.github.sanctum.labyrinth.data.MemorySpace;
-import com.github.sanctum.labyrinth.data.Node;
-import com.github.sanctum.labyrinth.data.WideFunction;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
@@ -24,12 +15,21 @@ import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Mailer;
+import com.github.sanctum.panther.annotation.Comment;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.annotation.Voluntary;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.file.MemorySpace;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.skulls.CustomHead;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.bukkit.inventory.ItemStack;
@@ -43,11 +43,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 
-	protected final LabyrinthCollection<ItemElement<?>> items = new LabyrinthList<>();
+	protected final PantherCollection<ItemElement<?>> items = new PantherList<>();
 	protected Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
 	protected MemoryItem pagination, next, previous, exit, filler, border;
-	protected WideFunction<String, T, String> dataConverter = (s, t) -> s;
-	protected WideFunction<String, Object, String> uniqueDataConverter = (s, t) -> s;
+	protected BiFunction<String, T, String> dataConverter = (s, t) -> s;
+	protected BiFunction<String, Object, String> uniqueDataConverter = (s, t) -> s;
 	protected final MemorySpace memory;
 	protected Supplier<List<T>> supplier;
 	protected Comparator<T> comparator;
@@ -91,16 +91,16 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 	}
 
 	@Voluntary("This method allows you to setup custom placeholders, used only in tandem with pagination.")
-	public MemoryDocket<T> setDataConverter(@NotNull WideFunction<String, T, String> function) {
+	public MemoryDocket<T> setDataConverter(@NotNull BiFunction<String, T, String> function) {
 		this.dataConverter = function;
 		return this;
 	}
 
 	@Override
 	@Note("This method is used for setting up unique translations. Example; a singular parent object being attached for extra placeholders.")
-	public <V> MemoryDocket<T> setUniqueDataConverter(@NotNull V t, @NotNull WideFunction<String, V, String> function) {
+	public <V> MemoryDocket<T> setUniqueDataConverter(@NotNull V t, @NotNull BiFunction<String, V, String> function) {
 		this.uniqueData = t;
-		this.uniqueDataConverter = (WideFunction<String, Object, String>) function;
+		this.uniqueDataConverter = (BiFunction<String, Object, String>) function;
 		return this;
 	}
 
@@ -108,14 +108,14 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 	public @NotNull MemoryDocket<T> load() {
 		this.title = Check.forNull(memory.getNode("title").toPrimitive().getString(), "Configured menus cannot have null titles please correct under path '" + memory.getPath() + "'");
 		if (this.uniqueData != null) {
-			this.title = uniqueDataConverter.accept(title, uniqueData);
+			this.title = uniqueDataConverter.apply(title, uniqueData);
 		}
 		this.rows = Check.forNull(Menu.Rows.valueOf(memory.getNode("rows").toPrimitive().getString()), "Configured menus need a row size please correct under path '" + memory.getPath() + "'");
 		this.type = Check.forNull(Menu.Type.valueOf(memory.getNode("type").toPrimitive().getString()), "Configured menus need a valid type please correct under path '" + memory.getPath() + "'");
 		this.shared = memory.getNode("shared").toPrimitive().getBoolean();
 		if (memory.getNode("id").toPrimitive().isString()) {
 			if (this.uniqueData != null) {
-				this.key = uniqueDataConverter.accept(memory.getNode("id").toPrimitive().getString(), uniqueData);
+				this.key = uniqueDataConverter.apply(memory.getNode("id").toPrimitive().getString(), uniqueData);
 			} else {
 				this.key = memory.getNode("id").toPrimitive().getString();
 			}
@@ -153,7 +153,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 					for (String s : element.getElement().getItemMeta().getLore()) {
 						String res = s;
 						if (uniqueData != null) {
-							res = uniqueDataConverter.accept(res, uniqueData);
+							res = uniqueDataConverter.apply(res, uniqueData);
 						}
 						lore.add(res);
 					}
@@ -161,7 +161,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 				}
 				String res = element.getName();
 				if (uniqueData != null ) {
-					res = uniqueDataConverter.accept(res, uniqueData);
+					res = uniqueDataConverter.apply(res, uniqueData);
 				}
 				String finalRes = res;
 				element.setElement(edit -> edit.setTitle(finalRes).build());
@@ -220,7 +220,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 									if (pagination.getMessage() != null) {
 										String res = handlePaginationReplacements(pagination, pagination.getMessage(), value);
 										if (dataConverter != null) {
-											res = dataConverter.accept(res, value);
+											res = dataConverter.apply(res, value);
 										}
 										Mailer.empty(click.getElement()).chat(res).deploy();
 									}
@@ -228,7 +228,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 										String open = pagination.getOpenOnClick();
 										String r = handlePaginationReplacements(pagination, open, value);
 										if (dataConverter != null) {
-											r = dataConverter.accept(r, value);
+											r = dataConverter.apply(r, value);
 										}
 										MenuRegistration registration = MenuRegistration.getInstance();
 										Menu registered = registration.get(r).get();
@@ -239,7 +239,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 												String command = pagination.getOpenOnClick().replace("/", "");
 												String res = handlePaginationReplacements(pagination, command, value);
 												if (dataConverter != null) {
-													res = dataConverter.accept(res, value);
+													res = dataConverter.apply(res, value);
 												}
 												click.getElement().performCommand(res);
 											}
@@ -253,7 +253,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 									for (String s : item.getElement().getItemMeta().getLore()) {
 										String res = handlePaginationReplacements(pagination, s, value);
 										if (dataConverter != null) {
-											res = dataConverter.accept(res, value);
+											res = dataConverter.apply(res, value);
 										}
 										lore.add(res);
 									}
@@ -261,7 +261,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 								}
 								String res = handlePaginationReplacements(pagination, title, value);
 								if (dataConverter != null ) {
-									res = dataConverter.accept(res, value);
+									res = dataConverter.apply(res, value);
 								}
 								String finalRes = res;
 								item.setElement(edit -> edit.setTitle(finalRes).build());
@@ -349,14 +349,14 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 				if (item.getMessage() != null) {
 					String message = item.getMessage();
 					if (uniqueData != null) {
-						message = uniqueDataConverter.accept(message, uniqueData);
+						message = uniqueDataConverter.apply(message, uniqueData);
 					}
 					Mailer.empty(click.getElement()).chat(message).deploy();
 				}
 				if (item.getOpenOnClick() != null) {
 					String open = item.getOpenOnClick();
 					if (uniqueData != null) {
-						open = uniqueDataConverter.accept(open, uniqueData);
+						open = uniqueDataConverter.apply(open, uniqueData);
 					}
 					MenuRegistration registration = MenuRegistration.getInstance();
 					Menu registered = registration.get(open).get();
@@ -366,7 +366,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 						if (item.getOpenOnClick().startsWith("/")) {
 							String command = item.getOpenOnClick().replace("/", "");
 							if (uniqueData != null) {
-								command = uniqueDataConverter.accept(command, uniqueData);
+								command = uniqueDataConverter.apply(command, uniqueData);
 							}
 							click.getElement().performCommand(command);
 						}
@@ -380,7 +380,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 	protected void handlePlayerHeadLookup(boolean local, ItemStack built, ItemElement<?> item, Object... args) {
 		boolean pass = local ? !Check.isNull(uniqueData, uniqueDataConverter, nameHolder) : !Check.isNull(dataConverter, nameHolder);
 		if (pass && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
-			String name = local ? uniqueDataConverter.accept(nameHolder, uniqueData) : dataConverter.accept(nameHolder, (T) args[0]);
+			String name = local ? uniqueDataConverter.apply(nameHolder, uniqueData) : dataConverter.apply(nameHolder, (T) args[0]);
 			PlayerSearch search = PlayerSearch.of(name);
 			if (search != null) {
 				item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());

@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Removal;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
+import com.github.sanctum.panther.annotation.Removal;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.util.WrongLoaderUsedException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -29,7 +30,7 @@ import org.bukkit.plugin.Plugin;
 public class AddonLoader {
     private static final Field PLUGIN_CLASS_MAP;
 
-    private final LabyrinthMap<String, List<String>> classMap = new LabyrinthEntryMap<>();
+    private final PantherMap<String, List<String>> classMap = new PantherEntryMap<>();
     private final Plugin javaPlugin;
     private AddonClassLoader loader;
 
@@ -222,11 +223,11 @@ public class AddonLoader {
             return loadClass(name, true);
         }
 
-        boolean removeClass(Class<?> clazz) throws WrongLoaderUsedException {
+        boolean removeClass(Class<?> clazz) throws IllegalArgumentException {
             if (loadedClasses.contains(clazz)) {
                 loadedClasses.remove(clazz);
                 return true;
-            } else throw new WrongLoaderUsedException("Class " + clazz.getName() + " does not belong to this loader!");
+            } else throw new IllegalArgumentException("Class " + clazz.getName() + " does not belong to this addon loader!");
         }
 
         void injectClass(String path, String className) {

@@ -1,8 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
-import com.github.sanctum.labyrinth.annotation.Experimental;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
+import com.github.sanctum.panther.annotation.Experimental;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;

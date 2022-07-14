@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherEntry;
 import org.bukkit.entity.Player;
 
 public interface Workbench {
@@ -15,7 +15,7 @@ public interface Workbench {
 		return this;
 	}
 
-	LabyrinthCollection<SimpleKeyedValue<WorkbenchSlot, Character>> get();
+	PantherCollection<PantherEntry.Modifiable<WorkbenchSlot, Character>> get();
 
 	static void open(Player player) {
 		player.openWorkbench(null, true);

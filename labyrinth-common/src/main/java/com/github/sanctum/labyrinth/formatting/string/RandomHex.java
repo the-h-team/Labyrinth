@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.annotation.Json;
+import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.util.RandomID;
 import java.util.Random;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;

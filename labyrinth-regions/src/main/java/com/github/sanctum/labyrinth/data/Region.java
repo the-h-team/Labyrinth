@@ -5,7 +5,7 @@ import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.interfacing.Catchable;
 import com.github.sanctum.labyrinth.interfacing.Snapshot;
 import com.github.sanctum.labyrinth.library.Cuboid;
-import com.github.sanctum.labyrinth.library.HUID;
+import com.github.sanctum.panther.util.HUID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

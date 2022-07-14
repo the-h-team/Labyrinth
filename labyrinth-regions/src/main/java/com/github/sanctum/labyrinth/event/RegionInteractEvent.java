@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.event;
 
 import com.github.sanctum.labyrinth.data.Region;
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 
 public abstract class RegionInteractEvent extends DefaultEvent.Player {
 

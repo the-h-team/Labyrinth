@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.file.MemorySpace;
 import java.util.Map;
 
 public interface Atlas extends MemorySpace, Map<String, Object> {

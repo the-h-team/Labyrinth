@@ -1,12 +1,12 @@
 package com.github.sanctum.labyrinth.interfacing;
 
-import com.github.sanctum.labyrinth.annotation.Json;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
-import com.github.sanctum.labyrinth.data.NodePointer;
-import com.github.sanctum.labyrinth.data.service.AnnotationDiscovery;
-import com.github.sanctum.labyrinth.data.service.Check;
-import com.github.sanctum.labyrinth.data.service.DummyReducer;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.annotation.AnnotationDiscovery;
+import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.DummyReducer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -184,7 +184,7 @@ public interface JsonIntermediate {
 				} catch (Exception ignored) {
 				}
 			}
-			String key = AnnotationDiscovery.of(NodePointer.class, o).mapFromClass((r, u) -> r.value());
+			String key = AnnotationDiscovery.of(Node.Pointer.class, o).mapFromClass((r, u) -> r.value());
 			JsonObject parent = new JsonObject();
 			if (key != null) {
 				parent.add(key, object);

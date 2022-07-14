@@ -7,9 +7,9 @@ import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
 import com.github.sanctum.labyrinth.formatting.string.MessageBreakdown;
 import com.github.sanctum.labyrinth.library.Mailer;
-import com.github.sanctum.labyrinth.library.TypeFlag;
-import com.github.sanctum.labyrinth.placeholders.Placeholder;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
+import com.github.sanctum.panther.placeholder.Placeholder;
+import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -32,7 +32,7 @@ public final class LabyrinthCommand extends Command {
 	}
 
 	private final SimpleTabCompletion completion = SimpleTabCompletion.empty();
-	private final TypeFlag<Player> conversion = TypeFlag.PLAYER;
+	private final TypeAdapter<Player> conversion = () -> Player.class;
 
 	@Override
 	public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {

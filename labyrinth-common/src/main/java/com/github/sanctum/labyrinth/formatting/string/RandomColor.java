@@ -6,6 +6,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class RandomColor extends Number {
 
+	private static final long serialVersionUID = -7633896621271251363L;
 	private final String color;
 	private final Number parent;
 

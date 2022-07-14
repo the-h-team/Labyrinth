@@ -1,13 +1,13 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.data.Node;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.skulls.CustomHeadLoader;
 import java.util.Arrays;
@@ -122,7 +122,7 @@ public class MemoryItem {
 			edit.setLore(node.getNode("lore").toPrimitive().getStringList());
 		}
 		if (node.getNode("flags").toPrimitive().isStringList()) {
-			LabyrinthCollection<ItemFlag> flags = new LabyrinthList<>();
+			PantherCollection<ItemFlag> flags = new PantherList<>();
 			for (String flag : node.getNode("flags").toPrimitive().getStringList()) {
 				try {
 					ItemFlag f = ItemFlag.valueOf(flag);

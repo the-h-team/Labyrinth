@@ -2,23 +2,20 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.event.CuboidSelectEvent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
 import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionInteractionEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.DefaultEvent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Items;
-import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.github.sanctum.panther.container.ImmutablePantherCollection;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.event.Vent;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
@@ -36,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class RegionServicesManagerImpl extends RegionServicesManager {
 
-	final LabyrinthCollection<Region> cache = new LabyrinthList<>();
+	final PantherCollection<Region> cache = new PantherList<>();
 	final Cuboid.FlagManager flagManager = new Cuboid.FlagManager(this);
 
 	public static void initialize(Labyrinth instance) {
@@ -48,7 +45,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Optional.ofNullable(getInstance().get(e.getBlock().getLocation()))).join();
 			if (r.isPresent()) {
-				RegionDestroyEvent event = new Vent.Call<>(new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock())).run();
+				RegionDestroyEvent event = new LabyrinthVentCall<>(new RegionDestroyEvent(e.getPlayer(), r.get(), e.getBlock())).run();
 				if (event.isCancelled()) {
 					e.setCancelled(true);
 				}
@@ -60,7 +57,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Optional.ofNullable(getInstance().get(e.getBlock().getLocation()))).join();
 			if (r.isPresent()) {
-				RegionBuildEvent event = new Vent.Call<>(new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock())).run();
+				RegionBuildEvent event = new LabyrinthVentCall<>(new RegionBuildEvent(e.getPlayer(), r.get(), e.getBlock())).run();
 				if (event.isCancelled()) {
 					e.setCancelled(true);
 				}
@@ -92,7 +89,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				if (r.isPresent()) {
 					// TODO: rewrite the optional#get call to safely obtain the value
 					//noinspection OptionalGetWithoutIsPresent
-					RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT)).run();
+					RegionInteractionEvent event = new LabyrinthVentCall<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.LEFT)).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 					}
@@ -116,7 +113,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 					//noinspection OptionalGetWithoutIsPresent
 					selection.setPos1(e.getBlock().get().getLocation());
 
-					new Vent.Call<>(new CuboidSelectEvent(selection) {
+					new LabyrinthVentCall<>(new CuboidSelectEvent(selection) {
 					}).run();
 
 				}
@@ -126,7 +123,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				if (r.isPresent()) {
 					// TODO: rewrite the optional#get call to safely obtain the value
 					//noinspection OptionalGetWithoutIsPresent
-					RegionInteractionEvent event = new Vent.Call<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT)).run();
+					RegionInteractionEvent event = new LabyrinthVentCall<>(new RegionInteractionEvent(e.getPlayer(), r.get(), e.getBlock().get(), RegionInteractionEvent.ClickType.RIGHT)).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 					}
@@ -156,7 +153,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 					//noinspection OptionalGetWithoutIsPresent
 					selection.setPos2(e.getBlock().get().getLocation());
 
-					new Vent.Call<>(new CuboidSelectEvent(selection) {
+					new LabyrinthVentCall<>(new CuboidSelectEvent(selection) {
 					}).run();
 				}
 			}
@@ -173,7 +170,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				if (r.getRegion().isPresent()) {
 					Region region = r.getRegion().get();
 
-					RegionPVPEvent e = new Vent.Call<>(new RegionPVPEvent(p, target, region)).run();
+					RegionPVPEvent e = new LabyrinthVentCall<>(new RegionPVPEvent(p, target, region)).run();
 
 					if (e.isCancelled()) {
 						event.setCancelled(true);
@@ -184,7 +181,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				if (r.getRegion().isPresent()) {
 					Region region = r.getRegion().get();
 
-					RegionPVPEvent e = new Vent.Call<>(new RegionPVPEvent(p, target, region)).run();
+					RegionPVPEvent e = new LabyrinthVentCall<>(new RegionPVPEvent(p, target, region)).run();
 
 					if (e.isCancelled()) {
 						event.setCancelled(true);
@@ -195,8 +192,8 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 	}
 
 	@Override
-	public LabyrinthCollection<Region> getAll() {
-		return ImmutableLabyrinthCollection.of(cache);
+	public PantherCollection<Region> getAll() {
+		return ImmutablePantherCollection.of(cache);
 	}
 
 	@Override

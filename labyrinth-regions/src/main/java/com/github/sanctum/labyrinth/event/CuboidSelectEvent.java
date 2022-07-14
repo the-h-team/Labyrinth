@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.event;
 
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
 import com.github.sanctum.labyrinth.library.Cuboid;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;

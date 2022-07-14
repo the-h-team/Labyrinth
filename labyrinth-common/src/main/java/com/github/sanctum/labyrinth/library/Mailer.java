@@ -3,10 +3,11 @@ package com.github.sanctum.labyrinth.library;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.data.service.Check;
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.ComponentChunk;
 import com.github.sanctum.labyrinth.formatting.TextChunk;
+import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.HUID;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -501,7 +502,7 @@ public class Mailer {
 		}
 
 		@Override
-		public <O> DeployableMapping<O> map(Function<? super Mailer, ? extends O> mapper) {
+		public <O> DeployableMapping<O> mapLabyrinth(Function<? super Mailer, ? extends O> mapper) {
 			return new DeployableMapping<>(() -> Mailer.this, (Function<? super Object, ? extends O>) mapper);
 		}
 

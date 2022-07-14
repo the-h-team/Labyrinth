@@ -1,9 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.library.Cuboid;
-import java.util.List;
+import com.github.sanctum.panther.container.PantherCollection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -23,7 +21,7 @@ public abstract class RegionServicesManager {
 		return Bukkit.getServicesManager().load(RegionServicesManager.class);
 	}
 
-	public abstract LabyrinthCollection<Region> getAll();
+	public abstract PantherCollection<Region> getAll();
 
 	public abstract Region get(@NotNull Location location);
 

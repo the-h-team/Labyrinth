@@ -1,12 +1,9 @@
-package com.github.sanctum.labyrinth.placeholders.factory;
+package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
-import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderIdentifier;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderTranslation;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderTranslationInformation;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderVariable;
+import com.github.sanctum.panther.placeholder.Placeholder;
+import com.github.sanctum.panther.util.ProgressBar;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
@@ -19,10 +16,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PlayerPlaceholders implements PlaceholderTranslation {
+public class PlayerPlaceholders implements Placeholder.Translation {
 
-	private final PlaceholderIdentifier identifier = () -> "player";
-	private final PlaceholderTranslationInformation information = new PlaceholderTranslationInformation() {
+	private final Placeholder.Identifier identifier = () -> "player";
+	private final Placeholder.Signature information = new Placeholder.Signature() {
 		@Override
 		public @NotNull String getName() {
 			return "Labyrinth-Player";
@@ -40,7 +37,7 @@ public class PlayerPlaceholders implements PlaceholderTranslation {
 	};
 
 	@Override
-	public PlaceholderTranslationInformation getInformation() {
+	public Placeholder.Signature getInformation() {
 		return information;
 	}
 
@@ -86,10 +83,10 @@ public class PlayerPlaceholders implements PlaceholderTranslation {
 	}
 
 	@Override
-	public @Nullable String onTranslation(String parameter, PlaceholderVariable variable) {
-		if (variable.exists() && variable.isPlayer()) {
+	public @Nullable String onTranslation(String parameter, Placeholder.Variable variable) {
+		if (variable.exists() && variable.get() instanceof OfflinePlayer) {
 
-			OfflinePlayer p = variable.getAsPlayer();
+			OfflinePlayer p = (OfflinePlayer) variable.get();
 
 			if (p.isOnline()) {
 				switch (parameter.toLowerCase(Locale.ROOT)) {
@@ -137,7 +134,7 @@ public class PlayerPlaceholders implements PlaceholderTranslation {
 	}
 
 	@Override
-	public @Nullable PlaceholderIdentifier getIdentifier() {
+	public @Nullable Placeholder.Identifier getIdentifier() {
 		return identifier;
 	}
 }

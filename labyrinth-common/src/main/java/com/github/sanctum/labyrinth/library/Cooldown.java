@@ -1,12 +1,12 @@
 package com.github.sanctum.labyrinth.library;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Removal;
 import com.github.sanctum.labyrinth.api.CooldownService;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.FileList;
-import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
@@ -148,7 +148,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	public synchronized final void save() {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.get("cooldowns", "Persistent", FileType.JSON)
+				.get("cooldowns", "Persistent", Configurable.Type.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));
 		TaskScheduler.of(() -> SERVICE.getCooldowns().add(this)).schedule();
 	}
@@ -162,7 +162,7 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 */
 	public synchronized final void update() {
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.get("cooldowns", "Persistent", FileType.JSON)
+				.get("cooldowns", "Persistent", Configurable.Type.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", abv(getTimePassed())));
 	}
 

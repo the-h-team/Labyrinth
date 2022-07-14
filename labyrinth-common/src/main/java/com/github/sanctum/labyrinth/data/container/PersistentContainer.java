@@ -4,7 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
-import com.github.sanctum.labyrinth.library.HFEncoded;
+import com.github.sanctum.labyrinth.library.LabyrinthEncoded;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
 import java.io.IOException;
 import java.util.Collection;
@@ -57,7 +57,7 @@ public class PersistentContainer extends PersistentData {
 		boolean f = manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 		if (f && !this.dataMap.containsKey(key)) {
 			try {
-				Object o = HFEncoded.of(manager.read(fi -> fi.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))).deserialized();
+				Object o = LabyrinthEncoded.of(manager.read(fi -> fi.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))).deserialized();
 				this.dataMap.put(key, o);
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
@@ -251,7 +251,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return the deserialized object otherwise null
 	 */
 	public <R> @Nullable R deserialize(Class<R> type, String value) {
-		return HFEncoded.of(value).deserialize(type);
+		return LabyrinthEncoded.of(value).deserialize(type);
 	}
 
 	// TODO: Explicit throw on serialization fail vs nullity contract
@@ -263,7 +263,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return the serialized string otherwise null if an issue occurred
 	 */
 	public @Nullable String serialize(String key) throws IOException {
-		return HFEncoded.of(this.dataMap.get(key)).serialize();
+		return LabyrinthEncoded.of(this.dataMap.get(key)).serialize();
 	}
 
 

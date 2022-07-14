@@ -1,23 +1,25 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Ordinal;
-import com.github.sanctum.labyrinth.formatting.string.ProgressBar;
-import com.github.sanctum.labyrinth.formatting.string.RandomID;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.util.ProgressBar;
+import com.github.sanctum.panther.util.RandomID;
 import java.text.NumberFormat;
 
-final class LabyrinthCollectionMergeProcess<T> extends CollectionTask<T> {
+final class PantherCollectionMergeProcess<T> extends CollectionTask<T> {
 
-	LabyrinthCollection<T> collector;
-	LabyrinthCollection<T> child;
+	private static final long serialVersionUID = -4311490730088594915L;
+	PantherCollection<T> collector;
+	PantherCollection<T> child;
 	int index = 0, limit;
 	long started = 0, lastRan = 0;
 	String table;
 	T current;
 
-	LabyrinthCollectionMergeProcess(LabyrinthCollection<T> collector, LabyrinthCollection<T> child, int processLimit, String table) {
+	PantherCollectionMergeProcess(PantherCollection<T> collector, PantherCollection<T> child, int processLimit, String table) {
 		super(new RandomID().generate());
 		this.collector = collector;
 		this.child = child;

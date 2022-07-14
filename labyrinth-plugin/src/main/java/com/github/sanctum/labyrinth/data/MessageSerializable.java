@@ -1,19 +1,19 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.Json;
-import com.github.sanctum.labyrinth.data.Configurable;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
-import com.github.sanctum.labyrinth.data.NodePointer;
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@NodePointer("com.github.sanctum.Message")
+@Node.Pointer("com.github.sanctum.Message")
 public final class MessageSerializable implements JsonAdapter<Message> {
 
 	public static Message fromJson(@Json String json) {
@@ -48,7 +48,7 @@ public final class MessageSerializable implements JsonAdapter<Message> {
 	}
 
 	@Override
-	public Class<Message> getClassType() {
+	public Class<Message> getSerializationSignature() {
 		return Message.class;
 	}
 }

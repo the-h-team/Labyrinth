@@ -1,20 +1,11 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.Note;
-import com.github.sanctum.labyrinth.annotation.Experimental;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.file.JsonConfiguration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,20 +23,20 @@ public class FileManager {
 		this.configuration = configuration;
 	}
 
-	protected FileManager(@NotNull Plugin plugin, @NotNull final String n, @Nullable final String d, FileExtension data) {
-		if (data.getExtension().endsWith("data")) {
-			JsonConfiguration c = new JsonConfiguration(plugin, null, n, d);
-			this.plugin = c.plugin;
+	protected FileManager(@NotNull Plugin plugin, @NotNull final String n, @Nullable final String d, Configurable.Extension data) {
+		if (data.get().endsWith("data") || data.get().endsWith("json")) {
+			JsonConfiguration c = new JsonConfiguration(plugin.getDataFolder(), n, d);
+			this.plugin = plugin;
 			this.configuration = c;
 			return;
 		}
-		if (data.getExtension().endsWith("yml")) {
+		if (data.get().endsWith("yml")) {
 			YamlConfiguration c = new YamlConfiguration(plugin, n, d);
 			this.plugin = c.plugin;
 			this.configuration = c;
 			return;
 		}
-		throw new IllegalArgumentException(data.getExtension() + " files cannot be instantiated through file manager, injection required!");
+		throw new IllegalArgumentException(data.get() + " files cannot be instantiated through file manager, injection required!");
 	}
 
 	/**
@@ -74,9 +65,9 @@ public class FileManager {
 
 	/**
 	 * A functional delegation to data table consumption
-	 * @see FileManager#write(DataTable)
 	 *
 	 * @param table The data consumption to take place.
+	 * @see FileManager#write(DataTable)
 	 */
 	public void write(Consumer<? super DataTable> table) {
 		DataTable t = DataTable.newTable();
@@ -87,8 +78,8 @@ public class FileManager {
 	/**
 	 * Set/Replace & save multiple keyed value spaces within this file.
 	 *
-	 * @see FileManager#write(DataTable, boolean) 
 	 * @param table The data table to use when setting values.
+	 * @see FileManager#write(DataTable, boolean)
 	 */
 	@Note("You can create a fresh DataTable really easily see DataTable#newTable()")
 	public void write(@Note("Provided table gets cleared upon finalization.") DataTable table) {
@@ -135,11 +126,11 @@ public class FileManager {
 	 * Copy all values from this yml file to a json file of similar stature.
 	 *
 	 * @param name The new name of the file.
-	 * @param dir The optional new directory, null places in base folder.
+	 * @param dir  The optional new directory, null places in base folder.
 	 * @return a new json file containing all values from this yml file.
 	 */
 	public @NotNull FileManager toJSON(@NotNull String name, String dir) {
-		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
+		FileManager n = FileList.search(plugin).get(name, dir, Configurable.Type.JSON);
 		Configurable c = getRoot();
 		if (c instanceof YamlConfiguration) {
 			n.write(copy(), false);
@@ -152,11 +143,11 @@ public class FileManager {
 	 * Copy all values from this json file to a yml file of similar stature.
 	 *
 	 * @param name The new name of the file.
-	 * @param dir The optional new directory, null places in base folder.
+	 * @param dir  The optional new directory, null places in base folder.
 	 * @return a new yml file containing all values from this json file.
 	 */
 	public @NotNull FileManager toYaml(@NotNull String name, String dir) {
-		FileManager n = FileList.search(plugin).get(name, dir, FileType.JSON);
+		FileManager n = FileList.search(plugin).get(name, dir, Configurable.Type.JSON);
 		Configurable c = getRoot();
 		if (c instanceof JsonConfiguration) {
 			n.write(copy(), false);

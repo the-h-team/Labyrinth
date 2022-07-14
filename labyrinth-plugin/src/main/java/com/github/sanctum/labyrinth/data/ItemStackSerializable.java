@@ -1,8 +1,10 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.annotation.Experimental;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.panther.annotation.Experimental;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.file.Node;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -17,10 +19,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
-@NodePointer("org.bukkit.inventory.ItemStack")
+@Node.Pointer("org.bukkit.inventory.ItemStack")
 public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 
 	private final Gson gson = new GsonBuilder().create();
@@ -100,7 +100,7 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 	}
 
 	@Override
-	public Class<ItemStack> getClassType() {
+	public Class<ItemStack> getSerializationSignature() {
 		return ItemStack.class;
 	}
 

@@ -1,9 +1,12 @@
 package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.data.MapDecompressionUtils;
-import com.github.sanctum.labyrinth.data.MemorySpace;
-import com.github.sanctum.labyrinth.data.Node;
 import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
+import com.github.sanctum.panther.container.PantherEntry;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.file.MemorySpace;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.util.MapDecompression;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class LabyrinthAtlasMap implements LabyrinthAtlas {
 
-	protected final LabyrinthMap<String, Object> SOURCE = new LabyrinthEntryMap<>();
-	protected final LabyrinthMap<String, MemorySpace> QUERY = new LabyrinthEntryMap<>();
+	protected final PantherMap<String, Object> SOURCE = new PantherEntryMap<>();
+	protected final PantherMap<String, MemorySpace> QUERY = new PantherEntryMap<>();
 	protected final char divider;
 
 	public LabyrinthAtlasMap() {
@@ -39,14 +42,14 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	public boolean isNode(String key) {
 		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
-		LabyrinthMap<String, Object> o = SOURCE;
+		PantherMap<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
 			String pathKey = a[i];
 			Object obj = o.get(pathKey);
 			if (obj instanceof Map) {
-				LabyrinthMap<String, Object> js = (LabyrinthMap<String, Object>) obj;
+				PantherMap<String, Object> js = (PantherMap<String, Object>) obj;
 				if (js.containsKey(k)) {
-					return js.get(k) instanceof LabyrinthMap;
+					return js.get(k) instanceof PantherMap;
 				} else {
 					o = js;
 				}
@@ -69,8 +72,8 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 		Set<String> keys = new HashSet<>();
 		SOURCE.forEach(e -> {
 			if (deep) {
-				if (e.getValue() instanceof LabyrinthMap) {
-					MapDecompressionUtils.getInstance().decompress((LabyrinthMap<String, Object>) e.getValue(), divider, null).toLabyrinthSet().forEach(keys::add);
+				if (e.getValue() instanceof PantherMap) {
+					MapDecompression.getInstance().decompress((PantherMap<String, Object>) e.getValue(), divider, null).toPantherSet().forEach(keys::add);
 				} else {
 					keys.add(e.getKey());
 				}
@@ -86,8 +89,8 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 		Map<String, Object> map = new HashMap<>();
 		SOURCE.forEach(e -> {
 			if (deep) {
-				if (e.getValue() instanceof LabyrinthMap) {
-					MapDecompressionUtils.getInstance().decompress((LabyrinthMap<String, Object>) e.getValue(), divider, null).toLabyrinthMap().forEach(ev -> map.put(ev.getKey(), ev.getValue()));
+				if (e.getValue() instanceof PantherMap) {
+					MapDecompression.getInstance().decompress((PantherMap<String, Object>) e.getValue(), divider, null).toPantherMap().forEach(ev -> map.put(ev.getKey(), ev.getValue()));
 				} else {
 					map.put(e.getKey(), e.getValue());
 				}
@@ -122,12 +125,12 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	public Object get(String key) {
 		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
-		LabyrinthMap<String, Object> o = SOURCE;
+		PantherMap<String, Object> o = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
 			String pathKey = a[i];
 			Object obj = o.get(pathKey);
 			if (obj instanceof Map) {
-				LabyrinthMap<String, Object> js = (LabyrinthMap<String, Object>) obj;
+				PantherMap<String, Object> js = (PantherMap<String, Object>) obj;
 				if (js.containsKey(k)) {
 					return js.get(k);
 				} else {
@@ -145,16 +148,16 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 	public Object put(String key, Object o) {
 		String[] a = key.split(dividerAdapt());
 		String k = a[Math.max(0, a.length - 1)];
-		LabyrinthMap<String, Object> ob = SOURCE;
+		PantherMap<String, Object> ob = SOURCE;
 		for (int i = 0; i < a.length - 1; i++) {
 			String pathKey = a[i];
 			Object os = ob.get(pathKey);
-			if (os instanceof LabyrinthMap) {
-				ob = (LabyrinthMap<String, Object>) os;
+			if (os instanceof PantherMap) {
+				ob = (PantherMap<String, Object>) os;
 			} else {
-				LabyrinthMap<String, Object> n = new LabyrinthEntryMap<>();
+				PantherMap<String, Object> n = new PantherEntryMap<>();
 				ob.put(pathKey, n);
-				ob = (LabyrinthMap<String, Object>) ob.get(pathKey);
+				ob = (PantherMap<String, Object>) ob.get(pathKey);
 			}
 		}
 		if (o == null) {
@@ -188,7 +191,7 @@ public class LabyrinthAtlasMap implements LabyrinthAtlas {
 
 	@NotNull
 	@Override
-	public Iterator<ReplaceableKeyedValue<String, Object>> iterator() {
+	public Iterator<PantherEntry.Modifiable<String, Object>> iterator() {
 		return SOURCE.iterator();
 	}
 

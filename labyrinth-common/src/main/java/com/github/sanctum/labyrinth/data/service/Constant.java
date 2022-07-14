@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.library.Deployable;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +42,7 @@ public interface Constant<T> {
 		return deployable.submit().join();
 	}
 
-	static <T> List<Constant<T>> values(Type source, TypeFlag<T> c) {
+	static <T> List<Constant<T>> values(Type source, TypeAdapter<T> c) {
 		Deployable<List<Constant<T>>> deployable = AccessibleConstants.collect(source).get(c.getType());
 		deployable.queue();
 		return deployable.submit().join();
@@ -63,7 +63,7 @@ public interface Constant<T> {
 		return list;
 	}
 
-	static <T> Constant<T> valueOf(TypeFlag<T> flag, String name) {
+	static <T> Constant<T> valueOf(TypeAdapter<T> flag, String name) {
 		return (Constant<T>) AccessibleConstants.of(flag.getType()).get(name);
 	}
 

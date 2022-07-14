@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Mailer;
@@ -9,6 +9,7 @@ import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
 import com.github.sanctum.labyrinth.task.TaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.event.Vent;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
@@ -93,7 +94,7 @@ public interface ActionbarInstance {
 			@Override
 			public @NotNull Deployable<ActionBarEvent> setText(@NotNull BaseComponent... components) {
 				return Deployable.of(() -> {
-					ActionBarEvent e = new Vent.Call<>(new ActionBarEvent(components, getHolder(), -1)).run();
+					ActionBarEvent e = new LabyrinthVentCall<>(new ActionBarEvent(components, getHolder(), -1)).run();
 					if (!e.isCancelled()) {
 						this.lastText = this.text;
 						this.text = e.getText();
@@ -112,7 +113,7 @@ public interface ActionbarInstance {
 			@Override
 			public @NotNull Deployable<ActionBarEvent> setTextEvery(long repetitionInTicks, @NotNull BaseComponent... components) {
 				return Deployable.of(() -> {
-					ActionBarEvent e = new Vent.Call<>(new ActionBarEvent(components, getHolder(), repetitionInTicks)).run();
+					ActionBarEvent e = new LabyrinthVentCall<>(new ActionBarEvent(components, getHolder(), repetitionInTicks)).run();
 					if (!e.isCancelled()) {
 						this.lastKnownRepetition = this.repetition;
 						this.repetition = e.getRepetition();

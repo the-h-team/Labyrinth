@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.annotation.Note;
+import com.github.sanctum.panther.annotation.Note;
 import java.awt.*;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;

@@ -1,21 +1,19 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
-import com.github.sanctum.labyrinth.data.service.Check;
-import java.util.HashMap;
-import java.util.Map;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.util.Check;
 
 /**
  * A small and simple service loader.
  * @author rigobert0
  */
 public final class ServiceManager {
-	final LabyrinthMap<ServiceType<?>, Service> services;
+	final PantherMap<ServiceType<?>, Service> services;
 
 	public ServiceManager() {
-		this.services = new LabyrinthEntryMap<>();
+		this.services = new PantherEntryMap<>();
 	}
 
 	public void load(ServiceType<? extends Service> type) {

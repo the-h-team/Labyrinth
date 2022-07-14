@@ -1,13 +1,15 @@
 package com.github.sanctum.labyrinth.formatting.pagination;
 
 import com.github.sanctum.labyrinth.data.ReplaceableKeyedValue;
-import com.github.sanctum.labyrinth.data.TripleWideConsumer;
-import com.github.sanctum.labyrinth.data.WideConsumer;
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.FancyMessageChain;
+import com.github.sanctum.panther.util.AbstractPaginatedCollection;
+import com.github.sanctum.panther.util.Page;
+import com.github.sanctum.panther.util.TriadConsumer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -20,9 +22,9 @@ import org.bukkit.entity.Player;
 public final class AdvancedPagination<T> {
 
 	private final AbstractPaginatedCollection<T> collection;
-	private TripleWideConsumer<T, Map.Entry<Integer, Integer>, FancyMessage> format;
-	private WideConsumer<Player, FancyMessage> header;
-	private WideConsumer<Player, FancyMessage> footer;
+	private TriadConsumer<T, Map.Entry<Integer, Integer>, FancyMessage> format;
+	private BiConsumer<Player, FancyMessage> header;
+	private BiConsumer<Player, FancyMessage> footer;
 	private final Player player;
 
 	public AdvancedPagination(Player target, Collection<T> collection) {
@@ -58,15 +60,15 @@ public final class AdvancedPagination<T> {
 		this.player = target;
 	}
 
-	public void setHeader(WideConsumer<Player, FancyMessage> consumer) {
+	public void setHeader(BiConsumer<Player, FancyMessage> consumer) {
 		this.header = consumer;
 	}
 
-	public void setFooter(WideConsumer<Player, FancyMessage> consumer) {
+	public void setFooter(BiConsumer<Player, FancyMessage> consumer) {
 		this.footer = consumer;
 	}
 
-	public void setFormat(TripleWideConsumer<T, Map.Entry<Integer, Integer>, FancyMessage> messageConsumer) {
+	public void setFormat(TriadConsumer<T, Map.Entry<Integer, Integer>, FancyMessage> messageConsumer) {
 		this.format = messageConsumer;
 	}
 

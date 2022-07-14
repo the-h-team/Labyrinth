@@ -1,12 +1,12 @@
 package com.github.sanctum.labyrinth.command;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollectionBase;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
 import com.github.sanctum.labyrinth.interfacing.MessageInListener;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherCollectionBase;
+import com.github.sanctum.panther.container.PantherList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @author Hempfest
  */
-public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand> {
+public abstract class SubCommandList extends PantherCollectionBase<SubCommand> {
 	protected final Crossover parent;
 
 
@@ -130,7 +130,7 @@ public abstract class SubCommandList extends LabyrinthCollectionBase<SubCommand>
 		@NotNull
 		@Override
 		public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-			LabyrinthCollection<String> labels = new LabyrinthList<>();
+			PantherCollection<String> labels = new PantherList<>();
 			if (args.length > 0) {
 				if (SubCommandList.this instanceof MessageInListener) {
 					((MessageInListener)SubCommandList.this).onReceiveSuggestion(String.join(" ", args));

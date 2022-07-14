@@ -1,9 +1,8 @@
 package com.github.sanctum.labyrinth.event;
 
 import com.github.sanctum.labyrinth.data.Region;
-import com.github.sanctum.labyrinth.event.custom.Vent;
 
-public class RegionTraverseEvent extends Vent {
+public class RegionTraverseEvent extends DefaultEvent {
 
 	private final Region.Resident resident;
 

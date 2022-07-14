@@ -1,5 +1,8 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.MemorySpace;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.util.MapDecompression;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,7 +68,7 @@ public class AtlasMap implements Atlas {
 		SOURCE.forEach((key, value) -> {
 			if (deep) {
 				if (value instanceof Map) {
-					keys.addAll(MapDecompressionUtils.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toSet());
+					keys.addAll(MapDecompression.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toSet());
 				} else {
 					keys.add(key);
 				}
@@ -82,7 +85,7 @@ public class AtlasMap implements Atlas {
 		SOURCE.forEach((key, value) -> {
 			if (deep) {
 				if (value instanceof Map) {
-					map.putAll(MapDecompressionUtils.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toMap());
+					map.putAll(MapDecompression.getInstance().decompress(((Map<String, Object>) value).entrySet(), divider, null).toMap());
 				} else {
 					map.put(key, value);
 				}

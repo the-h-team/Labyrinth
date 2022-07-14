@@ -2,21 +2,22 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.data.container.ImmutableLabyrinthMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
-import com.github.sanctum.labyrinth.formatting.pagination.AbstractPaginatedCollection;
-import com.github.sanctum.labyrinth.formatting.string.SpecialID;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.container.ImmutablePantherMap;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherEntry;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.container.PantherSet;
+import com.github.sanctum.panther.util.AbstractPaginatedCollection;
+import com.github.sanctum.panther.util.SpecialID;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -373,9 +374,9 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	/*
 	 * Element section \/
 	 */
-	public static class Slide extends Menu.Element<InventoryElement, LabyrinthMap<Integer, ItemElement<?>>> {
+	public static class Slide extends Menu.Element<InventoryElement, PantherMap<Integer, ItemElement<?>>> {
 
-		private final LabyrinthMap<Integer, ItemElement<?>> items = new LabyrinthEntryMap<>();
+		private final PantherMap<Integer, ItemElement<?>> items = new PantherEntryMap<>();
 		private final InventoryElement parent;
 		private long changeInterval;
 
@@ -405,8 +406,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		@Override
-		public LabyrinthMap<Integer, ItemElement<?>> getAttachment() {
-			return ImmutableLabyrinthMap.of(items);
+		public PantherMap<Integer, ItemElement<?>> getAttachment() {
+			return ImmutablePantherMap.of(items);
 		}
 	}
 
@@ -475,7 +476,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 	public static class Animated extends InventoryElement {
 
-		private final LabyrinthMap<Integer, Slide> slides = new LabyrinthEntryMap<>();
+		private final PantherMap<Integer, Slide> slides = new PantherEntryMap<>();
 		private TaskPredicate<?>[] predicates = new TaskPredicate<?>[0];
 		private long repeat;
 
@@ -502,7 +503,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			return repeat;
 		}
 
-		public LabyrinthCollection<Slide> getSlides() {
+		public PantherCollection<Slide> getSlides() {
 			return slides.values();
 		}
 
@@ -514,7 +515,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		@Override
 		public synchronized void open(Player player) {
 			TaskScheduler.of(() -> {
-				slides.stream().sorted(Comparator.comparingInt(SimpleKeyedValue::getKey)).forEach(entry -> {
+				slides.stream().sorted(Comparator.comparingInt(PantherEntry.Modifiable::getKey)).forEach(entry -> {
 					TaskScheduler.of(() -> {
 						getElement().clear();
 						BorderElement<?> border = (BorderElement<?>) getElement(e -> e instanceof BorderElement);
@@ -972,7 +973,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 
 		private int containerId;
 
-		private final LabyrinthCollection<Player> visible = new LabyrinthSet<>();
+		private final PantherCollection<Player> visible = new PantherSet<>();
 
 		public Printable(String title, AnvilMechanics mechanics, Menu menu) {
 			super(StringUtils.use(title).translate(), menu, true);

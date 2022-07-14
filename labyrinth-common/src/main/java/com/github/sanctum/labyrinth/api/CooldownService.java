@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.ParsedTimeFormat;
+import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 

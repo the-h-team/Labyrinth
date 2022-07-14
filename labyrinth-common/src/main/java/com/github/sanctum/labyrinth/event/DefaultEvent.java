@@ -1,10 +1,11 @@
-package com.github.sanctum.labyrinth.event.custom;
+package com.github.sanctum.labyrinth.event;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
-import com.github.sanctum.labyrinth.library.AFK;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.ListUtils;
+import com.github.sanctum.panther.event.Vent;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,19 +36,20 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class DefaultEvent extends Vent {
 
 	public DefaultEvent() {
+		this(false);
 	}
 
 	public DefaultEvent(boolean isAsync) {
-		super(isAsync, 420);
+		super((Host) LabyrinthProvider.getInstance().getPluginInstance(), isAsync);
 	}
 
-	@Override
-	public String getName() {
-		return "Un-labeled";
+	public DefaultEvent(@NotNull State state, boolean isAsync) {
+		super((Host) LabyrinthProvider.getInstance().getPluginInstance(), state, isAsync);
 	}
 
 	public static class Player extends DefaultEvent {
@@ -59,14 +61,15 @@ public class DefaultEvent extends Vent {
 			this.player = p;
 		}
 
+		public Player(org.bukkit.entity.Player p, boolean isAsync, Object... args) {
+			super(State.IMMUTABLE, isAsync);
+			this.player = p;
+		}
+
 		public org.bukkit.entity.Player getPlayer() {
 			return this.player;
 		}
 
-		@Override
-		public String getName() {
-			return "Player";
-		}
 	}
 
 	public static class Join extends Player {
@@ -89,8 +92,7 @@ public class DefaultEvent extends Vent {
 	public static class Leave extends Player {
 
 		public Leave(org.bukkit.entity.Player p) {
-			super(p, false);
-			setState(CancelState.OFF);
+			super(p, false, 0);
 		}
 	}
 
@@ -107,10 +109,6 @@ public class DefaultEvent extends Vent {
 			return block;
 		}
 
-		@Override
-		public String getName() {
-			return "BlockBreak";
-		}
 	}
 
 	public static class Communication extends Player {
@@ -296,10 +294,6 @@ public class DefaultEvent extends Vent {
 			return block;
 		}
 
-		@Override
-		public String getName() {
-			return "BlockPlace";
-		}
 	}
 
 	public static class Interact extends Player {
@@ -367,7 +361,7 @@ public class DefaultEvent extends Vent {
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onChat(AsyncPlayerChatEvent e) {
 
-			Communication c = new Call<>(Runtime.Asynchronous, new Communication(e.getPlayer(), Communication.Type.CHAT, new Communication.ChatMessage(Bukkit.getOnlinePlayers(), e.getMessage(), e.getFormat().replace("<%1$s>", "").replace("%2$s", "")))).complete().join();
+			Communication c = new LabyrinthVentCall<>(new Communication(e.getPlayer(), Communication.Type.CHAT, new Communication.ChatMessage(Bukkit.getOnlinePlayers(), e.getMessage(), e.getFormat().replace("<%1$s>", "").replace("%2$s", "")))).schedule().join();
 
 			if (c.isCancelled()) {
 				e.setCancelled(true);
@@ -396,7 +390,7 @@ public class DefaultEvent extends Vent {
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onChat(PlayerCommandPreprocessEvent e) {
 
-			Communication c = new Call<>(Runtime.Asynchronous, new Communication(e.getPlayer(), Communication.Type.COMMAND, new Communication.ChatCommand(e.getMessage().split(" "), Bukkit.getOnlinePlayers()))).complete().join();
+			Communication c = new LabyrinthVentCall<>(new Communication(e.getPlayer(), Communication.Type.COMMAND, new Communication.ChatCommand(e.getMessage().split(" "), Bukkit.getOnlinePlayers()))).schedule().join();
 
 			if (c.isCancelled()) {
 				e.setCancelled(true);
@@ -423,7 +417,7 @@ public class DefaultEvent extends Vent {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockPlaceEvent e) {
-			BlockPlace b = new Call<>(Runtime.Synchronous, new BlockPlace(e.getPlayer(), e.getBlock())).run();
+			BlockPlace b = new LabyrinthVentCall<>(new BlockPlace(e.getPlayer(), e.getBlock())).run();
 
 			if (b.isCancelled()) {
 				e.setCancelled(true);
@@ -433,7 +427,7 @@ public class DefaultEvent extends Vent {
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBuild(BlockBreakEvent e) {
 
-			BlockBreak b = new Call<>(Runtime.Synchronous, new BlockBreak(e.getPlayer(), e.getBlock())).run();
+			BlockBreak b = new LabyrinthVentCall<>(new BlockBreak(e.getPlayer(), e.getBlock())).run();
 			if (b.isCancelled()) {
 				e.setCancelled(true);
 			}
@@ -443,18 +437,11 @@ public class DefaultEvent extends Vent {
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onJoin(PlayerJoinEvent event) {
 
-			Join e = new Call<>(Runtime.Synchronous, new Join(event.getPlayer())).run();
+			Join e = new LabyrinthVentCall<>(new Join(event.getPlayer())).run();
 
 
 			if (e.isCancelled()) {
 				event.getPlayer().kickPlayer(e.getKickMessage());
-				return;
-			}
-
-			if (LabyrinthOption.IMPL_AFK.enabled()) {
-
-				AFK.supply(e.getPlayer());
-
 			}
 
 		}
@@ -462,14 +449,14 @@ public class DefaultEvent extends Vent {
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onLeave(PlayerQuitEvent event) {
 
-			new Call<>(Runtime.Synchronous, new Leave(event.getPlayer())).run();
+			new LabyrinthVentCall<>(new Leave(event.getPlayer())).run();
 
 		}
 
 		@EventHandler
 		public void onInteract(PlayerInteractEvent e) {
 
-			Interact i = new Call<>(Runtime.Synchronous, new Interact(e.getAction(), e.useInteractedBlock(), e.getClickedBlock(), e.getItem(), e.getPlayer())).run();
+			Interact i = new LabyrinthVentCall<>(new Interact(e.getAction(), e.useInteractedBlock(), e.getClickedBlock(), e.getItem(), e.getPlayer())).run();
 
 			if (e.useInteractedBlock() != i.getResult()) {
 				e.setUseInteractedBlock(i.getResult());
@@ -484,7 +471,7 @@ public class DefaultEvent extends Vent {
 				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
 				org.bukkit.entity.Player p = (org.bukkit.entity.Player) event.getDamager();
 
-				PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new PlayerDamagePlayer(p, target, true)).run();
+				PlayerDamagePlayer e = new LabyrinthVentCall<>(new PlayerDamagePlayer(p, target, true)).run();
 
 				if (e.isCancelled()) {
 					event.setCancelled(true);
@@ -498,7 +485,7 @@ public class DefaultEvent extends Vent {
 				org.bukkit.entity.Player p = (org.bukkit.entity.Player) pr.getShooter();
 				org.bukkit.entity.Player target = (org.bukkit.entity.Player) event.getEntity();
 
-				PlayerDamagePlayer e = new Call<>(Runtime.Synchronous, new PlayerDamagePlayer(p, target, false)).run();
+				PlayerDamagePlayer e = new LabyrinthVentCall<>(new PlayerDamagePlayer(p, target, false)).run();
 
 				if (e.isCancelled()) {
 					event.setCancelled(true);

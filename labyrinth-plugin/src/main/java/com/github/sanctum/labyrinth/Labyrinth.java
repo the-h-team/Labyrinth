@@ -7,17 +7,15 @@ import com.github.sanctum.labyrinth.command.LabyrinthCommand;
 import com.github.sanctum.labyrinth.command.LabyrinthCommandToken;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
-import com.github.sanctum.labyrinth.data.Configurable;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
-import com.github.sanctum.labyrinth.data.FileType;
 import com.github.sanctum.labyrinth.data.ItemStackSerializable;
 import com.github.sanctum.labyrinth.data.LegacyConfigLocation;
 import com.github.sanctum.labyrinth.data.LocationSerializable;
 import com.github.sanctum.labyrinth.data.MessageSerializable;
 import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
-import com.github.sanctum.labyrinth.data.Node;
+import com.github.sanctum.labyrinth.data.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
@@ -28,12 +26,7 @@ import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
-import com.github.sanctum.labyrinth.event.custom.DefaultEvent;
-import com.github.sanctum.labyrinth.event.custom.LabeledAs;
-import com.github.sanctum.labyrinth.event.custom.Subscribe;
-import com.github.sanctum.labyrinth.event.custom.Vent;
-import com.github.sanctum.labyrinth.event.custom.VentMap;
-import com.github.sanctum.labyrinth.event.custom.VentMapImpl;
+import com.github.sanctum.labyrinth.event.DefaultEvent;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
@@ -51,12 +44,17 @@ import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
-import com.github.sanctum.labyrinth.placeholders.PlaceholderRegistration;
-import com.github.sanctum.labyrinth.placeholders.factory.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskChain;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.event.Subscribe;
+import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.event.VentMap;
+import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.file.Node;
+import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
+import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
@@ -117,8 +115,8 @@ import org.jetbrains.annotations.Nullable;
  * </p>
  * Sanctum, hereby disclaims all copyright interest in the original features of this spigot library.
  */
-@LabeledAs("Core")
-public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAPI, Message.Factory {
+@Vent.Link.Key("Core")
+public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, LabyrinthAPI, Message.Factory {
 
 	private final ServiceManager serviceManager = new ServiceManager();
 	private final KeyedServiceManager<Plugin> servicesManager = new KeyedServiceManager<>();
@@ -126,7 +124,6 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	private final Map<String, ActionComponent> components = new HashMap<>();
 	private final ConcurrentLinkedQueue<Integer> tasks = new ConcurrentLinkedQueue<>();
 	private final Set<PersistentContainer> containers = new HashSet<>();
-	private final VentMap eventMap = new VentMapImpl();
 	private final ItemCompost composter = new ItemCompost();
 	private final PrintManager manager = new PrintManager();
 	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
@@ -157,12 +154,11 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 		registerImplementations().deploy();
 		registerHandshake().deploy();
 		registerDefaultPlaceholders().deploy();
-
+		PantherLogger.getInstance().setLogger(getLogger());
 	}
 
 	Deployable<Labyrinth> registerServices() {
 		return Deployable.of(() -> {
-			serviceManager.load(Service.VENT);
 			serviceManager.load(Service.TASK);
 			serviceManager.load(Service.RECORDING);
 			serviceManager.load(Service.DATA);
@@ -235,7 +231,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	Deployable<Labyrinth> registerDefaultPlaceholders() {
 		return Deployable.of(() -> {
 			PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
-			registration.registerTranslation(new PlayerPlaceholders()).deploy();
+			registration.registerTranslation(new PlayerPlaceholders());
 			return this;
 		});
 	}
@@ -320,7 +316,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Override
 	@NotNull
 	public VentMap getEventMap() {
-		return eventMap;
+		return VentMap.getInstance();
 	}
 
 	@Override
@@ -352,7 +348,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	@Nullable
 	public Cooldown getCooldown(String id) {
 		return cooldowns.stream().filter(c -> c.getId().equals(id)).findFirst().orElseGet(() -> {
-			FileManager library = FileList.search(this).get("cooldowns", "Persistent", FileType.JSON);
+			FileManager library = FileList.search(this).get("cooldowns", "Persistent", Configurable.Type.JSON);
 			if (library.read(f -> f.isNode("Library." + id))) {
 
 				long time = library.read(f -> f.getLong("Library." + id + ".expiration"));
@@ -387,7 +383,7 @@ public final class Labyrinth extends JavaPlugin implements Listener, LabyrinthAP
 	public boolean remove(Cooldown cooldown) {
 		if (!cooldowns.contains(cooldown)) return false;
 		Node home = FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
-				.get("cooldowns", "Persistent", FileType.JSON)
+				.get("cooldowns", "Persistent", Configurable.Type.JSON)
 				.read(t -> t.getNode("Library." + cooldown.getId()));
 		home.delete();
 		home.save();

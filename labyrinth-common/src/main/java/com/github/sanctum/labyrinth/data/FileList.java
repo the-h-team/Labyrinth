@@ -1,18 +1,21 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.Configurable;
 import com.google.common.collect.ImmutableList;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.*;
 import org.jetbrains.annotations.Nullable;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Encapsulates a plugin for quick and easy file locating/management.
@@ -101,7 +104,7 @@ public class FileList {
 	/**
 	 * Copy a file of any type from this listings plugin.
 	 *
-	 * @param fileName the name of the file following the file type
+	 * @param fileName    the name of the file following the file type
 	 * @param fileManager the FileManager instance to copy to
 	 */
 	public void copy(String fileName, FileManager fileManager) {
@@ -113,7 +116,7 @@ public class FileList {
 	/**
 	 * Copy a yml file from this listings plugin to a manager of specification.
 	 *
-	 * @param ymlName the file name only
+	 * @param ymlName     the file name only
 	 * @param fileManager the FileManager instance to copy to
 	 */
 	public void copyYML(String ymlName, FileManager fileManager) {
@@ -124,7 +127,7 @@ public class FileList {
 	 * Copy a yml file from this listings plugin to a file of specification.
 	 *
 	 * @param ymlName the file name only
-	 * @param file the file instance to copy to
+	 * @param file    the file instance to copy to
 	 */
 	public void copyYML(String ymlName, File file) {
 		InputStream stream = this.plugin.getResource(ymlName + ".yml");
@@ -132,37 +135,8 @@ public class FileList {
 		copy(stream, file);
 	}
 
-	public @NotNull CustomFileOptional check(String name, String desc, FileExtension extension) {
+	public @NotNull CustomFileOptional check(String name, String desc, Configurable.Extension extension) {
 		return new CustomFileOptional(this, name, desc, extension);
-	}
-
-	/**
-	 * @deprecated Use {@link FileList#get(String)} instead!!
-	 */
-	@Deprecated
-	public FileManager find(String n) {
-		return get(n);
-	}
-
-	@Deprecated
-	public FileManager find(String n, String d) {
-		return get(n, d);
-	}
-
-	/**
-	 * @deprecated Use {@link FileList#get(String,String,FileExtension)} instead!!
-	 */
-	@Deprecated
-	public FileManager find(String n, String d, FileType t) {
-		return get(n , d, t);
-	}
-
-	/**
-	 * @deprecated Use {@link FileList#get(String,FileExtension)} instead!!
-	 */
-	@Deprecated
-	public FileManager find(String n, FileType t) {
-		return get(n, t);
 	}
 
 	/**
@@ -191,7 +165,7 @@ public class FileList {
 	 * @throws IllegalArgumentException if name is empty
 	 */
 	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
-		return get(name, desc, FileType.YAML);
+		return get(name, desc, YamlExtension.INSTANCE);
 	}
 
 	/**
@@ -205,7 +179,7 @@ public class FileList {
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager get(@NotNull final String name, final FileExtension data) throws IllegalArgumentException {
+	public @NotNull FileManager get(@NotNull final String name, final Configurable.Extension data) throws IllegalArgumentException {
 		return get(name, null, data);
 	}
 
@@ -221,7 +195,7 @@ public class FileList {
 	 * @return existing instance or create new Config
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc, final FileExtension type) throws IllegalArgumentException {
+	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc, final Configurable.Extension type) throws IllegalArgumentException {
 		// move up to fail fast
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
@@ -235,7 +209,7 @@ public class FileList {
 
 	/**
 	 * This method checks if the desired backing file exists without creating necessary parent locations.
-	 *
+	 * <p>
 	 * Do not use this method if the desired file type is not a yml file.
 	 *
 	 * @param name The name of the file.
@@ -244,18 +218,18 @@ public class FileList {
 	 */
 
 	public boolean exists(@NotNull final String name, @Nullable final String desc) {
-		return exists(name, desc, FileType.YAML);
+		return exists(name, desc, YamlExtension.INSTANCE);
 	}
 
 	/**
 	 * This method checks if the desired backing file exists without creating necessary parent locations.
 	 *
-	 * @param name The name of the file.
-	 * @param desc The directory the file belongs to.
+	 * @param name      The name of the file.
+	 * @param desc      The directory the file belongs to.
 	 * @param extension The file extension to use, Ex: "data" or "yml"
 	 * @return true if the target file exists. false if either the parent or target file location doesn't exist.
 	 */
-	public boolean exists(@NotNull final String name, @Nullable final String desc, @NotNull FileExtension extension) {
+	public boolean exists(@NotNull final String name, @Nullable final String desc, @NotNull Configurable.Extension extension) {
 		// move up to fail fast
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty!");
@@ -264,7 +238,7 @@ public class FileList {
 		if (!parent.exists()) {
 			return false;
 		}
-		File test = new File(parent, name.concat(extension.getExtension()));
+		File test = new File(parent, name.concat(extension.get()));
 		return test.exists();
 	}
 

@@ -1,13 +1,13 @@
 package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
 import com.github.sanctum.labyrinth.library.Applicable;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.util.OrdinalProcedure;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.lang.reflect.Field;
 import java.util.TimerTask;
 import org.bukkit.Bukkit;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 @Note("This class requires a no argument method with ordinal level 0")
 public abstract class Task extends TimerTask implements Applicable {
 
-	public static final TypeFlag<Task> FLAG = () -> Task.class;
+	public static final TypeAdapter<Task> FLAG = () -> Task.class;
 
 	public static final int SINGULAR = 0;
 	public static final int REPEATABLE = 1;
@@ -27,7 +27,7 @@ public abstract class Task extends TimerTask implements Applicable {
 	private static final Plugin host = LabyrinthProvider.getInstance().getPluginInstance();
 
 	protected TaskChain parent;
-	private final LabyrinthCollection<TaskPredicate<Task>> predicates = new LabyrinthList<>();
+	private final PantherCollection<TaskPredicate<Task>> predicates = new PantherList<>();
 	private final BukkitScheduler bukkitScheduler = Bukkit.getScheduler();
 	private final OrdinalProcedure<Task> ordinal;
 	private final String key;
@@ -69,7 +69,7 @@ public abstract class Task extends TimerTask implements Applicable {
 		return this.key;
 	}
 
-	public final <T> T cast(TypeFlag<T> flag) {
+	public final <T> T cast(TypeAdapter<T> flag) {
 		return flag.cast(this);
 	}
 

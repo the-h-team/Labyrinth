@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.data.reload;
 
 import com.github.sanctum.labyrinth.library.Deployable;
-import com.github.sanctum.labyrinth.library.EasyTypeAdapter;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.panther.util.EasyTypeAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

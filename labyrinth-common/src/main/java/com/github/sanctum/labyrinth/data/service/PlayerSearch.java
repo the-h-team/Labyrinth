@@ -1,22 +1,22 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.data.JsonAdapter;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthEntryMap;
-import com.github.sanctum.labyrinth.data.container.LabyrinthList;
-import com.github.sanctum.labyrinth.data.container.LabyrinthMap;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
-import com.github.sanctum.labyrinth.formatting.string.SpecialID;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherList;
+import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.util.SpecialID;
 import com.google.gson.JsonArray;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class PlayerSearch implements LabyrinthUser {
 
-	static final LabyrinthMap<String, PlayerSearch> lookups = new LabyrinthEntryMap<>();
+	static final PantherMap<String, PlayerSearch> lookups = new PantherEntryMap<>();
 
 	@Override
 	public abstract @NotNull String getName();
@@ -97,7 +97,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 					}
 					if (sb.length() > 0) {
 						JsonArray array = JsonAdapter.getJsonBuilder().create().fromJson(sb.toString(), JsonArray.class);
-						LabyrinthCollection<String> names = new LabyrinthList<>();
+						PantherCollection<String> names = new PantherList<>();
 						array.forEach(element -> {
 							if (element.isJsonObject()) {
 								names.add(element.getAsJsonObject().get("name").getAsString());
@@ -151,7 +151,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 		lookups.put(search.getName(), search);
 	}
 
-	public static LabyrinthCollection<PlayerSearch> values() {
+	public static PantherCollection<PlayerSearch> values() {
 		return lookups.values();
 	}
 

@@ -6,7 +6,7 @@ import com.github.sanctum.labyrinth.formatting.ScoreboardInstance;
 import com.github.sanctum.labyrinth.formatting.TablistInstance;
 import com.github.sanctum.labyrinth.interfacing.Nameable;
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.ParsedTimeFormat;
+import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.OfflinePlayer;

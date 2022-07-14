@@ -1,18 +1,16 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.annotation.FieldsFrom;
 import com.github.sanctum.labyrinth.data.LabyrinthPluginChannel;
 import com.github.sanctum.labyrinth.data.LabyrinthPluginMessage;
 import com.github.sanctum.labyrinth.data.LabyrinthPluginMessageEvent;
 import com.github.sanctum.labyrinth.data.service.Constant;
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Mailer;
-import com.github.sanctum.labyrinth.library.TypeFlag;
-import java.util.List;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
+import com.github.sanctum.panther.annotation.FieldsFrom;
+import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.util.TypeAdapter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +46,7 @@ public interface MessagingService extends Service, Message.Factory {
 	}
 
 	default <T> Deployable<Object> sendPluginMessage(Plugin plugin, T object, @FieldsFrom(LabyrinthPluginChannel.class) LabyrinthPluginChannel<?> channel) {
-		return Deployable.of(() -> new Vent.Call<>(new LabyrinthPluginMessageEvent(new LabyrinthPluginMessage<T>() {
+		return Deployable.of(() -> new LabyrinthVentCall<>(new LabyrinthPluginMessageEvent(new LabyrinthPluginMessage<T>() {
 			@Override
 			public Plugin getPlugin() {
 				return plugin;
@@ -62,7 +60,7 @@ public interface MessagingService extends Service, Message.Factory {
 	}
 
 	default LabyrinthPluginChannel<?>[] getDefaultPluginChannels() {
-		TypeFlag<LabyrinthPluginChannel<?>> flag = TypeFlag.get();
+		TypeAdapter<LabyrinthPluginChannel<?>> flag = TypeAdapter.get();
 		return Constant.values(flag.getType(), flag.getType()).toArray(new LabyrinthPluginChannel[0]);
 	}
 

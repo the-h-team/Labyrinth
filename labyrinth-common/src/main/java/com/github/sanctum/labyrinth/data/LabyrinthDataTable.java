@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public final class LabyrinthDataTable implements DataTable {
 
-	protected final Map<String, Object> tempSpace = new HashMap<>();
+	final Map<String, Object> tempSpace = new HashMap<>();
 
 	@Override
 	public <T> LabyrinthDataTable set(String key, T value) {

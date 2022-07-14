@@ -10,7 +10,7 @@ public class MenuClickEvent extends MenuInteractEvent {
 	final ItemElement<?> itemElement;
 	final ItemStack item;
 
-	public MenuClickEvent(@NotNull Player player, @NotNull Menu menu, @NotNull ItemElement<?> itemElement) {
+	public MenuClickEvent(@NotNull org.bukkit.entity.Player player, @NotNull Menu menu, @NotNull ItemElement<?> itemElement) {
 		super(Type.CLICK, player, menu);
 		this.itemElement = itemElement;
 		this.item = itemElement.getElement();

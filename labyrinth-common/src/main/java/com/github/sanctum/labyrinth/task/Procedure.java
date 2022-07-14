@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.library.Deployable;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,16 +14,16 @@ public interface Procedure<T> {
 
 	long getLastExecuted();
 
-	TypeFlag<T> getType();
+	TypeAdapter<T> getType();
 
-	static <T> Procedure<T> request(TypeFlag<T> flag) {
+	static <T> Procedure<T> request(TypeAdapter<T> flag) {
 		return new Procedure<T>() {
 
 			private final List<Consumer<T>> actions = new ArrayList<>();
 			private long used = 0L;
 
 			@Override
-			public TypeFlag<T> getType() {
+			public TypeAdapter<T> getType() {
 				return flag;
 			}
 

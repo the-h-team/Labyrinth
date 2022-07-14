@@ -1,14 +1,9 @@
 package com.github.sanctum.labyrinth.task;
 
-import com.github.sanctum.labyrinth.annotation.Ordinal;
-import com.github.sanctum.labyrinth.interfacing.OrdinalProcedure;
+import com.github.sanctum.panther.annotation.Ordinal;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 

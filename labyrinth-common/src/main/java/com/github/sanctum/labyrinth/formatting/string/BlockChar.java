@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.annotation.Note;
+
+import com.github.sanctum.panther.annotation.Note;
 
 /**
  * Utility class for block character constants.

@@ -4,7 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.gui.unity.event.MenuClickEvent;
 import com.github.sanctum.labyrinth.gui.unity.event.MenuDragItemEvent;
@@ -21,6 +21,7 @@ import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.event.Vent;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -898,7 +899,7 @@ public abstract class Menu {
 			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
 			ItemElement<?> element = getInventory().getItem(attempt);
 			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(attempt);
-			MenuDragItemEvent event = new Vent.Call<>(new MenuDragItemEvent(Menu.this, (Player) e.getWhoClicked(), element)).run();
+			MenuDragItemEvent event = new LabyrinthVentCall<>(new MenuDragItemEvent(Menu.this, (Player) e.getWhoClicked(), element)).run();
 			if (event.isCancelled()) e.setCancelled(true);
 
 		}
@@ -927,7 +928,7 @@ public abstract class Menu {
 					ItemStack item = e.getCurrentItem();
 					ItemElement<?> fixedSlotElement = getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
 					if (fixedSlotElement != null) {
-						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, fixedSlotElement)).run();
+						MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, Menu.this, fixedSlotElement)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 							return;
@@ -1071,7 +1072,7 @@ public abstract class Menu {
 
 						ItemElement<?> hotKeyElement = getInventory().getItem(e.getRawSlot());
 						if (hotKeyElement != null) {
-							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, hotKeyElement)).run();
+							MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, Menu.this, hotKeyElement)).run();
 							if (event.isCancelled()) {
 								e.setCancelled(true);
 								return;
@@ -1216,7 +1217,7 @@ public abstract class Menu {
 
 						ItemElement<?> otherElement = getInventory().getItem(item);
 						if (otherElement != null) {
-							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, otherElement)).run();
+							MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, Menu.this, otherElement)).run();
 							if (event.isCancelled()) {
 								e.setCancelled(true);
 								return;
@@ -1367,7 +1368,7 @@ public abstract class Menu {
 						if (!e.isCancelled()) {
 
 							ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCurrentItem());
-							MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, element1)).run();
+							MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, Menu.this, element1)).run();
 							if (event.isCancelled()) {
 								e.setCancelled(true);
 								return;
@@ -1410,7 +1411,7 @@ public abstract class Menu {
 				if (!e.isCancelled()) {
 
 					ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(e.getCursor());
-					MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, Menu.this, el)).run();
+					MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, Menu.this, el)).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 						return;
@@ -1519,7 +1520,7 @@ public abstract class Menu {
 			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
 			ItemElement<?> element = menu.getInventory().getItem(attempt);
 			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(attempt);
-			MenuDragItemEvent event = new Vent.Call<>(new MenuDragItemEvent(menu, (Player) e.getWhoClicked(), element)).run();
+			MenuDragItemEvent event = new LabyrinthVentCall<>(new MenuDragItemEvent(menu, (Player) e.getWhoClicked(), element)).run();
 			if (event.isCancelled()) e.setCancelled(true);
 		}
 
@@ -1538,7 +1539,7 @@ public abstract class Menu {
 				ItemStack item = e.getCurrentItem();
 				ItemElement<?> fixedSlotElement = menu.getInventory().getItem(i -> i.getSlot().isPresent() && e.getRawSlot() == i.getSlot().get() && item.getType() == i.getElement().getType() && i.getType() != ItemElement.ControlType.ITEM_FILLER && i.getType() != ItemElement.ControlType.ITEM_BORDER);
 				if (fixedSlotElement != null) {
-					MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, fixedSlotElement)).run();
+					MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, menu, fixedSlotElement)).run();
 					if (event.isCancelled()) {
 						e.setCancelled(true);
 						return;
@@ -1682,7 +1683,7 @@ public abstract class Menu {
 
 					ItemElement<?> hotKeyElement = menu.getInventory().getItem(e.getRawSlot());
 					if (hotKeyElement != null) {
-						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, hotKeyElement)).run();
+						MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, menu, hotKeyElement)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 							return;
@@ -1827,7 +1828,7 @@ public abstract class Menu {
 
 					ItemElement<?> otherElement = menu.getInventory().getItem(item);
 					if (otherElement != null) {
-						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, otherElement)).run();
+						MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, menu, otherElement)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 							return;
@@ -1978,7 +1979,7 @@ public abstract class Menu {
 					if (!e.isCancelled()) {
 
 						ItemElement<?> element1 = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCurrentItem());
-						MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, element1)).run();
+						MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, menu, element1)).run();
 						if (event.isCancelled()) {
 							e.setCancelled(true);
 							return;
@@ -2021,7 +2022,7 @@ public abstract class Menu {
 			if (!e.isCancelled()) {
 
 				ItemElement<?> el = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(e.getCursor());
-				MenuClickEvent event = new Vent.Call<>(new MenuClickEvent(p, menu, el)).run();
+				MenuClickEvent event = new LabyrinthVentCall<>(new MenuClickEvent(p, menu, el)).run();
 				if (event.isCancelled()) {
 					e.setCancelled(true);
 					return;

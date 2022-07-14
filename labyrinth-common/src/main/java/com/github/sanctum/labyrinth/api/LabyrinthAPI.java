@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.annotation.Note;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.library.ItemCompost;
+import com.github.sanctum.panther.annotation.Note;
 import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Logger;

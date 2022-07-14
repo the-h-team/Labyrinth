@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.library;
 
-import com.github.sanctum.labyrinth.data.container.LabyrinthCollection;
-import com.github.sanctum.labyrinth.data.container.LabyrinthSet;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.bukkit.Location;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ItemCompost {
 
-	private final LabyrinthCollection<ItemMatcher> matchers = new LabyrinthSet<>();
+	private final PantherCollection<ItemMatcher> matchers = new PantherSet<>();
 
 	public ItemCompost registerMatcher(@NotNull ItemMatcher matcher) {
 		matchers.add(matcher);

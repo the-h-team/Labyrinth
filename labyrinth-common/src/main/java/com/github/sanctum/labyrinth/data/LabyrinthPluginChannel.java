@@ -1,8 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.event.custom.Vent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.Message;
-import com.github.sanctum.labyrinth.library.TypeFlag;
+import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.util.TypeAdapter;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ public final class LabyrinthPluginChannel<T> {
 		this.name = name;
 	}
 
-	public LabyrinthPluginChannel(String name, TypeFlag<T> flag) {
+	public LabyrinthPluginChannel(String name, TypeAdapter<T> flag) {
 		this.tClass = flag.getType();
 		this.name = name;
 	}
@@ -45,7 +46,7 @@ public final class LabyrinthPluginChannel<T> {
 
 	public @Nullable Object getResponse(@NotNull Plugin sender, @NotNull Object o) {
 		try {
-			return new Vent.Call<>(LabyrinthPluginMessageEvent.class.getDeclaredConstructor(LabyrinthPluginMessage.class, LabyrinthPluginChannel.class).newInstance(new LabyrinthPluginMessage<Object>() {
+			return new LabyrinthVentCall<>(LabyrinthPluginMessageEvent.class.getDeclaredConstructor(LabyrinthPluginMessage.class, LabyrinthPluginChannel.class).newInstance(new LabyrinthPluginMessage<Object>() {
 				@Override
 				public Plugin getPlugin() {
 					return sender;

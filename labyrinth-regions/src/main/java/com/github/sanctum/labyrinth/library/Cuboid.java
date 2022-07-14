@@ -6,16 +6,14 @@ import com.github.sanctum.labyrinth.data.Region;
 import com.github.sanctum.labyrinth.data.RegionFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.data.service.Check;
-import com.github.sanctum.labyrinth.event.RegionBuildEvent;
-import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
-import com.github.sanctum.labyrinth.event.RegionPVPEvent;
-import com.github.sanctum.labyrinth.event.custom.Vent;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
+import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.event.VentMap;
+import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.HUID;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -28,7 +26,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-
 import java.util.Optional;
 import java.util.Random;
 
@@ -403,7 +400,7 @@ public interface Cuboid {
 
 		public boolean registerControlling(Cuboid.Flag flag) {
 			if (!getFlag(flag.getId()).isPresent()) {
-				LabyrinthProvider.getService(Service.VENT).subscribe(plugin, flag);
+				VentMap.getInstance().subscribe((Vent.Host) plugin, flag);
 				regionServices.getAll().forEach(region -> region.addFlag(flag));
 				return CACHE.add(flag);
 			}
