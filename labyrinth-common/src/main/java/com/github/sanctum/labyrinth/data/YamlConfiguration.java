@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -297,21 +299,31 @@ public class YamlConfiguration extends Configurable {
 		}
 
 		@Override
-		public Set<String> getKeys(boolean deep) {
-			YamlConfiguration yaml = (YamlConfiguration) config;
-			if (yaml.getConfig().isConfigurationSection(getPath())) {
-				return yaml.getConfig().getConfigurationSection(getPath()).getKeys(deep);
+		public <T> T get(Class<T> type) {
+			if (type.isAssignableFrom(ConfigurationSection.class)) {
+				YamlConfiguration conf = (YamlConfiguration) config;
+				return (T) conf.getConfig().getConfigurationSection(this.key);
 			}
-			return super.getKeys(deep);
+			return super.get(type);
+		}
+
+		@Override
+		public com.github.sanctum.panther.file.Node getNode(String node) {
+			return (com.github.sanctum.panther.file.Node) Optional.ofNullable(((YamlConfiguration)config).memory.get(this.key + "." + node)).orElseGet(() -> {
+				Configurable.Node n = new Node(key + "." + node, config);
+				((YamlConfiguration)config).memory.put(n.getPath(), n);
+				return n;
+			});
+		}
+
+		@Override
+		public Set<String> getKeys(boolean deep) {
+			return get(ConfigurationSection.class).getKeys(deep);
 		}
 
 		@Override
 		public Map<String, Object> getValues(boolean deep) {
-			YamlConfiguration yaml = (YamlConfiguration) config;
-			if (yaml.getConfig().isConfigurationSection(getPath())) {
-				return yaml.getConfig().getConfigurationSection(getPath()).getValues(deep);
-			}
-			return super.getValues(deep);
+			return get(ConfigurationSection.class).getValues(deep);
 		}
 	}
 

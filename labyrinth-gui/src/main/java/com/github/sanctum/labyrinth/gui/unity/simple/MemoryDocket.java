@@ -23,6 +23,7 @@ import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.file.MemorySpace;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.skulls.CustomHead;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

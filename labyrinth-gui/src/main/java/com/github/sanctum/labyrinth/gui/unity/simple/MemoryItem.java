@@ -8,6 +8,7 @@ import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.skulls.CustomHeadLoader;
 import java.util.Arrays;

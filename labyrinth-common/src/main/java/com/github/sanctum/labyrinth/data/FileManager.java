@@ -147,7 +147,7 @@ public class FileManager {
 	 * @return a new yml file containing all values from this json file.
 	 */
 	public @NotNull FileManager toYaml(@NotNull String name, String dir) {
-		FileManager n = FileList.search(plugin).get(name, dir, Configurable.Type.JSON);
+		FileManager n = FileList.search(plugin).get(name, dir, YamlExtension.INSTANCE);
 		Configurable c = getRoot();
 		if (c instanceof JsonConfiguration) {
 			n.write(copy(), false);

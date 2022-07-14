@@ -26,7 +26,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <templates.version>1.1.0</templates.version>
-        <panther.version>1.0.0.R3-SNAPSHOT</panther.version>
+        <panther.version>1.0.0.R5-SNAPSHOT</panther.version>
         <project.version>${version}</project.version>
     </properties>
 
