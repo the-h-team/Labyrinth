@@ -19,7 +19,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 	boolean paused;
 
 	public CollectionTask(String key) {
-		super(key, TaskService.SYNCHRONOUS);
+		super(key, REPEATABLE, TaskService.SYNCHRONOUS);
 	}
 
 	protected final String correctDecimal(String s) {

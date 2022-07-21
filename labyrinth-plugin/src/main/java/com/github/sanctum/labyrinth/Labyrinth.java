@@ -26,6 +26,7 @@ import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.data.service.VentMapImpl;
 import com.github.sanctum.labyrinth.event.DefaultEvent;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
@@ -54,6 +55,7 @@ import com.github.sanctum.panther.event.VentMap;
 import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
+import com.github.sanctum.panther.recursive.ServiceFactory;
 import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
@@ -138,6 +140,10 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 	@Override
 	public void onLoad() {
 		this.validCommandToken = new LabyrinthCommandToken(this);
+		PantherLogger.getInstance().setLogger(getLogger());
+		if (VentMap.getInstance() instanceof VentMap.Default) {
+			ServiceFactory.getInstance().getLoader(VentMap.class).supply(new VentMapImpl());
+		}
 	}
 
 	@Override
@@ -154,7 +160,6 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 		registerImplementations().deploy();
 		registerHandshake().deploy();
 		registerDefaultPlaceholders().deploy();
-		PantherLogger.getInstance().setLogger(getLogger());
 	}
 
 	Deployable<Labyrinth> registerServices() {

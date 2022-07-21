@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.ComponentChunk;
 import com.github.sanctum.labyrinth.formatting.TextChunk;
+import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.panther.util.HUID;
 import java.util.Date;
@@ -358,7 +359,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+											online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 										}
 									}
 								}
@@ -421,7 +422,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 									}
 								}
 							}
@@ -466,7 +467,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+											online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 										}
 									}
 								}
@@ -532,7 +533,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 									}
 								}
 							}
@@ -576,7 +577,7 @@ public class Mailer {
 											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 											online.spigot().sendMessage(base);
 										} else {
-											online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+											online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 										}
 									}
 								}
@@ -631,7 +632,7 @@ public class Mailer {
 										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
 										online.spigot().sendMessage(base);
 									} else {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 									}
 								}
 							}
@@ -668,7 +669,7 @@ public class Mailer {
 							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
 								for (Player online : Bukkit.getOnlinePlayers()) {
 									if (predicate.getAttachment().test(online)) {
-										online.sendMessage(StringUtils.use(predicate.getString()).translate((Player) toSender(result.getSource())));
+										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
 									}
 								}
 							}, HUID.randomID().toString(), date);
