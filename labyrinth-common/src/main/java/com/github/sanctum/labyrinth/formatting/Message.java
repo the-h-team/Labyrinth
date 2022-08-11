@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.util.Deployable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

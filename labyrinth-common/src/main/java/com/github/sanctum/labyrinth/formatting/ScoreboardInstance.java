@@ -2,16 +2,13 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
-import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherMap;
-import java.util.Set;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +100,7 @@ public interface ScoreboardInstance {
 					ScoreboardBuilder builder = now.getBuilder(now.getIndex());
 
 					update(builder.toScoreboard());
-				}).scheduleTimer(player.getName() + "-scoreboard", interval, interval, TaskPredicate.cancelAfter(player));
+				}).scheduleTimer(player.getName() + "-scoreboard", interval, interval, BukkitTaskPredicate.cancelAfter(player));
 				return this;
 			}
 

@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.TypeAdapter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

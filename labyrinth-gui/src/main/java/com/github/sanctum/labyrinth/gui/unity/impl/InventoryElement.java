@@ -1,14 +1,12 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.task.RenderedTask;
-import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.container.ImmutablePantherMap;
 import com.github.sanctum.panther.container.PantherCollection;
@@ -21,10 +19,8 @@ import com.github.sanctum.panther.util.SpecialID;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -477,7 +473,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public static class Animated extends InventoryElement {
 
 		private final PantherMap<Integer, Slide> slides = new PantherEntryMap<>();
-		private TaskPredicate<?>[] predicates = new TaskPredicate<?>[0];
+		private BukkitTaskPredicate<?>[] predicates = new BukkitTaskPredicate<?>[0];
 		private long repeat;
 
 		public Animated(String title, Menu menu) {
@@ -494,7 +490,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 			return this;
 		}
 
-		public Animated setPredicates(TaskPredicate<?>... predicates) {
+		public Animated setPredicates(BukkitTaskPredicate<?>... predicates) {
 			this.predicates = predicates;
 			return this;
 		}

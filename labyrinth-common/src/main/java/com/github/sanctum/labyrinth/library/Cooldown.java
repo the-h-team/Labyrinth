@@ -145,8 +145,10 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	 * Save the cooldown to Labyrinth cache.
 	 * <p>
 	 * Note: If a cooldown is already saved with the same id, it will be overwritten.
+	 * @throws IllegalStateException if the cooldown is already saved.
 	 */
-	public synchronized final void save() {
+	public synchronized final void save() throws IllegalStateException {
+		if (SERVICE.getCooldown(getId()) != null) throw new IllegalStateException("Cooldown already cached!");
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
 				.get("cooldowns", "Persistent", Configurable.Type.JSON)
 				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));

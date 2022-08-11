@@ -1,10 +1,8 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.library.Deployable;
-import com.google.gson.reflect.TypeToken;
+import com.github.sanctum.panther.util.Deployable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,7 +39,7 @@ final class UtilityAccessibleConstants<T> extends AccessibleConstants<T> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -66,7 +64,7 @@ final class UtilityAccessibleConstants<T> extends AccessibleConstants<T> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -112,7 +110,7 @@ final class UtilityAccessibleConstants<T> extends AccessibleConstants<T> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -155,7 +153,7 @@ final class UtilityAccessibleConstants<T> extends AccessibleConstants<T> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override

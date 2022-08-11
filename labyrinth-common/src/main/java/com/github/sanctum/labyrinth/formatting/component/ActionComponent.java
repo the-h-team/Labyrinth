@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.formatting.ToolTip;
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.panther.util.Applicable;
 
 public interface ActionComponent {
 

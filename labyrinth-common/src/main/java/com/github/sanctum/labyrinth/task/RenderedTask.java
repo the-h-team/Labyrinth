@@ -7,6 +7,8 @@ import com.github.sanctum.panther.annotation.FieldsFrom;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.annotation.Ordinal;
 import com.github.sanctum.panther.util.RandomID;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import java.util.Objects;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +39,7 @@ public interface RenderedTask {
 
 	@NotNull TimeWatch getLastRendered();
 
-	@NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent);
+	@NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent);
 
 	@Note("Check if this task is either scheduled on delay or concurrence.")
 	default boolean isConcurrent() {
@@ -114,11 +116,11 @@ public interface RenderedTask {
 
 			@Override
 			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(getTask().scheduledExecutionTime());
+				return TimeWatch.start(420L);
 			}
 
 			@Override
-			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+			public @NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent) {
 				data.listen(intent);
 				return this;
 			}
@@ -155,11 +157,11 @@ public interface RenderedTask {
 
 			@Override
 			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(getTask().scheduledExecutionTime());
+				return TimeWatch.start(420L);
 			}
 
 			@Override
-			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+			public @NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent) {
 				switch (getRuntime()) {
 					case 0:
 						TaskScheduler.of(() -> data.listen(intent)).schedule();
@@ -191,7 +193,7 @@ public interface RenderedTask {
 
 	static @NotNull RenderedTask of(Runnable data, @MagicConstant(valuesFromClass = TaskService.class) int runtime) {
 		return new RenderedTask() {
-			private final Task task = new Task(new RandomID().generate(), runtime, data) {
+			private final Task task = new Task(new RandomID().generate(), TaskChain.getChain(runtime), data) {
 				private static final long serialVersionUID = 87916092504686934L;
 			};
 
@@ -232,11 +234,11 @@ public interface RenderedTask {
 
 			@Override
 			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(getTask().scheduledExecutionTime());
+				return TimeWatch.start(420L);
 			}
 
 			@Override
-			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+			public @NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent) {
 				return this;
 			}
 		};
@@ -244,7 +246,7 @@ public interface RenderedTask {
 
 	static @NotNull RenderedTask of(Runnable data, @Nullable String key, @MagicConstant(valuesFromClass = TaskService.class) int runtime, long delay, long period) {
 		return new RenderedTask() {
-			private final Task task = new Task(key != null ? key : new RandomID().generate(), runtime, data) {
+			private final Task task = new Task(key != null ? key : new RandomID().generate(), TaskChain.getChain(runtime), data) {
 				private static final long serialVersionUID = 2948251326991055359L;
 			};
 
@@ -275,11 +277,11 @@ public interface RenderedTask {
 
 			@Override
 			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(getTask().scheduledExecutionTime());
+				return TimeWatch.start(420L);
 			}
 
 			@Override
-			public @NotNull RenderedTask dependOn(@NotNull TaskPredicate<? super Task> intent) {
+			public @NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent) {
 				switch (getRuntime()) {
 					case 0:
 						TaskScheduler.of(() -> task.listen(intent)).schedule();

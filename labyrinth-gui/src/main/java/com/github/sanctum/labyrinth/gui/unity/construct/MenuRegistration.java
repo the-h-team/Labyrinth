@@ -4,13 +4,13 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.container.PantherMap;
 import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.Deployable;
 import java.util.function.Supplier;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +50,7 @@ public interface MenuRegistration extends Service {
 						n.add(menu);
 						cache.put(menu.getHost(), n);
 					}
-				});
+				}, 0);
 			}
 
 			@Override
@@ -61,12 +61,12 @@ public interface MenuRegistration extends Service {
 						if (!menus.contains(menu)) throw new MenuNotCacheableException("Menu not cached.");
 						menus.remove(menu);
 					} else throw new MenuNotCacheableException("No menu's cached for plugin " + menu.getHost());
-				});
+				}, 0);
 			}
 
 			@Override
 			public @NotNull Deployable<PantherCollection<Menu>> get(@NotNull Plugin host) {
-				return Deployable.of(new PantherList<>(), list -> list.addAll(Check.forNull(cache.get(host), "No registrations logged for provided plugin.")));
+				return Deployable.of(new PantherList<>(), list -> list.addAll(Check.forNull(cache.get(host), "No registrations logged for provided plugin.")), 0);
 			}
 
 			@Override
@@ -81,7 +81,7 @@ public interface MenuRegistration extends Service {
 					}
 					return b.build();
 				}).orElse(new PantherList<>()), unused -> {
-				});
+				}, 0);
 			}
 
 			@Override
@@ -96,8 +96,7 @@ public interface MenuRegistration extends Service {
 					}
 					return null;
 				};
-				return Deployable.of(getter.get(), unused -> {
-				});
+				return Deployable.of(getter, 0);
 			}
 		});
 		services.load(type);

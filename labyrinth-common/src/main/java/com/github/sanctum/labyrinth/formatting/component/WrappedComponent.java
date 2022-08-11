@@ -3,7 +3,7 @@ package com.github.sanctum.labyrinth.formatting.component;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.panther.util.Applicable;
 import com.github.sanctum.panther.util.HUID;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;

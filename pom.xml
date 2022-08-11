@@ -26,7 +26,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <templates.version>1.1.0</templates.version>
-        <panther.version>1.0.0.R5-SNAPSHOT</panther.version>
+        <panther.version>1.0.0.R8-SNAPSHOT</panther.version>
         <project.version>${version}</project.version>
     </properties>
 
@@ -150,6 +150,27 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.github.the-h-team.Panther</groupId>
+                <artifactId>panther</artifactId>
+                <version>${panther.version}</version>
+                <scope>provided</scope>
+                <type>pom</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.dv8tion</groupId>
+                        <artifactId>JDA</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.code.gson</groupId>
+                        <artifactId>gson</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>com.googlecode.json-simple</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
@@ -194,21 +215,25 @@
             <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-common</artifactId>
             <version>${panther.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-containers</artifactId>
             <version>${panther.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-paste</artifactId>
             <version>${panther.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-placeholders</artifactId>
             <version>${panther.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>

@@ -8,7 +8,7 @@ import com.github.sanctum.labyrinth.data.service.Counter;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
-import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.file.MemorySpace;
 import com.github.sanctum.panther.util.HUID;
@@ -59,7 +59,7 @@ public abstract class CustomHead implements SkullObject {
 				HEADS.stream().filter(h -> h.getType() == SkullType.PLAYER).forEach(h -> TaskScheduler.of(() -> HEADS.remove(h)).schedule());
 				HEADS.addAll(CustomHead.Manager.loadOffline());
 
-			}).scheduleTimerAsync(HUID.randomID().toString(), 0, 88000, TaskPredicate.cancelAfter(task -> {
+			}).scheduleTimerAsync(HUID.randomID().toString(), 0, 88000, BukkitTaskPredicate.cancelAfter(task -> {
 				Plugin pl = Bukkit.getPluginManager().getPlugin("Labyrinth");
 				if (pl == null || !pl.isEnabled()) {
 					task.cancel();

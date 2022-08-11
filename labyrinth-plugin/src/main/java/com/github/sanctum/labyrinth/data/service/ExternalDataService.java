@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.FileList;
-import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +40,7 @@ public abstract class ExternalDataService {
 		private boolean shook;
 
 		Handshake(LabyrinthAPI instance) {
-			super("Labyrinth-Handshake", TaskService.SYNCHRONOUS);
+			super("Labyrinth-Handshake", TaskChain.getSynchronous());
 			this.instance = instance;
 			this.version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
 		}

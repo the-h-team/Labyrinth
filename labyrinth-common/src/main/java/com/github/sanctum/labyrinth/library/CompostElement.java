@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.panther.util.Deployable;
 import org.bukkit.inventory.Inventory;
 
 public interface CompostElement {

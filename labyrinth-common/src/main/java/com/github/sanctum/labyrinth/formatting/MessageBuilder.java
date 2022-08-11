@@ -2,8 +2,8 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.panther.annotation.Json;
+import com.github.sanctum.panther.util.Deployable;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -66,7 +66,7 @@ public class MessageBuilder extends Message {
 		return Deployable.of(null, unused -> LabyrinthProvider
 				.getService(Service.MESSENGER)
 				.getEmptyMailer(target)
-				.chat(build()).deploy());
+				.chat(build()).deploy(), 0);
 	}
 
 	@Override
@@ -74,12 +74,12 @@ public class MessageBuilder extends Message {
 		return Deployable.of(null, unused -> LabyrinthProvider
 				.getService(Service.MESSENGER)
 				.getEmptyMailer()
-				.announce(predicate, build()).deploy());
+				.announce(predicate, build()).deploy(), 0);
 	}
 
 	@Override
 	public Deployable<Void> clear() {
-		return Deployable.of(null, unused -> TEXT.clear());
+		return Deployable.of(null, unused -> TEXT.clear(), 0);
 	}
 
 	@NotNull

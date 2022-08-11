@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
-import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.util.Deployable;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 

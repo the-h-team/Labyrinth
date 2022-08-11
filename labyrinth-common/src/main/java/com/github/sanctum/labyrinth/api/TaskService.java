@@ -2,7 +2,8 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
-import com.github.sanctum.labyrinth.task.TaskChain;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public interface TaskService extends Service {
 	/**
 	 * Get the manager for all thread-safe tasks
 	 *
-	 * @return A {@link RenderedTask} & {@link com.github.sanctum.labyrinth.task.Task} manager.
+	 * @return A {@link RenderedTask} & {@link Task} manager.
 	 */
 	default TaskMonitor getTaskMonitor() {
 		return TaskMonitor.getLocalInstance();

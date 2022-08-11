@@ -4,6 +4,8 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.panther.util.OrdinalProcedure;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class TaskMonitor {
 
 	private static TaskMonitor instance;
-	protected final TypeAdapter<TaskPredicate<Task>[]> flagClass;
+	protected final TypeAdapter<BukkitTaskPredicate<Task>[]> flagClass;
 	protected final Map<Integer, TaskChain> map = new HashMap<>();
 
 	TaskMonitor() {
@@ -87,10 +89,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Runnable data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -98,10 +100,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Runnable data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Runnable data, String key, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -109,10 +111,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -120,10 +122,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Runnable data, String key, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -131,11 +133,11 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimer(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(Runnable data, String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -143,11 +145,11 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(Runnable data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(Runnable data, String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -211,10 +213,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Task data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Task data, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.SYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -222,10 +224,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLater(Task data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(Task data, String key, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -233,10 +235,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Task data, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, null, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -244,10 +246,10 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(Task data, String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(Task data, String key, long delay, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, -1);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -255,11 +257,11 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimer(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(Task data, String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.SYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();
@@ -267,11 +269,11 @@ public class TaskMonitor {
 		return execution;
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(Task data, String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(Task data, String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		RenderedTask execution = RenderedTask.of(data, key, TaskService.ASYNCHRONOUS, delay * 50, period * 50);
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		execution.dependOn(TaskPredicate.reduceEmpty());
-		for (TaskPredicate<Task> flag : flagClass.cast(flags)) {
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		execution.dependOn(BukkitTaskPredicate.reduceEmpty());
+		for (BukkitTaskPredicate<Task> flag : flagClass.cast(flags)) {
 			execution.dependOn(flag);
 		}
 		Task task = execution.getTask();

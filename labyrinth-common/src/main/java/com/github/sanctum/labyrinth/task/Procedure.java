@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.task;
 
-import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +35,10 @@ public interface Procedure<T> {
 
 			@Override
 			public Deployable<Void> run(T source) {
-				return Deployable.of(null, unused -> {
+				return Deployable.of(() -> {
 					actions.forEach(a -> a.accept(source));
 					this.used = System.currentTimeMillis();
-				});
+				}, 0);
 			}
 
 			@Override

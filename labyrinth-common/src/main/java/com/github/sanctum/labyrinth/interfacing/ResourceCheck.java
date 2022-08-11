@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.interfacing;
 
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.panther.util.Applicable;
 import org.jetbrains.annotations.NotNull;
 
 public interface ResourceCheck extends Applicable {

@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.task;
 
-import com.github.sanctum.labyrinth.library.Applicable;
 import org.jetbrains.annotations.NotNull;
 
 final class NormalTaskScheduler implements TaskScheduler {
@@ -44,27 +43,27 @@ final class NormalTaskScheduler implements TaskScheduler {
 		return manager.scheduleTimerAsync(data, key, delay, period);
 	}
 
-	public @NotNull RenderedTask scheduleLater(long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(long delay, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleLater(data, delay, flags);
 	}
 
-	public @NotNull RenderedTask scheduleLater(String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(String key, long delay, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleLater(data, key, delay, flags);
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(long delay, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleLaterAsync(data, delay, flags);
 	}
 
-	public @NotNull RenderedTask scheduleLaterAsync(String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(String key, long delay, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleLaterAsync(data, key, delay, flags);
 	}
 
-	public @NotNull RenderedTask scheduleTimer(String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleTimer(data, key, delay, period, flags);
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return manager.scheduleTimerAsync(data, key, delay, period, flags);
 	}
 

@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data.reload;
 
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.EasyTypeAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public class PrintManager {
 
 			@Override
 			public @NotNull Deployable<Map<String, Object>> clear() {
-				return Deployable.of(map, Map::clear);
+				return Deployable.of(map, Map::clear, 0);
 			}
 
 			@Override
@@ -95,12 +95,12 @@ public class PrintManager {
 					if (test.containsKey(key)) {
 						map.put(key, test.get(key));
 					} else throw new IllegalArgumentException("Cannot reload non-existent directories!");
-				});
+				}, 0);
 			}
 
 			@Override
 			public @NotNull Deployable<FingerPrint> reload() {
-				return Deployable.of(this, print -> print.clear().deploy(m -> m.putAll(objects.accept())));
+				return Deployable.of(this, print -> print.clear().deploy(m -> m.putAll(objects.accept())), 0);
 			}
 		};
 		prints.put(key.toString(), print);

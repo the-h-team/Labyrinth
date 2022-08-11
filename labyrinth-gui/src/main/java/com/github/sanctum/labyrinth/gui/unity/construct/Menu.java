@@ -1,8 +1,6 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
@@ -16,17 +14,14 @@ import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
-import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.util.Task;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +31,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -898,7 +892,8 @@ public abstract class Menu {
 
 			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
 			ItemElement<?> element = getInventory().getItem(attempt);
-			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(attempt);
+			if (element == null)
+				element = new ItemElement<>().setPlayerAdded(true).setParent(getInventory()).setElement(attempt);
 			MenuDragItemEvent event = new LabyrinthVentCall<>(new MenuDragItemEvent(Menu.this, (Player) e.getWhoClicked(), element)).run();
 			if (event.isCancelled()) e.setCancelled(true);
 
@@ -1461,8 +1456,8 @@ public abstract class Menu {
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClose(InventoryCloseEvent e) {
 			if (!(e.getInventory().getHolder() instanceof Instance)) return;
-			if (!(e.getPlayer() instanceof Player))	return;
-			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			if (!(e.getPlayer() instanceof Player)) return;
+			Menu menu = ((Instance) e.getInventory().getHolder()).getMenu();
 			if (menu.getType() != Type.PRINTABLE) {
 				if (e.getView().getTopInventory().getSize() < menu.rows.slots) return;
 			}
@@ -1499,7 +1494,7 @@ public abstract class Menu {
 		public void onOpen(InventoryOpenEvent e) {
 			if (!(e.getInventory().getHolder() instanceof Instance)) return;
 			if (!(e.getPlayer() instanceof Player)) return;
-			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			Menu menu = ((Instance) e.getInventory().getHolder()).getMenu();
 			if (menu.open != null) {
 				OpeningElement element = new OpeningElement(menu, (Player) e.getPlayer(), e.getView());
 
@@ -1515,11 +1510,12 @@ public abstract class Menu {
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onDrag(InventoryDragEvent e) {
 			if (!(e.getInventory().getHolder() instanceof Instance)) return;
-			if (!(e.getWhoClicked() instanceof Player))	return;
-			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			if (!(e.getWhoClicked() instanceof Player)) return;
+			Menu menu = ((Instance) e.getInventory().getHolder()).getMenu();
 			ItemStack attempt = e.getCursor() != null ? e.getCursor() : e.getOldCursor();
 			ItemElement<?> element = menu.getInventory().getItem(attempt);
-			if (element == null) element = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(attempt);
+			if (element == null)
+				element = new ItemElement<>().setPlayerAdded(true).setParent(menu.getInventory()).setElement(attempt);
 			MenuDragItemEvent event = new LabyrinthVentCall<>(new MenuDragItemEvent(menu, (Player) e.getWhoClicked(), element)).run();
 			if (event.isCancelled()) e.setCancelled(true);
 		}
@@ -1527,8 +1523,8 @@ public abstract class Menu {
 		@EventHandler(priority = EventPriority.NORMAL)
 		public void onClick(InventoryClickEvent e) {
 			if (!(e.getInventory().getHolder() instanceof Instance)) return;
-			if (!(e.getWhoClicked() instanceof Player))	return;
-			Menu menu = ((Instance)e.getInventory().getHolder()).getMenu();
+			if (!(e.getWhoClicked() instanceof Player)) return;
+			Menu menu = ((Instance) e.getInventory().getHolder()).getMenu();
 
 			if (menu.getType() != Type.PRINTABLE) {
 				if (e.getView().getTopInventory().getSize() < menu.rows.slots) return;

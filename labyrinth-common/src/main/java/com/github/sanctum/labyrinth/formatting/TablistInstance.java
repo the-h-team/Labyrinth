@@ -4,6 +4,9 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -209,22 +212,31 @@ public interface TablistInstance {
 			@Override
 			public boolean enable(Consumer<Player> consumer, TimeUnit unit, long period) {
 				if (isEnabled()) return false;
-				LabyrinthProvider.getInstance().getScheduler(TaskService.SYNCHRONOUS).repeat(task1 -> {
 
-					if (getHolder() == null || !getHolder().isOnline()) {
-						task1.cancel();
-						return;
+
+				Task task = new Task(getHolder().getName() + "-tablist", Task.REPEATABLE, TaskChain.getSynchronous()){
+					private static final long serialVersionUID = -3924140918741032392L;
+
+					@Ordinal
+					public void onRun() {
+
+						if (getHolder() == null || !getHolder().isOnline()) {
+							cancel();
+							return;
+						}
+
+						getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
+							tabGroup.nextDisplayIndex(TabInfo.HEADER);
+							tabGroup.nextDisplayIndex(TabInfo.FOOTER);
+							TabInfo header = tabGroup.getHeader(tabGroup.getCurrentHeaderIndex());
+							TabInfo footer = tabGroup.getFooter(tabGroup.getCurrentFooterIndex());
+							getHolder().setPlayerListHeaderFooter(StringUtils.use(header.toString()).translate(getHolder()), StringUtils.use(footer.toString()).translate(getHolder()));
+							consumer.accept(getHolder());
+						});
 					}
 
-					getGroups().stream().filter(TabGroup::isActive).findFirst().ifPresent(tabGroup -> {
-						tabGroup.nextDisplayIndex(TabInfo.HEADER);
-						tabGroup.nextDisplayIndex(TabInfo.FOOTER);
-						TabInfo header = tabGroup.getHeader(tabGroup.getCurrentHeaderIndex());
-						TabInfo footer = tabGroup.getFooter(tabGroup.getCurrentFooterIndex());
-						getHolder().setPlayerListHeaderFooter(StringUtils.use(header.toString()).translate(getHolder()), StringUtils.use(footer.toString()).translate(getHolder()));
-						consumer.accept(getHolder());
-					});
-				}, getHolder().getName() + "-tablist", unit.toMillis(period), unit.toMillis(period));
+				};
+				TaskChain.getSynchronous().repeat(task, unit.toMillis(period), unit.toMillis(period));
 				return true;
 			}
 

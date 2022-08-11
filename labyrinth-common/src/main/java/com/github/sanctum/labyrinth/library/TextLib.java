@@ -4,6 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.component.NewComponent;
 import com.github.sanctum.labyrinth.formatting.component.OldComponent;
 import com.github.sanctum.labyrinth.formatting.component.WrappedComponent;
+import com.github.sanctum.panther.util.Applicable;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Content;

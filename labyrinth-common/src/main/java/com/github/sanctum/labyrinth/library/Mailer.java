@@ -8,6 +8,8 @@ import com.github.sanctum.labyrinth.formatting.ComponentChunk;
 import com.github.sanctum.labyrinth.formatting.TextChunk;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.panther.util.Check;
+import com.github.sanctum.panther.util.Deployable;
+import com.github.sanctum.panther.util.DeployableMapping;
 import com.github.sanctum.panther.util.HUID;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
@@ -395,116 +397,8 @@ public class Mailer {
 		}
 
 		@Override
-		public Deployable<Mailer> queue(Consumer<? super Mailer> consumer, Date date) {
-			if (result.isForPlayer()) {
-				if (date == null) {
-					switch (type) {
-						case ACTION:
-							if (text != null) {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
-							} else {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
-							}
-							consumer.accept(Mailer.this);
-							break;
-						case CHAT:
-							if (components != null) {
-								((Player)toSender(result.getSource())).spigot().sendMessage(components);
-							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
-							}
-							consumer.accept(Mailer.this);
-							break;
-						case BROADCAST:
-							for (Player online : Bukkit.getOnlinePlayers()) {
-								if (predicate.getAttachment().test(online)) {
-									if (Check.isJson(predicate.getString())) {
-										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
-										online.spigot().sendMessage(base);
-									} else {
-										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
-									}
-								}
-							}
-							consumer.accept(Mailer.this);
-							break;
-						case TITLE:
-							Player player = ((Player) toSender(result.getSource()));
-							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
-							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
-							}
-							consumer.accept(Mailer.this);
-							break;
-					}
-				} else {
-					switch (type) {
-						case ACTION:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								if (text != null) {
-									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
-								} else {
-									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
-								}
-								consumer.accept(Mailer.this);
-							}, HUID.randomID().toString(), date);
-						case CHAT:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								if (components != null) {
-									((Player)toSender(result.getSource())).spigot().sendMessage(components);
-								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
-								}
-								consumer.accept(Mailer.this);
-							}, HUID.randomID().toString(), date);
-							break;
-						case BROADCAST:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								for (Player online : Bukkit.getOnlinePlayers()) {
-									if (predicate.getAttachment().test(online)) {
-										if (Check.isJson(predicate.getString())) {
-											BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
-											online.spigot().sendMessage(base);
-										} else {
-											online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
-										}
-									}
-								}
-								consumer.accept(Mailer.this);
-							}, HUID.randomID().toString(), date);
-							break;
-						case TITLE:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								Player player = ((Player) toSender(result.getSource()));
-								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
-								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
-								}
-								consumer.accept(Mailer.this);
-							}, HUID.randomID().toString(), date);
-							break;
-					}
-				}
-			} else {
-				Plugin plugin = toPlugin(result.getSource());
-				if (date == null) {
-					plugin.getLogger().log(this.level, this.text);
-					consumer.accept(Mailer.this);
-				} else {
-					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-						plugin.getLogger().log(this.level, this.text);
-						consumer.accept(Mailer.this);
-					}, HUID.randomID().toString(), date);
-				}
-			}
-			return this;
-		}
-
-		@Override
-		public <O> DeployableMapping<O> mapLabyrinth(Function<? super Mailer, ? extends O> mapper) {
-			return new DeployableMapping<>(() -> Mailer.this, (Function<? super Object, ? extends O>) mapper);
+		public <O> DeployableMapping<O> map(@NotNull Function<? super Mailer, ? extends O> mapper) {
+			return null;
 		}
 
 		@Override
@@ -601,97 +495,6 @@ public class Mailer {
 					plugin.getLogger().log(this.level, this.text);
 				} else {
 					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> plugin.getLogger().log(this.level, this.text), HUID.randomID().toString(), timeout);
-				}
-			}
-			return this;
-		}
-
-		@Override
-		public Deployable<Mailer> queue(Date date) {
-			if (result.isForPlayer()) {
-				if (date == null) {
-					switch (type) {
-						case ACTION:
-							if (text != null) {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
-							} else {
-								((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
-							}
-							break;
-						case CHAT:
-							if (components != null) {
-								((Player)toSender(result.getSource())).spigot().sendMessage(components);
-							} else {
-								toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
-							}
-							break;
-						case BROADCAST:
-							for (Player online : Bukkit.getOnlinePlayers()) {
-								if (predicate.getAttachment().test(online)) {
-									if (Check.isJson(predicate.getString())) {
-										BaseComponent[] base = new FancyMessage().append(predicate.getString()).build();
-										online.spigot().sendMessage(base);
-									} else {
-										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
-									}
-								}
-							}
-							break;
-						case TITLE:
-							Player player = ((Player) toSender(result.getSource()));
-							if (this.title.getAttachment() != null) {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
-							} else {
-								player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
-							}
-							break;
-					}
-				} else {
-					switch (type) {
-						case ACTION:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								if (text != null) {
-									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtils.use(this.text).translate((Player) toSender(result.getSource()))));
-								} else {
-									((Player) toSender(result.getSource())).spigot().sendMessage(ChatMessageType.ACTION_BAR, new FancyMessage().append(new ComponentChunk(components)).build());
-								}
-							}, HUID.randomID().toString(), date);
-						case CHAT:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								if (components != null) {
-									((Player)toSender(result.getSource())).spigot().sendMessage(components);
-								} else {
-									toSender(result.getSource()).sendMessage(StringUtils.use(this.text).translate((Player) toSender(result.getSource())));
-								}
-							}, HUID.randomID().toString(), date);
-							break;
-						case BROADCAST:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								for (Player online : Bukkit.getOnlinePlayers()) {
-									if (predicate.getAttachment().test(online)) {
-										online.sendMessage(new FormattedString(predicate.getString()).translate(result.getSource()).color().get());
-									}
-								}
-							}, HUID.randomID().toString(), date);
-							break;
-						case TITLE:
-							LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> {
-								Player player = ((Player) toSender(result.getSource()));
-								if (this.title.getAttachment() != null) {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), StringUtils.use(this.title.getAttachment()).translate((Player) toSender(result.getSource())), 60, 60, 60);
-								} else {
-									player.sendTitle(StringUtils.use(this.title.getString()).translate((Player) toSender(result.getSource())), "", 60, 60, 60);
-								}
-							}, HUID.randomID().toString(), date);
-							break;
-					}
-				}
-			} else {
-				Plugin plugin = toPlugin(result.getSource());
-				if (date == null) {
-					plugin.getLogger().log(this.level, this.text);
-				} else {
-					LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.SYNCHRONOUS).wait(() -> plugin.getLogger().log(this.level, this.text), HUID.randomID().toString(), date);
 				}
 			}
 			return this;

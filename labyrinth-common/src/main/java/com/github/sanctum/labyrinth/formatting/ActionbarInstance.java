@@ -2,14 +2,13 @@ package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.task.RenderedTask;
-import com.github.sanctum.labyrinth.task.Task;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
-import com.github.sanctum.labyrinth.task.TaskPredicate;
+import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import com.github.sanctum.panther.event.Vent;
+import com.github.sanctum.panther.util.Deployable;
+import com.github.sanctum.panther.util.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
@@ -102,7 +101,7 @@ public interface ActionbarInstance {
 						this.repetition = e.getRepetition();
 					}
 					return e;
-				});
+				}, 0);
 			}
 
 			@Override
@@ -121,7 +120,7 @@ public interface ActionbarInstance {
 						this.text = e.getText();
 					}
 					return e;
-				});
+				}, 0);
 			}
 
 			@Override
@@ -136,7 +135,7 @@ public interface ActionbarInstance {
 							FancyMessage translation = new FancyMessage().append(chunk);
 							Mailer.empty(getHolder()).action(translation.build()).deploy();
 						}).schedule();
-					});
+					}, 0);
 				}
 				return Deployable.of(() -> {
 					this.paused = false;
@@ -145,7 +144,7 @@ public interface ActionbarInstance {
 						chunk.map(s -> new FormattedString(s).translate(getHolder()).get());
 						FancyMessage translation = new FancyMessage().append(chunk);
 						Mailer.empty(getHolder()).action(translation.build()).deploy();
-					}).scheduleTimer(getHolder().getName() + ";Action-bar", 0, repetition, TaskPredicate.cancelAfter(task -> {
+					}).scheduleTimer(getHolder().getName() + ";Action-bar", 0, repetition, BukkitTaskPredicate.cancelAfter(task -> {
 						if (holder == null || !getHolder().isOnline()) {
 							stop();
 							task.cancel();
@@ -153,7 +152,7 @@ public interface ActionbarInstance {
 						}
 						return true;
 					}));
-				});
+				}, 0);
 			}
 
 			@Override

@@ -25,6 +25,7 @@ import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.skulls.CustomHead;
+import com.github.sanctum.skulls.SkullType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -384,7 +385,8 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 			String name = local ? uniqueDataConverter.apply(nameHolder, uniqueData) : dataConverter.apply(nameHolder, (T) args[0]);
 			PlayerSearch search = PlayerSearch.of(name);
 			if (search != null) {
-				item.setElement(edit -> edit.setItem(CustomHead.Manager.get(search.getPlayer())).build());
+				ItemStack head = CustomHead.Manager.get(search.getPlayer());
+				item.setElement(edit -> edit.setItem(head != null ? head : SkullType.PLAYER.get()).build());
 				if (built.hasItemMeta()) {
 					if (built.getItemMeta().hasDisplayName()) {
 						item.setElement(edit -> edit.setTitle(built.getItemMeta().getDisplayName()).build());

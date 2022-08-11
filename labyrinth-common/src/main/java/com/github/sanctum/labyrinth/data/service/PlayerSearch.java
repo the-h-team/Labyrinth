@@ -7,7 +7,6 @@ import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.annotation.Note;
@@ -16,6 +15,7 @@ import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.container.PantherMap;
 import com.github.sanctum.panther.file.JsonAdapter;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.SpecialID;
 import com.google.gson.JsonArray;
 import java.io.BufferedReader;
@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -70,42 +71,45 @@ public abstract class PlayerSearch implements LabyrinthUser {
 				this.isOnlineMode = Bukkit.getOnlineMode();
 				this.name = s;
 				this.reference = player.getUniqueId();
-				TaskScheduler.of(() -> {
-					try {
-						this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
-						};
-					} catch (Exception ignored) {}
-				}).scheduleAsync().next(() -> {
-					URL url;
-					BufferedReader in = null;
-					StringBuilder sb = new StringBuilder();
-					try {
-						url = new URL("https://api.mojang.com/user/profiles/" + reference.toString() + "/names");
-						in = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-						String str;
-						while ((str = in.readLine()) != null) {
-							sb.append(str);
-						}
-					} catch (Exception ignored) {
-					} finally {
+				if (StringUtils.isAlphanumeric(name)) {
+					TaskScheduler.of(() -> {
 						try {
-							if (in != null) {
-								in.close();
-							}
-						} catch (IOException ignored) {
+							this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {
+							};
+						} catch (Exception ignored) {
 						}
-					}
-					if (sb.length() > 0) {
-						JsonArray array = JsonAdapter.getJsonBuilder().create().fromJson(sb.toString(), JsonArray.class);
-						PantherCollection<String> names = new PantherList<>();
-						array.forEach(element -> {
-							if (element.isJsonObject()) {
-								names.add(element.getAsJsonObject().get("name").getAsString());
+					}).scheduleAsync().next(() -> {
+						URL url;
+						BufferedReader in = null;
+						StringBuilder sb = new StringBuilder();
+						try {
+							url = new URL("https://api.mojang.com/user/profiles/" + reference.toString() + "/names");
+							in = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+							String str;
+							while ((str = in.readLine()) != null) {
+								sb.append(str);
 							}
-						});
-						this.names = names.stream().toArray(String[]::new);
-					}
-				}).scheduleAsync();
+						} catch (Exception ignored) {
+						} finally {
+							try {
+								if (in != null) {
+									in.close();
+								}
+							} catch (IOException ignored) {
+							}
+						}
+						if (sb.length() > 0) {
+							JsonArray array = JsonAdapter.getJsonBuilder().create().fromJson(sb.toString(), JsonArray.class);
+							PantherCollection<String> names = new PantherList<>();
+							array.forEach(element -> {
+								if (element.isJsonObject()) {
+									names.add(element.getAsJsonObject().get("name").getAsString());
+								}
+							});
+							this.names = names.stream().toArray(String[]::new);
+						}
+					}).scheduleAsync();
+				} else this.names = new String[0];
 			}
 
 			@Override
@@ -161,21 +165,28 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			final OfflinePlayer[] players = Bukkit.getOfflinePlayers();
 			final LabyrinthAPI api = LabyrinthProvider.getInstance();
 			if (players.length >= 500) {
-				CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
-				api.getLogger().warning("- Whoa large amounts of people, splitting the workload...");
-				api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
-				while (cache.getCompletion() < 100) {
-					try {
-						Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+				if (players.length >= 1000) {
+					int runtime = TaskService.SYNCHRONOUS;
+					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, runtime, PlayerSearch::of);
+					api.getLogger().warning("- Whoa large amounts of registered players, splitting the workload...");
+					api.getScheduler(runtime).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
+				} else {
+					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
+					api.getLogger().warning("- A-lot of registered players, splitting the workload...");
+					api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
+					while (cache.getCompletion() < 100) {
+						try {
+							Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			} else {
 				for (OfflinePlayer op : players) PlayerSearch.of(op);
 			}
 			return null;
-		});
+		}, 0);
 	}
 
 }

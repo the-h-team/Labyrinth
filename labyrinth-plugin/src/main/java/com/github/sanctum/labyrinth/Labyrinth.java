@@ -32,10 +32,8 @@ import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
 import com.github.sanctum.labyrinth.interfacing.Token;
-import com.github.sanctum.labyrinth.library.Applicable;
 import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
@@ -45,9 +43,7 @@ import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
-import com.github.sanctum.labyrinth.task.AsynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
-import com.github.sanctum.labyrinth.task.TaskChain;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.event.Subscribe;
 import com.github.sanctum.panther.event.Vent;
@@ -56,7 +52,10 @@ import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
 import com.github.sanctum.panther.recursive.ServiceFactory;
+import com.github.sanctum.panther.util.Applicable;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.PantherLogger;
+import com.github.sanctum.panther.util.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
@@ -128,8 +127,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 	private final Set<PersistentContainer> containers = new HashSet<>();
 	private final ItemCompost composter = new ItemCompost();
 	private final PrintManager manager = new PrintManager();
-	private final AsynchronousTaskChain ataskManager = new AsynchronousTaskChain();
-	private final SynchronousTaskChain staskManager = new SynchronousTaskChain(this);
+	private final SynchronousTaskChain syncChain = new SynchronousTaskChain(this);
 	private Token<Labyrinth> validCommandToken;
 	private boolean cachedIsLegacy;
 	private boolean cachedIsNew;
@@ -139,6 +137,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	@Override
 	public void onLoad() {
+		TaskChain.setChain(0, new SynchronousTaskChain(this));
 		this.validCommandToken = new LabyrinthCommandToken(this);
 		PantherLogger.getInstance().setLogger(getLogger());
 		if (VentMap.getInstance() instanceof VentMap.Default) {
@@ -189,7 +188,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			cachedIsNew = LabyrinthAPI.super.isNew();
 			cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
 			return this;
-		});
+		}, 0);
 	}
 
 	Deployable<Labyrinth> registerImplementations() {
@@ -223,14 +222,14 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 				RegionServicesManagerImpl.initialize(this);
 			}
 			return this;
-		});
+		}, 0);
 	}
 
 	Deployable<Labyrinth> registerHandshake() {
 		return Deployable.of(() -> {
 			TaskScheduler.of(ExternalDataService.Handshake.getInstance(this)).schedule();
 			return this;
-		});
+		}, 0);
 	}
 
 	Deployable<Labyrinth> registerDefaultPlaceholders() {
@@ -238,7 +237,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			PlaceholderRegistration registration = PlaceholderRegistration.getInstance();
 			registration.registerTranslation(new PlayerPlaceholders());
 			return this;
-		});
+		}, 0);
 	}
 
 	Deployable<Labyrinth> registerJsonAdapters() {
@@ -251,7 +250,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			Configurable.registerClass(ChunkSerializable.class);
 			Configurable.registerClass(CustomColor.class);
 			return this;
-		});
+		}, 0);
 	}
 
 	Deployable<Labyrinth> registerYamlAdapters() {
@@ -267,7 +266,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			}
 			this.cachedComponentRemoval = copy.read(f -> f.getInt("interactive-component-removal"));
 			return this;
-		});
+		}, 0);
 	}
 
 
@@ -334,13 +333,13 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 	public TaskChain getScheduler(int runtime) {
 		if (runtime <= 1) {
 			if (runtime == SYNCHRONOUS) {
-				return staskManager;
+				return syncChain;
 			}
 			if (runtime == ASYNCHRONOUS) {
-				return ataskManager;
+				return TaskChain.getAsynchronous();
 			}
 		}
-		return staskManager;
+		return syncChain;
 	}
 
 	@Override
@@ -404,12 +403,16 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	@Override
 	public Deployable<Void> registerComponent(ActionComponent component) {
-		return Deployable.of(null, unused -> this.components.put(component.getId(), component));
+		return Deployable.of(() -> {
+			this.components.put(component.getId(), component);
+		}, 0);
 	}
 
 	@Override
 	public Deployable<Void> removeComponent(ActionComponent component) {
-		return Deployable.of(null, unused -> this.components.remove(component.getId()));
+		return Deployable.of(() -> {
+			this.components.remove(component.getId());
+		}, 0);
 	}
 
 	@Override

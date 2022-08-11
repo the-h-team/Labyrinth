@@ -3,7 +3,9 @@ package com.github.sanctum.labyrinth.library;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.task.TaskChain;
+import com.github.sanctum.panther.annotation.Ordinal;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -175,15 +177,22 @@ public class Metrics {
      */
     private void startSubmitting() {
         TaskChain timer = LabyrinthProvider.getService(Service.TASK).getScheduler(TaskService.ASYNCHRONOUS);
-        timer.repeat(task -> {
-            if (!plugin.isEnabled()) { // Plugin was disabled
-                task.cancel();
-                return;
+        Task t = new Task("bstats-metrics", Task.REPEATABLE, TaskChain.getAsynchronous()){
+            private static final long serialVersionUID = 8188482267579546788L;
+
+            @Ordinal
+            public void execute() {
+                if (!plugin.isEnabled()) { // Plugin was disabled
+                    cancel();
+                    return;
+                }
+                // Nevertheless we want our code to run in the Bukkit main thread, so we have to use the Bukkit scheduler
+                // Don't be afraid! The connection to the bStats server is still async, only the stats collection is loadDepends ;)
+                Bukkit.getScheduler().runTask(plugin, Metrics.this::submitData);
             }
-            // Nevertheless we want our code to run in the Bukkit main thread, so we have to use the Bukkit scheduler
-            // Don't be afraid! The connection to the bStats server is still async, only the stats collection is loadDepends ;)
-            Bukkit.getScheduler().runTask(plugin, this::submitData);
-        }, "bstats-metrics", 1000 * 60 * 5, 1000 * 60 * 30);
+
+        };
+        timer.repeat(t, 1000 * 60 * 5, 1000 * 60 * 30);
         // Submit the data every 30 minutes, first time after 5 minutes to give other plugins enough time to start
         // WARNING: Changing the frequency has no effect but your plugin WILL be blocked/deleted!
         // WARNING: Just don't do it!

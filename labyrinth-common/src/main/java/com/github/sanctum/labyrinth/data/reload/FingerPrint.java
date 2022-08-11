@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data.reload;
 
-import com.github.sanctum.labyrinth.library.Deployable;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.TypeAdapter;
 import java.util.List;
 import java.util.Map;

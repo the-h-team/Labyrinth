@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.library;
 
+import com.github.sanctum.panther.util.Deployable;
 import org.bukkit.inventory.Inventory;
 
 /**
@@ -32,7 +33,7 @@ public abstract class InventorySync implements CompostElement {
 
 	@Override
 	public Deployable<Void> remove(ItemCompost compost) {
-		return Deployable.of(null, unused -> compost.remove(this));
+		return Deployable.of(null, unused -> compost.remove(this), 0);
 	}
 
 }

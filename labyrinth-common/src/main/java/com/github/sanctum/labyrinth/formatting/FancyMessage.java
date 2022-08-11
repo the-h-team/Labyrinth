@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.formatting;
 
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.panther.util.Applicable;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.inventory.ItemStack;

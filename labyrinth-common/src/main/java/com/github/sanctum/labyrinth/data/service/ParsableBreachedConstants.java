@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.util.Deployable;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -42,7 +42,7 @@ final class ParsableBreachedConstants extends ProtectedConstants<Object> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ final class ParsableBreachedConstants extends ProtectedConstants<Object> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -116,7 +116,7 @@ final class ParsableBreachedConstants extends ProtectedConstants<Object> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override
@@ -160,7 +160,7 @@ final class ParsableBreachedConstants extends ProtectedConstants<Object> {
 					}
 				}
 			}
-		});
+		}, 0);
 	}
 
 	@Override

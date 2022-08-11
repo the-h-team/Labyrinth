@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.task;
 
-import com.github.sanctum.labyrinth.library.Applicable;
+import com.github.sanctum.panther.util.Applicable;
+import com.github.sanctum.panther.util.Task;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
@@ -8,7 +9,7 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 	private static final long serialVersionUID = -3823153649975921753L;
 	private TaskScheduler parent;
 	private final String key;
-	private final TaskPredicate<?>[] predicates;
+	private final BukkitTaskPredicate<?>[] predicates;
 
 	public LabyrinthApplicable() {
 		this.key = null;
@@ -20,7 +21,7 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 		this.predicates = null;
 	}
 
-	public LabyrinthApplicable(String key, TaskPredicate<?>... predicates) {
+	public LabyrinthApplicable(String key, BukkitTaskPredicate<?>... predicates) {
 		this.key = key;
 		this.predicates = predicates;
 	}
@@ -108,7 +109,7 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleLater(long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(long delay, BukkitTaskPredicate<?>... flags) {
 		if (key != null) {
 			return fix().parent.scheduleLater(key, delay, flags);
 		}
@@ -116,12 +117,12 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleLater(String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLater(String key, long delay, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleLater(key, delay, flags);
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleLaterAsync(long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(long delay, BukkitTaskPredicate<?>... flags) {
 		if (key != null) {
 			return fix().parent.scheduleLaterAsync(key, delay, flags);
 		}
@@ -129,25 +130,25 @@ public abstract class LabyrinthApplicable implements Applicable, TaskScheduler {
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleLaterAsync(String key, long delay, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleLaterAsync(String key, long delay, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleLaterAsync(key, delay, flags);
 	}
 
-	public @NotNull RenderedTask scheduleTimer(long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleTimer(key, delay, period, flags);
 	}
 
-	public @NotNull RenderedTask scheduleTimerAsync(long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleTimerAsync(key, delay, period, flags);
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleTimer(String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimer(String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleTimer(key, delay, period, flags);
 	}
 
 	@Override
-	public @NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, TaskPredicate<?>... flags) {
+	public @NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, BukkitTaskPredicate<?>... flags) {
 		return fix().parent.scheduleTimerAsync(key, delay, period, flags);
 	}
 }

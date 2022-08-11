@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.library.Deployable;
+import com.github.sanctum.panther.util.Deployable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ public class FancyMessageChain implements Iterable<Message>{
 	}
 
 	public Deployable<Void> send(Player target) {
-		return Deployable.of(null, unused -> getMessages().forEach(message -> message.send(target).deploy()));
+		return Deployable.of(() -> getMessages().forEach(message -> message.send(target).deploy()), 0);
 	}
 
 	@NotNull
