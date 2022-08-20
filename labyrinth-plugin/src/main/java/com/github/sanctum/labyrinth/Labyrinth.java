@@ -229,7 +229,6 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			if (isLegacyVillager()) {
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
 			}
-
 			if (LabyrinthOption.IMPL_REGION_SERVICES.enabled()) {
 				RegionServicesManagerImpl.initialize(this);
 			}
