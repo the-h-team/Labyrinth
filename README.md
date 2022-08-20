@@ -15,7 +15,7 @@ otherwise have been far more time-consuming.
 ```xml
 <project>
     <properties>
-        <labyrinth.version>1.7.9</labyrinth.version>
+        <labyrinth.version>1.8.0</labyrinth.version>
     </properties>
     <repositories>
         <!-- For snapshots/versions in development -->
@@ -104,12 +104,12 @@ otherwise have been far more time-consuming.
     }
 
     dependencies {
-        compileOnly 'com.github.the-h-team:labyrinth-common:1.7.3'
-        compileOnly 'com.github.the-h-team:labyrinth-gui:1.7.3'
-        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.7.3'
-        compileOnly 'com.github.the-h-team:labyrinth-regions:1.7.3'
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.8.0'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.8.0'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.8.0'
+        compileOnly 'com.github.the-h-team:labyrinth-regions:1.8.0'
         // for build use only! (includes full plugin and resources)
-        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.7.3'
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.8.0'
     }
 ```
 
