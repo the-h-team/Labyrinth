@@ -1,5 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.StringUtils;
@@ -11,9 +13,13 @@ import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.skulls.CustomHead;
 import com.github.sanctum.skulls.CustomHeadLoader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -80,7 +86,24 @@ public class MemoryItem {
 	public @NotNull ItemStack toItem() {
 		String type = node.getNode("type").toPrimitive().getString();
 		ItemStack test = improvise(type);
-		Item.Edit edit = new Item.Edit(Check.forNull(test, "Item '" + type + "' not found. Key:" + node.getPath()));
+		if (test == null) {
+			test = new ItemStack(Material.DIRT);
+			Logger logger = LabyrinthProvider.getInstance().getLogger();
+			logger.severe("Item type " + '"' + type + '"' + " not found.");
+			logger.severe("Key: " + node.getPath());
+			File f = new File(LabyrinthProvider.getInstance().getPluginInstance().getDataFolder(), "Persistent/items.txt");
+			if (!f.exists()) {
+				logger.warning("A full list of acceptable item names has been created in directory " + '"' + "/Labyrinth/Persistent/" + '"');
+				try {
+					PrintWriter writer = new PrintWriter(f);
+					Arrays.stream(Material.values()).forEach(m -> writer.println(m.name()));
+					writer.close();
+				} catch (FileNotFoundException e) {
+					logger.severe("Unable to write example item list file.");
+				}
+			}
+		}
+		Item.Edit edit = new Item.Edit(test);
 		String label = node.getPath();
 		String[] split = label.split("\\.");
 		String c = split[split.length - 1];

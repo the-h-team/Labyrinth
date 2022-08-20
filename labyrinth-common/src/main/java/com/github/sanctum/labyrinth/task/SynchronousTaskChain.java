@@ -29,6 +29,7 @@ public final class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain run(final @NotNull Task task) {
 		task.setFuture(defaultTimer.submit(task.setChain(this).setSynchronizer(synchronizer)));
+
 		return this;
 	}
 
@@ -57,7 +58,7 @@ public final class SynchronousTaskChain extends TaskChain {
 
 	@Override
 	public SynchronousTaskChain wait(final @NotNull Task task, long delay) {
-		task.setFuture(defaultTimer.scheduleWithFixedDelay(task.setChain(this).setSynchronizer(synchronizer), delay, delay, TimeUnit.MILLISECONDS));
+		task.setFuture(defaultTimer.schedule(task.setChain(this).setSynchronizer(synchronizer), delay, TimeUnit.MILLISECONDS));
 		map.put(task.getKey(), task);
 		return this;
 	}
@@ -86,7 +87,7 @@ public final class SynchronousTaskChain extends TaskChain {
 			}
 		};
 		map.put(key, task);
-		task.setFuture(defaultTimer.scheduleWithFixedDelay(task.setChain(this).setSynchronizer(synchronizer), delay, delay, TimeUnit.MILLISECONDS));
+		task.setFuture(defaultTimer.schedule(task.setChain(this).setSynchronizer(synchronizer), delay, TimeUnit.MILLISECONDS));
 		return this;
 	}
 
@@ -137,12 +138,12 @@ public final class SynchronousTaskChain extends TaskChain {
 
 	@Override
 	public @NotNull <T> Future<T> submit(@NotNull Callable<T> data, long delay) {
-		return defaultTimer.schedule(data, delay, TimeUnit.MILLISECONDS);
+		return defaultTimer.schedule(data, delay * 50, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public @NotNull <T> List<Future<T>> submit(@NotNull Collection<Callable<T>> data, long delay) throws InterruptedException {
-		return defaultTimer.invokeAll(data, delay, TimeUnit.MILLISECONDS);
+		return defaultTimer.invokeAll(data, delay * 50, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -150,6 +151,7 @@ public final class SynchronousTaskChain extends TaskChain {
 		if (!map.isEmpty()) {
 			map.values().forEach(Task::cancel);
 			map.clear();
+			defaultTimer.shutdown();
 			return true;
 		}
 		return false;

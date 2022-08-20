@@ -1,7 +1,9 @@
 package com.github.sanctum.labyrinth.api;
 
+import com.github.sanctum.panther.annotation.Removal;
 import org.jetbrains.annotations.NotNull;
 
+@Removal
 public interface PlaceholderFormatService extends Service {
 
 	@NotNull String replaceAll(@NotNull String text, Object variable);

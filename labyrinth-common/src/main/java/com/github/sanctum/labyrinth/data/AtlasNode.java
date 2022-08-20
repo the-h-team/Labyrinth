@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.Generic;
 import com.github.sanctum.panther.file.JsonAdapter;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.file.Primitive;
@@ -31,6 +32,11 @@ class AtlasNode implements Node, Primitive {
 	@Override
 	public Primitive toPrimitive() {
 		return this;
+	}
+
+	@Override
+	public <T extends Generic> T toGeneric(@NotNull Class<T> clazz) {
+		return null;
 	}
 
 	@Override

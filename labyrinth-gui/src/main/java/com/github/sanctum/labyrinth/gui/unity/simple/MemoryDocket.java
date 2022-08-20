@@ -361,7 +361,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 						open = uniqueDataConverter.apply(open, uniqueData);
 					}
 					MenuRegistration registration = MenuRegistration.getInstance();
-					Menu registered = registration.get(open).get();
+					Menu registered = registration.get(open).deploy().get();
 					if (registered != null) {
 						registered.open(click.getElement());
 					} else {

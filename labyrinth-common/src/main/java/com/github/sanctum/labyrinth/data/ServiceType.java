@@ -2,9 +2,11 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
 
+import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.EasyTypeAdapter;
 import java.util.function.Supplier;
 
+@Removal
 public class ServiceType<T extends Service> {
 
 	final Supplier<T> supplier;

@@ -8,6 +8,7 @@ import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.panther.annotation.FieldsFrom;
+import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.TypeAdapter;
 import org.bukkit.command.CommandSender;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A service for default message creation.
  */
+@Removal
 public interface MessagingService extends Service, Message.Factory {
 
 	/**

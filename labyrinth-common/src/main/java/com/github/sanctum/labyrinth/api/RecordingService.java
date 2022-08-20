@@ -1,12 +1,14 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.panther.annotation.Removal;
 import java.util.Date;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Used to keep track of time-span's
  */
+@Removal
 public interface RecordingService extends Service {
 
 	/**

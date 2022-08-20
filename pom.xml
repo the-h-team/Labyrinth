@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>1.8.0</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
@@ -26,7 +26,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <templates.version>1.1.0</templates.version>
-        <panther.version>1.0.0.R8-SNAPSHOT</panther.version>
+        <panther.version>1.0.0</panther.version>
         <project.version>${version}</project.version>
     </properties>
 
@@ -157,10 +157,6 @@
                 <type>pom</type>
                 <exclusions>
                     <exclusion>
-                        <groupId>net.dv8tion</groupId>
-                        <artifactId>JDA</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                     </exclusion>
@@ -196,6 +192,7 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.clip</groupId>
@@ -206,10 +203,12 @@
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>Enterprise</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team.Panther</groupId>
@@ -238,6 +237,7 @@
         <dependency>
             <groupId>com.github.the-h-team</groupId>
             <artifactId>templates</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>

@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.BukkitGeneric;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 import com.github.sanctum.labyrinth.library.LabyrinthEncoded;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.panther.file.Configurable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,13 +25,13 @@ import org.jetbrains.annotations.Nullable;
 public class PersistentContainer extends PersistentData {
 
 	private final NamespacedKey key;
-
+	private final FileList list;
 	private final Map<String, Object> dataMap = new HashMap<>();
-
 	private final Map<String, Boolean> persistenceMap = new HashMap<>();
 
 	public PersistentContainer(NamespacedKey key) {
 		this.key = key;
+		this.list = FileList.search(LabyrinthProvider.getInstance().getPluginInstance());
 	}
 
 	/**
@@ -53,7 +55,7 @@ public class PersistentContainer extends PersistentData {
 	 * @return true if the key value has been stored persistently
 	 */
 	protected synchronized boolean found(String key) {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
+		FileManager manager = list.get("components", "Persistent", Configurable.Type.JSON);
 		boolean f = manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key));
 		if (f && !this.dataMap.containsKey(key)) {
 			try {
@@ -74,7 +76,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized boolean delete(String key) {
 		this.dataMap.remove(key);
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
+		FileManager manager = list.get("components", "Persistent", Configurable.Type.JSON);
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
 			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, null);
@@ -100,7 +102,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized void save(String key) throws IOException {
 		if (this.persistenceMap.get(key)) {
-			FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
+			FileManager manager = list.get("components", "Persistent", Configurable.Type.JSON);
 			DataTable inquiry = DataTable.newTable();
 			inquiry.set(this.key.getNamespace() + "." + this.key.getKey() + "." + key, serialize(key));
 			manager.write(inquiry);
@@ -108,7 +110,7 @@ public class PersistentContainer extends PersistentData {
 	}
 
 	protected synchronized <R> R load(Class<R> type, String key) {
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
+		FileManager manager = list.get("components", "Persistent", Configurable.Type.JSON);
 		if (manager.read(c -> c.isString(this.key.getNamespace() + "." + this.key.getKey() + "." + key))) {
 			R value = deserialize(type, manager.read(f -> f.getString(this.key.getNamespace() + "." + this.key.getKey() + "." + key)));
 			if (value == null) {
@@ -198,7 +200,7 @@ public class PersistentContainer extends PersistentData {
 	 */
 	public synchronized List<String> persistentKeySet() {
 		List<String> list = new LinkedList<>();
-		FileManager manager = FileList.search(LabyrinthProvider.getInstance().getPluginInstance()).get("Components", "Persistent");
+		FileManager manager = this.list.get("components", "Persistent", Configurable.Type.JSON);
 		if (manager.read(c -> c.isNode(this.key.getNamespace() + "." + this.key.getKey()))) {
 			//noinspection ConstantConditions
 			list.addAll(manager.read(f -> f.getNode(this.key.getNamespace() + "." + this.key.getKey()).getKeys(false)));

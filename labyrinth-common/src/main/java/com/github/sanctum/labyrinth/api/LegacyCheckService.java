@@ -1,11 +1,13 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.panther.annotation.Removal;
 import org.bukkit.Bukkit;
 
 /**
  * Detects legacy server environments.
  */
+@Removal
 public interface LegacyCheckService extends Service {
 
     String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);

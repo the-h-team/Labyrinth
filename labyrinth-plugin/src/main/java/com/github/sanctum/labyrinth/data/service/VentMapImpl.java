@@ -127,17 +127,26 @@ public class VentMapImpl extends VentMap {
 
 	@Override
 	public void unsubscribeAll(@NotNull String key) {
-
+		getSubscriptions().forEach(s -> {
+			if (s.getKey().map(key::equals).orElse(false)) {
+				s.remove();
+			}
+		});
+		getLinks().forEach(l -> {
+			if (l.getKey() != null && l.getKey().equals(key)) {
+				l.remove();
+			}
+		});
 	}
 
 	@Override
 	public void unsubscribeAll(@NotNull Predicate<Vent.Subscription<?>> fun) {
-
+		getSubscriptions().stream().filter(fun).forEach(Vent.Subscription::remove);
 	}
 
 	@Override
 	public void unsubscribeAll(Vent.@NotNull Host host) {
-
+		getLinks().stream().filter(l -> host.equals(l.getHost())).forEach(Vent.Link::remove);
 	}
 
 	@Override

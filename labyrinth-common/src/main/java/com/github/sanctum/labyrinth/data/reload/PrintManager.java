@@ -90,17 +90,21 @@ public class PrintManager {
 
 			@Override
 			public @NotNull Deployable<FingerPrint> reload(String key) {
-				return Deployable.of(this, print -> {
+				return Deployable.of(() -> {
 					Map<String, Object> test = objects.accept();
 					if (test.containsKey(key)) {
 						map.put(key, test.get(key));
 					} else throw new IllegalArgumentException("Cannot reload non-existent directories!");
+					return this;
 				}, 0);
 			}
 
 			@Override
 			public @NotNull Deployable<FingerPrint> reload() {
-				return Deployable.of(this, print -> print.clear().deploy(m -> m.putAll(objects.accept())), 0);
+				return Deployable.of(() -> {
+					clear().deploy(m -> m.putAll(objects.accept()));
+					return this;
+				}, 0);
 			}
 		};
 		prints.put(key.toString(), print);

@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherMap;
 import com.github.sanctum.panther.util.Check;
@@ -9,6 +10,7 @@ import com.github.sanctum.panther.util.Check;
  * A small and simple service loader.
  * @author rigobert0
  */
+@Removal
 public final class ServiceManager {
 	final PantherMap<ServiceType<?>, Service> services;
 

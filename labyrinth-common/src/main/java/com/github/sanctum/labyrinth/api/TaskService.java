@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
+import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.Task;
 import com.github.sanctum.panther.util.TaskChain;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,6 +10,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 // TODO: description; elaborate on "most" in getConcurrentTaskIds
+@Removal
 public interface TaskService extends Service {
 
 	int SYNCHRONOUS = 0;

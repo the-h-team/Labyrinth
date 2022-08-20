@@ -77,7 +77,8 @@ public abstract class ExternalDataService {
 					// write the jar file to the service's directory.
 					FileList.copy(stream, file);
 					try {
-						AnvilMechanicsLoader loader = new AnvilMechanicsLoader(file);
+						// Load the mechanics classes into the JVM
+						AnvilMechanicsLoader loader = new AnvilMechanicsLoader(file, instance.getPluginInstance().getClass().getClassLoader());
 						ExternalDataService service = loader.getMainClass();
 						AnvilMechanics mechanics = service.getMechanics();
 						if (mechanics != null) {

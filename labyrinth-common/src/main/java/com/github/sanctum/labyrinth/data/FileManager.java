@@ -28,12 +28,14 @@ public class FileManager {
 			JsonConfiguration c = new JsonConfiguration(plugin.getDataFolder(), n, d);
 			this.plugin = plugin;
 			this.configuration = c;
+			configuration.register(new BukkitGeneric());
 			return;
 		}
 		if (data.get().endsWith("yml")) {
 			YamlConfiguration c = new YamlConfiguration(plugin, n, d);
 			this.plugin = c.plugin;
 			this.configuration = c;
+			configuration.register(new BukkitGeneric());
 			return;
 		}
 		throw new IllegalArgumentException(data.get() + " files cannot be instantiated through file manager, injection required!");

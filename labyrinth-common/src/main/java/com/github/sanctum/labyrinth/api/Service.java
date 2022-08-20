@@ -2,10 +2,12 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.ServiceType;
+import com.github.sanctum.panther.annotation.Removal;
 
 /**
  * Used to mark objects that are recursively used.
  */
+@Removal
 public interface Service {
 
 	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<>(LabyrinthProvider::getInstance);

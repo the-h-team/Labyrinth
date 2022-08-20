@@ -23,6 +23,7 @@ import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
+import com.github.sanctum.labyrinth.data.service.AnvilMechanicsLoader;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
@@ -55,11 +56,13 @@ import com.github.sanctum.panther.recursive.ServiceFactory;
 import com.github.sanctum.panther.util.Applicable;
 import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.PantherLogger;
+import com.github.sanctum.panther.util.ResourceLookup;
 import com.github.sanctum.panther.util.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -137,7 +140,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	@Override
 	public void onLoad() {
-		TaskChain.setChain(0, new SynchronousTaskChain(this));
+		TaskChain.setChain(0, syncChain);
 		this.validCommandToken = new LabyrinthCommandToken(this);
 		PantherLogger.getInstance().setLogger(getLogger());
 		if (VentMap.getInstance() instanceof VentMap.Default) {
@@ -151,6 +154,15 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 		LabyrinthProvider.instance = this;
 		getLogger().info("- Copyright Team Sanctum 2020, Open-source spigot development tool.");
 		getLogger().info("- Loading user cache, please be patient...");
+		// temporary, move components yaml to json file.
+		FileManager manager = FileList.search(this).get("Components", "Persistent");
+		if (manager.getRoot().exists()) {
+			FileManager n = manager.toJSON("components", "Persistent");
+			Configurable c = n.getRoot();
+			c.save();
+			c.reload();
+			manager.getRoot().delete();
+		}
 		PlayerSearch.reload().deploy();
 		registerServices().deploy();
 		registerJsonAdapters().deploy();
@@ -193,8 +205,8 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	Deployable<Labyrinth> registerImplementations() {
 		return Deployable.of(() -> {
-			TaskScheduler.of(() -> new AdvancedEconomyImplementation(this)).scheduleLater(240)
-					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).scheduleLater(240)
+			TaskScheduler.of(() -> new AdvancedEconomyImplementation(this)).scheduleLater(12)
+					.next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).scheduleLater(12)
 					.next(() -> {
 						if (getServer().getPluginManager().isPluginEnabled("Vault")) {
 							VaultImplementation bridge = new VaultImplementation();
@@ -212,7 +224,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 								getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
 							}
 						}
-					}).scheduleLater(40);
+					}).scheduleLater(12);
 
 			if (isLegacyVillager()) {
 				ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
@@ -285,7 +297,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 		} catch (InterruptedException ignored) {
 		}
 
-		if (!isLegacy() && !StringUtils.use(getServer().getName()).containsIgnoreCase("forge", "magma")) {
+		if (!isLegacy() && !isModded()) {
 			for (Item i : Item.getRegistered()) {
 				Item.removeEntry(i);
 			}

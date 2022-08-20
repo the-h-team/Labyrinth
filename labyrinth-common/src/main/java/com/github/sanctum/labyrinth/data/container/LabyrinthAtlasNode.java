@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.file.Generic;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.file.Primitive;
 import com.github.sanctum.panther.util.MapDecompression;
@@ -32,6 +33,11 @@ class LabyrinthAtlasNode implements Node, Primitive {
 	@Override
 	public Primitive toPrimitive() {
 		return this;
+	}
+
+	@Override
+	public <T extends Generic> T toGeneric(@NotNull Class<T> clazz) {
+		return null;
 	}
 
 	@Override
