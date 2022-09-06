@@ -117,15 +117,15 @@ public class MenuType<T extends Menu, K extends InventoryElement, V extends Menu
 	}
 
 	public boolean exists(String key) {
-		return registration.get(key) != null;
+		return registration.get(key).deploy().get() != null;
 	}
 
 	public T get(String key) {
-		return (T) registration.get(key);
+		return (T) registration.get(key).deploy().get();
 	}
 
 	public T get(Predicate<Menu> predicate) {
-		for (Menu m : registration.getAll().get()) {
+		for (Menu m : registration.getAll().deploy().get()) {
 			if (predicate.test(m)) {
 				return (T) m;
 			}

@@ -37,7 +37,7 @@ public interface MenuRegistration extends Service {
 
 			@Override
 			public <M extends Menu> Deployable<Void> register(M menu) throws MenuDuplicationException, MenuNotCacheableException {
-				return Deployable.of(null, unused -> {
+				return Deployable.of(() -> {
 					PantherCollection<Menu> menus = cache.get(menu.getHost());
 					if (menus != null) {
 						if (menus.contains(menu))
@@ -55,7 +55,7 @@ public interface MenuRegistration extends Service {
 
 			@Override
 			public Deployable<Void> unregister(Menu menu) throws MenuNotCacheableException {
-				return Deployable.of(null, unused -> {
+				return Deployable.of(() -> {
 					PantherCollection<Menu> menus = cache.get(menu.getHost());
 					if (menus != null) {
 						if (!menus.contains(menu)) throw new MenuNotCacheableException("Menu not cached.");

@@ -233,7 +233,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 											r = dataConverter.apply(r, value);
 										}
 										MenuRegistration registration = MenuRegistration.getInstance();
-										Menu registered = registration.get(r).get();
+										Menu registered = registration.get(r).deploy().get();
 										if (registered != null) {
 											registered.open(click.getElement());
 										} else {
@@ -361,7 +361,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 						open = uniqueDataConverter.apply(open, uniqueData);
 					}
 					MenuRegistration registration = MenuRegistration.getInstance();
-					Menu registered = registration.get(open).deploy().get();
+					Menu registered = registration.get(open).deploy().complete();
 					if (registered != null) {
 						registered.open(click.getElement());
 					} else {
