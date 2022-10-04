@@ -673,7 +673,7 @@ public abstract class Menu {
 		}
 
 		public T orGet(Predicate<Menu> predicate) {
-			Menu test = MenuRegistration.getInstance().getAll().get().stream().filter(predicate).findFirst().orElse(null);
+			Menu test = MenuRegistration.getInstance().getAll().deploy().get().stream().filter(predicate).findFirst().orElse(null);
 			if (test != null) return (T) test;
 
 			Menu menu = null;
