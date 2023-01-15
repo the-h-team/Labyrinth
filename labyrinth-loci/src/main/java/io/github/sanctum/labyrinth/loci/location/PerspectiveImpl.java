@@ -15,12 +15,12 @@ class PerspectiveImpl extends PositionImpl implements Perspective {
     }
 
     @Override
-    public float yaw() {
+    public float getYaw() {
         return yaw;
     }
 
     @Override
-    public float pitch() {
+    public float getPitch() {
         return pitch;
     }
 

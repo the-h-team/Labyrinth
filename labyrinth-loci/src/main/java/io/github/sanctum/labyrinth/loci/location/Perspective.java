@@ -30,7 +30,7 @@ public interface Perspective extends Position, PerspectiveLike {
      *
      * @return the {@code yaw} of this perspective
      */
-    float yaw();
+    float getYaw();
 
     /**
      * Gets the {@code pitch} of this perspective.
@@ -40,7 +40,7 @@ public interface Perspective extends Position, PerspectiveLike {
      *
      * @return the {@code pitch} of this perspective
      */
-    float pitch();
+    float getPitch();
 
     @Override
     default @NotNull Perspective asPerspective() {

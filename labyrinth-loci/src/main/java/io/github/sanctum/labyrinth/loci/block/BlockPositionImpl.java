@@ -57,7 +57,9 @@ class BlockPositionImpl implements BlockPosition {
         int result = x;
         result = 31 * result + y;
         result = 31 * result + z;
-        result = 31 * result + (relative ? 1 : 0);
+        if (relative) {
+            result = 31 * result + 1;
+        }
         return result;
     }
 

@@ -42,7 +42,6 @@ class WorldPerspectiveImpl extends PerspectiveImpl implements WorldPerspective {
                 "x=" + x +
                 ", y=" + y +
                 ", z=" + z +
-                ", relative=" + relative +
                 ", yaw=" + yaw +
                 ", pitch=" + pitch +
                 ", world=" + world +
