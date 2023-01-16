@@ -36,11 +36,11 @@ public interface WorldPosition extends Position, HasWorld, WorldPositionLike {
     /**
      * Gets a world position builder from a world reference.
      *
-     * @param worldReference a world reference
+     * @param world a world reference
      * @return a new world position builder
      */
-    static Builder world(@NotNull WorldReference worldReference) {
-        return new Builder(worldReference);
+    static Builder builder(@NotNull WorldReference world) {
+        return new Builder(world);
     }
 
     /**

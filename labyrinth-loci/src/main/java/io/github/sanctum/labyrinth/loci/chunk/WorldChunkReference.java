@@ -63,7 +63,7 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
      * @param world a world reference
      * @return a new chunk reference builder
      */
-    static Builder world(@NotNull WorldReference world) {
+    static Builder builder(@NotNull WorldReference world) {
         return new Builder(world);
     }
 

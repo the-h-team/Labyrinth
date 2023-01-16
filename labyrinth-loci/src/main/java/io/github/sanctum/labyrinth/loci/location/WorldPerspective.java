@@ -28,10 +28,11 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
     /**
      * Gets a world perspective builder from a world reference.
      *
+     * @param world a world reference
      * @return a new world perspective builder
      */
-    static Builder builder(@NotNull WorldReference worldReference) {
-        return new Builder(worldReference);
+    static Builder builder(@NotNull WorldReference world) {
+        return new Builder(world);
     }
 
     /**

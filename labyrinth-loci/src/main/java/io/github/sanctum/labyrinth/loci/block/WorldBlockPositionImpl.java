@@ -21,7 +21,7 @@ final class WorldBlockPositionImpl extends BlockPositionImpl implements WorldBlo
 
     @Override
     public @NotNull WorldPosition asWorldPosition() {
-        return WorldPosition.world(world)
+        return WorldPosition.builder(world)
                 .setX(x)
                 .setY(y)
                 .setZ(z)
