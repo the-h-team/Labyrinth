@@ -111,24 +111,6 @@ public interface Position extends PositionLike {
         }
 
         /**
-         * Gets the current {@code y} coordinate.
-         *
-         * @return the current {@code y} coordinate
-         */
-        public double getY() {
-            return y;
-        }
-
-        /**
-         * Gets the current {@code z} coordinate.
-         *
-         * @return the current {@code z} coordinate
-         */
-        public double getZ() {
-            return z;
-        }
-
-        /**
          * Sets the {@code x} coordinate.
          *
          * @param x a new {@code x} coordinate
@@ -137,6 +119,15 @@ public interface Position extends PositionLike {
         public Builder setX(double x) {
             this.x = x;
             return this;
+        }
+
+        /**
+         * Gets the current {@code y} coordinate.
+         *
+         * @return the current {@code y} coordinate
+         */
+        public double getY() {
+            return y;
         }
 
         /**
@@ -151,6 +142,15 @@ public interface Position extends PositionLike {
         }
 
         /**
+         * Gets the current {@code z} coordinate.
+         *
+         * @return the current {@code z} coordinate
+         */
+        public double getZ() {
+            return z;
+        }
+
+        /**
          * Sets the {@code z} coordinate.
          *
          * @param z a new {@code z} coordinate
@@ -159,6 +159,15 @@ public interface Position extends PositionLike {
         public Builder setZ(double z) {
             this.z = z;
             return this;
+        }
+
+        /**
+         * Indicates whether the coordinates are relative.
+         *
+         * @return true if relative
+         */
+        boolean isRelative() {
+            return relative;
         }
 
         /**

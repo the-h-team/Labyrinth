@@ -88,24 +88,6 @@ public interface ChunkReference {
         }
 
         /**
-         * Gets the current chunk {@code z} coordinate.
-         *
-         * @return the current chunk {@code z} coordinate
-         */
-        public int getChunkZ() {
-            return z;
-        }
-
-        /**
-         * Indicates whether the chunk coordinates are relative.
-         *
-         * @return true if relative
-         */
-        boolean isRelative() {
-            return relative;
-        }
-
-        /**
          * Sets the chunk {@code x} coordinate.
          *
          * @param x the chunk {@code x} coordinate
@@ -117,6 +99,15 @@ public interface ChunkReference {
         }
 
         /**
+         * Gets the current chunk {@code z} coordinate.
+         *
+         * @return the current chunk {@code z} coordinate
+         */
+        public int getChunkZ() {
+            return z;
+        }
+
+        /**
          * Sets the chunk {@code z} coordinate.
          *
          * @param z the chunk {@code z} coordinate
@@ -125,6 +116,15 @@ public interface ChunkReference {
         public Builder setChunkZ(int z) {
             this.z = z;
             return this;
+        }
+
+        /**
+         * Indicates whether the chunk coordinates are relative.
+         *
+         * @return true if relative
+         */
+        boolean isRelative() {
+            return relative;
         }
 
         /**

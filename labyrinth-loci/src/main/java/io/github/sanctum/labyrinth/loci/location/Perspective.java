@@ -90,6 +90,12 @@ public interface Perspective extends Position, PerspectiveLike {
             return this;
         }
 
+        @Override
+        public Builder setRelative(boolean relative) {
+            this.relative = relative;
+            return this;
+        }
+
         /**
          * Gets the current {@code yaw} value.
          *
