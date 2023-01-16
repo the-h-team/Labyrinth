@@ -77,6 +77,7 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
         }
 
         @Override
+        @Contract("true -> fail")
         public Builder setRelative(boolean relative) {
             if (relative) throw new UnsupportedOperationException("Cannot set relative on a WorldPerspective");
             return this; // silently no-op
