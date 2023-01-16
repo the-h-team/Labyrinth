@@ -96,7 +96,7 @@ public interface WorldPosition extends Position, HasWorld, WorldPositionLike {
          * @param world a world reference
          * @return this builder
          */
-        public Builder world(@NotNull WorldReference world) {
+        public Builder setWorld(@NotNull WorldReference world) {
             this.world = world;
             return this;
         }

@@ -46,6 +46,8 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
             this.world = world;
         }
 
+        // TODO make sure to override setter returns with subtype; + validate ranges?
+
         @Override
         public Position.Builder setRelative(boolean relative) {
             if (relative) throw new UnsupportedOperationException("Cannot set relative on a WorldPerspective");
@@ -57,6 +59,7 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
          *
          * @return the current world reference
          */
+        @Override
         public @NotNull WorldReference getWorld() {
             return world;
         }

@@ -1,9 +1,11 @@
 package io.github.sanctum.labyrinth.loci.world;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+@ApiStatus.Internal
 final class ByUIDImpl implements WorldReference.ByUID {
     private final UUID uuid;
 
@@ -36,4 +38,3 @@ final class ByUIDImpl implements WorldReference.ByUID {
                 '}';
     }
 }
-

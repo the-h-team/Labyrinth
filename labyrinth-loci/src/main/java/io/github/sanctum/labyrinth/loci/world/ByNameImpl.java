@@ -1,7 +1,9 @@
 package io.github.sanctum.labyrinth.loci.world;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+@ApiStatus.Internal
 final class ByNameImpl implements WorldReference.ByName {
     private final String name;
 

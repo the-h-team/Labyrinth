@@ -18,15 +18,14 @@ public interface Perspective extends Position, PerspectiveLike {
      * Gets the {@code yaw} of this perspective.
      * <p>
      * This value corresponds to horizontal rotation.
-     * Values range from 0 to 360 to express all directions.
+     * Values range from 0.0 to 360.0 to express all directions.
      * <p>
      * For reference:
      * <pre>
-     *       0 = +Z (south)
-     *      90 = -X (west)
-     *     180 = -Z (north)
-     *     270 = +X (east)
-     * </pre>
+     *   {@code 0.0f} = +Z (south)
+     *  {@code 90.0f} = -X (west)
+     * {@code 180.0f} = -Z (north)
+     * {@code 270.0f} = +X (east)</pre>
      *
      * @return the {@code yaw} of this perspective
      */
@@ -36,7 +35,13 @@ public interface Perspective extends Position, PerspectiveLike {
      * Gets the {@code pitch} of this perspective.
      * <p>
      * This value corresponds to vertical rotation.
-     * Values range from -90 to 90.
+     * Values range from -90.0 to 90.0.
+     * <p>
+     * For reference:
+     * <pre>
+     * {@code -90.0f} = looking straight up
+     *   {@code 0.0f} = looking forward
+     *  {@code 90.0f} = looking straight down</pre>
      *
      * @return the {@code pitch} of this perspective
      */
@@ -67,15 +72,19 @@ public interface Perspective extends Position, PerspectiveLike {
 
         Builder() {}
 
+        // TODO yaw+pitch getters
+        // TODO override setters with proper subtype
+
         /**
          * Sets the {@code yaw} value.
          * <p>
-         * Values above 360 and below 0 will be normalized.
+         * Values above {@code 360.0} and below {@code 0.0} will be normalized.
          *
          * @param yaw the yaw value
          * @return this builder
+         * @see #normalizeYaw(float)
          */
-        public Builder yaw(float yaw) {
+        public Builder setYaw(float yaw) {
             this.yaw = normalizeYaw(yaw);
             return this;
         }
@@ -83,15 +92,15 @@ public interface Perspective extends Position, PerspectiveLike {
         /**
          * Sets the {@code pitch} value.
          * <p>
-         * Validates that the value is between -90 and 90.
+         * This method checks that the provided pitch is a valid pitch.
          *
          * @param pitch the pitch value
          * @return this builder
-         * @throws IllegalArgumentException if the value is not between
-         * {@code -90} (inclusive) and {@code 90} (also inclusive)
+         * @throws IllegalArgumentException if {@code pitch} is not a valid
+         * pitch
          * @see #validatePitch(float)
          */
-        public Builder pitch(float pitch) throws IllegalArgumentException {
+        public Builder setPitch(float pitch) throws IllegalArgumentException {
             this.pitch = validatePitch(pitch);
             return this;
         }
@@ -112,7 +121,8 @@ public interface Perspective extends Position, PerspectiveLike {
         /**
          * Normalizes a yaw value.
          * <p>
-         * The values returned will be between 0 and 360 (inclusive).
+         * The values returned will be between {@code 0.0f} and {@code 360.0f}
+         * (inclusive).
          *
          * @param yaw a yaw value
          * @return a normalized yaw value
@@ -132,7 +142,7 @@ public interface Perspective extends Position, PerspectiveLike {
          * @param pitch a pitch value
          * @return {@code pitch} if it is a valid pitch value
          * @throws IllegalArgumentException if {@code pitch} is less than
-         * {@code -90} or greater than {@code 90}
+         * {@code -90.0f} or greater than {@code 90.0f}
          */
         public static float validatePitch(float pitch) throws IllegalArgumentException {
             if (pitch < 90f || pitch > 90f) {
