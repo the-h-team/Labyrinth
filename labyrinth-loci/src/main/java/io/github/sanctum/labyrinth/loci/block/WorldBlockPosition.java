@@ -18,23 +18,6 @@ import org.jetbrains.annotations.Range;
  */
 @ApiStatus.NonExtendable
 public interface WorldBlockPosition extends BlockPosition, HasWorld, WorldPositionLike {
-    /**
-     * The minimum block {@code x}/{@code z} coordinate.
-     */
-    int MIN_XZ = -30_000_000;
-    /**
-     * The maximum block {@code x}/{@code z} coordinate.
-     */
-    int MAX_XZ = 30_000_000;
-    /**
-     * The minimum block {@code y} coordinate.
-     */
-    int MIN_Y = -2_032;
-    /**
-     * The maximum block {@code y} coordinate.
-     */
-    int MAX_Y = 2_032;
-
     @Override
     @Range(from = MIN_XZ, to = MAX_XZ) int getX();
 
@@ -65,4 +48,68 @@ public interface WorldBlockPosition extends BlockPosition, HasWorld, WorldPositi
     }
 
     // TODO builder?
+    class Builder extends BlockPosition.Builder implements HasWorld {
+        @NotNull WorldReference world;
+
+        Builder(@NotNull WorldReference world) {
+            this.world = world;
+        }
+
+        @Override
+        public Builder setX(@Range(from = MIN_XZ, to = MAX_XZ) int x) {
+            this.x = x;
+            return this;
+        }
+
+        @Override
+        public Builder setY(@Range(from = MIN_Y, to = MAX_Y) int y) {
+            this.y = y;
+            return this;
+        }
+
+        @Override
+        public Builder setZ(@Range(from = MIN_XZ, to = MAX_XZ) int z) {
+            this.z = z;
+            return this;
+        }
+
+        @Override
+        @Contract("true -> fail")
+        public Builder setRelative(boolean relative) {
+            if (relative) throw new IllegalArgumentException("Cannot set relative on a WorldBlockPosition");
+            return this; // no-op
+        }
+
+        /**
+         * Gets the current world reference.
+         *
+         * @return the current world reference
+         */
+        @Override
+        public @NotNull WorldReference getWorld() {
+            return world;
+        }
+
+        /**
+         * Sets the current world reference.
+         *
+         * @param world a world reference
+         * @return this builder
+         */
+        public Builder setWorld(@NotNull WorldReference world) {
+            this.world = world;
+            return this;
+        }
+
+        /**
+         * Builds a new world block position with the provided coordinate data
+         * and world reference.
+         *
+         * @return a new world block position object
+         */
+        @Override
+        public WorldBlockPosition build() {
+            return new WorldBlockPositionImpl(x, y, z, world);
+        }
+    }
 }
