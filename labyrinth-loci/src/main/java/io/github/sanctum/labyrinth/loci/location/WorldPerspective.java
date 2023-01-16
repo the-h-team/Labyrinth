@@ -46,10 +46,38 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
             this.world = world;
         }
 
-        // TODO make sure to override setter returns with subtype; + validate ranges?
+        @Override
+        public Builder setX(double x) {
+            this.x = x;
+            return this;
+        }
 
         @Override
-        public Position.Builder setRelative(boolean relative) {
+        public Builder setY(double y) {
+            this.y = y;
+            return this;
+        }
+
+        @Override
+        public Builder setZ(double z) {
+            this.z = z;
+            return this;
+        }
+
+        @Override
+        public Builder setYaw(float yaw) {
+            this.yaw = yaw;
+            return this;
+        }
+
+        @Override
+        public Builder setPitch(float pitch) throws IllegalArgumentException {
+            this.pitch = pitch;
+            return this;
+        }
+
+        @Override
+        public Builder setRelative(boolean relative) {
             if (relative) throw new UnsupportedOperationException("Cannot set relative on a WorldPerspective");
             return this; // silently no-op
         }

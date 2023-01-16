@@ -72,6 +72,42 @@ public interface Perspective extends Position, PerspectiveLike {
 
         Builder() {}
 
+        @Override
+        public Builder setX(double x) {
+            this.x = x;
+            return this;
+        }
+
+        @Override
+        public Builder setY(double y) {
+            this.y = y;
+            return this;
+        }
+
+        @Override
+        public Builder setZ(double z) {
+            this.z = z;
+            return this;
+        }
+
+        /**
+         * Gets the current {@code yaw} value.
+         *
+         * @return the current {@code yaw} value
+         */
+        public float getYaw() {
+            return yaw;
+        }
+
+        /**
+         * Gets the current {@code pitch} value.
+         *
+         * @return the current {@code pitch} value
+         */
+        public float getPitch() {
+            return pitch;
+        }
+
         // TODO yaw+pitch getters
         // TODO override setters with proper subtype
 
