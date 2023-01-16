@@ -60,6 +60,15 @@ public interface BlockPosition extends PositionLike {
     boolean isRelative();
 
     /**
+     * Gets a new block position builder.
+     *
+     * @return a new block position builder
+     */
+    static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Gets a block position with the given absolute coordinates.
      *
      * @param x the block {@code x} coordinate
@@ -86,7 +95,6 @@ public interface BlockPosition extends PositionLike {
         return new BlockPositionImpl(x, y, z, relative);
     }
 
-    // TODO builder?
     /**
      * Build a block position incrementally.
      *

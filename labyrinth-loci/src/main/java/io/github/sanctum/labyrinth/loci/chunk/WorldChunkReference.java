@@ -81,7 +81,6 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
         return new WorldChunkReferenceImpl(x, z, world);
     }
 
-    // TODO update doc + rearrange methods
     /**
      * Builds a world chunk reference incrementally.
      *

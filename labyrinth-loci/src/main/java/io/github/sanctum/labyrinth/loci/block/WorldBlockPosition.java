@@ -32,6 +32,16 @@ public interface WorldBlockPosition extends BlockPosition, HasWorld, WorldPositi
     boolean isRelative();
 
     /**
+     * Gets a world block position builder from an existing world reference.
+     *
+     * @param world a world reference
+     * @return a new world block position builder
+     */
+    static Builder builder(@NotNull WorldReference world) {
+        return new Builder(world);
+    }
+
+    /**
      * Gets a world block position at coordinates in a given world.
      *
      * @param x the block {@code x} coordinate
@@ -47,7 +57,12 @@ public interface WorldBlockPosition extends BlockPosition, HasWorld, WorldPositi
         return new WorldBlockPositionImpl(x, y, z, world);
     }
 
-    // TODO builder?
+    /**
+     * Build a world block position incrementally.
+     *
+     * @since 1.9.0
+     */
+    @ApiStatus.NonExtendable
     class Builder extends BlockPosition.Builder implements HasWorld {
         @NotNull WorldReference world;
 
