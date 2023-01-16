@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * {@code x}/{@code y}/{@code z} values are absolute.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable
@@ -46,7 +46,7 @@ public interface WorldPosition extends Position, HasWorld, WorldPositionLike {
     /**
      * Builds a world position incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     class Builder extends Position.Builder implements HasWorld {

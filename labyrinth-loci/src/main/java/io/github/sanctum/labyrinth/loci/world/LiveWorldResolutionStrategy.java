@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
  * Provides a strategy for converting and comparing world references using
  * information only present at runtime.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.OverrideOnly

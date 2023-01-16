@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * {@code Yaw} and {@code pitch} values are absolute degrees.
  * {@code x}/{@code y}/{@code z} values may be absolute or relative.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable
@@ -64,7 +64,7 @@ public interface Perspective extends Position, PerspectiveLike {
     /**
      * Build a perspective incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     class Builder extends Position.Builder {
         protected float yaw;

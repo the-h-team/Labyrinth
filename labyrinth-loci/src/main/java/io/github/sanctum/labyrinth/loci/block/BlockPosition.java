@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
  * <p>
  * Values may be absolute or relative. See {@link #isRelative()}.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable

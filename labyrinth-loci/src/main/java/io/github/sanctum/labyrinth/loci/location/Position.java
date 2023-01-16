@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * May be absolute or relative unless otherwise specified.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable
@@ -90,7 +90,7 @@ public interface Position extends PositionLike {
     /**
      * Builds a position incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     class Builder {

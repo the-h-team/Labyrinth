@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Range;
  * <p>
  * {@code x}/{@code z} coordinates are absolute.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 public interface WorldChunkReference extends ChunkReference, HasWorld {
@@ -80,10 +80,11 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
         return new WorldChunkReferenceImpl(x, z, world);
     }
 
+    // TODO update doc + rearrange methods
     /**
      * Builds a chunk reference incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     final class Builder extends ChunkReference.Builder implements HasWorld {

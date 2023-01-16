@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * All values are absolute.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable
@@ -37,7 +37,7 @@ public interface WorldPerspective extends Perspective, HasWorld, WorldPerspectiv
     /**
      * Builds a world perspective incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     class Builder extends Perspective.Builder implements HasWorld {
         protected @NotNull WorldReference world;

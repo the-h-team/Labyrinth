@@ -7,7 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
  * <p>
  * {@code x}/{@code z} coordinates may be relative or absolute.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 public interface ChunkReference {
@@ -68,7 +68,7 @@ public interface ChunkReference {
     /**
      * Build a chunk reference incrementally.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     class Builder {

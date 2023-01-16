@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Refers to a world.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @ApiStatus.NonExtendable
@@ -38,7 +38,7 @@ public interface WorldReference {
     /**
      * Refers to a world by its name.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     interface ByName extends WorldReference {
@@ -53,7 +53,7 @@ public interface WorldReference {
     /**
      * Refers to a world by its Unique ID.
      *
-     * @since 1.8.3
+     * @since 1.9.0
      */
     @ApiStatus.NonExtendable
     interface ByUID extends WorldReference {

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An object that has an associated world.
  *
- * @since 1.8.3
+ * @since 1.9.0
  * @author ms5984
  */
 @FunctionalInterface
