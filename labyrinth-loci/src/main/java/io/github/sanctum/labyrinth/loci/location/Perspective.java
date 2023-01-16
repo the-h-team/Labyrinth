@@ -100,18 +100,6 @@ public interface Perspective extends Position, PerspectiveLike {
         }
 
         /**
-         * Gets the current {@code pitch} value.
-         *
-         * @return the current {@code pitch} value
-         */
-        public float getPitch() {
-            return pitch;
-        }
-
-        // TODO yaw+pitch getters
-        // TODO override setters with proper subtype
-
-        /**
          * Sets the {@code yaw} value.
          * <p>
          * Values above {@code 360.0} and below {@code 0.0} will be normalized.
@@ -123,6 +111,15 @@ public interface Perspective extends Position, PerspectiveLike {
         public Builder setYaw(float yaw) {
             this.yaw = normalizeYaw(yaw);
             return this;
+        }
+
+        /**
+         * Gets the current {@code pitch} value.
+         *
+         * @return the current {@code pitch} value
+         */
+        public float getPitch() {
+            return pitch;
         }
 
         /**
