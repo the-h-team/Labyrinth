@@ -3,6 +3,7 @@ package io.github.sanctum.labyrinth.loci.chunk;
 import io.github.sanctum.labyrinth.loci.world.WorldReference;
 import io.github.sanctum.labyrinth.loci.world.HasWorld;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -82,7 +83,7 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
 
     // TODO update doc + rearrange methods
     /**
-     * Builds a chunk reference incrementally.
+     * Builds a world chunk reference incrementally.
      *
      * @since 1.9.0
      */
@@ -94,12 +95,6 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
             this.world = world;
         }
 
-        @Override
-        public ChunkReference.Builder setRelative(boolean relative) {
-            if (relative) throw new UnsupportedOperationException("Cannot set relative on a WorldChunkReference");
-            return this; // silently no-op
-        }
-
         /**
          * Gets the current chunk {@code x} coordinate.
          *
@@ -108,26 +103,6 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
         @Override
         public @Range(from = MIN_CHUNK_X, to = MAX_CHUNK_X) int getChunkX() {
             return x;
-        }
-
-        /**
-         * Gets the current chunk {@code z} coordinate.
-         *
-         * @return the current chunk {@code z} coordinate
-         */
-        @Override
-        public @Range(from = MIN_CHUNK_Z, to = MAX_CHUNK_Z) int getChunkZ() {
-            return z;
-        }
-
-        /**
-         * Gets the current world reference.
-         *
-         * @return the current world reference
-         */
-        @Override
-        public @NotNull WorldReference getWorld() {
-            return world;
         }
 
         /**
@@ -143,6 +118,16 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
         }
 
         /**
+         * Gets the current chunk {@code z} coordinate.
+         *
+         * @return the current chunk {@code z} coordinate
+         */
+        @Override
+        public @Range(from = MIN_CHUNK_Z, to = MAX_CHUNK_Z) int getChunkZ() {
+            return z;
+        }
+
+        /**
          * Sets the chunk {@code z} coordinate.
          *
          * @param z the chunk {@code z} coordinate
@@ -152,6 +137,23 @@ public interface WorldChunkReference extends ChunkReference, HasWorld {
         public Builder setChunkZ(@Range(from = MIN_CHUNK_Z, to = MAX_CHUNK_Z) int z) {
             this.z = z;
             return this;
+        }
+
+        @Override
+        @Contract("true -> fail")
+        public Builder setRelative(boolean relative) {
+            if (relative) throw new UnsupportedOperationException("Cannot set relative on a WorldChunkReference");
+            return this; // silently no-op
+        }
+
+        /**
+         * Gets the current world reference.
+         *
+         * @return the current world reference
+         */
+        @Override
+        public @NotNull WorldReference getWorld() {
+            return world;
         }
 
         /**
