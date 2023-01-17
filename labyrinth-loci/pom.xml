@@ -9,14 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>labyrinth-common</artifactId>
-    <name>Labyrinth-common</name>
-    <description>Common libraries of all Labyrinth modules</description>
-    <dependencies>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>labyrinth-loci</artifactId>
+    <name>Labyrinth-Loci</name>
+    <description>Manipulate in-game location data</description>
 
 </project>

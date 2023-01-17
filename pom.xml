@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.8.3</version>
+    <version>1.9.0</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
@@ -14,6 +14,7 @@
         <module>labyrinth-regions</module>
         <module>labyrinth-plugin</module>
         <module>labyrinth-perms</module>
+        <module>labyrinth-loci</module>
     </modules>
     <packaging>pom</packaging>
 
