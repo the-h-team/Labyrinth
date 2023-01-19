@@ -14,8 +14,23 @@
     <dependencies>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
+            <artifactId>panther-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-common</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
