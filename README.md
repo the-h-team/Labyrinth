@@ -3,7 +3,7 @@ Labyrinth is an easy-access Spigot development library that assists you in areas
 otherwise have been far more time-consuming.
 
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth*?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.the-h-team/labyrinth*?label=sonatype&server=https%3A%2F%2Fs01.oss.sonatype.org&style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
 
 [![GitHub license](https://img.shields.io/github/license/the-h-team/Labyrinth.svg)](https://github.com/the-h-team/Labyrinth/blob/master/LICENSE)
@@ -15,7 +15,7 @@ otherwise have been far more time-consuming.
 ```xml
 <project>
     <properties>
-        <labyrinth.version>1.8.0</labyrinth.version>
+        <labyrinth.version>1.9.1-SNAPSHOT</labyrinth.version>
     </properties>
     <repositories>
         <!-- For snapshots/versions in development -->
@@ -104,12 +104,12 @@ otherwise have been far more time-consuming.
     }
 
     dependencies {
-        compileOnly 'com.github.the-h-team:labyrinth-common:1.8.0'
-        compileOnly 'com.github.the-h-team:labyrinth-gui:1.8.0'
-        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.8.0'
-        compileOnly 'com.github.the-h-team:labyrinth-regions:1.8.0'
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-regions:1.9.1-SNAPSHOT'
         // for build use only! (includes full plugin and resources)
-        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.8.0'
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.9.1-SNAPSHOT'
     }
 ```
 
