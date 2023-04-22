@@ -59,6 +59,13 @@ otherwise have been far more time-consuming. It uses a global java library calle
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
+    <!-- Used specifically for location related services. -->
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-loci</artifactId>
+            <version>${labyrinth.version}</version>
+            <scope>provided</scope>
+        </dependency>
     <!-- Used specifically for permission related services (Vault replacement). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
@@ -108,6 +115,7 @@ otherwise have been far more time-consuming. It uses a global java library calle
         compileOnly 'com.github.the-h-team:labyrinth-gui:1.9.1-SNAPSHOT'
         compileOnly 'com.github.the-h-team:labyrinth-skulls:1.9.1-SNAPSHOT'
         compileOnly 'com.github.the-h-team:labyrinth-regions:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-loci:1.9.1-SNAPSHOT'
         // for build use only! (includes full plugin and resources)
         compileOnly 'com.github.the-h-team:labyrinth-plugin:1.9.1-SNAPSHOT'
     }
