@@ -32,6 +32,13 @@ public abstract class Cooldown implements ParsedTimeFormat {
 	public abstract String getId();
 
 	/**
+	 * @return
+	 */
+	public String getDescriptor() {
+		return "";
+	}
+
+	/**
 	 * Get the original cooldown period.
 	 *
 	 * @return the original specified cooldown period
@@ -151,7 +158,12 @@ public abstract class Cooldown implements ParsedTimeFormat {
 		if (SERVICE.getCooldown(getId()) != null) throw new IllegalStateException("Cooldown already cached!");
 		FileList.search(LabyrinthProvider.getInstance().getPluginInstance())
 				.get("cooldowns", "Persistent", Configurable.Type.JSON)
-				.write(t -> t.set("Library." + getId() + ".expiration", getCooldown()));
+				.write(t -> {
+					t.set("Library." + getId() + ".expiration", getCooldown());
+					if (getDescriptor() != null && !getDescriptor().isEmpty()) {
+						t.set("Library." + getId() + ".descriptor", getDescriptor());
+					}
+				});
 		TaskScheduler.of(() -> SERVICE.getCooldowns().add(this)).schedule();
 	}
 

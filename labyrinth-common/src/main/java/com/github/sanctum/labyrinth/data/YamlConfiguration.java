@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.panther.file.Configurable;
+import com.github.sanctum.panther.util.PantherLogger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -314,6 +315,22 @@ public class YamlConfiguration extends Configurable {
 				((YamlConfiguration)config).memory.put(n.getPath(), n);
 				return n;
 			});
+		}
+
+		@Override
+		public boolean create() {
+			YamlConfiguration conf = (YamlConfiguration) config;
+			if (!config.exists()) {
+				try {
+					config.create();
+				} catch (IOException ex) {
+					PantherLogger.getInstance().getLogger().severe("- An issue occurred while attempting to create the backing file for the '" + config.getName() + "' configuration.");
+					ex.printStackTrace();
+				}
+			}
+			conf.getConfig().createSection(this.key);
+			save();
+			return false;
 		}
 
 		@Override

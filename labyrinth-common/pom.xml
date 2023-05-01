@@ -14,7 +14,7 @@
     <description>Common libraries of all Labyrinth modules</description>
     <dependencies>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-common</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -42,6 +42,10 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team.Panther</groupId>
+            <artifactId>panther-common</artifactId>
         </dependency>
     </dependencies>
 

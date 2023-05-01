@@ -367,6 +367,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			if (library.read(f -> f.isNode("Library." + id))) {
 
 				long time = library.read(f -> f.getLong("Library." + id + ".expiration"));
+				String s = library.read(f -> f.getString("Library." + id + ".descriptor"));
 				Long a = time;
 				Long b = System.currentTimeMillis();
 				int compareNum = a.compareTo(b);
@@ -380,6 +381,11 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 						@Override
 						public long getCooldown() {
 							return time;
+						}
+
+						@Override
+						public String getDescriptor() {
+							return s;
 						}
 					};
 					toMake.save();

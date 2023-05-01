@@ -28,7 +28,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spigot.version>1.16.2-R0.1-SNAPSHOT</spigot.version>
         <templates.version>1.1.0</templates.version>
-        <panther.version>1.0.2-SNAPSHOT</panther.version>
+        <panther.version>1.0.2</panther.version>
     </properties>
 
     <licenses>
@@ -129,22 +129,22 @@
             </dependency>
             <!-- Panther -->
             <dependency>
-                <groupId>com.github.the-h-team</groupId>
+                <groupId>com.github.the-h-team.Panther</groupId>
                 <artifactId>panther-common</artifactId>
                 <version>${panther.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.the-h-team</groupId>
+                <groupId>com.github.the-h-team.Panther</groupId>
                 <artifactId>panther-containers</artifactId>
                 <version>${panther.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.the-h-team</groupId>
+                <groupId>com.github.the-h-team.Panther</groupId>
                 <artifactId>panther-paste</artifactId>
                 <version>${panther.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.the-h-team</groupId>
+                <groupId>com.github.the-h-team.Panther</groupId>
                 <artifactId>panther-placeholders</artifactId>
                 <version>${panther.version}</version>
             </dependency>

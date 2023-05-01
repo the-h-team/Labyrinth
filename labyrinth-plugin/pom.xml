@@ -134,19 +134,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-containers</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-paste</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-placeholders</artifactId>
         </dependency>
         <dependency>

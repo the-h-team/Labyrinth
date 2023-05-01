@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-common</artifactId>
             <scope>provided</scope>
         </dependency>
