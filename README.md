@@ -1,6 +1,6 @@
 ## What is Labyrinth?
 Labyrinth is an easy-access Spigot development library that assists you in areas that may
-otherwise have been far more time-consuming.
+otherwise have been far more time-consuming. It uses a global java library called Panther created by us to handle the base of the apis such as the string utility, task scheduling and many other things.
 
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
@@ -59,6 +59,13 @@ otherwise have been far more time-consuming.
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
+    <!-- Used specifically for location related services. -->
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-loci</artifactId>
+            <version>${labyrinth.version}</version>
+            <scope>provided</scope>
+        </dependency>
     <!-- Used specifically for permission related services (Vault replacement). -->
         <dependency>
             <groupId>com.github.the-h-team</groupId>
@@ -108,6 +115,7 @@ otherwise have been far more time-consuming.
         compileOnly 'com.github.the-h-team:labyrinth-gui:1.9.1-SNAPSHOT'
         compileOnly 'com.github.the-h-team:labyrinth-skulls:1.9.1-SNAPSHOT'
         compileOnly 'com.github.the-h-team:labyrinth-regions:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-loci:1.9.1-SNAPSHOT'
         // for build use only! (includes full plugin and resources)
         compileOnly 'com.github.the-h-team:labyrinth-plugin:1.9.1-SNAPSHOT'
     }
@@ -131,7 +139,6 @@ otherwise have been far more time-consuming.
 _API Table of Contents_:
 -- 
 * ### Common Utilities
-  - [AFK Player Utility](https://github.com/the-h-team/Labyrinth/wiki/Have-i-been-gone-long-enough%3F)
   - [Command Builder](https://github.com/the-h-team/Labyrinth/wiki/Commands)
   - [Command Utility](https://github.com/the-h-team/Labyrinth/wiki/Commands)
   - [Complete GUI Builder](https://github.com/the-h-team/Labyrinth/wiki/Unity-Library)
