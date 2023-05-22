@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>labyrinth</artifactId>
+        <groupId>com.github.the-h-team</groupId>
+        <version>1.9.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>labyrinth-resource-loader</artifactId>
+    <name>Labyrinth-Resource-Loader</name>
+    <description>Load any external libraries your plugin needs!</description>
+
+<!--    <dependencies>-->
+<!--        <dependency>-->
+<!--            <groupId>com.google.code.gson</groupId>-->
+<!--            <artifactId>gson</artifactId>-->
+<!--            &lt;!&ndash; Build against the earliest common version, ensuring support for >=1.8.3 &ndash;&gt;-->
+<!--            &lt;!&ndash;suppress MavenPackageUpdate &ndash;&gt;-->
+<!--            <version>2.2.4</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+<!--    </dependencies>-->
+
+</project>
