@@ -1,299 +1,50 @@
-package com.github.sanctum.labyrinth.library;
+package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.data.Region;
-import com.github.sanctum.labyrinth.data.RegionFlag;
+import com.github.sanctum.labyrinth.data.CuboidAxis;
+import com.github.sanctum.labyrinth.data.CuboidLocation;
+import com.github.sanctum.labyrinth.data.DefaultCuboid;
+import com.github.sanctum.labyrinth.data.DefaultFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import com.github.sanctum.panther.event.Vent;
-import com.github.sanctum.panther.event.VentMap;
-import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.panther.util.HUID;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Function;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import java.util.Optional;
 import java.util.Random;
 
 /**
+ * An interface for capturing cubic or rectangular areas.
+ *
  * @author Hempfest
  */
 public interface Cuboid {
 
 	static Cuboid fromPoints(Location start, Location end) {
-		Check.forNull(start, "Starting point cannot be null!");
-		Check.forNull(end, "End point cannot be null!");
-		return new Cuboid() {
-
-			private final int xMin;
-			private final int xMax;
-			private final int yMin;
-			private final int yMax;
-			private final int zMin;
-			private final int zMax;
-			private final int height;
-			private final int zWidth;
-			private final int xWidth;
-			private final int totalSize;
-			private final World world;
-
-			{
-				this.xMin = Math.min(start.getBlockX(), end.getBlockX());
-				this.xMax = Math.max(start.getBlockX(), end.getBlockX());
-				this.yMin = Math.min(start.getBlockY(), end.getBlockY());
-				this.yMax = Math.max(start.getBlockY(), end.getBlockY());
-				this.zMin = Math.min(start.getBlockZ(), end.getBlockZ());
-				this.zMax = Math.max(start.getBlockZ(), end.getBlockZ());
-				this.world = start.getWorld();
-				this.height = this.yMax - this.yMin + 1;
-				this.xWidth = this.xMax - this.xMin + 1;
-				this.zWidth = this.zMax - this.zMin + 1;
-				this.totalSize = height * xWidth * zWidth;
-			}
-
-			@Override
-			public Boundary getBoundary(Player target) {
-				return new Boundary(xMax, xMin, yMax, yMin, zMax, zMin).target(target);
-			}
-
-			@Override
-			public World getWorld() {
-				return world;
-			}
-
-			@Override
-			public int getTotalBlocks() {
-				return totalSize;
-			}
-
-			@Override
-			public int getXWidth() {
-				return xWidth;
-			}
-
-			@Override
-			public int getZWidth() {
-				return zWidth;
-			}
-
-			@Override
-			public int getHeight() {
-				return height;
-			}
-
-			@Override
-			public int xMax() {
-				return xMax;
-			}
-
-			@Override
-			public int xMin() {
-				return xMin;
-			}
-
-			@Override
-			public int yMax() {
-				return yMax;
-			}
-
-			@Override
-			public int yMin() {
-				return yMin;
-			}
-
-			@Override
-			public int zMax() {
-				return zMax;
-			}
-
-			@Override
-			public int zMin() {
-				return zMin;
-			}
-		};
+		return new DefaultCuboid(start, end);
 	}
 
-	Boundary getBoundary(Player target);
-
-	World getWorld();
+	VisualBoundary getBoundary(Player target);
 
 	int getTotalBlocks();
 
-	int getXWidth();
+	CuboidAxis getAxis();
 
-	int getZWidth();
-
-	int getHeight();
-
-	int xMax();
-
-	int xMin();
-
-	int yMax();
-
-	int yMin();
-
-	int zMax();
-
-	int zMin();
+	CuboidLocation getLocation();
 
 	default Region toRegion() {
-		return new Region(getWorld(), xMin(), xMax(), yMin(), yMax(), zMin(), zMax(), HUID.randomID()){};
+		return new Region(getLocation().getWorld(), getAxis().getxMin(), getAxis().getxMax(), getAxis().getyMin(), getAxis().getyMax(), getAxis().getzMin(), getAxis().getzMax(), HUID.randomID()){};
 	}
 
 	default <R extends Region> R toRegion(Function<SimpleKeyedValue<Cuboid, SimpleKeyedValue<Location, Location>>, R> function) {
-		return function.apply(SimpleKeyedValue.of(this, SimpleKeyedValue.of(new Location(getWorld(), xMin(), yMin(), zMin()), new Location(getWorld(), xMax(), yMax(), this.zMax()))));
-	}
-
-	class Selection {
-
-		private static final Set<Selection> cache = new HashSet<>();
-
-		private final Player wizard;
-
-		private ItemStack wand = new ItemStack(Material.WOODEN_AXE);
-
-		private Location pos1;
-
-		private Location pos2;
-
-		protected Selection(Player wizard) {
-			this.wizard = wizard;
-		}
-
-		public static boolean contains(Player p) {
-			return cache.stream().anyMatch(s -> s.getPlayer().equals(p));
-		}
-
-		public static Selection source(Player p) {
-			for (Selection r : cache) {
-				if (r.getPlayer().equals(p)) {
-					return r;
-				}
-			}
-			Selection r = new Selection(p);
-			cache.add(r);
-			return r;
-		}
-
-		public Player getPlayer() {
-			return wizard;
-		}
-
-		public ItemStack getWand() {
-			return wand;
-		}
-
-		public void setWand(ItemStack wand) {
-			this.wand = wand;
-		}
-
-		public Location getPos1() {
-			return pos1;
-		}
-
-		public Location getPos2() {
-			return pos2;
-		}
-
-		public Location getHighest() {
-			return getPos1().getBlockY() > getPos2().getBlockY() ? getPos1() : getPos2();
-		}
-
-		public Location getLowest() {
-			return getPos2().getBlockY() < getPos1().getBlockY() ? getPos2() : getPos1();
-		}
-
-		public Location expand(BlockFace direction) {
-			Location update;
-			switch (direction) {
-				case UP:
-					update = getHighest().getBlock().getRelative(BlockFace.UP).getLocation();
-					setPos1(update);
-					return update;
-				case DOWN:
-					update = getHighest().getBlock().getRelative(BlockFace.DOWN).getLocation();
-					setPos2(update);
-					return update;
-				case EAST:
-					update = getHighest().getBlock().getRelative(BlockFace.EAST).getLocation();
-					setPos1(update);
-					return update;
-				case WEST:
-					update = getHighest().getBlock().getRelative(BlockFace.WEST).getLocation();
-					setPos2(update);
-					return update;
-				case NORTH:
-					update = getHighest().getBlock().getRelative(BlockFace.NORTH).getLocation();
-					setPos1(update);
-					return update;
-				case SOUTH:
-					update = getHighest().getBlock().getRelative(BlockFace.SOUTH).getLocation();
-					setPos2(update);
-					return update;
-				default:
-					throw new IllegalStateException();
-			}
-		}
-
-		public Location expand(BlockFace direction, int distance) {
-			Location update;
-			switch (direction) {
-				case UP:
-					update = getHighest().getBlock().getRelative(BlockFace.UP, distance).getLocation();
-					setPos1(update);
-					return update;
-				case DOWN:
-					update = getHighest().getBlock().getRelative(BlockFace.DOWN, distance).getLocation();
-					setPos2(update);
-					return update;
-				case EAST:
-					update = getHighest().getBlock().getRelative(BlockFace.EAST, distance).getLocation();
-					setPos1(update);
-					return update;
-				case WEST:
-					update = getHighest().getBlock().getRelative(BlockFace.WEST, distance).getLocation();
-					setPos2(update);
-					return update;
-				case NORTH:
-					update = getHighest().getBlock().getRelative(BlockFace.NORTH, distance).getLocation();
-					setPos1(update);
-					return update;
-				case SOUTH:
-					update = getHighest().getBlock().getRelative(BlockFace.SOUTH, distance).getLocation();
-					setPos2(update);
-					return update;
-				default:
-					throw new IllegalStateException();
-			}
-		}
-
-		public void setPos1(Location pos1) {
-			this.pos1 = pos1;
-		}
-
-		public void setPos2(Location pos2) {
-			this.pos2 = pos2;
-		}
-
-		public Cuboid toCuboid() {
-			return fromPoints(getPos1(), getPos2());
-		}
-
+		return function.apply(SimpleKeyedValue.of(this, SimpleKeyedValue.of(new Location(getLocation().getWorld(), getAxis().getxMin(), getAxis().getyMin(), getAxis().getzMin()), new Location(getLocation().getWorld(), getAxis().getxMax(), getAxis().getyMax(), getAxis().getzMax()))));
 	}
 
 	abstract class Flag implements Listener {
@@ -312,7 +63,7 @@ public interface Cuboid {
 		}
 
 		public Flag clone() {
-			return new RegionFlag(this);
+			return new DefaultFlag(this);
 		}
 
 		public final void setEnabled(boolean allowed) {
@@ -337,79 +88,7 @@ public interface Cuboid {
 
 	}
 
-	class FlagManager {
-
-		private final Plugin plugin = LabyrinthProvider.getInstance().getPluginInstance();
-		private final Set<Flag> CACHE = new HashSet<>();
-		private final RegionServicesManager regionServices;
-
-		@SuppressWarnings("OptionalGetWithoutIsPresent") // TODO: Refactor to avoid unchecked #get/safely operate on Optionals
-		public FlagManager(RegionServicesManager manager) {
-			this.regionServices = manager;
-			Flag BREAK = RegionFlag.Builder
-					.initialize()
-					.label("break")
-					.finish();
-
-			Flag BUILD = RegionFlag.Builder
-					.initialize()
-					.label("build")
-					.finish();
-
-			Flag PVP = RegionFlag.Builder
-					.initialize()
-					.label("pvp")
-					.finish();
-
-			register(PVP);
-			register(BREAK);
-			register(BUILD);
-
-		}
-
-		public Optional<Flag> getFlag(String id) {
-			return CACHE.stream().filter(f -> f.getId().equals(id)).findFirst();
-		}
-
-		public Set<Flag> getFlags() {
-			return Collections.unmodifiableSet(CACHE);
-		}
-
-		public boolean isRegistered(Cuboid.Flag flag) {
-			return CACHE.stream().anyMatch(f -> f.getId().equals(flag.getId()));
-		}
-
-		public boolean unregister(Cuboid.Flag flag) {
-			for (Region r : regionServices.getAll()) {
-				r.getFlags().forEach(f -> {
-					if (f.getId().equals(flag.getId())) {
-						TaskScheduler.of(() -> r.removeFlag(f)).schedule();
-					}
-				});
-			}
-			return CACHE.removeIf(f -> f.getId().equals(flag.getId()));
-		}
-
-		public boolean register(Cuboid.Flag flag) {
-			if (!getFlag(flag.getId()).isPresent()) {
-				regionServices.getAll().forEach(region -> region.addFlag(flag));
-				return CACHE.add(flag);
-			}
-			return false;
-		}
-
-		public boolean registerControlling(Cuboid.Flag flag) {
-			if (!getFlag(flag.getId()).isPresent()) {
-				VentMap.getInstance().subscribe((Vent.Host) plugin, flag);
-				regionServices.getAll().forEach(region -> region.addFlag(flag));
-				return CACHE.add(flag);
-			}
-			return false;
-		}
-
-	}
-
-	class Boundary {
+	class VisualBoundary {
 
 		private final double xMax;
 		private final double xMin;
@@ -420,7 +99,7 @@ public interface Cuboid {
 
 		private Player p;
 
-		public Boundary(double xMax, double xMin, double yMax, double yMin, double zMax, double zMin) {
+		public VisualBoundary(double xMax, double xMin, double yMax, double yMin, double zMax, double zMin) {
 			this.xMax = xMax;
 			this.zMax = zMax;
 			this.yMax = yMax;
@@ -429,7 +108,7 @@ public interface Cuboid {
 			this.yMin = yMin;
 		}
 
-		public Boundary target(Player target) {
+		public VisualBoundary setViewer(Player target) {
 			this.p = target;
 			return this;
 		}
