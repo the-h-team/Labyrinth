@@ -15,6 +15,7 @@
         <module>labyrinth-plugin</module>
         <module>labyrinth-perms</module>
         <module>labyrinth-loci</module>
+        <module>labyrinth-bukkit</module>
     </modules>
     <packaging>pom</packaging>
 
