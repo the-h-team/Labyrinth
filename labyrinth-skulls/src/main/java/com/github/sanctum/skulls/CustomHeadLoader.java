@@ -24,18 +24,18 @@ public final class CustomHeadLoader {
 	private final MemorySpace memory;
 	private boolean loaded;
 
-	private final Map<HeadText, OnlineHeadSearch> que;
-	private final Map<HeadText, ItemStack> additions;
+	private final Map<HeadContext, HeadLookup> queue;
+	private final Map<HeadContext, ItemStack> additions;
 
-	protected CustomHeadLoader(MemorySpace memory) {
+	public CustomHeadLoader(MemorySpace memory) {
 		this.memory = memory;
-		this.que = new HashMap<>();
+		this.queue = new HashMap<>();
 		this.additions = new HashMap<>();
 	}
 
-	protected CustomHeadLoader(Plugin plugin, String fileName, String directory) {
+	public CustomHeadLoader(Plugin plugin, String fileName, String directory) {
 		this.memory = FileList.search(plugin).get(fileName, directory).getRoot();
-		this.que = new HashMap<>();
+		this.queue = new HashMap<>();
 		this.additions = new HashMap<>();
 	}
 
@@ -64,7 +64,7 @@ public final class CustomHeadLoader {
 					}
 
 					if (value != null) {
-						additions.put(new HeadText(name, category), provide(value));
+						additions.put(new HeadContext(name, category), provide(value));
 					} else {
 						LabyrinthProvider.getInstance().getLogger().severe("- Custom head #" + id + " has no value to use.");
 					}
@@ -77,9 +77,9 @@ public final class CustomHeadLoader {
 					boolean isID = user != null && user.contains("-");
 
 					if (isID) {
-						que.put(new HeadText(name, category), new OnlineHeadSearch(UUID.fromString(user)));
+						queue.put(new HeadContext(name, category), new HeadLookup(UUID.fromString(user)));
 					} else {
-						que.put(new HeadText(name, category), new OnlineHeadSearch(user));
+						queue.put(new HeadContext(name, category), new HeadLookup(user));
 					}
 				}
 			}
@@ -92,7 +92,7 @@ public final class CustomHeadLoader {
 	 */
 	public CustomHeadLoader load() {
 		this.loaded = true;
-		for (Map.Entry<HeadText, OnlineHeadSearch> entry : this.que.entrySet()) {
+		for (Map.Entry<HeadContext, HeadLookup> entry : this.queue.entrySet()) {
 			ItemStack result = entry.getValue().getResult();
 			if (result != null) {
 				this.additions.put(entry.getKey(), result);
@@ -114,7 +114,7 @@ public final class CustomHeadLoader {
 		}
 	}
 
-	Map<HeadText, ItemStack> getHeads() {
+	Map<HeadContext, ItemStack> getHeads() {
 		return this.additions;
 	}
 

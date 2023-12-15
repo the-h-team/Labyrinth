@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.event;
 
-import com.github.sanctum.labyrinth.data.Region;
+import com.github.sanctum.labyrinth.data.container.Region;
 import org.bukkit.block.Block;
 
 public class RegionDestroyEvent extends RegionInteractEvent {

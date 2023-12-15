@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("SameParameterValue")
-final class LabyrinthHeadImpl extends CustomHead {
+final class DefaultHead extends CustomHead {
 
 	private final String name;
 
@@ -13,13 +13,13 @@ final class LabyrinthHeadImpl extends CustomHead {
 
 	private final ItemStack item;
 
-	LabyrinthHeadImpl(@NotNull String name, @NotNull String category, @NotNull ItemStack item) {
+	DefaultHead(@NotNull String name, @NotNull String category, @NotNull ItemStack item) {
 		this.name = name;
 		this.category = category;
 		this.item = item;
 	}
 
-	LabyrinthHeadImpl(@NotNull String name,@NotNull  String category, @NotNull ItemStack item, @NotNull UUID owner) {
+	DefaultHead(@NotNull String name, @NotNull  String category, @NotNull ItemStack item, @NotNull UUID owner) {
 		super(owner);
 		this.category = category;
 		this.name = name;

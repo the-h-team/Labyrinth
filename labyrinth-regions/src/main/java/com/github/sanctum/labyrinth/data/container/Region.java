@@ -1,16 +1,20 @@
-package com.github.sanctum.labyrinth.data;
+package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.CuboidAxis;
+import com.github.sanctum.labyrinth.data.CuboidLocation;
+import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.interfacing.Catchable;
 import com.github.sanctum.labyrinth.interfacing.Snapshot;
-import com.github.sanctum.labyrinth.library.Cuboid;
+import com.github.sanctum.panther.container.ImmutablePantherCollection;
+import com.github.sanctum.panther.container.PantherCollection;
+import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.util.HUID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -25,58 +29,65 @@ import org.bukkit.plugin.Plugin;
 public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 
 	private Region parent;
-	private final int xMin;
-	private final int xMax;
-	private final int yMin;
-	private final int yMax;
-	private final int zMin;
-	private final int zMax;
-	private final int totalSize;
 	private final double distanceBetweenPoints;
-	private final World world;
 	private final Location point1;
 	private final Location point2;
+	private final CuboidAxis axis;
+	private final CuboidLocation location;
 	private final HUID id;
-	private final int height;
-	private final int xWidth;
-	private final int zWidth;
 	private UUID owner;
 	private String name;
-	private boolean passthrough;
+	private boolean dominant;
 	private final Plugin plugin;
 	protected final List<Flag> FLAGS;
 	private final List<UUID> MEMBERS;
-	private final List<Block> list;
+	private final PantherList<Block> list;
+
+	protected Region(Cuboid cuboid) {
+		if (cuboid instanceof Region) {
+			this.parent = ((Region) cuboid);
+			this.axis = ((Region) cuboid).axis;
+			this.id = ((Region) cuboid).id;
+			this.FLAGS = ((Region) cuboid).FLAGS;
+			this.MEMBERS = ((Region) cuboid).MEMBERS;
+			this.plugin = ((Region) cuboid).plugin;
+			this.list = ((Region) cuboid).list;
+			this.owner = ((Region) cuboid).owner;
+			this.name = ((Region) cuboid).name;
+			this.dominant = ((Region) cuboid).dominant;
+			this.point1 = ((Region) cuboid).point1;
+			this.point2 = ((Region) cuboid).point2;
+			this.distanceBetweenPoints = ((Region) cuboid).distanceBetweenPoints;
+			this.location = ((Region) cuboid).location;
+		} else {
+			this.axis = cuboid.getAxis();
+			this.location = cuboid.getLocation();
+			this.id = HUID.randomID();
+			this.FLAGS = new ArrayList<>();
+			this.MEMBERS = new ArrayList<>();
+			this.plugin = LabyrinthProvider.getInstance().getPluginInstance();
+			this.list = new PantherList<>(axis.getTotalSize());
+			for (int x = axis.getxMin(); x <= axis.getxMax(); x++) {
+				for (int y = axis.getyMin(); y <= axis.getyMax(); y++) {
+					for (int z = axis.getzMin(); z <= axis.getzMax(); z++) {
+						Block b = location.getWorld().getBlockAt(x, y, z);
+						list.add(b);
+					}
+				}
+			}
+			this.point1 = new Location(location.getWorld(), axis.getxMin(), axis.getyMin(), axis.getzMin());
+			this.point2 = new Location(location.getWorld(), axis.getxMax(), axis.getyMax(), axis.getzMax());
+			this.distanceBetweenPoints = this.getStartingPoint().distance(this.getEndingPoint());
+			for (Flag registered : RegionServicesManager.getInstance().getFlagManager().getFlags()) {
+				addFlag(registered);
+			}
+		}
+
+	}
 
 	protected Region(Region cuboid, Region parent) {
 		this(cuboid);
 		this.parent = parent;
-	}
-
-	protected Region(Region cuboid) {
-		this.parent = cuboid.parent;
-		this.xMin = cuboid.xMin;
-		this.xMax = cuboid.xMax;
-		this.yMin = cuboid.yMin;
-		this.yMax = cuboid.yMax;
-		this.zMin = cuboid.zMin;
-		this.zMax = cuboid.zMax;
-		this.height = this.yMax - this.yMin + 1;
-		this.xWidth = this.xMax - this.xMin + 1;
-		this.zWidth = this.zMax - this.zMin + 1;
-		this.totalSize = this.getHeight() * this.getXWidth() * this.getZWidth();
-		this.world = cuboid.world;
-		this.id = cuboid.id;
-		this.FLAGS = cuboid.FLAGS;
-		this.MEMBERS = cuboid.MEMBERS;
-		this.plugin = cuboid.plugin;
-		this.list = cuboid.list;
-		this.owner = cuboid.owner;
-		this.name = cuboid.name;
-		this.passthrough = cuboid.passthrough;
-		this.point1 = new Location(this.world, this.xMin, this.yMin, this.zMin);
-		this.point2 = new Location(this.world, this.xMax, this.yMax, this.zMax);
-		this.distanceBetweenPoints = this.getStartingPoint().distance(this.getEndingPoint());
 	}
 
 	protected Region(final Location point1, final Location point2) {
@@ -100,32 +111,23 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 	}
 
 	protected Region(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, Plugin plugin, HUID id) {
-		this.xMin = xMin;
-		this.xMax = xMax;
-		this.yMin = yMin;
-		this.yMax = yMax;
-		this.zMin = zMin;
-		this.zMax = zMax;
-		this.height = this.yMax - this.yMin + 1;
-		this.xWidth = this.xMax - this.xMin + 1;
-		this.zWidth = this.zMax - this.zMin + 1;
-		this.totalSize = this.getHeight() * this.getXWidth() * this.getZWidth();
-		this.world = world;
+		this.axis = new CuboidAxis(xMax, xMin, yMax, yMin, zMax, zMin);
+		this.location = new CuboidLocation(axis, world);
 		this.id = id;
 		this.FLAGS = new ArrayList<>();
 		this.MEMBERS = new ArrayList<>();
 		this.plugin = plugin;
-		this.list = new ArrayList<>(this.getTotalBlocks());
-		for (int x = this.xMin; x <= this.xMax; x++) {
-			for (int y = this.yMin; y <= this.yMax; y++) {
-				for (int z = this.zMin; z <= this.zMax; z++) {
-					Block b = this.world.getBlockAt(x, y, z);
+		this.list = new PantherList<>(axis.getTotalSize());
+		for (int x = axis.getxMin(); x <= axis.getxMax(); x++) {
+			for (int y = axis.getyMin(); y <= axis.getyMax(); y++) {
+				for (int z = axis.getzMin(); z <= axis.getzMax(); z++) {
+					Block b = location.getWorld().getBlockAt(x, y, z);
 					list.add(b);
 				}
 			}
 		}
-		this.point1 = new Location(this.world, this.xMin, this.yMin, this.zMin);
-		this.point2 = new Location(this.world, this.xMax, this.yMax, this.zMax);
+		this.point1 = new Location(location.getWorld(), axis.getxMin(), axis.getyMin(), axis.getzMin());
+		this.point2 = new Location(location.getWorld(), axis.getxMax(), axis.getyMax(), axis.getzMax());
 		this.distanceBetweenPoints = this.getStartingPoint().distance(this.getEndingPoint());
 		for (Flag registered : RegionServicesManager.getInstance().getFlagManager().getFlags()) {
 			addFlag(registered);
@@ -172,22 +174,20 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 		return this.id;
 	}
 
-	public List<Block> getBlocks() {
-		return Collections.unmodifiableList(list);
+	public PantherCollection<Block> getBlocks() {
+		return ImmutablePantherCollection.of(list);
 	}
 
 	public List<Region> getLaced() {
-		return CompletableFuture.supplyAsync(() -> {
-			List<Region> list = new ArrayList<>();
-			RegionServicesManager.getInstance().getAll().forEach(c -> {
-				for (Block b : this.list) {
-					if (c.contains(b.getLocation()) && !c.getId().equals(getId())) {
-						list.add(c);
-					}
+		List<Region> list = new ArrayList<>();
+		RegionServicesManager.getInstance().getAll().forEach(c -> {
+			for (Block b : this.list) {
+				if (c.contains(b.getLocation()) && !c.getId().equals(getId())) {
+					list.add(c);
 				}
-			});
-			return list;
-		}).join();
+			}
+		});
+		return list;
 	}
 
 	public Location getHighpoint() {
@@ -196,10 +196,6 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 
 	public Location getLowpoint() {
 		return getEndingPoint().getBlockY() < getStartingPoint().getBlockY() ? getEndingPoint() : getStartingPoint();
-	}
-
-	public Location getCenter() {
-		return new Location(this.world, (double) (this.xMax - this.xMin) / 2 + this.xMin, (double) (this.yMax - this.yMin) / 2 + this.yMin, (double) (this.zMax - this.zMin) / 2 + this.zMin);
 	}
 
 	public double getDistanceBetweenPoints() {
@@ -214,14 +210,6 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 		return point2;
 	}
 
-	public Location getRandomWithin() {
-		Random r = new Random();
-		int x = r.nextInt(Math.abs(this.xMax - this.xMin) + 1) + this.xMin;
-		int y = r.nextInt(Math.abs(this.yMax - this.yMin) + 1) + this.yMin;
-		int z = r.nextInt(Math.abs(this.zMax - this.zMin) + 1) + this.zMin;
-		return new Location(this.world, x, y, z);
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -231,63 +219,23 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 	}
 
 	@Override
-	public Boundary getBoundary(Player target) {
-		return new Boundary(xMax + 0.5, xMin + 0.5, yMax + 0.5, yMin + 0.5, zMax + 0.5, zMin + 0.5).target(target);
+	public VisualBoundary getBoundary(Player target) {
+		return new VisualBoundary(this.axis.getxMax() + 0.5, this.axis.getxMin() + 0.5, this.axis.getyMax() + 0.5, this.axis.getyMin() + 0.5, this.axis.getzMax() + 0.5, this.axis.getzMin() + 0.5).setViewer(target);
 	}
 
 	@Override
-	public World getWorld() {
-		return this.world;
+	public CuboidAxis getAxis() {
+		return this.axis;
 	}
 
 	@Override
-	public int getHeight() {
-		return height;
+	public CuboidLocation getLocation() {
+		return this.location;
 	}
 
 	@Override
 	public int getTotalBlocks() {
-		return totalSize;
-	}
-
-	@Override
-	public int getXWidth() {
-		return xWidth;
-	}
-
-	@Override
-	public int getZWidth() {
-		return zWidth;
-	}
-
-	@Override
-	public int xMax() {
-		return xMax;
-	}
-
-	@Override
-	public int xMin() {
-		return xMin;
-	}
-
-	@Override
-	public int yMax() {
-		return yMax;
-	}
-
-	@Override
-	public int yMin() {
-		return yMin;
-	}
-
-	@Override
-	public int zMax() {
-		return zMax;
-	}
-
-	@Override
-	public int zMin() {
-		return zMin;
+		return this.axis.getTotalSize();
 	}
 
 	public OfflinePlayer getOwner() {
@@ -329,12 +277,12 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 		return false;
 	}
 
-	public boolean isPassthrough() {
-		return passthrough;
+	public boolean isDominant() {
+		return this.dominant;
 	}
 
-	public void setPassthrough(boolean passthrough) {
-		this.passthrough = passthrough;
+	public void setDominant(boolean dominant) {
+		this.dominant = dominant;
 	}
 
 	public boolean addFlag(Flag... flag) {
@@ -387,18 +335,31 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 		return true;
 	}
 
-	public boolean contains(final Location loc) {
-		return loc.getWorld() == this.world && loc.getBlockX() >= this.xMin && loc.getBlockX() <= this.xMax && loc.getBlockY() >= this.yMin && loc.getBlockY() <= this.yMax && loc
-				.getBlockZ() >= this.zMin && loc.getBlockZ() <= this.zMax;
+	public boolean contains(Block block) {
+		return block.getWorld() == this.location.getWorld() && block.getX() >= this.axis.getxMin() && block.getX() <= this.axis.getxMax() && block.getY() >= this.axis.getyMin() && block.getY() <= this.axis.getyMax() && block
+				.getZ() >= this.axis.getzMin() && block.getZ() <= this.axis.getzMax();
 	}
 
-	public boolean contains(final Player player) {
+	public boolean contains(Location loc) {
+		return loc.getWorld() == this.location.getWorld() && loc.getBlockX() >= this.axis.getxMin() && loc.getBlockX() <= this.axis.getxMax() && loc.getBlockY() >= this.axis.getyMin() && loc.getBlockY() <= this.axis.getyMax() && loc
+				.getBlockZ() >= this.axis.getzMin() && loc.getBlockZ() <= this.axis.getzMax();
+	}
+
+	public boolean contains(Player player) {
 		return this.contains(player.getLocation());
 	}
 
-	public boolean contains(final Location loc, double precision) {
-		return loc.getWorld() == this.world && loc.getX() >= (xMin() + 0.5) - precision && loc.getX() <= (xMax() + 0.5) + precision && loc.getY() >= (yMin() + 0.5) - precision && loc
-				.getY() <= (yMax() + 0.5) + precision && loc.getZ() >= (zMin() + 0.5) - precision && loc.getZ() <= (zMax() + 0.5) + precision;
+	public boolean contains(Block b, double precision) {
+		return contains(b.getLocation(), precision);
+	}
+
+	public boolean contains(Player p, double precision) {
+		return contains(p.getLocation(), precision);
+	}
+
+	public boolean contains(Location loc, double precision) {
+		return loc.getWorld() == this.location.getWorld() && loc.getX() >= (axis.getxMin() + 0.5) - precision && loc.getX() <= (axis.getxMax() + 0.5) + precision && loc.getY() >= (axis.getyMin() + 0.5) - precision && loc
+				.getY() <= (axis.getyMax() + 0.5) + precision && loc.getZ() >= (axis.getzMin() + 0.5) - precision && loc.getZ() <= (axis.getzMax() + 0.5) + precision;
 	}
 
 	public final boolean remove() {

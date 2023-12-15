@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.event;
 
-import com.github.sanctum.labyrinth.library.Cuboid;
+import com.github.sanctum.labyrinth.data.CuboidSelection;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public abstract class CuboidSelectEvent extends DefaultEvent.Player {
 
-	private final Cuboid.Selection selection;
+	private final CuboidSelection selection;
 
-	public CuboidSelectEvent(Cuboid.Selection selection) {
+	public CuboidSelectEvent(CuboidSelection selection) {
 		super(selection.getPlayer(), false);
 		this.selection = selection;
 	}

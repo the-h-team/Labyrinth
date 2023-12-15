@@ -1,12 +1,12 @@
 package com.github.sanctum.skulls;
 
-final class HeadText {
+final class HeadContext {
 
 	private final String name;
 
 	private final String category;
 
-	HeadText(String name, String category) {
+	HeadContext(String name, String category) {
 		this.name = name;
 		this.category = category;
 	}

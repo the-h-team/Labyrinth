@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.Labyrinth;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.data.container.Region;
 import com.github.sanctum.labyrinth.event.CuboidSelectEvent;
 import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.event.RegionBuildEvent;
@@ -9,7 +10,6 @@ import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionInteractionEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
 import com.github.sanctum.labyrinth.event.DefaultEvent;
-import com.github.sanctum.labyrinth.library.Cuboid;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;
@@ -25,6 +25,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,8 @@ import org.jetbrains.annotations.NotNull;
 public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 	final PantherCollection<Region> cache = new PantherList<>();
-	final Cuboid.FlagManager flagManager = new Cuboid.FlagManager(this);
+	final FlagManager flagManager = new FlagManager(this);
+	private ItemStack wand = new ItemStack(Material.STICK);
 
 	public static void initialize(Labyrinth instance) {
 
@@ -102,7 +104,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				if (!e.getPlayer().hasPermission("labyrinth.selection"))
 					return;
 
-				Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
+				CuboidSelection selection = CuboidSelection.get(e.getPlayer());
 
 				if (e.getItem().getType() == selection.getWand().getType()) {
 					if (e.getResult() != Event.Result.DENY) {
@@ -144,7 +146,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 				}
 
 				if (e.getItem().getType() == mat) {
-					Cuboid.Selection selection = Cuboid.Selection.source(e.getPlayer());
+					CuboidSelection selection = CuboidSelection.get(e.getPlayer());
 					if (e.getResult() != Event.Result.DENY) {
 						e.setResult(Event.Result.DENY);
 					}
@@ -213,17 +215,17 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 	@Override
 	public Region get(@NotNull Location location, boolean passthrough) {
-		return cache.stream().filter(region -> region.contains(location) && region.isPassthrough() == passthrough).findFirst().orElse(null);
+		return cache.stream().filter(region -> region.contains(location) && region.isDominant() == passthrough).findFirst().orElse(null);
 	}
 
 	@Override
 	public Region get(@NotNull Player player, boolean passthrough) {
-		return cache.stream().filter(region -> region.contains(player) && region.isPassthrough() == passthrough).findFirst().orElse(null);
+		return cache.stream().filter(region -> region.contains(player) && region.isDominant() == passthrough).findFirst().orElse(null);
 	}
 
 	@Override
 	public Region get(@NotNull String name, boolean passthrough) {
-		return cache.stream().filter(region -> region.getName().equals(name) && region.isPassthrough() == passthrough).findFirst().orElse(null);
+		return cache.stream().filter(region -> region.getName().equals(name) && region.isDominant() == passthrough).findFirst().orElse(null);
 	}
 
 	@Override
@@ -239,7 +241,17 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 	}
 
 	@Override
-	public Cuboid.FlagManager getFlagManager() {
+	public FlagManager getFlagManager() {
 		return flagManager;
+	}
+
+	@Override
+	public ItemStack getWand() {
+		return wand;
+	}
+
+	@Override
+	public void setWand(@NotNull ItemStack itemStack) {
+		this.wand = itemStack;
 	}
 }

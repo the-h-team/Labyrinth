@@ -120,17 +120,17 @@ public abstract class CustomHead implements SkullObject {
 				if (players.length >= 500) {
 					Counter<Long> count = Counter.newInstance();
 					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, player -> {
-						OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+						HeadLookup search = new HeadLookup(player.getUniqueId());
 						if (search.getResult() != null) {
 							if (player.getName() != null) {
-								list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
+								list.add(new DefaultHead(player.getName(), "Human", search.getResult(), player.getUniqueId()));
 							}
 						} else {
 							count.add();
-							OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
+							HeadLookup search2 = new HeadLookup(player.getName());
 							if (search2.getResult() != null) {
 								if (player.getName() != null) {
-									list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult()));
+									list.add(new DefaultHead(player.getName(), "Deceased", search2.getResult()));
 								}
 							}
 						}
@@ -152,17 +152,17 @@ public abstract class CustomHead implements SkullObject {
 					TaskScheduler.of(() -> {
 						int count = 0;
 						for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-							OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+							HeadLookup search = new HeadLookup(player.getUniqueId());
 							if (search.getResult() != null) {
 								if (player.getName() != null) {
-									list.add(new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId()));
+									list.add(new DefaultHead(player.getName(), "Human", search.getResult(), player.getUniqueId()));
 								}
 							} else {
 								count++;
-								OnlineHeadSearch search2 = new OnlineHeadSearch(player.getName());
+								HeadLookup search2 = new HeadLookup(player.getName());
 								if (search2.getResult() != null) {
 									if (player.getName() != null) {
-										list.add(new LabyrinthHeadImpl(player.getName(), "Deceased", search2.getResult()));
+										list.add(new DefaultHead(player.getName(), "Deceased", search2.getResult()));
 									}
 								}
 							}
@@ -184,11 +184,11 @@ public abstract class CustomHead implements SkullObject {
 		 */
 		public static void load(CustomHeadLoader loader) {
 			if (loader.isLoaded()) {
-				for (Map.Entry<HeadText, ItemStack> entry : loader.getHeads().entrySet()) {
+				for (Map.Entry<HeadContext, ItemStack> entry : loader.getHeads().entrySet()) {
 					load(entry.getKey().getName(), entry.getKey().getCategory(), entry.getValue());
 				}
 			} else {
-				for (Map.Entry<HeadText, ItemStack> entry : loader.load().getHeads().entrySet()) {
+				for (Map.Entry<HeadContext, ItemStack> entry : loader.load().getHeads().entrySet()) {
 					load(entry.getKey().getName(), entry.getKey().getCategory(), entry.getValue());
 				}
 			}
@@ -205,9 +205,9 @@ public abstract class CustomHead implements SkullObject {
 		public static @Nullable ItemStack get(OfflinePlayer player) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).map(CustomHead::get).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+				HeadLookup search = new HeadLookup(player.getUniqueId());
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId());
+					CustomHead head = new DefaultHead(player.getName(), "Human", search.getResult(), player.getUniqueId());
 					HEADS.add(head);
 					return head.get();
 				}
@@ -226,9 +226,9 @@ public abstract class CustomHead implements SkullObject {
 		public static @Nullable ItemStack get(UUID id) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).map(CustomHead::get).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(id);
+				HeadLookup search = new HeadLookup(id);
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(Bukkit.getOfflinePlayer(id).getName(), "Human", search.getResult(), id);
+					CustomHead head = new DefaultHead(Bukkit.getOfflinePlayer(id).getName(), "Human", search.getResult(), id);
 					HEADS.add(head);
 					return head.get();
 				}
@@ -248,9 +248,9 @@ public abstract class CustomHead implements SkullObject {
 
 			return HEADS.stream().filter(h -> h.name().equals(name)).map(CustomHead::get).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(name);
+				HeadLookup search = new HeadLookup(name);
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(name, "Human", search.getResult());
+					CustomHead head = new DefaultHead(name, "Human", search.getResult());
 					HEADS.add(head);
 					return head.get();
 				}
@@ -269,9 +269,9 @@ public abstract class CustomHead implements SkullObject {
 		public static @Nullable CustomHead pick(String name) {
 			return HEADS.stream().filter(h -> h.name().equals(name)).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(name);
+				HeadLookup search = new HeadLookup(name);
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(name, "Human", search.getResult());
+					CustomHead head = new DefaultHead(name, "Human", search.getResult());
 					HEADS.add(head);
 					return head;
 				}
@@ -290,9 +290,9 @@ public abstract class CustomHead implements SkullObject {
 		public static @Nullable CustomHead pick(UUID id) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(id)).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(id);
+				HeadLookup search = new HeadLookup(id);
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(Bukkit.getOfflinePlayer(id).getName(), "Human", search.getResult(), id);
+					CustomHead head = new DefaultHead(Bukkit.getOfflinePlayer(id).getName(), "Human", search.getResult(), id);
 					HEADS.add(head);
 					return head;
 				}
@@ -311,9 +311,9 @@ public abstract class CustomHead implements SkullObject {
 		public static @Nullable CustomHead pick(OfflinePlayer player) {
 			return HEADS.stream().filter(h -> h.id().isPresent() && h.id().get().equals(player.getUniqueId())).findFirst().orElseGet(() -> {
 
-				OnlineHeadSearch search = new OnlineHeadSearch(player.getUniqueId());
+				HeadLookup search = new HeadLookup(player.getUniqueId());
 				if (search.getResult() != null) {
-					CustomHead head = new LabyrinthHeadImpl(player.getName(), "Human", search.getResult(), player.getUniqueId());
+					CustomHead head = new DefaultHead(player.getName(), "Human", search.getResult(), player.getUniqueId());
 					HEADS.add(head);
 					return head;
 				}
@@ -392,7 +392,7 @@ public abstract class CustomHead implements SkullObject {
 			if (item.getType() != type)
 				throw new IllegalStateException(item.getType().name() + " is not a direct representation of " + type.name());
 
-			load(new LabyrinthHeadImpl(name, category, item));
+			load(new DefaultHead(name, category, item));
 		}
 
 		/**

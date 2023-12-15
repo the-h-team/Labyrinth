@@ -15,14 +15,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Encapsulate player data and search online for skin results.
  */
-public class OnlineHeadSearch {
+public class HeadLookup {
 
 	protected String name = null;
 	protected String id = null;
 	protected String value = null;
 
 	// TODO: throw to prevent invalid object state and allow field finality
-	public OnlineHeadSearch(String name) {
+	public HeadLookup(String name) {
 		this.name = name;
 		try {
 			Gson g = new Gson();
@@ -42,7 +42,7 @@ public class OnlineHeadSearch {
 	}
 
 	// TODO: throw to prevent invalid object state and allow field finality
-	public OnlineHeadSearch(UUID id) {
+	public HeadLookup(UUID id) {
 		try {
 			Gson g = new Gson();
 			String signature = getSessionContent(id.toString());

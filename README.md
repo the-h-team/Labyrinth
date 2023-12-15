@@ -2,10 +2,6 @@
 Labyrinth is an easy-access Spigot development library that assists you in areas that may
 otherwise have been far more time-consuming. It uses a global java library called Panther created by us to handle the base of the apis such as the string utility, task scheduling and many other things.
 
-
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.the-h-team/labyrinth?style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
-[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.the-h-team/labyrinth*?label=sonatype&server=https%3A%2F%2Fs01.oss.sonatype.org&style=for-the-badge)](https://s01.oss.sonatype.org/#nexus-search;gav~com.github.the-h-team~labyrinth*~~~)
-
 [![GitHub license](https://img.shields.io/github/license/the-h-team/Labyrinth.svg)](https://github.com/the-h-team/Labyrinth/blob/master/LICENSE)
 [![](https://jitpack.io/v/the-h-team/Labyrinth.svg)](https://jitpack.io/#the-h-team/Labyrinth)
 [![Github all releases](https://img.shields.io/github/downloads/the-h-team/Labyrinth/total.svg)](https://gitHub.com/the-h-team/Labyrinth/releases/)
@@ -15,20 +11,16 @@ otherwise have been far more time-consuming. It uses a global java library calle
 ```xml
 <project>
     <properties>
-        <labyrinth.version>1.9.1-SNAPSHOT</labyrinth.version>
+        <labyrinth.version>1.9.3-SNAPSHOT</labyrinth.version>
     </properties>
     <repositories>
-        <!-- For snapshots/versions in development -->
         <repository>
-            <id>s01-snapshots</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
-        <!-- For stable release builds. -->
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-        <!-- No repository needed for Maven Central versions! :D -->
     </repositories>
     <dependencies>
     <!-- Used for accessing common library functions -->
@@ -101,23 +93,21 @@ otherwise have been far more time-consuming. It uses a global java library calle
 ```groovy
     allprojects {
         repositories {
-            // Normal releases
             mavenCentral()
             maven {
-                // For snapshots/development builds
-                url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+                url "https://jitpack.io/"
             }
         }
     }
 
     dependencies {
-        compileOnly 'com.github.the-h-team:labyrinth-common:1.9.1-SNAPSHOT'
-        compileOnly 'com.github.the-h-team:labyrinth-gui:1.9.1-SNAPSHOT'
-        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.9.1-SNAPSHOT'
-        compileOnly 'com.github.the-h-team:labyrinth-regions:1.9.1-SNAPSHOT'
-        compileOnly 'com.github.the-h-team:labyrinth-loci:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-common:1.9.3-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-gui:1.9.3-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-skulls:1.9.3-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-regions:1.9.3-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-loci:1.9.3-SNAPSHOT'
         // for build use only! (includes full plugin and resources)
-        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.9.1-SNAPSHOT'
+        compileOnly 'com.github.the-h-team:labyrinth-plugin:1.9.3-SNAPSHOT'
     }
 ```
 

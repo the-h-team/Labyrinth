@@ -1,17 +1,16 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.library.Cuboid;
+import com.github.sanctum.labyrinth.data.container.Cuboid;
 import com.github.sanctum.panther.event.Vent;
 
-public class RegionFlag extends Cuboid.Flag {
+public class DefaultFlag extends Cuboid.Flag {
 
 	public static class Builder {
 		private Vent.Subscription<?> subscription;
 		private String id;
 
 		protected Builder() {
-
 		}
 
 		public static Builder initialize() {
@@ -32,17 +31,17 @@ public class RegionFlag extends Cuboid.Flag {
 			if (this.subscription != null) {
 				LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
 			}
-			return new RegionFlag(this.id);
+			return new DefaultFlag(this.id);
 		}
 
 	}
 
 
-	public RegionFlag(Cuboid.Flag flag) {
+	public DefaultFlag(Cuboid.Flag flag) {
 		super(flag);
 	}
 
-	public RegionFlag(String id) {
+	public DefaultFlag(String id) {
 		super(id);
 	}
 
