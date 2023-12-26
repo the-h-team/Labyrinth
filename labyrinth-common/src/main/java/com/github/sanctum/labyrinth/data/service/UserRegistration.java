@@ -3,7 +3,6 @@ package com.github.sanctum.labyrinth.data.service;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherMap;
@@ -40,7 +39,7 @@ public interface UserRegistration extends Service {
 			}
 		};
 		UserRegistration finalTest = test;
-		LabyrinthProvider.getInstance().getServiceManager().load(new ServiceType<>(() -> finalTest));
+		LabyrinthProvider.getInstance().getServiceManager().newLoader(UserRegistration.class).supply(finalTest);
 		return test;
 	}
 

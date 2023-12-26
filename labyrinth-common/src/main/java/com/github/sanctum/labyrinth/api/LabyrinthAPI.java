@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.panther.annotation.Note;
+import com.github.sanctum.panther.recursive.ServiceManager;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -50,7 +50,9 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
     KeyedServiceManager<Plugin> getServicesManager();
 
     /**
-     * @return A general purpose service manager for {@link Service}'s
+     * Gets the service manager for the Labyrinth API.
+     *
+     * @return the service manager for Labyrinth {@link Service services}
      */
     ServiceManager getServiceManager();
 

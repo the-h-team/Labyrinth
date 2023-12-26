@@ -18,8 +18,6 @@ import com.github.sanctum.labyrinth.data.MessageSerializable;
 import com.github.sanctum.labyrinth.data.MetaTemplateSerializable;
 import com.github.sanctum.labyrinth.data.PlayerPlaceholders;
 import com.github.sanctum.labyrinth.data.RegionServicesManagerImpl;
-import com.github.sanctum.labyrinth.data.ServiceManager;
-import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
@@ -54,6 +52,7 @@ import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
 import com.github.sanctum.panther.recursive.ServiceFactory;
+import com.github.sanctum.panther.recursive.ServiceManager;
 import com.github.sanctum.panther.util.Applicable;
 import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.PantherLogger;
@@ -123,7 +122,7 @@ import org.jetbrains.annotations.Nullable;
 @Vent.Link.Key("Core")
 public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, LabyrinthAPI, Message.Factory {
 
-	private final ServiceManager serviceManager = new ServiceManager();
+	private final ServiceManager serviceManager = ServiceFactory.newInstance();
 	private final KeyedServiceManager<Plugin> servicesManager = new KeyedServiceManager<>();
 	private final LinkedList<Cooldown> cooldowns = new LinkedList<>();
 	private final Map<String, ActionComponent> components = new HashMap<>();
@@ -174,14 +173,14 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	Deployable<Labyrinth> registerServices() {
 		return Deployable.of(() -> {
-			serviceManager.load(Service.TASK);
-			serviceManager.load(Service.RECORDING);
-			serviceManager.load(Service.DATA);
-			serviceManager.load(Service.MESSENGER);
-			serviceManager.load(Service.LEGACY);
-			serviceManager.load(Service.COOLDOWNS);
-			serviceManager.load(Service.COMPONENTS);
-			serviceManager.load(new ServiceType<>(() -> (PlaceholderFormatService) (text, variable) -> {
+			serviceManager.newLoader(Service.TASK.getType()).supply(Service.TASK.getLoader());
+			serviceManager.newLoader(Service.RECORDING.getType()).supply(Service.RECORDING.getLoader());
+			serviceManager.newLoader(Service.DATA.getType()).supply(Service.DATA.getLoader());
+			serviceManager.newLoader(Service.MESSENGER.getType()).supply(Service.MESSENGER.getLoader());
+			serviceManager.newLoader(Service.LEGACY.getType()).supply(Service.LEGACY.getLoader());
+			serviceManager.newLoader(Service.COOLDOWNS.getType()).supply(Service.COOLDOWNS.getLoader());
+			serviceManager.newLoader(Service.COMPONENTS.getType()).supply(Service.COMPONENTS.getLoader());
+			serviceManager.newLoader(PlaceholderFormatService.class).supplyFresh(() -> (PlaceholderFormatService) (text, variable) -> {
 				String result = text;
 				if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 					if (variable instanceof OfflinePlayer) {
@@ -189,7 +188,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 					}
 				}
 				return PlaceholderRegistration.getInstance().replaceAll(result, variable);
-			}));
+			});
 			servicesManager.register(new DefaultImplementation(), this, ServicePriority.Low);
 			try {
 				CommandUtils.register(new LabyrinthCommand((LabyrinthCommandToken) validCommandToken));

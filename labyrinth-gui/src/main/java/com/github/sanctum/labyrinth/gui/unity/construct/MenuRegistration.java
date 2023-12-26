@@ -2,13 +2,12 @@ package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.data.ServiceManager;
-import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.container.PantherMap;
+import com.github.sanctum.panther.recursive.ServiceManager;
 import com.github.sanctum.panther.util.Check;
 import com.github.sanctum.panther.util.Deployable;
 import java.util.function.Supplier;
@@ -29,9 +28,10 @@ public interface MenuRegistration extends Service {
 
 	static MenuRegistration getInstance() {
 		ServiceManager services = LabyrinthProvider.getInstance().getServiceManager();
-		MenuRegistration cache = services.get(MenuRegistration.class);
+		MenuRegistration cache = services.newLoader(MenuRegistration.class).load();
+		//noinspection ConstantValue
 		if (cache != null) return cache;
-		ServiceType<MenuRegistration> type = new ServiceType<>(() -> new MenuRegistration() {
+		return services.newLoader(MenuRegistration.class).supply(new MenuRegistration() {
 
 			private final PantherMap<Plugin, PantherCollection<Menu>> cache = new PantherEntryMap<>();
 
@@ -98,9 +98,7 @@ public interface MenuRegistration extends Service {
 				};
 				return Deployable.of(getter, 0);
 			}
-		});
-		services.load(type);
-		return type.getLoader().get();
+		}).load();
 	}
 
 }

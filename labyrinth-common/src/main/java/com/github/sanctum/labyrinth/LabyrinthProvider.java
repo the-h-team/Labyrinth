@@ -5,6 +5,7 @@ import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.annotation.FieldsFrom;
 import com.github.sanctum.panther.annotation.Note;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * <pre>
@@ -33,9 +34,8 @@ public abstract class LabyrinthProvider {
 	}
 
 	/**
-	 * Get a service from cache.
-	 *
-	 * <h3>Example services are: </h3>
+	 * Gets a service from cache.
+	 * <h3>Example services:</h3>
 	 * <pre>
 	 *     {@link Service#COMPONENTS}
 	 *     {@link Service#COOLDOWNS}
@@ -46,19 +46,24 @@ public abstract class LabyrinthProvider {
 	 *     {@link Service#TASK}
 	 *     </pre>
 	 *
-	 * @param type The service to use.
-	 * @param <T>  The type of service.
-	 * @return The service.
+	 * @param type the service type
+	 * @return the service instance
 	 * @throws IllegalArgumentException If the provided service type isn't loaded.
 	 */
 	@Note("This method only works on loaded services!")
 	public static <T extends Service> T getService(@FieldsFrom(Service.class) ServiceType<T> type) {
-		return getInstance().getServiceManager().get(type);
+		final T load = getInstance().getServiceManager().newLoader(type.getType()).load();
+		//noinspection ConstantValue
+		if (load == null) {
+			throw new IllegalArgumentException("No loaded instance of service type " + type.getType().getSimpleName() + " was found.");
+		}
+		return load;
 	}
 
+	@SuppressWarnings("DataFlowIssue")
 	@Note("This method only works on loaded services!")
-	public static <T extends Service> T getService(Class<T> service) {
-		return getInstance().getServiceManager().get(service);
+	public static <T extends Service> @Nullable T getService(Class<T> service) {
+		return getInstance().getServiceManager().newLoader(service).load();
 	}
 
 }
