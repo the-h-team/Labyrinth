@@ -173,13 +173,13 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
 	Deployable<Labyrinth> registerServices() {
 		return Deployable.of(() -> {
-			serviceManager.newLoader(Service.TASK.getType()).supply(Service.TASK.getLoader());
-			serviceManager.newLoader(Service.RECORDING.getType()).supply(Service.RECORDING.getLoader());
-			serviceManager.newLoader(Service.DATA.getType()).supply(Service.DATA.getLoader());
-			serviceManager.newLoader(Service.MESSENGER.getType()).supply(Service.MESSENGER.getLoader());
-			serviceManager.newLoader(Service.LEGACY.getType()).supply(Service.LEGACY.getLoader());
-			serviceManager.newLoader(Service.COOLDOWNS.getType()).supply(Service.COOLDOWNS.getLoader());
-			serviceManager.newLoader(Service.COMPONENTS.getType()).supply(Service.COMPONENTS.getLoader());
+			serviceManager.newLoader(Service.TASK.getType()).supply(this);
+			serviceManager.newLoader(Service.RECORDING.getType()).supply(this);
+			serviceManager.newLoader(Service.DATA.getType()).supply(this);
+			serviceManager.newLoader(Service.MESSENGER.getType()).supply(this);
+			serviceManager.newLoader(Service.LEGACY.getType()).supply(this);
+			serviceManager.newLoader(Service.COOLDOWNS.getType()).supply(this);
+			serviceManager.newLoader(Service.COMPONENTS.getType()).supply(this);
 			serviceManager.newLoader(PlaceholderFormatService.class).supplyFresh(() -> (PlaceholderFormatService) (text, variable) -> {
 				String result = text;
 				if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {

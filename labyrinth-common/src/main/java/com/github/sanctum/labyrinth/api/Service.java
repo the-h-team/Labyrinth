@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.annotation.Removal;
 
@@ -10,12 +9,12 @@ import com.github.sanctum.panther.annotation.Removal;
 @Removal
 public interface Service extends com.github.sanctum.panther.recursive.Service {
 
-	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<CooldownService> COOLDOWNS = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<LegacyCheckService> LEGACY = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<MessagingService> MESSENGER = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<PersistentDataService> DATA = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<RecordingService> RECORDING = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<TaskService> TASK = new ServiceType<>(LabyrinthProvider::getInstance);
+	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<>();
+	ServiceType<CooldownService> COOLDOWNS = new ServiceType<>();
+	ServiceType<LegacyCheckService> LEGACY = new ServiceType<>();
+	ServiceType<MessagingService> MESSENGER = new ServiceType<>();
+	ServiceType<PersistentDataService> DATA = new ServiceType<>();
+	ServiceType<RecordingService> RECORDING = new ServiceType<>();
+	ServiceType<TaskService> TASK = new ServiceType<>();
 
 }
