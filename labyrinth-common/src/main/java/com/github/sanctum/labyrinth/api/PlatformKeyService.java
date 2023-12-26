@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 1.9.4
  * @author ms5984
  */
-public interface PlatformKeyService {
+public interface PlatformKeyService extends Service {
     /**
      * Allows for the conversion of a namespaced key to a native key, if possible.
      *

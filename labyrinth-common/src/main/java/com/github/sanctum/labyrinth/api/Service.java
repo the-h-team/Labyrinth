@@ -16,5 +16,6 @@ public interface Service extends com.github.sanctum.panther.recursive.Service {
 	ServiceType<PersistentDataService> DATA = new ServiceType<>();
 	ServiceType<RecordingService> RECORDING = new ServiceType<>();
 	ServiceType<TaskService> TASK = new ServiceType<>();
+	ServiceType<PlatformKeyService> KEYS = new ServiceType<>();
 
 }
