@@ -8,7 +8,7 @@ import com.github.sanctum.panther.annotation.Removal;
  * Used to mark objects that are recursively used.
  */
 @Removal
-public interface Service {
+public interface Service extends com.github.sanctum.panther.recursive.Service {
 
 	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<>(LabyrinthProvider::getInstance);
 	ServiceType<CooldownService> COOLDOWNS = new ServiceType<>(LabyrinthProvider::getInstance);
