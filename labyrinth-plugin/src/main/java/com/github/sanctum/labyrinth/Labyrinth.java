@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.BukkitLegacyCheckService;
 import com.github.sanctum.labyrinth.api.BukkitPlatformKeyService;
+import com.github.sanctum.labyrinth.api.BukkitService;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
@@ -164,7 +165,9 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 			serviceManager.newLoader(Service.LEGACY.getType()).supply(this);
 			serviceManager.newLoader(Service.COOLDOWNS.getType()).supply(this);
 			serviceManager.newLoader(Service.COMPONENTS.getType()).supply(this);
-			serviceManager.newLoader(Service.KEYS.getType()).supply(new BukkitPlatformKeyService());
+			final BukkitPlatformKeyService bukkitPlatformKeyService = new BukkitPlatformKeyService();
+			serviceManager.newLoader(BukkitService.KEYS.getType()).supply(bukkitPlatformKeyService);
+			serviceManager.newLoader(Service.KEYS.getType()).supply(bukkitPlatformKeyService);
 			serviceManager.newLoader(PlaceholderFormatService.class).supplyFresh(() -> (PlaceholderFormatService) (text, variable) -> {
 				String result = text;
 				if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 1.9.4
  * @author ms5984
  */
-public final class BukkitPlatformKeyService implements PlatformKeyService {
+public final class BukkitPlatformKeyService implements BukkitService, PlatformKeyService {
     @Override
     public @Nullable org.bukkit.NamespacedKey toNative(@NotNull NamespacedKey key) {
         try {

@@ -10,7 +10,7 @@ import org.bukkit.Bukkit;
  * @author Hempfest
  * @author ms5984
  */
-public final class BukkitLegacyCheckService implements LegacyCheckService {
+public final class BukkitLegacyCheckService implements BukkitService, LegacyCheckService {
     final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
     boolean modded, legacy, isNew, legacyVillager;
 
