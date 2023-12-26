@@ -6,6 +6,7 @@ import com.github.sanctum.labyrinth.data.reload.PrintManager;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.panther.annotation.Note;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.logging.Logger;
 
@@ -17,11 +18,14 @@ import java.util.logging.Logger;
  * ▐█▌▐▌▐█*▪▐▌██▄▪▐█*▐█▀·.▐█•█▌▐█▌██▐█▌*▐█▌·██▌▐▀
  * .▀▀▀**▀**▀*·▀▀▀▀***▀*•*.▀**▀▀▀▀▀▀*█▪*▀▀▀*▀▀▀*·
  * </pre>
- * Copyright (c) 2020-2023 <strong>Sanctum</strong>
+ * The Labyrinth API.
+ * <p>
+ * Copyright (c) 2020-2023 Sanctum
  */
+@ApiStatus.NonExtendable
 public interface LabyrinthAPI extends VentService, TaskService, RecordingService, MessagingService, CooldownService, ActionComponentService, PersistentDataService, LegacyCheckService {
     /**
-     * Get a Logger for messaging the console as Labyrinth.
+     * Gets a logger for messaging the console as Labyrinth.
      *
      * @return Labyrinth's logger
      */

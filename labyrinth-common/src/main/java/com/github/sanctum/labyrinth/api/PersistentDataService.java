@@ -14,7 +14,7 @@ import java.util.List;
 @Removal
 public interface PersistentDataService extends Service {
     /**
-     * Get a list of all containers associated with a specified plugin.
+     * Gets a list of all containers associated with a specified plugin.
      * <p>
      * Containers must have been initialized <strong>at least once</strong>
      * prior to access in this view.
@@ -24,9 +24,9 @@ public interface PersistentDataService extends Service {
     @NotNull List<PersistentContainer> getContainers(Plugin plugin);
 
     /**
-     * Operate on a custom persistent data container at the specified coordinates.
+     * Operates on a persistent data container at the specified coordinates.
      *
-     * @param namespacedKey the namespaced key for this component
+     * @param namespacedKey the namespaced key for the container
      * @return the existing data container or a new instance
      */
     @NotNull PersistentContainer getContainer(@NotNull NamespacedKey namespacedKey);
