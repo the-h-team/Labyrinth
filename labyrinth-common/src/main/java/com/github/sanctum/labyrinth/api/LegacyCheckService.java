@@ -1,35 +1,25 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.panther.annotation.Removal;
-import org.bukkit.Bukkit;
-
 /**
  * Detects legacy server environments.
  */
-@Removal
 public interface LegacyCheckService extends Service {
 
-    String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
-
-    default boolean isModded() {
-        return StringUtils.use(Bukkit.getServer().getName()).containsIgnoreCase("forge", "magma");
-    }
+    /**
+     * Checks if the server environment is modded.
+     * <p>
+     * This generally means that the server is running forge or magma.
+     *
+     * @return true if the server is modded
+     */
+    boolean isModded();
 
     /**
      * Checks if the server environment is a legacy game version.
      *
      * @return true if the game version is 1.13 or lower
      */
-    default boolean isLegacy() {
-        String num = String.valueOf(VERSION.charAt(2));
-        String num2 = String.valueOf(VERSION.charAt(3));
-        if (StringUtils.use(num2).isInt()) {
-             num += num2;
-        }
-        int fin = Integer.parseInt(num);
-        return fin >= 8 && fin < 14;
-    }
+    boolean isLegacy();
 
     /**
      * Checks if the server environment is a newer game version.
@@ -38,15 +28,7 @@ public interface LegacyCheckService extends Service {
      *
      * @return true if the server version is 1.16 or higher
      */
-    default boolean isNew() {
-        String num = String.valueOf(VERSION.charAt(2));
-        String num2 = String.valueOf(VERSION.charAt(3));
-        if (StringUtils.use(num2).isInt()) {
-            num += num2;
-        }
-        int fin = Integer.parseInt(num);
-        return fin >= 16;
-    }
+    boolean isNew();
 
     /**
      * Checks if the server environment requires legacy villager support.
@@ -58,13 +40,5 @@ public interface LegacyCheckService extends Service {
      *
      * @return true if the server version is 1.14 or lower
      */
-    default boolean isLegacyVillager() {
-        String num = String.valueOf(VERSION.charAt(2));
-        String num2 = String.valueOf(VERSION.charAt(3));
-        if (StringUtils.use(num2).isInt()) {
-            num += num2;
-        }
-        int fin = Integer.parseInt(num);
-        return fin >= 8 && fin < 15;
-    }
+    boolean isLegacyVillager();
 }

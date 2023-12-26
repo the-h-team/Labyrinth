@@ -156,6 +156,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.the-h-team</groupId>
+            <artifactId>labyrinth-bukkit</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.the-h-team</groupId>
             <artifactId>labyrinth-gui</artifactId>
             <version>${project.version}</version>
         </dependency>

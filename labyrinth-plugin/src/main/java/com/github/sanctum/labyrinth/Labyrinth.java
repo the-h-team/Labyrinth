@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth;
 
+import com.github.sanctum.labyrinth.api.BukkitLegacyCheckService;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
 import com.github.sanctum.labyrinth.api.Service;
@@ -132,9 +133,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 	private final PrintManager manager = new PrintManager();
 	private final SynchronousTaskChain syncChain = new SynchronousTaskChain(this);
 	private Token<Labyrinth> validCommandToken;
-	private boolean cachedIsLegacy;
-	private boolean cachedIsNew;
-	private boolean cachedNeedsLegacyLocation;
+	private BukkitLegacyCheckService cachedLegacyCheckService;
 	private int cachedComponentRemoval;
 	private long time;
 
@@ -196,9 +195,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 				CommandUtils.register(new LabyrinthCommand((LabyrinthCommandToken) validCommandToken));
 			} catch (IllegalAccessException ignored) {
 			}
-			cachedIsLegacy = LabyrinthAPI.super.isLegacy();
-			cachedIsNew = LabyrinthAPI.super.isNew();
-			cachedNeedsLegacyLocation = LabyrinthAPI.super.isLegacyVillager();
+			cachedLegacyCheckService = new BukkitLegacyCheckService();
 			return this;
 		}, 0);
 	}
@@ -449,18 +446,23 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 	}
 
 	@Override
+	public boolean isModded() {
+		return cachedLegacyCheckService.isModded();
+	}
+
+	@Override
 	public boolean isLegacy() {
-		return cachedIsLegacy;
+		return cachedLegacyCheckService.isLegacy();
 	}
 
 	@Override
 	public boolean isNew() {
-		return cachedIsNew;
+		return cachedLegacyCheckService.isNew();
 	}
 
 	@Override
 	public boolean isLegacyVillager() {
-		return cachedNeedsLegacyLocation;
+		return cachedLegacyCheckService.isLegacyVillager();
 	}
 
 	@Override
