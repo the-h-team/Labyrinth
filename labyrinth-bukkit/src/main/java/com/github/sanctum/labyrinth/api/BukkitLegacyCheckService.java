@@ -2,15 +2,14 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
 import org.bukkit.Bukkit;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * @implNote Written prior to 1.9.4 but relocated at that version.
  * @since 1.9.4
+ * @see LegacyCheckService
  * @author Hempfest
  * @author ms5984
  */
-@ApiStatus.Internal
 public final class BukkitLegacyCheckService implements LegacyCheckService {
     final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
     boolean modded, legacy, isNew, legacyVillager;
