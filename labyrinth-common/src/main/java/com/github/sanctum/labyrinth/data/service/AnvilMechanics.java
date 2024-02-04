@@ -17,20 +17,31 @@ import org.jetbrains.annotations.NotNull;
 public interface AnvilMechanics extends Service {
 
 	/**
+	 * @return The current anvil mechanics for this version.
+	 */
+	static @Note @NotNull AnvilMechanics getInstance() {
+		return Objects.requireNonNull(Bukkit.getServicesManager().load(AnvilMechanics.class));
+	}
+
+	/**
 	 * Gets the next available NMS container id for the player
 	 *
 	 * @param player    The player to getMechanics the next container id of
 	 * @param container The container that a new id is being generated for
 	 * @return The next available NMS container id
 	 */
-	int getNextContainerId(Player player, Object container);
+	@Deprecated()
+	default int getNextContainerId(Player player, Object container) {
+		return -1;
+	}
 
 	/**
 	 * Closes the current inventory for the player
 	 *
 	 * @param player The player that needs their current inventory closed
 	 */
-	void handleInventoryCloseEvent(Player player);
+	@Deprecated
+	default void handleInventoryCloseEvent(Player player) {}
 
 	/**
 	 * Sends PacketPlayOutOpenWindow to the player with the container id and window title
@@ -39,7 +50,8 @@ public interface AnvilMechanics extends Service {
 	 * @param containerId    The container id to open
 	 * @param inventoryTitle The title of the inventory to be opened (only works in Minecraft 1.14 and above)
 	 */
-	void sendPacketOpenWindow(Player player, int containerId, String inventoryTitle);
+	@Deprecated
+	default void sendPacketOpenWindow(Player player, int containerId, String inventoryTitle) {}
 
 	/**
 	 * Sends PacketPlayOutCloseWindow to the player with the container id
@@ -47,14 +59,16 @@ public interface AnvilMechanics extends Service {
 	 * @param player      The player to send the packet to
 	 * @param containerId The container id to close
 	 */
-	void sendPacketCloseWindow(Player player, int containerId);
+	@Deprecated
+	default void sendPacketCloseWindow(Player player, int containerId) {}
 
 	/**
 	 * Sets the NMS player's active container to the default one
 	 *
 	 * @param player The player to set the active container of
 	 */
-	void setActiveContainerDefault(Player player);
+	@Deprecated
+	default void setActiveContainerDefault(Player player) {}
 
 	/**
 	 * Sets the NMS player's active container to the one supplied
@@ -62,7 +76,8 @@ public interface AnvilMechanics extends Service {
 	 * @param player    The player to set the active container of
 	 * @param container The container to set as active
 	 */
-	void setActiveContainer(Player player, Object container);
+	@Deprecated
+	default void setActiveContainer(Player player, Object container) {}
 
 	/**
 	 * Sets the supplied windowId of the supplied Container
@@ -70,7 +85,8 @@ public interface AnvilMechanics extends Service {
 	 * @param container   The container to set the windowId of
 	 * @param containerId The new windowId
 	 */
-	void setActiveContainerId(Object container, int containerId);
+	@Deprecated
+	default void setActiveContainerId(Object container, int containerId) {}
 
 	/**
 	 * Adds a slot listener to the supplied container for the player
@@ -78,7 +94,8 @@ public interface AnvilMechanics extends Service {
 	 * @param container The container to add the slot listener to
 	 * @param player    The player to have as a listener
 	 */
-	void addActiveContainerSlotListener(Object container, Player player);
+	@Deprecated
+	default void addActiveContainerSlotListener(Object container, Player player){}
 
 	/**
 	 * Gets the {@link Inventory} wrapper of the supplied NMS container
@@ -86,7 +103,10 @@ public interface AnvilMechanics extends Service {
 	 * @param container The NMS container to getMechanics the {@link Inventory} of
 	 * @return The inventory of the NMS container
 	 */
-	Inventory toBukkitInventory(Object container);
+	@Deprecated
+	default Inventory toBukkitInventory(Object container) {
+		return null;
+	}
 
 	/**
 	 * Creates a new ContainerAnvil
@@ -95,10 +115,59 @@ public interface AnvilMechanics extends Service {
 	 * @param title  The title of the anvil inventory
 	 * @return The Container instance
 	 */
-	Object newContainerAnvil(Player player, String title);
+	@Deprecated
+	default Object newContainerAnvil(Player player, String title) {
+		return null;
+	}
 
-	static @Note @NotNull AnvilMechanics getInstance() {
-		return Objects.requireNonNull(Bukkit.getServicesManager().load(AnvilMechanics.class));
+	/**
+	 * Creates a new ContainerAnvil
+	 *
+	 * @param player The player to get the container of
+	 * @param title  The title of the anvil inventory
+	 * @return The Container instance
+	 */
+	Container newContainer(@NotNull Player player, @NotNull String title, boolean override);
+
+	/**
+	 * Get the players current active container.
+	 *
+	 * @param player the player to use.
+	 * @return the specified player's container or null if none active.
+	 */
+	Container getContainer(@NotNull Player player);
+
+	/**
+	 * Checks if the current Minecraft version actually supports custom titles
+	 *
+	 * @return The current supported state
+	 */
+	default boolean isCustomAllowed() {
+		return true;
+	}
+
+	interface Container {
+
+		/**
+		 * @return the item context within the itemstack on the left-hand side of the anvil container.
+		 */
+		String getLeftInput();
+
+		/**
+		 * Change to input text of the itemstack to the left-hand side of the anvil container.
+		 *
+		 * @param text the text to use
+		 */
+		void setLeftInput(String text);
+
+		Inventory getBukkitInventory();
+
+		void open(@NotNull Player player);
+
+		void close(@NotNull Player player);
+
+		void reset(@NotNull Player player);
+
 	}
 
 }

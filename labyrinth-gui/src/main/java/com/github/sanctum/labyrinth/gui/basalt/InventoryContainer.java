@@ -41,8 +41,8 @@ public abstract class InventoryContainer {
 			switch (properties.getFormat()) {
 				case ANVIL:
 					AnvilMechanics mechanics = AnvilMechanics.getInstance();
-					final Object container = mechanics.newContainerAnvil(player, properties.getTitle());
-					Inventory ne = mechanics.toBukkitInventory(container);
+					final AnvilMechanics.Container container = mechanics.newContainer(player, properties.getTitle(), false);
+					Inventory ne = container.getBukkitInventory();
 					for (int i = 0; i < this.inventory.getSize() + 1; i++) {
 						ne.setItem(i, this.inventory.getItem(i));
 					}

@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.file.JsonConfiguration;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -149,7 +150,7 @@ public class FileManager {
 	 * @return a new yml file containing all values from this json file.
 	 */
 	public @NotNull FileManager toYaml(@NotNull String name, String dir) {
-		FileManager n = FileList.search(plugin).get(name, dir, YamlExtension.INSTANCE);
+		FileManager n = FileList.search(plugin).get(name, dir, Configurable.Type.YAML);
 		Configurable c = getRoot();
 		if (c instanceof JsonConfiguration) {
 			n.write(copy(), false);
@@ -190,6 +191,36 @@ public class FileManager {
 		n.write(copy(), false);
 		c.delete();
 		return n;
+	}
+
+	/**
+	 * This method assumes the resource being loaded is named and located no differently than this file managers local info and attempts to
+	 * load the data from its source plugin jar.
+	 *
+	 * @return the same file manager instance.
+	 */
+	public @NotNull FileManager load() {
+		if (!getRoot().exists()) {
+			InputStream mainGrab = plugin.getResource(configuration.getName() + configuration.getType().get());
+			if (mainGrab == null) throw new IllegalStateException("Unable to load " + '"' + configuration.getName() + configuration.getType().get() + '"' + " from plugin " + plugin.getName());
+			FileList.copy(mainGrab, getRoot().getParent());
+		}
+		return this;
+	}
+
+	/**
+	 * This method attempts to load a resource from the parent plugin under the specified root path.
+	 *
+	 * @param data the directory labeled file to load into this file manager.
+	 * @return the same file manager instance.
+	 */
+	public @NotNull FileManager load(@NotNull String data) {
+		if (!getRoot().exists()) {
+			InputStream mainGrab = plugin.getResource(data);
+			if (mainGrab == null) throw new IllegalStateException("Unable to load " + '"' + data + '"' + " from plugin " + plugin.getName());
+			FileList.copy(mainGrab, getRoot().getParent());
+		}
+		return this;
 	}
 
 	/**

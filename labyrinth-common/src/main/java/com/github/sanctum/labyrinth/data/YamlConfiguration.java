@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
+import com.github.sanctum.panther.file.AbstractYamlConfiguration;
 import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.util.PantherLogger;
 import java.io.File;
@@ -16,7 +17,7 @@ import org.bukkit.plugin.Plugin;
  * @author Hempfest
  * @version 1.0
  */
-public class YamlConfiguration extends Configurable {
+public class YamlConfiguration extends AbstractYamlConfiguration {
 
 	protected final String n;
 	protected final String d;
@@ -286,11 +287,6 @@ public class YamlConfiguration extends Configurable {
 	@Override
 	public List<Long> getLongList(String key) {
 		return getConfig().getLongList(key);
-	}
-
-	@Override
-	public Extension getType() {
-		return YamlExtension.INSTANCE;
 	}
 
 	public static class Node extends Configurable.Node {

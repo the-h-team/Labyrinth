@@ -7,6 +7,7 @@ import com.github.sanctum.labyrinth.command.LabyrinthCommand;
 import com.github.sanctum.labyrinth.command.LabyrinthCommandToken;
 import com.github.sanctum.labyrinth.data.AdvancedEconomyImplementation;
 import com.github.sanctum.labyrinth.data.ChunkSerializable;
+import com.github.sanctum.labyrinth.data.CommandVisibilityListener;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
@@ -23,7 +24,6 @@ import com.github.sanctum.labyrinth.data.TemplateSerializable;
 import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
-import com.github.sanctum.labyrinth.data.service.AnvilMechanicsLoader;
 import com.github.sanctum.labyrinth.data.service.ExternalDataService;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
@@ -39,7 +39,6 @@ import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.ItemCompost;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
@@ -56,13 +55,11 @@ import com.github.sanctum.panther.recursive.ServiceFactory;
 import com.github.sanctum.panther.util.Applicable;
 import com.github.sanctum.panther.util.Deployable;
 import com.github.sanctum.panther.util.PantherLogger;
-import com.github.sanctum.panther.util.ResourceLookup;
 import com.github.sanctum.panther.util.TaskChain;
 import com.github.sanctum.templates.MetaTemplate;
 import com.github.sanctum.templates.Template;
 import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -167,6 +164,16 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 		registerServices().deploy();
 		registerJsonAdapters().deploy();
 		registerYamlAdapters().deploy();
+		// 1.12 and prior there is no command send event.
+		boolean found = true;
+		try {
+			Class.forName("org.bukkit.event.player.PlayerCommandSendEvent");
+		} catch (ClassNotFoundException e) {
+			found = false;
+		}
+		if (found) {
+			getEventMap().subscribeAll(this, new CommandVisibilityListener());
+		}
 		getEventMap().subscribeAll(this, new DefaultEvent.Controller(), this);
 		registerImplementations().deploy();
 		registerHandshake().deploy();
@@ -219,9 +226,9 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 							getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
 						} else {
 							if (instance instanceof VaultImplementation) {
-								getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Vault)");
+								getLogger().info("- Vault permission manager found. Now using: " + instance.getProvider().getName());
 							} else {
-								getLogger().info("- Using " + instance.getProvider().getName() + " for permissions. (Provider)");
+								getLogger().info("- Custom permission manager found. Now using: " + instance.getProvider().getName());
 							}
 						}
 					}).scheduleLater(12);

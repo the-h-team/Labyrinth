@@ -988,11 +988,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		public void close(Player player, boolean sendPacket) {
 			if (nms == null || !visible.contains(player)) return;
 			visible.remove(player);
-			if (sendPacket) {
-				nms.handleInventoryCloseEvent(player);
-			}
-			nms.setActiveContainerDefault(player);
-			nms.sendPacketCloseWindow(player, containerId);
+			AnvilMechanics.Container container = nms.getContainer(player);
+			if (container != null) container.close(player);
 		}
 
 		@Override
@@ -1008,12 +1005,10 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				player.closeInventory();
 				return;
 			}
-			nms.handleInventoryCloseEvent(player);
-			nms.setActiveContainerDefault(player);
 
-			final Object container = nms.newContainerAnvil(player, this.getTitle());
+			final AnvilMechanics.Container container = nms.newContainer(player, this.getTitle(), true);
 
-			setElement(nms.toBukkitInventory(container));
+			setElement(container.getBukkitInventory());
 
 			for (ItemElement<?> it : getAttachment()) {
 				if (it.getSlot().isPresent()) {
@@ -1030,11 +1025,7 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				}
 			}
 
-			containerId = nms.getNextContainerId(player, container);
-			nms.sendPacketOpenWindow(player, containerId, this.getTitle());
-			nms.setActiveContainer(player, container);
-			nms.setActiveContainerId(container, containerId);
-			nms.addActiveContainerSlotListener(container, player);
+			container.open(player);
 			visible.add(player);
 		}
 
