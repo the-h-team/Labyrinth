@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.9.4</version>
+    <version>1.9.4-SNAPSHOT</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
@@ -29,7 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spigot.version>1.16.2-R0.1-SNAPSHOT</spigot.version>
         <templates.version>1.1.0</templates.version>
-        <panther.version>1.0.3</panther.version>
+        <panther.version>1.0.4-SNAPSHOT</panther.version>
     </properties>
 
     <licenses>

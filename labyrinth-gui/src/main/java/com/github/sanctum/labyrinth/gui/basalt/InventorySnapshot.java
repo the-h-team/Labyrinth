@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.gui.basalt;
 
+import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
-import java.util.concurrent.CompletableFuture;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -42,38 +42,29 @@ public final class InventorySnapshot {
 		return modifiedContents[index];
 	}
 
-	public CompletableFuture<Void> reset() {
-		return CompletableFuture.supplyAsync(() -> {
-			TaskScheduler.of(() -> {
-				this.modifiedContents = new ItemStack[this.contents.length];
-				for (int i = 0; i < this.contents.length + 1; i++) {
-					modifiedContents[i] = new ItemStack(this.contents[i]);
-				}
-			}).schedule();
-			return null;
-		});
+	public RenderedTask reset() {
+		return TaskScheduler.of(() -> {
+			this.modifiedContents = new ItemStack[this.contents.length];
+			for (int i = 0; i < this.contents.length + 1; i++) {
+				modifiedContents[i] = new ItemStack(this.contents[i]);
+			}
+		}).schedule();
 	}
 
-	public CompletableFuture<Void> update() {
-		return CompletableFuture.supplyAsync(() -> {
-			TaskScheduler.of(() -> {
-				for (int i = 0; i < this.modifiedContents.length + 1; i++) {
-					this.parent.setItem(i, this.modifiedContents[i]);
-				}
-			}).schedule();
-			return null;
-		});
+	public RenderedTask update() {
+		return TaskScheduler.of(() -> {
+			for (int i = 0; i < this.modifiedContents.length + 1; i++) {
+				this.parent.setItem(i, this.modifiedContents[i]);
+			}
+		}).schedule();
 	}
 
-	public CompletableFuture<Void> update(@NotNull Inventory inventory) {
-		return CompletableFuture.supplyAsync(() -> {
-			TaskScheduler.of(() -> {
-				for (int i = 0; i < this.modifiedContents.length + 1; i++) {
-					inventory.setItem(i, this.modifiedContents[i]);
-				}
-			}).schedule();
-			return null;
-		});
+	public RenderedTask update(@NotNull Inventory inventory) {
+		return TaskScheduler.of(() -> {
+			for (int i = 0; i < this.modifiedContents.length + 1; i++) {
+				inventory.setItem(i, this.modifiedContents[i]);
+			}
+		}).schedule();
 	}
 
 }

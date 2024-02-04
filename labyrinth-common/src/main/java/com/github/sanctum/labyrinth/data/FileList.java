@@ -165,7 +165,7 @@ public class FileList {
 	 * @throws IllegalArgumentException if name is empty
 	 */
 	public @NotNull FileManager get(@NotNull final String name, @Nullable final String desc) throws IllegalArgumentException {
-		return get(name, desc, YamlExtension.INSTANCE);
+		return get(name, desc, Configurable.Type.YAML);
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class FileList {
 	 */
 
 	public boolean exists(@NotNull final String name, @Nullable final String desc) {
-		return exists(name, desc, YamlExtension.INSTANCE);
+		return exists(name, desc, Configurable.Type.YAML);
 	}
 
 	/**

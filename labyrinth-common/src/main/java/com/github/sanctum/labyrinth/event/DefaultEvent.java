@@ -1,9 +1,7 @@
 package com.github.sanctum.labyrinth.event;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
-import com.github.sanctum.labyrinth.library.CommandUtils;
 import com.github.sanctum.labyrinth.library.ListUtils;
 import com.github.sanctum.panther.event.Vent;
 import java.util.Collection;
@@ -30,11 +28,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -399,19 +395,6 @@ public class DefaultEvent extends Vent {
 			if (c.getCommand().get().isChanged()) {
 				e.setMessage(StringUtils.join(c.getCommand().get().args, " "));
 			}
-
-		}
-
-		@EventHandler
-		public void onCommandHide(PlayerCommandSendEvent e) {
-			CommandUtils.getVisibilityCalculations().forEach(calculation -> {
-				String test = calculation.accept(e.getPlayer());
-				if (test != null) e.getCommands().remove(test);
-			});
-		}
-
-		@EventHandler
-		public void onTabInsert(TabCompleteEvent e) {
 
 		}
 

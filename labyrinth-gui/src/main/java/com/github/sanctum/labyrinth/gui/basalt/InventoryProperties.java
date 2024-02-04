@@ -1,26 +1,42 @@
 package com.github.sanctum.labyrinth.gui.basalt;
 
+import org.jetbrains.annotations.NotNull;
+
 public class InventoryProperties {
 
-	private int size;
+	private final InventoryFormat type;
+	private final boolean shareable;
+	private InventorySize size;
 	private String title;
-	private InventoryFormat type;
 
-	public InventoryProperties(InventoryFormat format, String title) {
+	public InventoryProperties(@NotNull InventoryFormat format, @NotNull InventorySize size, @NotNull String title, boolean shareable) {
 		this.title = title;
 		this.type = format;
-		this.size = 4;// decide size with new enum
+		this.size = size;
+		this.shareable = shareable;
 	}
 
 	public InventoryFormat getFormat() {
 		return type;
 	}
 
+	public InventorySize getSize() {
+		return size;
+	}
+
 	public String getTitle() {
 		return title;
 	}
 
-	public int getSize() {
-		return size;
+	public boolean isShareable() {
+		return shareable;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setSize(InventorySize size) {
+		this.size = size;
 	}
 }

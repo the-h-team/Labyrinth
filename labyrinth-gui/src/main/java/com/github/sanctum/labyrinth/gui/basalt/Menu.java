@@ -1,20 +1,25 @@
 package com.github.sanctum.labyrinth.gui.basalt;
 
+import org.jetbrains.annotations.NotNull;
+
 public class Menu {
 
-	private final boolean isSharable;
 	private final InventoryProperties properties;
+	private  InventoryContainer container;
 
-	public Menu(String title, InventoryFormat format, boolean sharable) {
-		this.isSharable = sharable;
-		this.properties = new InventoryProperties(format, title);
+	public Menu(InventoryProperties properties) {
+		this.properties = properties;
 	}
 
 	public InventoryContainer getContainer() {
-		if (isSharable) {
+		if (getProperties().isShareable()) {
 			// new instance
 		}
 		return null; // cached instance
+	}
+
+	public @NotNull InventoryProperties getProperties() {
+		return properties;
 	}
 
 }
