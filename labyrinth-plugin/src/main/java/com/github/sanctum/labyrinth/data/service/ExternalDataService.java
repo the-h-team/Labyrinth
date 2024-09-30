@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.data.service;
 
+import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.panther.annotation.Ordinal;
 import com.github.sanctum.panther.util.Task;
@@ -42,11 +44,16 @@ public abstract class ExternalDataService {
 		Handshake(LabyrinthAPI instance) {
 			super("Labyrinth-Handshake", TaskChain.getSynchronous());
 			this.instance = instance;
-			this.version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
+			this.version = LegacyCheckService.VERSION;
 		}
 
 		@Ordinal
 		private void initialize() {
+			if (LabyrinthProvider.getInstance().isJava20()) {
+				instance.getLogger().info("- Using new mappings " + version + ", switching to WesJD AnvilGUI.");
+				return;
+			}
+
 			if (!shook) {
 				// create a stream containing the version jar.
 				InputStream stream = instance.getPluginInstance().getResource(version + ".jar");
@@ -84,6 +91,7 @@ public abstract class ExternalDataService {
 						if (mechanics != null) {
 							if (!service.getServerVersion().contains(version)) {
 								instance.getLogger().severe("- Version service " + service.getServerVersion() + " invalid for " + version);
+								instance.getLogger().severe("- Anvil GUI interfacing will not work correctly.");
 								return;
 							}
 							Bukkit.getServicesManager().register(AnvilMechanics.class, mechanics, instance.getPluginInstance(), ServicePriority.High);

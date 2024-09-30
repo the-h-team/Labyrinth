@@ -1,10 +1,14 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
+import com.github.sanctum.labyrinth.api.LabyrinthAPI;
+import com.github.sanctum.labyrinth.api.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
+import com.github.sanctum.labyrinth.library.StringUtils;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -14,12 +18,16 @@ public class PrintableMenu extends Menu {
 	public PrintableMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		super(host, title, rows, type, properties);
 		this.properties.add(Property.SHAREABLE);
-		AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
-		if (mechanics != null) {
-			addElement(new InventoryElement.Printable(title, mechanics, this));
+		if (!LabyrinthProvider.getInstance().isJava20()) {
+			AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
+			if (mechanics != null) {
+				addElement(new InventoryElement.Printable(title, mechanics, this));
+			} else {
+				LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
+				addElement(new InventoryElement.Printable(title, (AnvilMechanics) null, this));
+			}
 		} else {
-			LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
-			addElement(new InventoryElement.Printable(title, null, this));
+			addElement(new InventoryElement.Printable(title, new AnvilGUI.Builder().plugin(LabyrinthProvider.getInstance().getPluginInstance()).title(StringUtils.use(title).translate()), this));
 		}
 
 	}

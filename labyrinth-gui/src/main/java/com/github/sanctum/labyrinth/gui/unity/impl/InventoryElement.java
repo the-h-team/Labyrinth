@@ -17,17 +17,13 @@ import com.github.sanctum.panther.container.PantherSet;
 import com.github.sanctum.panther.util.AbstractPaginatedCollection;
 import com.github.sanctum.panther.util.SpecialID;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -966,6 +962,8 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 	public static class Printable extends InventoryElement {
 
 		private final AnvilMechanics nms;
+		private final AnvilGUI.Builder builder;
+		private AnvilGUI gui = null;
 
 		private int containerId;
 
@@ -974,6 +972,13 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		public Printable(String title, AnvilMechanics mechanics, Menu menu) {
 			super(StringUtils.use(title).translate(), menu, true);
 			this.nms = mechanics;
+			this.builder = null;
+		}
+
+		public Printable(String title, AnvilGUI.Builder builder, Menu menu) {
+			super(StringUtils.use(title).translate(), menu, true);
+			this.nms = null;
+			this.builder = builder;
 		}
 
 		public boolean isVisible(Player player) {
@@ -986,17 +991,25 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		}
 
 		public void close(Player player, boolean sendPacket) {
-			if (nms == null || !visible.contains(player)) return;
+			if (!visible.contains(player)) return;
 			visible.remove(player);
-			AnvilMechanics.Container container = nms.getContainer(player);
-			if (container != null) container.close(player);
+			if (nms != null) {
+				AnvilMechanics.Container container = nms.getContainer(player);
+				if (container != null) container.close(player);
+			} else {
+				if (this.gui != null) {
+					this.gui.closeInventory();
+				} else {
+					// TODO: input warning message
+				}
+			}
 		}
 
 		@Override
 		public void open(Player player) {
-			if (nms == null) {
+			if (this.builder == null && nms == null) {
 				Mailer mailer = Mailer.empty(player).prefix().start("&7[").middle("&2&lLabyrinth").end("&7]").finish();
-				String reason = LabyrinthProvider.getInstance().isModded() ? "Modded Environment" : "Unknown";
+				String reason = LabyrinthProvider.getInstance().isModded() ? "Modded Environment" : "Missing version support";
 				mailer.chat("&c&lAn internal matter has prevented you from accessing this menu.").deploy(m -> {
 					if (player.isOp()) {
 						mailer.chat("&eReason: &f" + reason).queue();
@@ -1006,26 +1019,43 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 				return;
 			}
 
-			final AnvilMechanics.Container container = nms.newContainer(player, this.getTitle(), true);
+			if (this.builder == null) {
+				final AnvilMechanics.Container container = nms.newContainer(player, this.getTitle(), true);
 
-			setElement(container.getBukkitInventory());
-
-			for (ItemElement<?> it : getAttachment()) {
-				if (it.getSlot().isPresent()) {
-					int slot = it.getSlot().get();
-					if (slot == 0) {
-						getElement().setItem(0, it.getElement());
-					}
-					if (slot == 1) {
-						getElement().setItem(1, it.getElement());
-					}
-					if (slot == 2) {
-						getElement().setItem(2, it.getElement());
+				setElement(container.getBukkitInventory());
+				for (ItemElement<?> it : getAttachment()) {
+					if (it.getSlot().isPresent()) {
+						int slot = it.getSlot().get();
+						if (slot == 0) {
+							getElement().setItem(0, it.getElement());
+						}
+						if (slot == 1) {
+							getElement().setItem(1, it.getElement());
+						}
+						if (slot == 2) {
+							getElement().setItem(2, it.getElement());
+						}
 					}
 				}
+
+				container.open(player);
+			} else {
+				for (ItemElement<?> it : getAttachment()) {
+					if (it.getSlot().isPresent()) {
+						int slot = it.getSlot().get();
+						if (slot == 0) {
+							builder.itemLeft(it.getElement());
+						}
+						if (slot == 1) {
+							builder.itemRight(it.getElement());
+						}
+					}
+				}
+				builder.onClick((integer, stateSnapshot) -> Collections.emptyList());
+				this.gui = builder.open(player);
+				setElement(gui.getInventory());
 			}
 
-			container.open(player);
 			visible.add(player);
 		}
 

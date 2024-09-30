@@ -2,6 +2,7 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.panther.annotation.Removal;
+import com.github.sanctum.panther.util.PantherString;
 import org.bukkit.Bukkit;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.Bukkit;
 @Removal
 public interface LegacyCheckService extends Service {
 
-    String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
+    String VERSION = new WesVersionMatcher().match();
 
     default boolean isModded() {
         return StringUtils.use(Bukkit.getServer().getName()).containsIgnoreCase("forge", "magma");
@@ -29,6 +30,10 @@ public interface LegacyCheckService extends Service {
         }
         int fin = Integer.parseInt(num);
         return fin >= 8 && fin < 14;
+    }
+
+    default boolean isJava20() {
+        return new PantherString(VERSION).contains("1_20_R3", "1_20_R4", "1_20_R5", "1_20_R6", "1_21");
     }
 
     /**
