@@ -4,7 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.ActionbarInstance;
 import com.github.sanctum.labyrinth.formatting.ScoreboardInstance;
 import com.github.sanctum.labyrinth.formatting.TablistInstance;
-import com.github.sanctum.labyrinth.interfacing.Nameable;
+import com.github.sanctum.labyrinth.interfacing.Identifiable;
 import com.github.sanctum.labyrinth.library.Cooldown;
 import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface LabyrinthUser extends Nameable {
+public interface LabyrinthUser extends Identifiable {
 
 	@NotNull String getName();
 
