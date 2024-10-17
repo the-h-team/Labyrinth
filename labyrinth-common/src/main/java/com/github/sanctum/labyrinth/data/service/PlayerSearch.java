@@ -7,6 +7,7 @@ import com.github.sanctum.labyrinth.data.LabyrinthUser;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
 import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
+import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.library.TimeWatch;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.annotation.Note;
@@ -24,7 +25,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +71,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 				this.isOnlineMode = Bukkit.getOnlineMode();
 				this.name = s;
 				this.reference = player.getUniqueId();
-				if (StringUtils.isAlphanumeric(name)) {
+				if (StringUtils.use(name).isAlphanumeric()) {
 					TaskScheduler.of(() -> {
 						try {
 							this.image = new ImageBreakdown("https://minotar.net/avatar/" + s + ".png", 8, BlockChar.SOLID) {

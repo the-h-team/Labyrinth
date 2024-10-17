@@ -254,6 +254,16 @@ public final class StringUtils {
 	}
 
 	/**
+	 * Checks if the given context is alphanumeric "[^a-zA-Z0-9]"
+	 *
+	 * @return true if the context is alphanumeric
+	 */
+	public boolean isAlphanumeric() {
+		Pattern p = Pattern.compile("[^a-zA-Z0-9]");
+		return p.matcher(this.context).find();
+	}
+
+	/**
 	 * Checks if the given context is a double.
 	 *
 	 * @return true if the context is a double.

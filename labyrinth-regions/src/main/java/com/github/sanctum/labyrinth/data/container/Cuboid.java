@@ -1,5 +1,6 @@
 package com.github.sanctum.labyrinth.data.container;
 
+import com.github.sanctum.labyrinth.api.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.CuboidAxis;
 import com.github.sanctum.labyrinth.data.CuboidLocation;
 import com.github.sanctum.labyrinth.data.DefaultCuboid;
@@ -10,10 +11,8 @@ import com.github.sanctum.labyrinth.library.StringUtils;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.util.HUID;
 import java.util.function.Function;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -90,6 +89,9 @@ public interface Cuboid {
 
 	class VisualBoundary {
 
+		final Particle power = LegacyCheckService.VERSION.contains("1_21_R1") ? Particle.valueOf("ELECTRIC_SPARK") : Particle.valueOf("REDSTONE");
+		final Particle water = LegacyCheckService.VERSION.contains("1_21_R1") ? Particle.valueOf("DRIPPING_WATER") : Particle.valueOf("WATER_DROP");
+
 		private final double xMax;
 		private final double xMin;
 		private final double yMax;
@@ -113,57 +115,57 @@ public interface Cuboid {
 			return this;
 		}
 
-		public enum Particle {
-			WHITE(Color.fromRGB(255, 255, 255)),
-			GREEN(Color.fromRGB(66, 245, 102)),
-			RED(Color.fromRGB(255, 10, 10)),
-			YELLOW(Color.fromRGB(207, 183, 4)),
-			CUSTOM(Color.AQUA),
-			BLUE(Color.fromRGB(3, 148, 252));
+		public enum Color {
+			WHITE(org.bukkit.Color.fromRGB(255, 255, 255)),
+			GREEN(org.bukkit.Color.fromRGB(66, 245, 102)),
+			RED(org.bukkit.Color.fromRGB(255, 10, 10)),
+			YELLOW(org.bukkit.Color.fromRGB(207, 183, 4)),
+			CUSTOM(org.bukkit.Color.AQUA),
+			BLUE(org.bukkit.Color.fromRGB(3, 148, 252));
 
-			private final Color color;
+			private final org.bukkit.Color color;
 
-			Particle(Color color) {
+			Color(org.bukkit.Color color) {
 				this.color = color;
 			}
 
-			public Color toColor() {
+			public org.bukkit.Color toColor() {
 				return color;
 			}
 
-			public Color toColor(int hex) {
+			public org.bukkit.Color toColor(int hex) {
 				if (this != CUSTOM)
 					throw new IllegalStateException("Invalid particle color usage. Expected 'CUSTOM'");
-				return Color.fromRGB(hex);
+				return org.bukkit.Color.fromRGB(hex);
 			}
 
 		}
 
-		public static Color randomColor() {
+		public static org.bukkit.Color randomColor() {
 			Random r = new Random();
 			switch (r.nextInt(25)) {
 				case 0:
 				case 1:
 				case 2:
 				case 3:
-					return Particle.YELLOW.toColor();
+					return Color.YELLOW.toColor();
 				case 4:
 				case 5:
 				case 6:
 				case 7:
-					return Particle.WHITE.toColor();
+					return Color.WHITE.toColor();
 				case 8:
 				case 9:
 				case 10:
 				case 11:
 				case 12:
-					return Particle.RED.toColor();
+					return Color.RED.toColor();
 				case 13:
 				case 14:
 				case 15:
 				case 16:
 				case 17:
-					return Particle.GREEN.toColor();
+					return Color.GREEN.toColor();
 				case 18:
 				case 19:
 				case 20:
@@ -171,41 +173,41 @@ public interface Cuboid {
 				case 22:
 				case 23:
 				case 24:
-					return Particle.BLUE.toColor();
+					return Color.BLUE.toColor();
 			}
-			return Particle.WHITE.toColor();
+			return Color.WHITE.toColor();
 		}
 
 		public void deploy() {
 			org.bukkit.Particle.DustOptions dustOptions = new org.bukkit.Particle.DustOptions(randomColor(), 2);
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = zMin; j < zMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, yMax, j, 1, dustOptions);
-					p.spawnParticle(org.bukkit.Particle.WATER_DROP, i, yMax, j, 1);
+					p.spawnParticle(power, i, yMax, j, 1, dustOptions);
+					p.spawnParticle(water, i, yMax, j, 1);
 				}
 			}
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, j, zMin, 1, dustOptions);
-					p.spawnParticle(org.bukkit.Particle.WATER_DROP, i, j, zMin, 1);
+					p.spawnParticle(power, i, j, zMin, 1, dustOptions);
+					p.spawnParticle(water, i, j, zMin, 1);
 				}
 			}
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, j, zMax, 1, dustOptions);
-					p.spawnParticle(org.bukkit.Particle.WATER_DROP, i, j, zMax, 1);
+					p.spawnParticle(power, i, j, zMax, 1, dustOptions);
+					p.spawnParticle(water, i, j, zMax, 1);
 				}
 			}
 			for (double i = zMin; i < zMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, xMin, j, i, 1, dustOptions);
-					p.spawnParticle(org.bukkit.Particle.WATER_DROP, xMin, j, i, 1);
+					p.spawnParticle(power, xMin, j, i, 1, dustOptions);
+					p.spawnParticle(water, xMin, j, i, 1);
 				}
 			}
 			for (double i = zMin; i < zMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, xMax, j, i, 1, dustOptions);
-					p.spawnParticle(org.bukkit.Particle.WATER_DROP, xMax, j, i, 1);
+					p.spawnParticle(power, xMax, j, i, 1, dustOptions);
+					p.spawnParticle(water, xMax, j, i, 1);
 				}
 			}
 		}
@@ -240,31 +242,31 @@ public interface Cuboid {
 			}
 		}
 
-		public void deploy(Particle color) {
+		public void deploy(Color color) {
 			org.bukkit.Particle.DustOptions dustOptions = new org.bukkit.Particle.DustOptions(color.toColor(), 2);
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = zMin; j < zMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, yMax, j, 1, dustOptions);
+					p.spawnParticle(power, i, yMax, j, 1, dustOptions);
 				}
 			}
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, j, zMin, 1, dustOptions);
+					p.spawnParticle(power, i, j, zMin, 1, dustOptions);
 				}
 			}
 			for (double i = xMin; i < xMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, i, j, zMax, 1, dustOptions);
+					p.spawnParticle(power, i, j, zMax, 1, dustOptions);
 				}
 			}
 			for (double i = zMin; i < zMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, xMin, j, i, 1, dustOptions);
+					p.spawnParticle(power, xMin, j, i, 1, dustOptions);
 				}
 			}
 			for (double i = zMin; i < zMax + 1; i++) {
 				for (double j = yMin; j < yMax + 1; j++) {
-					p.spawnParticle(org.bukkit.Particle.REDSTONE, xMax, j, i, 1, dustOptions);
+					p.spawnParticle(power, xMax, j, i, 1, dustOptions);
 				}
 			}
 		}
@@ -289,6 +291,8 @@ public interface Cuboid {
 
 		public static class Action {
 
+			final Particle power = LegacyCheckService.VERSION.contains("1_21_R1") ? Particle.valueOf("ELECTRIC_SPARK") : Particle.valueOf("REDSTONE");
+			final Particle water = LegacyCheckService.VERSION.contains("1_21_R1") ? Particle.valueOf("DRIPPING_WATER") : Particle.valueOf("WATER_DROP");
 			private final Player p;
 			private final double x;
 			private final double y;
@@ -318,12 +322,12 @@ public interface Cuboid {
 			}
 
 			public void box() {
-				p.spawnParticle(org.bukkit.Particle.REDSTONE, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
-				p.spawnParticle(org.bukkit.Particle.WATER_DROP, getX(), getY(), getZ(), 1);
+				p.spawnParticle(power, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
+				p.spawnParticle(water, getX(), getY(), getZ(), 1);
 			}
 
 			public void walls() {
-				p.spawnParticle(org.bukkit.Particle.REDSTONE, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
+				p.spawnParticle(power, getX(), getY(), getZ(), 1, new org.bukkit.Particle.DustOptions(randomColor(), 2));
 			}
 
 			public void box(Material material, long decay) {

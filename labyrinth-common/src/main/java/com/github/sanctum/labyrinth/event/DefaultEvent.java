@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -391,10 +390,21 @@ public class DefaultEvent extends Vent {
 			if (c.isCancelled()) {
 				e.setCancelled(true);
 			}
+			c.getCommand().ifPresent(command -> {
+				if (command.isChanged()) {
+					StringBuilder builder = new StringBuilder();
+					int length = command.args.length - 1;
+					for (int i = 0; i <= length; i++) {
+						if (i != length) {
+							builder.append(command.args[i]).append(" ");
+						} else {
+							builder.append(command.args[i]);
+						}
+					}
+					e.setMessage(builder.toString());
+				}
+			});
 
-			if (c.getCommand().get().isChanged()) {
-				e.setMessage(StringUtils.join(c.getCommand().get().args, " "));
-			}
 
 		}
 

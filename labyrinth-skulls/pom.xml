@@ -5,7 +5,7 @@
     <parent>
         <artifactId>labyrinth</artifactId>
         <groupId>com.github.the-h-team</groupId>
-        <version>1.9.4</version>
+        <version>1.9.5-PREVIEW</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -33,8 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.16.2-R0.1-SNAPSHOT</version>
+            <artifactId>spigot-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
