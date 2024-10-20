@@ -7,22 +7,22 @@ import java.util.UUID;
 
 public interface Identifiable {
 
-	@NotNull String getName();
+    @NotNull String getName();
 
-	@NotNull UUID getId();
+    @NotNull UUID getUniqueId();
 
-	static @NotNull Identifiable wrap(@NotNull Entity entity) {
-		return new Identifiable() {
-			@Override
-			public @NotNull String getName() {
-				return entity.getName();
-			}
+    static @NotNull Identifiable wrap(@NotNull Entity entity) {
+        return new Identifiable() {
+            @Override
+            public @NotNull String getName() {
+                return entity.getName();
+            }
 
-			@Override
-			public @NotNull UUID getId() {
-				return entity.getUniqueId();
-			}
-		};
-	}
+            @Override
+            public @NotNull UUID getUniqueId() {
+                return entity.getUniqueId();
+            }
+        };
+    }
 
 }

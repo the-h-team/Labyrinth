@@ -45,7 +45,7 @@ public class VaultPlayer {
 	}
 
 	public static VaultPlayer wrap(PlayerSearch player) {
-		VaultPlayer play = CACHE.stream().filter(p -> p.player.getId().equals(player.getId())).findFirst().orElse(null);
+		VaultPlayer play = CACHE.stream().filter(p -> p.player.getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
 		if (play != null) {
 			return play;
 		}

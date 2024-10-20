@@ -19,7 +19,7 @@ public interface LabyrinthUser extends Identifiable {
 
 	String[] getPreviousNames();
 
-	@NotNull UUID getId();
+	@NotNull UUID getUniqueId();
 
 	@NotNull OfflinePlayer getPlayer();
 
@@ -36,7 +36,7 @@ public interface LabyrinthUser extends Identifiable {
 	}
 
 	default @Nullable Cooldown getCooldown(@NotNull String key) {
-		return LabyrinthProvider.getInstance().getCooldown(getId().toString() + "-" + key);
+		return LabyrinthProvider.getInstance().getCooldown(getUniqueId().toString() + "-" + key);
 	}
 
 	default @NotNull Cooldown getOrCreate(@NotNull String key, @NotNull ParsedTimeFormat format) {

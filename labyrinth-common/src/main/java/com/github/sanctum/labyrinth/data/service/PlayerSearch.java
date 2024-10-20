@@ -41,7 +41,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 
 	public abstract @NotNull OfflinePlayer getPlayer();
 
-	public abstract @NotNull UUID getId();
+	public abstract @NotNull UUID getUniqueId();
 
 	public abstract @NotNull SpecialID getSpecialId();
 
@@ -128,7 +128,7 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			}
 
 			@Override
-			public @NotNull UUID getId() {
+			public @NotNull UUID getUniqueId() {
 				return isOnlineMode ? reference : getPlayer().getUniqueId();
 			}
 
