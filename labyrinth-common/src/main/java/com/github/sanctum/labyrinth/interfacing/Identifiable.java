@@ -9,7 +9,9 @@ public interface Identifiable {
 
     @NotNull String getName();
 
-    @NotNull UUID getUniqueId();
+    default @NotNull UUID getUniqueId() {
+        return UUID.nameUUIDFromBytes("LABYRINTH;DEFAULT".getBytes());
+    }
 
     static @NotNull Identifiable wrap(@NotNull Entity entity) {
         return new Identifiable() {
