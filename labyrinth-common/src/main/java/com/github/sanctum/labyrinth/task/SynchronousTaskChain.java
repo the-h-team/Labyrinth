@@ -29,7 +29,6 @@ public final class SynchronousTaskChain extends TaskChain {
 	@Override
 	public SynchronousTaskChain run(final @NotNull Task task) {
 		task.setFuture(defaultTimer.submit(task.setChain(this).setSynchronizer(synchronizer)));
-
 		return this;
 	}
 

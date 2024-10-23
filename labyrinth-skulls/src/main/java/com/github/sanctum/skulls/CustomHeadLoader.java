@@ -7,6 +7,7 @@ import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.util.HUID;
 import com.google.common.base.Preconditions;
 import com.google.gson.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -237,14 +238,20 @@ public final class CustomHeadLoader {
                 try {
                     Class<?> playerProfileClass = Class.forName("org.bukkit.profile.PlayerProfile");
                     Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit");
-                    Method m = bukkitClass.getMethod("createPlayerProfile", UUID.class, String.class);
+                    Method createPlayerProfile = bukkitClass.getMethod("createPlayerProfile", UUID.class, String.class);
                     // create new player profile
-                    Object o = m.invoke(null, UUID.nameUUIDFromBytes(headValue.getBytes()), HUID.parseID(headValue).newID().toString());
-                    Object set = o.getClass().getMethod("getTextures").invoke(o);
+                    Object playerProfile = createPlayerProfile.invoke(null, UUID.nameUUIDFromBytes(headValue.getBytes()), HUID.parseID(headValue).newID().toString());
+                    Object craftTextures = playerProfile.getClass().getMethod("getTextures").invoke(playerProfile);
                     // apply texture to player profile
-                    set.getClass().getMethod("setSkin", URL.class).invoke(set, parseHeadValue(headValue));
+                    Method setSkin = craftTextures.getClass().getMethod("setSkin", URL.class);
+                    Optional<URL> url = parseHeadValue(headValue);
+                    if (url.isPresent()) {
+                        setSkin.invoke(craftTextures, url.get());
+                    }
                     // update skull meta
-                    skullMeta.getClass().getMethod("setOwnerProfile", playerProfileClass).invoke(skullMeta, o);
+                    Method setOwnerProfile = skullMeta.getClass().getMethod("setOwnerProfile", playerProfileClass);
+                    setOwnerProfile.setAccessible(true);
+                    setOwnerProfile.invoke(skullMeta, playerProfile);
                 } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                          IllegalAccessException e) {
                     throw new RuntimeException(e);

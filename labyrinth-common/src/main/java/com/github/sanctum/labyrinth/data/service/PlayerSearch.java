@@ -164,22 +164,21 @@ public abstract class PlayerSearch implements LabyrinthUser {
 			PlayerSearch.lookups.clear();
 			final OfflinePlayer[] players = Bukkit.getOfflinePlayers();
 			final LabyrinthAPI api = LabyrinthProvider.getInstance();
+			int runtime = players.length >= 1000 ? TaskService.ASYNCHRONOUS : TaskService.SYNCHRONOUS;
+			CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, runtime, PlayerSearch::of);
 			if (players.length >= 500) {
 				if (players.length >= 1000) {
-					int runtime = TaskService.SYNCHRONOUS;
-					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, runtime, PlayerSearch::of);
 					api.getLogger().warning("- Whoa large amounts of registered players, splitting the workload...");
 					api.getScheduler(runtime).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
 				} else {
-					CollectionTask<OfflinePlayer> cache = CollectionTask.process(players, "USER-CACHE", 20, PlayerSearch::of);
 					api.getLogger().warning("- A-lot of registered players, splitting the workload...");
 					api.getScheduler(TaskService.ASYNCHRONOUS).repeat(cache, 0, 50); // repeat the task every 1 tick therefore loading only 20 users every tick instead of all at once.
-					while (cache.getCompletion() < 100) {
-						try {
-							Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+				}
+				while (cache.getCompletion() < 100) {
+					try {
+						Thread.sleep(1L); // make main thread wait to continue after all users are loaded.
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			} else {
