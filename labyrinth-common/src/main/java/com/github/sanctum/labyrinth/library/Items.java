@@ -1,9 +1,14 @@
 package com.github.sanctum.labyrinth.library;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+
+import com.github.sanctum.panther.container.PantherEntry;
+import com.github.sanctum.panther.container.PantherEntryMap;
+import com.github.sanctum.panther.container.PantherMap;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -13,17 +18,17 @@ import org.jetbrains.annotations.Nullable;
  * @author Hempfest
  */
 public final class Items {
-	private static final Map<String, Material> MATERIAL_ALIAS = new HashMap<>();
-
+	static final PantherMap<String, Material> cache = new PantherEntryMap<>();
 	static {
-		for (Material material : Material.values()) {
-			MATERIAL_ALIAS.put(material.name().toLowerCase().replace("_", ""), material);
+		for (Material m : Material.values()) {
+			cache.put(m.name().toLowerCase().replace("_", ""), m);
 		}
 	}
 
 	public static @Nullable Material findMaterial(String name) {
-		return Optional.ofNullable(MATERIAL_ALIAS.get(name.toLowerCase().replaceAll("_", ""))).orElseGet(() -> MATERIAL_ALIAS.entrySet().stream().filter(e -> StringUtils.use(e.getKey()).containsIgnoreCase(name)).map(Map.Entry::getValue).findFirst().orElse(null));
+		return Optional.ofNullable(cache.get(name.toLowerCase().replace("_", ""))).orElse(cache.stream().filter(m -> StringUtils.use(m.getValue().name()).containsIgnoreCase(name.toLowerCase().replace("_", ""))).findFirst().map(PantherEntry.Modifiable::getValue).orElse(null));
 	}
+
 
 	/**
 	 * Build and convert an item-stack all in one function.
@@ -52,8 +57,5 @@ public final class Items {
 	 */
 	public static @NotNull ItemStack edit(ItemStack toEdit, Function<Item.Edit, ItemStack> fun) {
 		return fun.apply(edit().setItem(toEdit));
-	}
-
-	private Items() {
 	}
 }

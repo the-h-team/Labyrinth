@@ -76,7 +76,7 @@ public class AnvilDocket implements Docket<UnknownGeneric>, UniqueHolder {
 			if (item.getOpenOnClick() != null) {
 				String open = item.getOpenOnClick();
 				MenuRegistration registration = MenuRegistration.getInstance();
-				Menu registered = registration.get(open).get();
+				Menu registered = registration.get(open).deploy().get();
 				if (registered != null) {
 					registered.open(click.getElement());
 				} else {

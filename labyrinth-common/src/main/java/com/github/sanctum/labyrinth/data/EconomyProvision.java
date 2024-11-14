@@ -7,8 +7,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 public abstract class EconomyProvision {
-	static AdvancedEconomyProvision enterprise;
-	static VaultEconomyProvision vault;
+		static VaultEconomyProvision vault;
 
 	public static EconomyProvision getInstance() {
 		EconomyProvision provision = Bukkit.getServicesManager().load(EconomyProvision.class);
@@ -21,7 +20,7 @@ public abstract class EconomyProvision {
 	public abstract String getImplementation();
 
 	public final boolean isValid() {
-		return enterprise != null || vault != null || getInstance() != EmptyProvision.INSTANCE;
+		return vault != null || getInstance() != EmptyProvision.INSTANCE;
 	}
 
 	public Optional<Double> balance(OfflinePlayer p) {

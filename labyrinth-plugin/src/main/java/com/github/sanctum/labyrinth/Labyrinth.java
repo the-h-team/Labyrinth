@@ -14,6 +14,8 @@ import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.labyrinth.data.service.VentMapImpl;
 import com.github.sanctum.labyrinth.event.DefaultEvent;
+import com.github.sanctum.labyrinth.event.EnableAfterEvent;
+import com.github.sanctum.labyrinth.event.LabyrinthVentCall;
 import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
@@ -22,6 +24,7 @@ import com.github.sanctum.labyrinth.library.*;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.impl.DefaultImplementation;
 import com.github.sanctum.labyrinth.permissions.impl.VaultImplementation;
+import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.SynchronousTaskChain;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.event.Subscribe;
@@ -130,15 +133,6 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
         LabyrinthProvider.instance = this;
         getLogger().info("- Copyright Team Sanctum 2020, Open-source spigot development tool.");
         getLogger().info("- Loading user cache, please be patient...");
-        // temporary, move components yaml to json file.
-        FileManager manager = FileList.search(this).get("Components", "Persistent");
-        if (manager.getRoot().exists()) {
-            FileManager n = manager.toJSON("components", "Persistent");
-            Configurable c = n.getRoot();
-            c.save();
-            c.reload();
-            manager.getRoot().delete();
-        }
         PlayerSearch.reload().deploy();
         registerServices().deploy();
         registerJsonAdapters().deploy();
@@ -157,6 +151,32 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
         registerImplementations().deploy();
         registerHandshake().deploy();
         registerDefaultPlaceholders().deploy();
+        Plugin[] list = Bukkit.getPluginManager().getPlugins();
+        TaskScheduler.of(() -> new LabyrinthVentCall<>(new EnableAfterEvent(Arrays.stream(list).filter(Plugin::isEnabled).map(Plugin::getName).toArray(String[]::new))).run()).scheduleLater("labyrinth;enable-after-ever", 20L * (Math.min(40L + list.length, 120))); // the bigger the plugin list the longer it tries to wait
+    }
+
+    @Subscribe
+    public void onEnableAfter(EnableAfterEvent e) {
+        // Load economy
+        new com.github.sanctum.labyrinth.data.VaultImplementation(this);
+
+        // Load permission
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+            VaultImplementation bridge = new VaultImplementation();
+            getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
+        }
+        Permissions instance = getServicesManager().load(Permissions.class);
+        assert instance != null;
+        // we know it's not null because of the default implementation.
+        if (instance.getProvider().equals(this)) {
+            getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
+        } else {
+            if (instance instanceof VaultImplementation) {
+                getLogger().info("- Vault permission manager found. Now using: " + instance.getProvider().getName());
+            } else {
+                getLogger().info("- Custom permission manager found. Now using: " + instance.getProvider().getName());
+            }
+        }
     }
 
     Deployable<Labyrinth> registerServices() {
@@ -191,27 +211,6 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
 
     Deployable<Labyrinth> registerImplementations() {
         return Deployable.of(() -> {
-            TaskScheduler.of(() -> new AdvancedEconomyImplementation(this)).scheduleLater(12)
-                    .next(() -> new com.github.sanctum.labyrinth.data.VaultImplementation(this)).scheduleLater(12)
-                    .next(() -> {
-                        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-                            VaultImplementation bridge = new VaultImplementation();
-                            getServicesManager().register(bridge, bridge.getProvider(), ServicePriority.Normal);
-                        }
-                        Permissions instance = getServicesManager().load(Permissions.class);
-                        assert instance != null;
-                        // we know it's not null because of the default implementation.
-                        if (instance.getProvider().equals(this)) {
-                            getLogger().info("- Using default labyrinth implementation for permissions (No provider).");
-                        } else {
-                            if (instance instanceof VaultImplementation) {
-                                getLogger().info("- Vault permission manager found. Now using: " + instance.getProvider().getName());
-                            } else {
-                                getLogger().info("- Custom permission manager found. Now using: " + instance.getProvider().getName());
-                            }
-                        }
-                    }).scheduleLater(12);
-
             if (isLegacyVillager()) {
                 ConfigurationSerialization.registerClass(LegacyConfigLocation.class);
             }

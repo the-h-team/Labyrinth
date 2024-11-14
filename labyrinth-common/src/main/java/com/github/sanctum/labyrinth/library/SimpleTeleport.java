@@ -109,10 +109,7 @@ public class SimpleTeleport extends Teleport {
             if (filter != null) {
                 for (Identifiable i : getEntities()) {
                     if (i.isPlayer()) {
-                        boolean hasWait = i.getAsPlayer().getNearbyEntities(filter.radius(), filter.radius(), filter.radius()).stream().anyMatch(e -> {
-                            Identifiable wrapped = Identifiable.wrap(e);
-                            return !filter.accept(wrapped);
-                        });
+                        boolean hasWait = !filter.accept(i);
                         if (hasWait) {
                             // wait for configured time
                             setState(State.TELEPORTING);
@@ -157,10 +154,7 @@ public class SimpleTeleport extends Teleport {
             if (filter != null) {
                 Identifiable i = getEntity();
                 if (i.isPlayer()) {
-                    boolean hasWait = i.getAsPlayer().getNearbyEntities(filter.radius(), filter.radius(), filter.radius()).stream().anyMatch(e -> {
-                        Identifiable wrapped = Identifiable.wrap(e);
-                        return !filter.accept(wrapped);
-                    });
+                    boolean hasWait = !filter.accept(i);
                     if (hasWait) {
                         // wait for configured time
                         setState(State.TELEPORTING);
