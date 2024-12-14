@@ -10,53 +10,46 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Encapsulate player data and search online for skin results.
  */
-public class HeadLookup {
+public class SkullReferenceLookup {
 
-	protected String name = null;
-	protected String id = null;
-	protected String value = null;
+	final String name, id, value;
+	final Gson gson = new Gson();
 
-	// TODO: throw to prevent invalid object state and allow field finality
-	public HeadLookup(String name) {
+	public SkullReferenceLookup(String name) throws InvalidSkullReferenceException {
 		this.name = name;
 		try {
-			Gson g = new Gson();
-			String signature = getNonSessionContent(name);
-			JsonObject obj = g.fromJson(signature, JsonObject.class);
+			JsonObject obj = getContentFromName(name);
 			this.id = obj.get("id").toString().replace("\"", "");
-			String sessionContent = getSessionContent(this.id);
-			obj = g.fromJson(sessionContent, JsonObject.class);
+            obj = getContentFromID(UUID.fromString(this.id));
 			String value = obj.getAsJsonArray("properties").get(0).getAsJsonObject().get("value").getAsString();
 			String decoded = new String(Base64.getDecoder().decode(value));
-			obj = g.fromJson(decoded, JsonObject.class);
+			obj = gson.fromJson(decoded, JsonObject.class);
 			String skinURL = obj.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
 			byte[] skinByte = ("{\"textures\":{\"SKIN\":{\"url\":\"" + skinURL + "\"}}}").getBytes();
 			this.value = new String(Base64.getEncoder().encode(skinByte));
-		} catch (Exception ignored) {
+		} catch (Exception e) {
+			throw new InvalidSkullReferenceException("There was a problem finding matching results for '" + name + "' within skull reference lookup.");
 		}
 	}
 
-	// TODO: throw to prevent invalid object state and allow field finality
-	public HeadLookup(UUID id) {
+	public SkullReferenceLookup(UUID id) throws InvalidSkullReferenceException {
 		try {
-			Gson g = new Gson();
-			String signature = getSessionContent(id.toString());
-			JsonObject obj = g.fromJson(signature, JsonObject.class);
-
+			JsonObject obj = getContentFromID(id);
 			this.id = obj.get("id").toString().replace("\"", "");
 			this.name = obj.get("name").toString().replace("\"", "");
 			String value = obj.getAsJsonArray("properties").get(0).getAsJsonObject().get("value").getAsString();
 			String decoded = new String(Base64.getDecoder().decode(value));
-			obj = g.fromJson(decoded, JsonObject.class);
+			obj = gson.fromJson(decoded, JsonObject.class);
 			String skinURL = obj.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
 			byte[] skinByte = ("{\"textures\":{\"SKIN\":{\"url\":\"" + skinURL + "\"}}}").getBytes();
 			this.value = new String(Base64.getEncoder().encode(skinByte));
-		} catch (Exception ignored) {
+		} catch (Exception e) {
+			throw new InvalidSkullReferenceException("There was a problem finding matching results for '" + id.toString() + "' within skull reference lookup.");
 		}
 	}
 
@@ -75,16 +68,24 @@ public class HeadLookup {
 	 * @return the user id for this search
 	 */
 	public UUID getUUID() {
-		// TODO: Remove null-check after above refactor
-		return this.id != null ? UUID.fromString(this.id) : null;
+		return UUID.fromString(this.id);
 	}
 
-	private String getSessionContent(String string) {
+	/**
+	 * Get the desired skin applied to a player skull.
+	 *
+	 * @return the desired skin applied to a player skull or default if not successful.
+	 */
+	public @NotNull ItemStack getResult() {
+		return SkullReferenceDocker.provide(this.value);
+	}
+
+	private JsonObject getContentFromID(UUID id) {
 		URL url;
 		BufferedReader in = null;
 		StringBuilder sb = new StringBuilder();
 		try {
-			url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + string);
+			url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + id.toString());
 			in = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
 			String str;
 			while ((str = in.readLine()) != null) {
@@ -99,10 +100,10 @@ public class HeadLookup {
 			} catch (IOException ignored) {
 			}
 		}
-		return sb.toString();
+		return gson.fromJson(sb.toString(), JsonObject.class);
 	}
 
-	private String getNonSessionContent(String string) {
+	private JsonObject getContentFromName(String string) {
 		URL url;
 		BufferedReader in = null;
 		StringBuilder sb = new StringBuilder();
@@ -122,20 +123,7 @@ public class HeadLookup {
 			} catch (IOException ignored) {
 			}
 		}
-		return sb.toString();
-	}
-
-	// TODO: With value never null, nullity should match CustomerHeadLoader.provide(String)
-	/**
-	 * Get the desired skin applied to a player skull.
-	 *
-	 * @return the desired skin applied to a player skull
-	 */
-	public @Nullable ItemStack getResult() {
-		if (value != null) {
-			return CustomHeadLoader.provide(this.value);
-		}
-		return null;
+		return gson.fromJson(sb.toString(), JsonObject.class);
 	}
 
 

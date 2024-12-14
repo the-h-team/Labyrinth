@@ -1,12 +1,12 @@
 package com.github.sanctum.skulls;
 
-final class HeadContext {
+final class SkullReferenceTicket {
 
 	private final String name;
 
 	private final String category;
 
-	HeadContext(String name, String category) {
+	SkullReferenceTicket(String name, String category) {
 		this.name = name;
 		this.category = category;
 	}

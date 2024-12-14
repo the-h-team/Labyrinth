@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 @SuppressWarnings("SpellCheckingInspection")
-public enum SkullType implements SkullObject {
+public enum SkullReferenceType implements SkullReferenceMeta {
 
 	COMMAND_BLOCK("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY0YzIxZDE3YWQ2MzYzODdlYTNjNzM2YmZmNmFkZTg5NzMxN2UxMzc0Y2Q1ZDliMWMxNWU2ZTg5NTM0MzIifX19"),
 	ARROW_BLACK_LEFT("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0"),
@@ -24,7 +24,7 @@ public enum SkullType implements SkullObject {
 
 	private final ItemStack itemStack;
 
-	SkullType(String value) {
+	SkullReferenceType(String value) {
 		if (value.equals("LP")) {
 			boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("PLAYER_HEAD"));
 			if (isNew) {
@@ -37,28 +37,33 @@ public enum SkullType implements SkullObject {
 		} else if (value.equals("LC")) {
 			this.itemStack = new ItemStack(Material.AIR);
 		} else {
-			this.itemStack = CustomHeadLoader.provide(value);
+			this.itemStack = SkullReferenceDocker.provide(value);
 		}
 	}
 
 
 	@Override
-	public ItemStack get() {
+	public ItemStack getItem() {
 		return this.itemStack;
 	}
 
 	@Override
-	public String category() {
+	public String getName() {
+		return name();
+	}
+
+	@Override
+	public String getCategory() {
 		return "Labyrinth";
 	}
 
 	@Override
-	public Optional<UUID> id() {
+	public Optional<UUID> getId() {
 		return Optional.empty();
 	}
 
 	@Override
-	public com.github.sanctum.skulls.SkullType getType() {
+	public SkullReferenceType getType() {
 		return this;
 	}
 
