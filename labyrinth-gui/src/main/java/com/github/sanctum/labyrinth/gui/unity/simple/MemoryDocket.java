@@ -23,17 +23,14 @@ import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.file.MemorySpace;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.panther.util.Check;
-import com.github.sanctum.panther.util.PantherLogger;
-import com.github.sanctum.skulls.CustomHead;
-import com.github.sanctum.skulls.SkullType;
+import com.github.sanctum.skulls.SkullReferenceType;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import com.github.sanctum.skulls.SkullReferenceUtility;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -257,7 +254,12 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 										if (dataConverter != null) {
 											res = dataConverter.apply(res, value);
 										}
-										lore.add(res);
+										if (res.contains("\\n")) {
+											String[] list = res.split("\\\\n");
+                                            lore.addAll(Arrays.asList(list));
+										} else {
+											lore.add(res);
+										}
 									}
 									item.setElement(edit -> edit.setLore(lore).build());
 								}
@@ -385,8 +387,8 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 			String name = local ? uniqueDataConverter.apply(nameHolder, uniqueData) : dataConverter.apply(nameHolder, (T) args[0]);
 			PlayerSearch search = PlayerSearch.of(name);
 			if (search != null) {
-				ItemStack head = CustomHead.Manager.get(search.getPlayer());
-				item.setElement(edit -> edit.setItem(head != null ? head : SkullType.PLAYER.get()).build());
+				ItemStack head = SkullReferenceUtility.getItem(search.getPlayer());
+				item.setElement(edit -> edit.setItem(head != null ? head : SkullReferenceType.PLAYER.getItem()).build());
 				if (built.hasItemMeta()) {
 					if (built.getItemMeta().hasDisplayName()) {
 						item.setElement(edit -> edit.setTitle(built.getItemMeta().getDisplayName()).build());

@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.github.sanctum.panther.container.PantherEntry;
 import com.github.sanctum.panther.container.PantherEntryMap;
@@ -40,22 +42,11 @@ public final class Items {
 	}
 
 	/**
-	 * Build and convert an item-stack all in one function.
 	 *
-	 * @param fun The item builder to stack conversion.
-	 * @return An item modification object.
+	 * @param itemStack
+	 * @return
 	 */
-	public static @NotNull ItemStack edit(Function<Item.Edit, ItemStack> fun) {
-		return fun.apply(edit());
-	}
-
-	/**
-	 * Build and convert an item-stack all in one function.
-	 *
-	 * @param fun The item builder to stack conversion.
-	 * @return An item modification object.
-	 */
-	public static @NotNull ItemStack edit(ItemStack toEdit, Function<Item.Edit, ItemStack> fun) {
-		return fun.apply(edit().setItem(toEdit));
+	public static Item.Edit edit(ItemStack itemStack) {
+		return new Item.Edit(itemStack);
 	}
 }

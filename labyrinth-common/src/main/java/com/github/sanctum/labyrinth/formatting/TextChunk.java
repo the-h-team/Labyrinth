@@ -157,13 +157,15 @@ public class TextChunk extends Message.Chunk {
 		List<String> adjusted = new ArrayList<>();
 		this.CONTEXT.stream().filter(t -> t instanceof ToolTip.Text).forEach(toolTip -> adjusted.add(((ToolTip.Text) toolTip).get()));
 		TextComponent finalComponent = component;
-		ListUtils.use(adjusted).append(object -> object + "\n").forEach(context -> {
-			if (LabyrinthProvider.getInstance().isLegacy()) {
-				finalComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use(context).translate()).create()));
-			} else {
+		List<String> newList = ListUtils.use(adjusted).append(object -> object + "\n");
+		newList.forEach(context -> {
+			if (!LabyrinthProvider.getInstance().isLegacy()) {
 				ComponentUtil.addContent(finalComponent, context);
 			}
 		});
+		if (LabyrinthProvider.getInstance().isLegacy()) {
+			finalComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(StringUtils.use(String.join("", newList)).translate()).create()));
+		}
 		for (ToolTip<?> context : this.CONTEXT) {
 			switch (context.getType()) {
 				case COMMAND:

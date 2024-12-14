@@ -18,17 +18,7 @@ public class PrintableMenu extends Menu {
 	public PrintableMenu(Plugin host, String title, Rows rows, Type type, Property... properties) {
 		super(host, title, rows, type, properties);
 		this.properties.add(Property.SHAREABLE);
-		if (!LabyrinthProvider.getInstance().isJava20()) {
-			AnvilMechanics mechanics = Bukkit.getServicesManager().load(AnvilMechanics.class);
-			if (mechanics != null) {
-				addElement(new InventoryElement.Printable(title, mechanics, this));
-			} else {
-				LabyrinthProvider.getInstance().getLogger().severe("- No anvil mechanic service found!!");
-				addElement(new InventoryElement.Printable(title, (AnvilMechanics) null, this));
-			}
-		} else {
-			addElement(new InventoryElement.Printable(title, new AnvilGUI.Builder().plugin(LabyrinthProvider.getInstance().getPluginInstance()).title(StringUtils.use(title).translate()), this));
-		}
+		addElement(new InventoryElement.Printable(title, new AnvilGUI.Builder().plugin(LabyrinthProvider.getInstance().getPluginInstance()).title(StringUtils.use(title).translate()), this));
 
 	}
 

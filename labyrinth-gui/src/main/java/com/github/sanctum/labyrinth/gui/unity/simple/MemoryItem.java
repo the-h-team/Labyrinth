@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.FileList;
+import com.github.sanctum.labyrinth.api.LegacyCheckService;
 import com.github.sanctum.labyrinth.library.Item;
 import com.github.sanctum.labyrinth.library.Items;
 import com.github.sanctum.labyrinth.library.StringUtils;
@@ -9,10 +9,8 @@ import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.file.Node;
-import com.github.sanctum.panther.util.Check;
-import com.github.sanctum.panther.util.PantherLogger;
 import com.github.sanctum.skulls.CustomHead;
-import com.github.sanctum.skulls.CustomHeadLoader;
+import com.github.sanctum.skulls.SkullReferenceDocker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -20,6 +18,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.github.sanctum.skulls.SkullReferenceUtility;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -71,21 +71,41 @@ public class MemoryItem {
 	}
 
 	private ItemStack improvise(String value) {
+		if (value.equalsIgnoreCase("playerhead") || value.equalsIgnoreCase("player_head")) value = "skullitem";
 		Material mat = Items.findMaterial(value);
 		if (mat != null) {
 			return new ItemStack(mat);
 		} else {
 			if (value.length() < 26) {
-				return CustomHead.Manager.getHeads().stream().filter(h -> StringUtils.use(h.name()).containsIgnoreCase(value)).map(CustomHead::get).findFirst().orElse(null);
+				String finalValue = value;
+				return SkullReferenceUtility.getHeads().stream().filter(h -> StringUtils.use(h.getName()).containsIgnoreCase(finalValue)).map(CustomHead::getItem).findFirst().orElse(null);
 			} else {
-				return CustomHeadLoader.provide(value);
+				return SkullReferenceDocker.provide(value);
 			}
 		}
 	}
 
+	private ItemStack improviseOldShort(String value, short sh) {
+		if (value.equalsIgnoreCase("playerhead") || value.equalsIgnoreCase("player_head")) value = "skullitem";
+		Material mat = Items.findMaterial(value);
+		if (mat != null) {
+			return new ItemStack(mat, 1, sh);
+		}
+		return null;
+	}
+
 	public @NotNull ItemStack toItem() {
 		String type = node.getNode("type").toPrimitive().getString();
-		ItemStack test = improvise(type);
+		ItemStack test;
+		if (type.contains(":")) {
+			// add short to itemstack
+			String[] typeAr = type.split(":");
+			String t = typeAr[0];
+			short s = Short.parseShort(typeAr[1]);
+			test = improviseOldShort(t, s);
+		} else {
+			test = improvise(type);
+		}
 		if (test == null) {
 			test = new ItemStack(Material.DIRT);
 			Logger logger = LabyrinthProvider.getInstance().getLogger();
@@ -139,7 +159,11 @@ public class MemoryItem {
 		if (node.isNode("enchantments")) {
 			Node enchants = node.getNode("enchantments");
 			for (String enchant : enchants.getKeys(false)) {
-				Arrays.stream(Enchantment.values()).filter(en -> en.getKey().getKey().equals(enchant)).findFirst().ifPresent(e -> edit.addEnchantment(e, enchants.getNode(enchant).toPrimitive().getInt()));
+				if (!LegacyCheckService.VERSION.contains("1_8")) {
+					Arrays.stream(Enchantment.values()).filter(en -> en.getKey().getKey().equals(enchant)).findFirst().ifPresent(e -> edit.addEnchantment(e, enchants.getNode(enchant).toPrimitive().getInt()));
+				} else {
+					Arrays.stream(Enchantment.values()).filter(en -> en.getName().equals(enchant)).findFirst().ifPresent(e -> edit.addEnchantment(e, enchants.getNode(enchant).toPrimitive().getInt()));
+				}
 			}
 		}
 		if (node.getNode("lore").toPrimitive().isStringList()) {

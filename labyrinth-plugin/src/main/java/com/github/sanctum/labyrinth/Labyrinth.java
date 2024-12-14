@@ -152,7 +152,7 @@ public final class Labyrinth extends JavaPlugin implements Vent.Host, Listener, 
         registerHandshake().deploy();
         registerDefaultPlaceholders().deploy();
         Plugin[] list = Bukkit.getPluginManager().getPlugins();
-        TaskScheduler.of(() -> new LabyrinthVentCall<>(new EnableAfterEvent(Arrays.stream(list).filter(Plugin::isEnabled).map(Plugin::getName).toArray(String[]::new))).run()).scheduleLater("labyrinth;enable-after-ever", 20L * (Math.min(40L + list.length, 120))); // the bigger the plugin list the longer it tries to wait
+        TaskScheduler.of(() -> new LabyrinthVentCall<>(new EnableAfterEvent(Arrays.stream(list).filter(Plugin::isEnabled).map(Plugin::getName).toArray(String[]::new))).run()).scheduleLater("labyrinth;enable-after-ever", (Math.min(40L + list.length, 120))); // the bigger the plugin list the longer it tries to wait
     }
 
     @Subscribe

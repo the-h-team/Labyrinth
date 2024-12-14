@@ -108,7 +108,7 @@ public class SimpleTeleport extends Teleport {
         if (hasMultipleEntities()) {
             if (filter != null) {
                 for (Identifiable i : getEntities()) {
-                    if (i.isPlayer()) {
+                    if (i.getAsPlayer() != null) {
                         boolean hasWait = !filter.accept(i);
                         if (hasWait) {
                             // wait for configured time
@@ -140,7 +140,7 @@ public class SimpleTeleport extends Teleport {
                         accepted = new Date();
                         teleportEntity(i, loc);
                         flush();
-                    } else if (i.isPlayer()) {
+                    } else if (i.getAsPlayer() != null) {
                         // theyre a player
                         setState(State.TELEPORTING);
                         accepted = new Date();
@@ -153,7 +153,7 @@ public class SimpleTeleport extends Teleport {
         } else {
             if (filter != null) {
                 Identifiable i = getEntity();
-                if (i.isPlayer()) {
+                if (i.getAsPlayer() != null) {
                     boolean hasWait = !filter.accept(i);
                     if (hasWait) {
                         // wait for configured time
@@ -184,7 +184,7 @@ public class SimpleTeleport extends Teleport {
                     accepted = new Date();
                     teleportEntity(i, loc);
                     flush();
-                } else if (i.isPlayer()) {
+                } else if (i.getAsPlayer() != null) {
                     // theyre a player
                     setState(State.TELEPORTING);
                     accepted = new Date();

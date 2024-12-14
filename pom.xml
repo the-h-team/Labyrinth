@@ -6,7 +6,7 @@
 
     <groupId>com.github.the-h-team</groupId>
     <artifactId>labyrinth</artifactId>
-    <version>1.9.5</version>
+    <version>1.9.6</version>
     <modules>
         <module>labyrinth-common</module>
         <module>labyrinth-gui</module>
