@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.Cooldown;
-import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.ParsedTimeFormat;
 import java.util.Optional;
+
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Provides cooldown information.
  */
-@Removal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface CooldownService extends Service {
     /**
      * Get a list of all pre-cached cooldowns.

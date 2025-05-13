@@ -1,7 +1,5 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherMap;
 import com.github.sanctum.panther.util.WrongLoaderUsedException;
@@ -19,14 +17,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Load addon classes in Java 8-16+.
  *
  * @author ms5984
  */
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public class AddonLoader {
     private static final Field PLUGIN_CLASS_MAP;
 
@@ -55,7 +55,7 @@ public class AddonLoader {
      * @return an addon loader for your plugin
      */
     @Deprecated
-    @Removal(inVersion = "1.7.9")
+    @ApiStatus.ScheduledForRemoval(inVersion = "1.7.9")
     public static AddonLoader forPlugin(Plugin yourPlugin) {
         return new AddonLoader(yourPlugin);
     }

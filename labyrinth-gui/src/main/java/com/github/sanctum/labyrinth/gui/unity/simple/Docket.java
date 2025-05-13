@@ -5,7 +5,6 @@ import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
 import com.github.sanctum.panther.annotation.Json;
 import com.github.sanctum.panther.annotation.Note;
-import com.github.sanctum.panther.annotation.See;
 import com.github.sanctum.panther.file.MemorySpace;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The optional type used for pagination
  */
-@See({DocketBuilder.class, JsonDocket.class, MapDocket.class, MemoryDocket.class})
 public interface Docket<T> extends JsonIntermediate {
 
 	@Note("A useful variable processing step")

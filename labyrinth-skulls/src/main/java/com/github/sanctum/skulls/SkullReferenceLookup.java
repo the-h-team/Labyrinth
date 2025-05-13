@@ -23,9 +23,9 @@ public class SkullReferenceLookup {
 	public SkullReferenceLookup(String name) throws InvalidSkullReferenceException {
 		this.name = name;
 		try {
-			JsonObject obj = getContentFromName(name);
+			JsonObject obj = getMojangContent(name);
 			this.id = obj.get("id").toString().replace("\"", "");
-            obj = getContentFromID(UUID.fromString(this.id));
+            obj = getProfileContent(UUID.fromString(this.id));
 			String value = obj.getAsJsonArray("properties").get(0).getAsJsonObject().get("value").getAsString();
 			String decoded = new String(Base64.getDecoder().decode(value));
 			obj = gson.fromJson(decoded, JsonObject.class);
@@ -39,7 +39,7 @@ public class SkullReferenceLookup {
 
 	public SkullReferenceLookup(UUID id) throws InvalidSkullReferenceException {
 		try {
-			JsonObject obj = getContentFromID(id);
+			JsonObject obj = getProfileContent(id);
 			this.id = obj.get("id").toString().replace("\"", "");
 			this.name = obj.get("name").toString().replace("\"", "");
 			String value = obj.getAsJsonArray("properties").get(0).getAsJsonObject().get("value").getAsString();
@@ -80,7 +80,7 @@ public class SkullReferenceLookup {
 		return SkullReferenceDocker.provide(this.value);
 	}
 
-	private JsonObject getContentFromID(UUID id) {
+	private JsonObject getProfileContent(UUID id) {
 		URL url;
 		BufferedReader in = null;
 		StringBuilder sb = new StringBuilder();
@@ -103,12 +103,12 @@ public class SkullReferenceLookup {
 		return gson.fromJson(sb.toString(), JsonObject.class);
 	}
 
-	private JsonObject getContentFromName(String string) {
+	private JsonObject getMojangContent(String name) {
 		URL url;
 		BufferedReader in = null;
 		StringBuilder sb = new StringBuilder();
 		try {
-			url = new URL("https://api.mojang.com/users/profiles/minecraft/" + string);
+			url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
 			in = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
 			String str;
 			while ((str = in.readLine()) != null) {

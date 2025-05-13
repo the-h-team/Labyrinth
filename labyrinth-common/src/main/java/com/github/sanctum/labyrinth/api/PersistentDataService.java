@@ -2,8 +2,8 @@ package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.data.container.PersistentContainer;
 import com.github.sanctum.labyrinth.library.NamespacedKey;
-import com.github.sanctum.panther.annotation.Removal;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * Manages persistent data container access.
  */
-@Removal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface PersistentDataService extends Service {
     /**
      * Get a list of all containers associated with a specified plugin.

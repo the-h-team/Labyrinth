@@ -1,6 +1,5 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
@@ -13,7 +12,9 @@ import java.util.Map;
  * @since 1.2.1
  */
 public class WesVersionMatcher {
-    /** Maps a Minecraft version string to the corresponding revision string */
+    /**
+     * Maps a Minecraft version string to the corresponding revision string
+     */
     private static final Map<String, String> VERSION_TO_REVISION = new HashMap<String, String>() {
         {
             this.put("1.20", "1_20_R1");

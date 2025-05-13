@@ -1,14 +1,15 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.PantherString;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Detects legacy server environments.
  */
-@Removal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface LegacyCheckService extends Service {
 
     String VERSION = new WesVersionMatcher().match();

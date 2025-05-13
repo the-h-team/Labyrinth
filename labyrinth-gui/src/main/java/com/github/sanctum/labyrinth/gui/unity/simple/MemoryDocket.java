@@ -15,9 +15,7 @@ import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.library.Mailer;
-import com.github.sanctum.panther.annotation.Comment;
 import com.github.sanctum.panther.annotation.Note;
-import com.github.sanctum.panther.annotation.Voluntary;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherList;
 import com.github.sanctum.panther.file.MemorySpace;
@@ -64,19 +62,19 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 		this.memory = memorySpace;
 	}
 
-	@Voluntary("Used only in tandem with pagination.")
+	@Note("Used only in tandem with pagination.")
 	public MemoryDocket<T> setList(@NotNull Supplier<List<T>> supplier) {
 		this.supplier = supplier;
 		return this;
 	}
 
-	@Voluntary("Used only in tandem with pagination.")
+	@Note("Used only in tandem with pagination.")
 	public MemoryDocket<T> setComparator(Comparator<T> comparator) {
 		this.comparator = comparator;
 		return this;
 	}
 
-	@Voluntary("Used only in tandem with pagination.")
+	@Note("Used only in tandem with pagination.")
 	public MemoryDocket<T> setFilter(Predicate<T> predicate) {
 		this.predicate = predicate;
 		return this;
@@ -89,7 +87,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 		return this;
 	}
 
-	@Voluntary("This method allows you to setup custom placeholders, used only in tandem with pagination.")
+	@Note("This method allows you to setup custom placeholders, used only in tandem with pagination.")
 	public MemoryDocket<T> setDataConverter(@NotNull BiFunction<String, T, String> function) {
 		this.dataConverter = function;
 		return this;
@@ -380,7 +378,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 		}
 	}
 
-	@Comment("Handle player head to user translations, local being a unique object instead of paginated.")
+	@Note("Handle player head to user translations, local being a unique object instead of paginated.")
 	protected void handlePlayerHeadLookup(boolean local, ItemStack built, ItemElement<?> item, Object... args) {
 		boolean pass = local ? !Check.isNull(uniqueData, uniqueDataConverter, nameHolder) : !Check.isNull(dataConverter, nameHolder);
 		if (pass && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
@@ -401,7 +399,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 		}
 	}
 
-	@Comment("Handle memory item placeholder translation on a string with a provided value")
+	@Note("Handle memory item placeholder translation on a string with a provided value")
 	protected String handlePaginationReplacements(MemoryItem item, String context, T value) {
 		final FormattedString string = new FormattedString(context);
 		for (Map.Entry<String, String> entry : item.getReplacements().entrySet()) {

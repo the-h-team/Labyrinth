@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.api;
 
-import com.github.sanctum.panther.annotation.Removal;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-@Removal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface PlaceholderFormatService extends Service {
 
 	@NotNull String replaceAll(@NotNull String text, Object variable);

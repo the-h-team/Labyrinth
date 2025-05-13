@@ -1,15 +1,17 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
-import com.github.sanctum.panther.annotation.Removal;
 import com.github.sanctum.panther.util.Deployable;
 import java.util.List;
+
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Exposes cached action-wrapped components.
  */
-@Removal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface ActionComponentService extends Service {
     /**
      * Get a list of all action-wrapped text components.

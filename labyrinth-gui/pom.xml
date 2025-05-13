@@ -57,7 +57,7 @@
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.10.2-SNAPSHOT</version>
+            <version>1.10.5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
