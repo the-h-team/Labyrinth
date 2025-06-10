@@ -11,12 +11,12 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.ScheduledForRemoval
 public interface Service {
 
-	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<CooldownService> COOLDOWNS = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<LegacyCheckService> LEGACY = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<MessagingService> MESSENGER = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<PersistentDataService> DATA = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<RecordingService> RECORDING = new ServiceType<>(LabyrinthProvider::getInstance);
-	ServiceType<TaskService> TASK = new ServiceType<>(LabyrinthProvider::getInstance);
+	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<ActionComponentService>(LabyrinthProvider::getInstance);
+	ServiceType<CooldownService> COOLDOWNS = new ServiceType<CooldownService>(LabyrinthProvider::getInstance);
+	ServiceType<LegacyCheckService> LEGACY = new ServiceType<LegacyCheckService>(LabyrinthProvider::getInstance);
+	ServiceType<MessagingService> MESSENGER = new ServiceType<MessagingService>(LabyrinthProvider::getInstance);
+	ServiceType<PersistentDataService> DATA = new ServiceType<PersistentDataService>(LabyrinthProvider::getInstance);
+	ServiceType<RecordingService> RECORDING = new ServiceType<RecordingService>(LabyrinthProvider::getInstance);
+	ServiceType<TaskService> TASK = new ServiceType<TaskService>(LabyrinthProvider::getInstance);
 
 }

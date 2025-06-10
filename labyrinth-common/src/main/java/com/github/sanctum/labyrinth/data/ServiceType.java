@@ -3,6 +3,7 @@ package com.github.sanctum.labyrinth.data;
 import com.github.sanctum.labyrinth.api.Service;
 
 import com.github.sanctum.panther.util.EasyTypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
@@ -16,7 +17,7 @@ public class ServiceType<T extends Service> {
 
 	public ServiceType(Supplier<T> supplier) {
 		this.supplier = supplier;
-		c = new EasyTypeAdapter<T>().getType();
+		c = (Class<T>) supplier.get().getClass();
 	}
 
 	public Class<T> getType() {

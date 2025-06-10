@@ -1,6 +1,7 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.panther.util.EasyTypeAdapter;
 import com.github.sanctum.panther.util.TypeAdapter;
 
 public interface Counter<N extends Number> extends Service {
@@ -18,7 +19,7 @@ public interface Counter<N extends Number> extends Service {
 			boolean integer = false;
 
 			{
-				TypeAdapter<N> flag = TypeAdapter.get();
+				TypeAdapter<N> flag = new EasyTypeAdapter<N>() {};
 				Class<N> type = flag.getType();
 				if (type == Integer.class) {
 					i = 0L;
@@ -55,7 +56,7 @@ public interface Counter<N extends Number> extends Service {
 			boolean integer = false;
 
 			{
-				TypeAdapter<N> flag = TypeAdapter.get();
+				TypeAdapter<N> flag = new EasyTypeAdapter<N>() {};
 				Class<N> type = flag.getType();
 				if (type == Integer.class) {
 					i = 0L;

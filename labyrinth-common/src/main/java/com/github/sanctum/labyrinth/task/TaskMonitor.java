@@ -3,10 +3,8 @@ package com.github.sanctum.labyrinth.task;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
 import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.panther.util.OrdinalProcedure;
-import com.github.sanctum.panther.util.Task;
-import com.github.sanctum.panther.util.TaskChain;
-import com.github.sanctum.panther.util.TypeAdapter;
+import com.github.sanctum.panther.util.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +17,7 @@ public class TaskMonitor {
 	protected final Map<Integer, TaskChain> map = new HashMap<>();
 
 	TaskMonitor() {
-		this.flagClass = TypeAdapter.get();
+		this.flagClass = new EasyTypeAdapter<BukkitTaskPredicate<Task>[]>(){};
 		LabyrinthAPI api = LabyrinthProvider.getInstance();
 		map.put(0, api.getScheduler(TaskService.SYNCHRONOUS));
 		map.put(1, api.getScheduler(TaskService.ASYNCHRONOUS));

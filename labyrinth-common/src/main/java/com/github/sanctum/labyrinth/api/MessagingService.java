@@ -9,6 +9,7 @@ import com.github.sanctum.labyrinth.formatting.Message;
 import com.github.sanctum.labyrinth.library.Mailer;
 import com.github.sanctum.panther.annotation.FieldsFrom;
 import com.github.sanctum.panther.util.Deployable;
+import com.github.sanctum.panther.util.EasyTypeAdapter;
 import com.github.sanctum.panther.util.TypeAdapter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -62,7 +63,7 @@ public interface MessagingService extends Service, Message.Factory {
 	}
 
 	default LabyrinthPluginChannel<?>[] getDefaultPluginChannels() {
-		TypeAdapter<LabyrinthPluginChannel<?>> flag = TypeAdapter.get();
+		TypeAdapter<LabyrinthPluginChannel<?>> flag = new EasyTypeAdapter<LabyrinthPluginChannel<?>>(){};
 		return Constant.values(flag.getType(), flag.getType()).toArray(new LabyrinthPluginChannel[0]);
 	}
 

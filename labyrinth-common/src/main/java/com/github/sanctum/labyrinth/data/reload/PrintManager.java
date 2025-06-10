@@ -46,7 +46,7 @@ public class PrintManager {
 			@Override
 			public boolean getBoolean(String key) {
 				if (map.containsKey(key)) {
-					return new EasyTypeAdapter<Boolean>().cast(map.get(key));
+					return new EasyTypeAdapter<Boolean>(){}.cast(map.get(key));
 				}
 				return false;
 			}
@@ -55,7 +55,7 @@ public class PrintManager {
 			public String getString(String key) {
 				if (map.containsKey(key)) {
 					if (String.class.isAssignableFrom(map.get(key).getClass())) {
-						return new EasyTypeAdapter<String>().cast(map.get(key));
+						return new EasyTypeAdapter<String>(){}.cast(map.get(key));
 					}
 				}
 				return null;
@@ -76,7 +76,7 @@ public class PrintManager {
 				if (map.containsKey(key)) {
 					if (List.class.isAssignableFrom(map.get(key).getClass())) {
 						if (String.class.isAssignableFrom(((List<?>)map.get(key)).get(0).getClass())) {
-							return new EasyTypeAdapter<List<String>>().cast(map.get(key));
+							return new EasyTypeAdapter<List<String>>(){}.cast(map.get(key));
 						}
 					}
 				}
