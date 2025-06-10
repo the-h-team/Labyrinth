@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
  * Exposes cached action-wrapped components.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface ActionComponentService extends Service {
     /**
      * Get a list of all action-wrapped text components.

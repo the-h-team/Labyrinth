@@ -12,7 +12,6 @@ import java.util.List;
  * Manages persistent data container access.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface PersistentDataService extends Service {
     /**
      * Get a list of all containers associated with a specified plugin.

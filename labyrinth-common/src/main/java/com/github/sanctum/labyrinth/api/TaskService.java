@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 // TODO: description; elaborate on "most" in getConcurrentTaskIds
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface TaskService extends Service {
 
 	int SYNCHRONOUS = 0;

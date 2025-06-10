@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
  * Used to keep track of time-span's
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface RecordingService extends Service {
 
 	/**

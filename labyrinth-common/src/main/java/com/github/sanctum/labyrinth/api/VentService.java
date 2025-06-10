@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
  * Provides access to the VentMap.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface VentService extends Service {
     /**
      * Get the main VentMap instance.

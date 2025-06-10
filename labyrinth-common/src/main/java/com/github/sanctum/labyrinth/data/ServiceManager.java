@@ -11,7 +11,6 @@ import org.jetbrains.annotations.ApiStatus;
  * @author rigobert0
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public final class ServiceManager {
 	final PantherMap<ServiceType<?>, Service> services;
 

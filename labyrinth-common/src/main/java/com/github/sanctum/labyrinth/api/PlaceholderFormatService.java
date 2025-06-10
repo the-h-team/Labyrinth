@@ -4,7 +4,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface PlaceholderFormatService extends Service {
 
 	@NotNull String replaceAll(@NotNull String text, Object variable);

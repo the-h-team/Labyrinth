@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
  * A service for default message creation.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface MessagingService extends Service, Message.Factory {
 
 	/**

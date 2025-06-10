@@ -9,7 +9,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.function.Supplier;
 
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public class ServiceType<T extends Service> {
 
 	final Supplier<T> supplier;

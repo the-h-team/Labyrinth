@@ -8,7 +8,6 @@ import org.jetbrains.annotations.ApiStatus;
  * Used to mark objects that are recursively used.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface Service {
 
 	ServiceType<ActionComponentService> COMPONENTS = new ServiceType<ActionComponentService>(LabyrinthProvider::getInstance);

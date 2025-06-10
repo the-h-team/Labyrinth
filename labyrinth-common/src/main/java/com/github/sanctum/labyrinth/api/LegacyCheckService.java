@@ -9,7 +9,6 @@ import org.jetbrains.annotations.ApiStatus;
  * Detects legacy server environments.
  */
 @Deprecated
-@ApiStatus.ScheduledForRemoval
 public interface LegacyCheckService extends Service {
 
     String VERSION = new WesVersionMatcher().match();
