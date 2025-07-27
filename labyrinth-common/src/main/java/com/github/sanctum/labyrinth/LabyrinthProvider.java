@@ -14,7 +14,7 @@ import com.github.sanctum.panther.annotation.Note;
  * ▐█▌▐▌▐█*▪▐▌██▄▪▐█*▐█▀·.▐█•█▌▐█▌██▐█▌*▐█▌·██▌▐▀
  * .▀▀▀**▀**▀*·▀▀▀▀***▀*•*.▀**▀▀▀▀▀▀*█▪*▀▀▀*▀▀▀*·
  * </pre>
- * Copyright (c) 2020-2023 <strong>Sanctum</strong>
+ * Copyright (c) 2020-2024 <strong>Sanctum</strong>
  */
 public abstract class LabyrinthProvider {
 	static LabyrinthAPI instance;
