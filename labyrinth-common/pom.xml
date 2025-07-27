@@ -4,20 +4,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>labyrinth</artifactId>
-        <groupId>com.github.the-h-team</groupId>
+        <groupId>com.github.the-h-team.Labyrinth</groupId>
         <version>1.9.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>labyrinth-common</artifactId>
-    <name>Labyrinth-common</name>
+    <name>Labyrinth-Common</name>
     <description>Common libraries of all Labyrinth modules</description>
     <dependencies>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>com.github.the-h-team.Panther</groupId>
             <artifactId>panther-common</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>

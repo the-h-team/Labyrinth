@@ -25,63 +25,63 @@ otherwise have been far more time-consuming. It uses a global java library calle
     <dependencies>
     <!-- Used for accessing common library functions -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-common</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for loading/retrieving custom skull items. -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-skulls</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically as a full GUI arsenal (Singular/Paginated/Shared/Live/Slideshow/Anvil). -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-gui</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for region related services. -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-regions</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for location related services. -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-loci</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for permission related services (Vault replacement). -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-perms</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for pastebin/hastebin related services. -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-paste</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Used specifically for placeholder provision services. -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-placeholders</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>
         </dependency>
     <!-- Plugin internals, submodules marked to shade (Includes main class + plugin.yml, try not to use this) -->
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-plugin</artifactId>
             <version>${labyrinth.version}</version>
             <scope>provided</scope>

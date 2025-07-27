@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>labyrinth</artifactId>
-        <groupId>com.github.the-h-team</groupId>
+        <groupId>com.github.the-h-team.Labyrinth</groupId>
         <version>1.9.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -123,11 +123,13 @@
     </build>
 
     <dependencies>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -150,22 +152,22 @@
             <artifactId>panther-placeholders</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-gui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-perms</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.the-h-team</groupId>
+            <groupId>com.github.the-h-team.Labyrinth</groupId>
             <artifactId>labyrinth-regions</artifactId>
             <version>${project.version}</version>
         </dependency>
