@@ -90,9 +90,11 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <!-- Interim fix as original placeholderapi url is 404 -->
         <repository>
-            <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <id>helpchat-repo-releases</id>
+            <name>HelpChat Maven Repository</name>
+            <url>https://repo.helpch.at/releases</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -163,7 +165,7 @@
             <dependency>
                 <groupId>me.clip</groupId>
                 <artifactId>placeholderapi</artifactId>
-                <version>2.10.6</version>
+                <version>2.11.6</version>
                 <scope>provided</scope>
             </dependency>
             <!-- Vault -->
