@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.PlaceholderFormatService;
+import com.github.sanctum.labyrinth.data.service.PlaceholderFormatService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;

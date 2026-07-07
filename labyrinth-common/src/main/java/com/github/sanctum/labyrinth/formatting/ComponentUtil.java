@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.panther.annotation.Json;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;

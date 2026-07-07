@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.common.CustomItemRecipe;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
 import com.github.sanctum.panther.annotation.Experimental;
 import com.github.sanctum.panther.file.JsonAdapter;
 import com.github.sanctum.panther.file.Node;
@@ -67,7 +67,7 @@ public final class ItemStackSerializable implements JsonAdapter<ItemStack> {
 		int amount = Integer.parseInt(String.valueOf(o.get("amount")));
 		Material type = Material.valueOf((String) o.get("type"));
 		ItemStack stack = new ItemStack(type);
-		Item.Edit edit = Items.edit();
+		CustomItemRecipe.Edit edit = CachedMaterialEnums.edit();
 		Map<String,Object> ob = (Map<String, Object>) o.get("meta");
 		if (ob != null) {
 			byte data = Byte.parseByte(ob.get("data").toString());

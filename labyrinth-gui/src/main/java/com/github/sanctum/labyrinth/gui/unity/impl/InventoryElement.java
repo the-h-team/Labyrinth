@@ -4,8 +4,8 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import com.github.sanctum.labyrinth.library.Mailer;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.MessageComposer;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.labyrinth.task.BukkitTaskPredicate;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.container.ImmutablePantherMap;
@@ -1008,11 +1008,11 @@ public abstract class InventoryElement extends Menu.Element<Inventory, Set<ItemE
 		@Override
 		public void open(Player player) {
 			if (this.builder == null && nms == null) {
-				Mailer mailer = Mailer.empty(player).prefix().start("&7[").middle("&2&lLabyrinth").end("&7]").finish();
+				MessageComposer messageComposer = MessageComposer.empty(player).prefix().start("&7[").middle("&2&lLabyrinth").end("&7]").finish();
 				String reason = LabyrinthProvider.getInstance().isModded() ? "Modded Environment" : "Missing version support";
-				mailer.chat("&c&lAn internal matter has prevented you from accessing this menu.").deploy(m -> {
+				messageComposer.chat("&c&lAn internal matter has prevented you from accessing this menu.").deploy(m -> {
 					if (player.isOp()) {
-						mailer.chat("&eReason: &f" + reason).queue();
+						messageComposer.chat("&eReason: &f" + reason).queue();
 					}
 				});
 				player.closeInventory();

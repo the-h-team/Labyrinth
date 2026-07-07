@@ -10,7 +10,7 @@ import com.github.sanctum.labyrinth.event.RegionDestroyEvent;
 import com.github.sanctum.labyrinth.event.RegionInteractionEvent;
 import com.github.sanctum.labyrinth.event.RegionPVPEvent;
 import com.github.sanctum.labyrinth.event.DefaultEvent;
-import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;
 import com.github.sanctum.panther.container.PantherCollection;
@@ -43,7 +43,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 		RegionServicesManager servicesManager = new RegionServicesManagerImpl();
 		Bukkit.getServicesManager().register(RegionServicesManager.class, servicesManager, instance, ServicePriority.Normal);
 
-		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+		instance.getVentMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockBreak.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Optional.ofNullable(getInstance().get(e.getBlock().getLocation()))).join();
 			if (r.isPresent()) {
@@ -55,7 +55,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockPlace.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
+		instance.getVentMap().subscribe(new Vent.Subscription<>(DefaultEvent.BlockPlace.class, instance, Vent.Priority.HIGH, (e, subscription) -> {
 
 			Optional<Region> r = CompletableFuture.supplyAsync(() -> Optional.ofNullable(getInstance().get(e.getBlock().getLocation()))).join();
 			if (r.isPresent()) {
@@ -67,7 +67,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, "region-spawn", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+		instance.getVentMap().subscribe(new Vent.Subscription<>(DefaultEvent.Join.class, "region-spawn", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
 
 			Region.Resident r = Region.Resident.get(event.getPlayer());
 			if (!event.getPlayer().hasPlayedBefore()) {
@@ -84,7 +84,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", instance, Vent.Priority.MEDIUM, (e, subscription) -> {
+		instance.getVentMap().subscribe(new Vent.Subscription<>(DefaultEvent.Interact.class, "region-interact", instance, Vent.Priority.MEDIUM, (e, subscription) -> {
 
 			if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				Optional<Region> r = CompletableFuture.supplyAsync(() -> e.getBlock().map(Block::getLocation).flatMap(location -> Optional.ofNullable(getInstance().get(location)))).join();
@@ -139,10 +139,10 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 				boolean isOld = LabyrinthProvider.getInstance().isLegacy();
 
-				Material mat = Items.findMaterial("WOODEN_AXE");
+				Material mat = CachedMaterialEnums.findMaterial("WOODEN_AXE");
 
 				if (isOld) {
-					mat = Items.findMaterial("WOOD_AXE");
+					mat = CachedMaterialEnums.findMaterial("WOOD_AXE");
 				}
 
 				if (e.getItem().getType() == mat) {
@@ -162,7 +162,7 @@ public final class RegionServicesManagerImpl extends RegionServicesManager {
 
 		}));
 
-		instance.getEventMap().subscribe(new Vent.Subscription<>(DefaultEvent.PlayerDamagePlayer.class, "region-pvp", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
+		instance.getVentMap().subscribe(new Vent.Subscription<>(DefaultEvent.PlayerDamagePlayer.class, "region-pvp", instance, Vent.Priority.MEDIUM, (event, subscription) -> {
 
 			Player p = event.getPlayer();
 			Player target = event.getVictim();

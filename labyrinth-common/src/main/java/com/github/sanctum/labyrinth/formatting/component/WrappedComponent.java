@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.data.service.Service;
+import com.github.sanctum.labyrinth.data.service.TaskService;
 import com.github.sanctum.panther.util.Applicable;
 import com.github.sanctum.panther.util.HUID;
 import net.md_5.bungee.api.chat.ClickEvent;

@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
+import com.github.sanctum.labyrinth.data.LabyrinthPlayer;
+import com.github.sanctum.labyrinth.data.PlayerInfo;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherEntryMap;
@@ -17,25 +17,25 @@ public interface UserRegistration extends Service {
 		UserRegistration test = LabyrinthProvider.getService(UserRegistration.class);
 		if (test != null) return test;
 		test = new UserRegistration() {
-			final PantherMap<String, LabyrinthUser> cache = new PantherEntryMap<>();
+			final PantherMap<String, LabyrinthPlayer> cache = new PantherEntryMap<>();
 
-			public Deployable<LabyrinthUser> load(@NotNull LabyrinthUser user) {
+			public Deployable<LabyrinthPlayer> load(@NotNull LabyrinthPlayer user) {
 				return Deployable.of(user, u -> {
-					if (u instanceof PlayerSearch) {
-						PlayerSearch.register((PlayerSearch) u);
+					if (u instanceof PlayerInfo) {
+						PlayerInfo.register((PlayerInfo) u);
 					} else cache.computeIfAbsent(u.getName(), u);
 				}, 0);
 			}
 
-			public Deployable<LabyrinthUser> unload(@NotNull LabyrinthUser user) {
+			public Deployable<LabyrinthPlayer> unload(@NotNull LabyrinthPlayer user) {
 				return Deployable.of(user, u -> cache.remove(u.getName()), 0);
 			}
 
-			public Deployable<LabyrinthUser> get(@NotNull String name) {
-				return Deployable.of(() -> Optional.ofNullable(cache.get(name)).orElseGet(() -> PlayerSearch.of(name)), 0);
+			public Deployable<LabyrinthPlayer> get(@NotNull String name) {
+				return Deployable.of(() -> Optional.ofNullable(cache.get(name)).orElseGet(() -> PlayerInfo.of(name)), 0);
 			}
 
-			public Deployable<PantherCollection<LabyrinthUser>> getAll() {
+			public Deployable<PantherCollection<LabyrinthPlayer>> getAll() {
 				return Deployable.of(cache::values, 0);
 			}
 		};
@@ -44,12 +44,12 @@ public interface UserRegistration extends Service {
 		return test;
 	}
 
-	Deployable<LabyrinthUser> load(@NotNull LabyrinthUser user);
+	Deployable<LabyrinthPlayer> load(@NotNull LabyrinthPlayer user);
 
-	Deployable<LabyrinthUser> unload(@NotNull LabyrinthUser user);
+	Deployable<LabyrinthPlayer> unload(@NotNull LabyrinthPlayer user);
 
-	Deployable<LabyrinthUser> get(@NotNull String name);
+	Deployable<LabyrinthPlayer> get(@NotNull String name);
 
-	Deployable<PantherCollection<LabyrinthUser>> getAll();
+	Deployable<PantherCollection<LabyrinthPlayer>> getAll();
 
 }

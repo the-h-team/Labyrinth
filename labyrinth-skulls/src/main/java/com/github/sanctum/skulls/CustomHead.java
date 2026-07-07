@@ -2,9 +2,9 @@ package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.api.TaskService;
+import com.github.sanctum.labyrinth.data.service.TaskService;
 import com.github.sanctum.labyrinth.data.container.CollectionTask;
-import com.github.sanctum.labyrinth.data.service.Counter;
+import com.github.sanctum.labyrinth.common.Counter;
 import com.github.sanctum.labyrinth.data.service.LabyrinthOption;
 import com.github.sanctum.labyrinth.event.EnableAfterEvent;
 import com.github.sanctum.labyrinth.task.TaskScheduler;

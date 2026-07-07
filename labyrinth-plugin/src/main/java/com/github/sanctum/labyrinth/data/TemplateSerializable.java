@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
+import com.github.sanctum.labyrinth.interfacing.JsonCompliant;
 import com.github.sanctum.panther.file.JsonAdapter;
 import com.github.sanctum.panther.file.Node;
 import com.github.sanctum.templates.SimpleTemplate;
@@ -13,7 +13,7 @@ public final class TemplateSerializable implements JsonAdapter<Template> {
 
 	@Override
 	public JsonElement write(Template template) {
-		return JsonIntermediate.toJsonObject(template.serialize());
+		return JsonCompliant.toJsonObject(template.serialize());
 	}
 
 	@Override

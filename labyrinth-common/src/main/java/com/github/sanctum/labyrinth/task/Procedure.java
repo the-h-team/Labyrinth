@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+// used for launch code
 public interface Procedure<T> {
 
 	Procedure<T> next(Consumer<T> action);

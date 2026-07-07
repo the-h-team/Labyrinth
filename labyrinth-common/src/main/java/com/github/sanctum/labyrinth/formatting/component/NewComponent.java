@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.formatting.component;
 
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
-import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.library.TextLib;
+import com.github.sanctum.labyrinth.common.StringUtils;
+import com.github.sanctum.labyrinth.common.TextLib;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;

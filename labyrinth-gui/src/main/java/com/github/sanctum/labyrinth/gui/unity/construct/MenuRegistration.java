@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.service.Service;
 import com.github.sanctum.labyrinth.data.ServiceManager;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;

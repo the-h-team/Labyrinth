@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting;
 
-import com.github.sanctum.labyrinth.library.ListUtils;
+import com.github.sanctum.labyrinth.common.ListUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;

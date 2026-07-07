@@ -3,7 +3,7 @@ package com.github.sanctum.labyrinth.formatting;
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.component.ActionComponent;
 import com.github.sanctum.labyrinth.formatting.string.CustomColor;
-import com.github.sanctum.labyrinth.library.ListUtils;
+import com.github.sanctum.labyrinth.common.ListUtils;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.annotation.Experimental;
 import com.github.sanctum.panther.util.Applicable;

@@ -1,6 +1,8 @@
 package com.github.sanctum.labyrinth.command;
 
 import java.util.function.Function;
+
+import com.github.sanctum.labyrinth.common.CommandUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -35,7 +37,7 @@ public class CommandRegistration {
 	}
 
 	/**
-	 * @deprecated Use {@link com.github.sanctum.labyrinth.library.CommandUtils#read(Function)} instead!
+	 * @deprecated Use {@link CommandUtils#read(Function)} instead!
 	 */
 	@Deprecated
 	public static void use(Command cmd) {

@@ -1,16 +1,14 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.service.Service;
 import com.github.sanctum.panther.container.PantherEntryMap;
 import com.github.sanctum.panther.container.PantherMap;
 import com.github.sanctum.panther.util.Check;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * A small and simple service loader.
  * @author rigobert0
  */
-@Deprecated
 public final class ServiceManager {
 	final PantherMap<ServiceType<?>, Service> services;
 

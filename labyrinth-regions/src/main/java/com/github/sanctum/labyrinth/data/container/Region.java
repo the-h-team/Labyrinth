@@ -5,7 +5,7 @@ import com.github.sanctum.labyrinth.data.CuboidAxis;
 import com.github.sanctum.labyrinth.data.CuboidLocation;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
-import com.github.sanctum.labyrinth.interfacing.Catchable;
+import com.github.sanctum.labyrinth.interfacing.Duplication;
 import com.github.sanctum.labyrinth.interfacing.Snapshot;
 import com.github.sanctum.panther.container.ImmutablePantherCollection;
 import com.github.sanctum.panther.container.PantherCollection;
@@ -25,8 +25,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
-public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
+public abstract class Region implements Cuboid, Snapshot, Duplication<Region> {
 
 	private Region parent;
 	private final double distanceBetweenPoints;
@@ -135,9 +136,16 @@ public abstract class Region implements Cuboid, Snapshot, Catchable<Region> {
 	}
 
 	@Override
-	public Region getSnapshot() {
+	public Region newDuplicate() {
 		return new Region(this, this) {
 		};
+	}
+
+	@Override
+	public void inform(@NotNull Snapshot snapshot) {
+		if (snapshot instanceof Region) {
+		this.parent = (Region) snapshot;
+		}
 	}
 
 	@Override

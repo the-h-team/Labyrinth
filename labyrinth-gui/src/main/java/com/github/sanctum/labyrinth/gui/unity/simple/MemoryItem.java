@@ -1,10 +1,10 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.LegacyCheckService;
-import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Items;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.data.service.LegacyCheckService;
+import com.github.sanctum.labyrinth.common.CustomItemRecipe;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherList;
@@ -72,7 +72,7 @@ public class MemoryItem {
 
 	private ItemStack improvise(String value) {
 		if (value.equalsIgnoreCase("playerhead") || value.equalsIgnoreCase("player_head")) value = "skullitem";
-		Material mat = Items.findMaterial(value);
+		Material mat = CachedMaterialEnums.findMaterial(value);
 		if (mat != null) {
 			return new ItemStack(mat);
 		} else {
@@ -87,7 +87,7 @@ public class MemoryItem {
 
 	private ItemStack improviseOldShort(String value, short sh) {
 		if (value.equalsIgnoreCase("playerhead") || value.equalsIgnoreCase("player_head")) value = "skullitem";
-		Material mat = Items.findMaterial(value);
+		Material mat = CachedMaterialEnums.findMaterial(value);
 		if (mat != null) {
 			return new ItemStack(mat, 1, sh);
 		}
@@ -123,7 +123,7 @@ public class MemoryItem {
 				}
 			}
 		}
-		Item.Edit edit = new Item.Edit(test);
+		CustomItemRecipe.Edit edit = new CustomItemRecipe.Edit(test);
 		String label = node.getPath();
 		String[] split = label.split("\\.");
 		String c = split[split.length - 1];

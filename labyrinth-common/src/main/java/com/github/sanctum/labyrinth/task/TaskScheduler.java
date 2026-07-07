@@ -34,11 +34,11 @@ public interface TaskScheduler {
 	@NotNull RenderedTask scheduleTimerAsync(String key, long delay, long period, BukkitTaskPredicate<?>... flags);
 
 	static @NotNull TaskScheduler of(@NotNull Runnable runnable) {
-		return new NormalTaskScheduler(runnable);
+		return new DefaultTaskScheduler(runnable);
 	}
 
 	static @NotNull TaskScheduler of(@NotNull Task task) {
-		return new CustomTaskScheduler(task);
+		return new InlineTaskScheduler(task);
 	}
 
 }

@@ -1,15 +1,10 @@
 package com.github.sanctum.labyrinth.gui.unity.construct;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.api.LegacyCheckService;
-import com.github.sanctum.labyrinth.data.service.AnvilMechanics;
 import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
-import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 

@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.task;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.data.service.TaskService;
+import com.github.sanctum.labyrinth.common.StopWatch;
 import com.github.sanctum.panther.annotation.FieldsFrom;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.annotation.Ordinal;
@@ -37,7 +37,7 @@ public interface RenderedTask {
 		return Objects.requireNonNull(TaskMonitor.getLocalInstance().get(Objects.requireNonNull(getId())));
 	}
 
-	@NotNull TimeWatch getLastRendered();
+	@NotNull StopWatch getLastRendered();
 
 	@NotNull RenderedTask dependOn(@NotNull BukkitTaskPredicate<? super Task> intent);
 
@@ -115,8 +115,8 @@ public interface RenderedTask {
 			}
 
 			@Override
-			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(420L);
+			public @NotNull StopWatch getLastRendered() {
+				return StopWatch.start(420L);
 			}
 
 			@Override
@@ -156,8 +156,8 @@ public interface RenderedTask {
 			}
 
 			@Override
-			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(420L);
+			public @NotNull StopWatch getLastRendered() {
+				return StopWatch.start(420L);
 			}
 
 			@Override
@@ -233,8 +233,8 @@ public interface RenderedTask {
 			}
 
 			@Override
-			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(420L);
+			public @NotNull StopWatch getLastRendered() {
+				return StopWatch.start(420L);
 			}
 
 			@Override
@@ -276,8 +276,8 @@ public interface RenderedTask {
 			}
 
 			@Override
-			public @NotNull TimeWatch getLastRendered() {
-				return TimeWatch.start(420L);
+			public @NotNull StopWatch getLastRendered() {
+				return StopWatch.start(420L);
 			}
 
 			@Override

@@ -1,9 +1,10 @@
 package com.github.sanctum.labyrinth.api;
 
 import com.github.sanctum.labyrinth.data.ServiceManager;
-import com.github.sanctum.labyrinth.data.container.KeyedServiceManager;
+import com.github.sanctum.labyrinth.data.container.MemoryBank;
 import com.github.sanctum.labyrinth.data.reload.PrintManager;
-import com.github.sanctum.labyrinth.library.ItemCompost;
+import com.github.sanctum.labyrinth.data.service.*;
+import com.github.sanctum.labyrinth.common.ItemCompost;
 import com.github.sanctum.panther.annotation.Note;
 import org.bukkit.plugin.Plugin;
 
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
  * </pre>
  * Copyright (c) 2020-2023 <strong>Sanctum</strong>
  */
-public interface LabyrinthAPI extends VentService, TaskService, RecordingService, MessagingService, CooldownService, ActionComponentService, PersistentDataService, LegacyCheckService {
+public interface LabyrinthAPI extends VentService, TaskService, RecordService, MessagingService, CooldownService, ActionComponentService, PersistentDataService, LegacyCheckService {
     /**
      * Get a Logger for messaging the console as Labyrinth.
      *
@@ -38,12 +39,12 @@ public interface LabyrinthAPI extends VentService, TaskService, RecordingService
      * @return A manager for data footprints.
      */
     @Note("Don't store your footprints here! Make your own manager with PrintManager")
-    PrintManager getLocalPrintManager();
+    PrintManager getPrintManager();
 
     /**
-     * @return A service manager for plugin's
+     * @return A service manager for plugin objects stored in memory
      */
-    KeyedServiceManager<Plugin> getServicesManager();
+    MemoryBank<Plugin> getMemoryBank();
 
     /**
      * @return A general purpose service manager for {@link Service}'s

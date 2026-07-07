@@ -1,8 +1,8 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.common.StringUtils;
+import com.github.sanctum.labyrinth.common.StopWatch;
 import com.github.sanctum.panther.annotation.Ordinal;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.util.ProgressBar;
@@ -79,7 +79,7 @@ final class PantherCollectionMergeProcess<T> extends CollectionTask<T> {
 			LabyrinthProvider.getInstance().getLogger().info("- Queable collection process " + table + ";MERGE @ " + correctDecimal(NumberFormat.getNumberInstance().format(getCompletion())) + "% ");
 			return current;
 		}
-		TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
+		StopWatch.Recording recording = StopWatch.Recording.subtract(started);
 		LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
 		LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aSize b match of a (" + child.size() + " vs " + collector.size() + ")").translate());
 		cancel();

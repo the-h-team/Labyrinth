@@ -24,9 +24,9 @@
     <inceptionYear>2020</inceptionYear>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spigot.version>1.16.2-R0.1-SNAPSHOT</spigot.version>
+        <spigot.version>26.2-R0.1-SNAPSHOT</spigot.version>
         <templates.version>1.1.0</templates.version>
         <panther.version>main-SNAPSHOT</panther.version>
     </properties>

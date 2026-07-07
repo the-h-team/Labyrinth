@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.permissions.impl;
 
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.data.PlayerInfo;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import com.github.sanctum.labyrinth.permissions.entity.Group;
 import com.github.sanctum.labyrinth.permissions.entity.Inheritance;
@@ -17,7 +16,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
- * This vault permission bridge isn't meant to be a very powerful alternative, it merely acts as a port to our self proclaimed better interface.
+ * This vault permission bridge isn't meant to be a very powerful alternative, it merely acts as a port.
  */
 public class VaultImplementation implements Permissions {
 
@@ -62,7 +61,7 @@ public class VaultImplementation implements Permissions {
 	@Override
 	public User[] getUsers() {
 		if (users.isEmpty()) {
-			for (PlayerSearch lookup : PlayerSearch.values()) {
+			for (PlayerInfo lookup : PlayerInfo.values()) {
 				getUser(lookup.getPlayer());
 			}
 		}
@@ -81,16 +80,16 @@ public class VaultImplementation implements Permissions {
 
 	class UserImpl implements User {
 
-		private final PlayerSearch user;
+		private final PlayerInfo user;
 		private final Inheritance groupInheritance;
 
 		UserImpl(String name) {
-			this.user = PlayerSearch.of(name);
+			this.user = PlayerInfo.of(name);
 			this.groupInheritance = new UserInheritance(user);
 		}
 
 		@Override
-		public PlayerSearch toLabyrinth() {
+		public PlayerInfo toLabyrinth() {
 			return this.user;
 		}
 
@@ -213,9 +212,9 @@ public class VaultImplementation implements Permissions {
 
 	class UserInheritance implements Inheritance {
 
-		private final PlayerSearch user;
+		private final PlayerInfo user;
 
-		UserInheritance(PlayerSearch user) {
+		UserInheritance(PlayerInfo user) {
 			this.user = user;
 		}
 

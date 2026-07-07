@@ -5,7 +5,7 @@ import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
 import com.github.sanctum.labyrinth.interfacing.UnknownGeneric;
-import com.github.sanctum.labyrinth.library.Mailer;
+import com.github.sanctum.labyrinth.common.MessageComposer;
 import com.github.sanctum.panther.file.MemorySpace;
 import com.github.sanctum.panther.util.Check;
 import java.util.function.BiFunction;
@@ -71,7 +71,7 @@ public class AnvilDocket implements Docket<UnknownGeneric>, UniqueHolder {
 				if (uniqueData != null) {
 					message = uniqueDataConverter.apply(message, uniqueData);
 				}
-				Mailer.empty(click.getElement()).chat(message).deploy();
+				MessageComposer.empty(click.getElement()).chat(message).deploy();
 			}
 			if (item.getOpenOnClick() != null) {
 				String open = item.getOpenOnClick();

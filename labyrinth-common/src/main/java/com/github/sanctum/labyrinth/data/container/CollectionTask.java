@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.TaskService;
-import com.github.sanctum.labyrinth.library.StringUtils;
-import com.github.sanctum.labyrinth.library.TimeWatch;
+import com.github.sanctum.labyrinth.data.service.TaskService;
+import com.github.sanctum.labyrinth.common.StringUtils;
+import com.github.sanctum.labyrinth.common.StopWatch;
 import com.github.sanctum.panther.annotation.Ordinal;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.util.ProgressBar;
@@ -133,7 +133,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 					LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- Collection task " + table + ";RUN @ &e" + correctDecimal(NumberFormat.getNumberInstance().format(getCompletion())) + "&f%").translate());
 					return current;
 				}
-				TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
+				StopWatch.Recording recording = StopWatch.Recording.subtract(started);
 				LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
 				cancel();
 				return current;
@@ -288,7 +288,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 					LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- Collection task " + table + ";RUN @ &e" + correctDecimal(NumberFormat.getNumberInstance().format(getCompletion())) + "&f%").translate());
 					return current;
 				}
-				TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
+				StopWatch.Recording recording = StopWatch.Recording.subtract(started);
 				LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
 				cancel();
 				return current;
@@ -439,7 +439,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 					LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- Collection task " + table + ";RUN @ &e" + correctDecimal(NumberFormat.getNumberInstance().format(getCompletion())) + "&f%").translate());
 					return current;
 				}
-				TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
+				StopWatch.Recording recording = StopWatch.Recording.subtract(started);
 				LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
 				cancel();
 				return current;
@@ -516,7 +516,7 @@ public abstract class CollectionTask<T> extends Task implements Iterator<T> {
 					LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- Collection task " + table + ";RUN @ &e" + correctDecimal(NumberFormat.getNumberInstance().format(getCompletion())) + "&f%").translate());
 					return current;
 				}
-				TimeWatch.Recording recording = TimeWatch.Recording.subtract(started);
+				StopWatch.Recording recording = StopWatch.Recording.subtract(started);
 				LabyrinthProvider.getInstance().getLogger().info(StringUtils.use("- &aTask " + table + " completed after " + recording.getHours() + " hours " + recording.getMinutes() + " minutes & " + recording.getSeconds() + " seconds.").translate());
 				cancel();
 				return current;

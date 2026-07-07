@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.formatting.FancyMessage;
 import com.github.sanctum.labyrinth.formatting.Message;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.panther.annotation.Json;
 import com.github.sanctum.panther.file.Configurable;
 import com.github.sanctum.panther.file.JsonAdapter;

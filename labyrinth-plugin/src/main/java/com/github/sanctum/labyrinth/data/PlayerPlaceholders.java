@@ -1,7 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
 import com.github.sanctum.panther.placeholder.Placeholder;
 import com.github.sanctum.panther.util.ProgressBar;
 import java.text.NumberFormat;
@@ -106,9 +105,9 @@ public class PlayerPlaceholders implements Placeholder.Translation {
 					case "health_bar":
 						return new ProgressBar().setProgress(((Number)p.getPlayer().getHealth()).intValue()).setGoal(20).toString();
 					case "time_played":
-						return PlayerSearch.of(p.getName()).getPlaytime().toString();
+						return PlayerInfo.of(p.getName()).getPlaytime().toString();
 					case "hours_played":
-						return PlayerSearch.of(p.getName()).getPlaytime().getHours() + "";
+						return PlayerInfo.of(p.getName()).getPlaytime().getHours() + "";
 					case "health":
 						return NumberFormat.getNumberInstance().format(p.getPlayer().getHealth());
 					case "last_played":
@@ -122,7 +121,7 @@ public class PlayerPlaceholders implements Placeholder.Translation {
 					case "display_name":
 						return p.getName();
 					case "hours_played":
-						return PlayerSearch.of(p.getName()).getPlaytime().getHours() + "";
+						return PlayerInfo.of(p.getName()).getPlaytime().getHours() + "";
 					case "last_played":
 						return new Date(p.getLastPlayed()).toLocaleString();
 

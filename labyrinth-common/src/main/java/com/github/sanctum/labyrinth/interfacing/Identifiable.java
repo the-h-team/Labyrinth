@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.interfacing;
 
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.data.PlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -17,7 +17,7 @@ public interface Identifiable {
     }
 
     default boolean isPlayer() {
-        return PlayerSearch.of(getName()) != null;
+        return PlayerInfo.of(getName()) != null;
     }
 
     default boolean isEntity() {

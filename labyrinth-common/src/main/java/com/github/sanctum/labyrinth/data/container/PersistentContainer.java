@@ -1,12 +1,11 @@
 package com.github.sanctum.labyrinth.data.container;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.BukkitGeneric;
 import com.github.sanctum.labyrinth.data.DataTable;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
-import com.github.sanctum.labyrinth.library.LabyrinthEncoded;
-import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.common.LabyrinthEncoded;
+import com.github.sanctum.labyrinth.common.NamespacedKey;
 import com.github.sanctum.panther.file.Configurable;
 import java.io.IOException;
 import java.util.Collection;

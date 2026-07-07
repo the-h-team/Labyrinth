@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth.gui.unity.impl;
 
 import com.github.sanctum.labyrinth.formatting.UniformedComponents;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import java.text.MessageFormat;
 import java.util.Arrays;

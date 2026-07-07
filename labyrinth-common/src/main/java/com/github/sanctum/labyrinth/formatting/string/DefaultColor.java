@@ -50,13 +50,13 @@ public enum DefaultColor implements CustomColor {
 	public static @NotNull ChatColor fromAwt(@NotNull Color color) {
 		int index = 0;
 		double best = -1;
-		for (int i = 0; i < ImageBreakdown.VANILLA_COLORS.length; i++) {
-			if (areIdentical(ImageBreakdown.VANILLA_COLORS[i], color)) {
+		for (int i = 0; i < BufferedHeadSkin.VANILLA_COLORS.length; i++) {
+			if (areIdentical(BufferedHeadSkin.VANILLA_COLORS[i], color)) {
 				return ChatColor.values()[i];
 			}
 		}
-		for (int i = 0; i < ImageBreakdown.VANILLA_COLORS.length; i++) {
-			double distance = getDistance(color, ImageBreakdown.VANILLA_COLORS[i]);
+		for (int i = 0; i < BufferedHeadSkin.VANILLA_COLORS.length; i++) {
+			double distance = getDistance(color, BufferedHeadSkin.VANILLA_COLORS[i]);
 			if (distance < best || best == -1) {
 				best = distance;
 				index = i;

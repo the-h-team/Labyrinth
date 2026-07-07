@@ -1,9 +1,9 @@
 package com.github.sanctum.labyrinth.command;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.interfacing.MessageInListener;
-import com.github.sanctum.labyrinth.library.CommandUtils;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.interfacing.CommandMessageListener;
+import com.github.sanctum.labyrinth.common.CommandUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherCollectionBase;
 import com.github.sanctum.panther.container.PantherList;
@@ -132,8 +132,8 @@ public abstract class SubCommandList extends PantherCollectionBase<SubCommand> {
 		public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
 			PantherCollection<String> labels = new PantherList<>();
 			if (args.length > 0) {
-				if (SubCommandList.this instanceof MessageInListener) {
-					((MessageInListener)SubCommandList.this).onReceiveSuggestion(String.join(" ", args));
+				if (SubCommandList.this instanceof CommandMessageListener) {
+					((CommandMessageListener)SubCommandList.this).onReceiveSuggestion(String.join(" ", args));
 				}
 				for (SubCommand sub : SubCommandList.this) {
 					if (args.length == 1) {
@@ -153,8 +153,8 @@ public abstract class SubCommandList extends PantherCollectionBase<SubCommand> {
 		@Override
 		public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
 			if (args.length > 0) {
-				if (SubCommandList.this instanceof MessageInListener) {
-					((MessageInListener)SubCommandList.this).onReceiveMessage(String.join(" ", args));
+				if (SubCommandList.this instanceof CommandMessageListener) {
+					((CommandMessageListener)SubCommandList.this).onReceiveMessage(String.join(" ", args));
 				}
 				for (SubCommand sub : SubCommandList.this) {
 					if (args[0].equalsIgnoreCase(sub.getLabel())) {

@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.data.PlayerInfo;
 import com.github.sanctum.labyrinth.formatting.string.FormattedString;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 import com.github.sanctum.labyrinth.gui.unity.construct.MenuRegistration;
@@ -14,7 +14,7 @@ import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ListElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.MenuType;
-import com.github.sanctum.labyrinth.library.Mailer;
+import com.github.sanctum.labyrinth.common.MessageComposer;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.container.PantherCollection;
 import com.github.sanctum.panther.container.PantherList;
@@ -219,7 +219,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 										if (dataConverter != null) {
 											res = dataConverter.apply(res, value);
 										}
-										Mailer.empty(click.getElement()).chat(res).deploy();
+										MessageComposer.empty(click.getElement()).chat(res).deploy();
 									}
 									if (pagination.getOpenOnClick() != null) {
 										String open = pagination.getOpenOnClick();
@@ -353,7 +353,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 					if (uniqueData != null) {
 						message = uniqueDataConverter.apply(message, uniqueData);
 					}
-					Mailer.empty(click.getElement()).chat(message).deploy();
+					MessageComposer.empty(click.getElement()).chat(message).deploy();
 				}
 				if (item.getOpenOnClick() != null) {
 					String open = item.getOpenOnClick();
@@ -383,7 +383,7 @@ public class MemoryDocket<T> implements Docket<T>, UniqueHolder {
 		boolean pass = local ? !Check.isNull(uniqueData, uniqueDataConverter, nameHolder) : !Check.isNull(dataConverter, nameHolder);
 		if (pass && new FormattedString(built.getType().name()).contains("player_head", "skull_item")) {
 			String name = local ? uniqueDataConverter.apply(nameHolder, uniqueData) : dataConverter.apply(nameHolder, (T) args[0]);
-			PlayerSearch search = PlayerSearch.of(name);
+			PlayerInfo search = PlayerInfo.of(name);
 			if (search != null) {
 				ItemStack head = SkullReferenceUtility.getItem(search.getPlayer());
 				item.setElement(edit -> edit.setItem(head != null ? head : SkullReferenceType.PLAYER.getItem()).build());

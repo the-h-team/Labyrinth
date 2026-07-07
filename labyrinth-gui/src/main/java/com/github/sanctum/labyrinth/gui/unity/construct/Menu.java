@@ -12,8 +12,8 @@ import com.github.sanctum.labyrinth.gui.unity.impl.InventoryElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.ItemElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.OpeningElement;
 import com.github.sanctum.labyrinth.gui.unity.impl.PreProcessElement;
-import com.github.sanctum.labyrinth.library.Items;
-import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
+import com.github.sanctum.labyrinth.common.NamespacedKey;
 import com.github.sanctum.labyrinth.task.RenderedTask;
 import com.github.sanctum.labyrinth.task.TaskMonitor;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
@@ -160,7 +160,7 @@ public abstract class Menu {
 	public synchronized final void retrieve() {
 		if (!this.retrieved) {
 			this.retrieved = true;
-			PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
+			PersistentContainer container = LabyrinthProvider.getInstance().getPersistentContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 			if (getInventory().isPaginated()) {
 				Map<Integer, UniformedComponents<ItemStack>> map = (Map<Integer, UniformedComponents<ItemStack>>) container.get(Map.class, getInventory().getTitle());
 				if (map != null) {
@@ -204,7 +204,7 @@ public abstract class Menu {
 	 */
 	public synchronized final void save() {
 		if (!getProperties().contains(Property.SAVABLE)) return;
-		PersistentContainer container = LabyrinthProvider.getInstance().getContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
+		PersistentContainer container = LabyrinthProvider.getInstance().getPersistentContainer(new NamespacedKey(host, "labyrinth-gui-" + this.key));
 		if (getInventory().isPaginated()) {
 			InventoryElement.Paginated inv = (InventoryElement.Paginated) getInventory();
 			Map<Integer, UniformedComponents<ItemStack>> s = new HashMap<>();
@@ -803,7 +803,7 @@ public abstract class Menu {
 				if (LabyrinthProvider.getInstance().isModded()) {
 					TaskScheduler.of(() -> {
 						Arrays.stream(e.getPlayer().getInventory().getContents()).filter(i -> i != null && i.getType() != Material.AIR).forEach(i -> {
-							if (i.hasItemMeta() && !i.getItemMeta().hasDisplayName() && i.getType() == (Items.findMaterial("playerhead") == null ? Items.findMaterial("skullitem") : Items.findMaterial("playerhead"))) {
+							if (i.hasItemMeta() && !i.getItemMeta().hasDisplayName() && i.getType() == (CachedMaterialEnums.findMaterial("playerhead") == null ? CachedMaterialEnums.findMaterial("skullitem") : CachedMaterialEnums.findMaterial("playerhead"))) {
 								i.setAmount(0);
 								i.setType(Material.AIR);
 							}

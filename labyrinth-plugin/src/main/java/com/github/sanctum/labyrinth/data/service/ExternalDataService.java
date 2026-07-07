@@ -2,7 +2,6 @@ package com.github.sanctum.labyrinth.data.service;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.api.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.panther.annotation.Ordinal;
 import com.github.sanctum.panther.util.Task;

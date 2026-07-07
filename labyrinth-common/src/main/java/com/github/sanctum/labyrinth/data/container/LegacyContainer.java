@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.library.NamespacedKey;
+import com.github.sanctum.labyrinth.common.NamespacedKey;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.persistence.PersistentDataAdapterContext;

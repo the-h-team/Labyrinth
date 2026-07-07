@@ -1,8 +1,7 @@
 package com.github.sanctum.labyrinth.permissions.impl;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.data.LabyrinthUser;
-import com.github.sanctum.labyrinth.data.service.PlayerSearch;
+import com.github.sanctum.labyrinth.data.PlayerInfo;
 import com.github.sanctum.labyrinth.permissions.Permissions;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,14 +56,14 @@ public class DefaultImplementation implements Permissions {
 
 	static class User implements com.github.sanctum.labyrinth.permissions.entity.User {
 
-		private final PlayerSearch user;
+		private final PlayerInfo user;
 
 		User(String name) {
-			this.user = PlayerSearch.of(name);
+			this.user = PlayerInfo.of(name);
 		}
 
 		@Override
-		public PlayerSearch toLabyrinth() {
+		public PlayerInfo toLabyrinth() {
 			return this.user;
 		}
 

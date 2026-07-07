@@ -1,7 +1,7 @@
 package com.github.sanctum.labyrinth;
 
 import com.github.sanctum.labyrinth.api.LabyrinthAPI;
-import com.github.sanctum.labyrinth.api.Service;
+import com.github.sanctum.labyrinth.data.service.Service;
 import com.github.sanctum.labyrinth.data.ServiceType;
 import com.github.sanctum.panther.annotation.FieldsFrom;
 import com.github.sanctum.panther.annotation.Note;

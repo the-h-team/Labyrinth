@@ -1,12 +1,12 @@
 package com.github.sanctum.labyrinth.command;
 
 import com.github.sanctum.labyrinth.Labyrinth;
-import com.github.sanctum.labyrinth.formatting.completion.SimpleTabCompletion;
-import com.github.sanctum.labyrinth.formatting.completion.TabCompletionIndex;
+import com.github.sanctum.labyrinth.formatting.SimpleTabCompletion;
+import com.github.sanctum.labyrinth.formatting.TabCompletionIndex;
 import com.github.sanctum.labyrinth.formatting.string.BlockChar;
-import com.github.sanctum.labyrinth.formatting.string.ImageBreakdown;
+import com.github.sanctum.labyrinth.formatting.string.BufferedHeadSkin;
 import com.github.sanctum.labyrinth.formatting.string.MessageBreakdown;
-import com.github.sanctum.labyrinth.library.Mailer;
+import com.github.sanctum.labyrinth.common.MessageComposer;
 import com.github.sanctum.panther.placeholder.Placeholder;
 import com.github.sanctum.panther.placeholder.PlaceholderRegistration;
 import com.github.sanctum.panther.util.TypeAdapter;
@@ -36,24 +36,24 @@ public final class LabyrinthCommand extends Command {
 
 	@Override
 	public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-		Mailer mailer = Mailer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
+		MessageComposer messageComposer = MessageComposer.empty(sender).prefix().start("&2Labyrinth").middle(":").finish();
 		if (!sender.isOp() && !sender.hasPermission("labyrinth")) {
-			mailer.chat("&cYou don't have access to labyrinth functions.").deploy();
+			messageComposer.chat("&cYou don't have access to labyrinth functions.").deploy();
 			return true;
 		}
 		if (args.length == 0) {
-			mailer.chat("&6Currently running version &r" + labyrinth.getDescription().getVersion()).queue();
+			messageComposer.chat("&6Currently running version &r" + labyrinth.getDescription().getVersion()).queue();
 			return true;
 		}
 
 		if (args.length == 1) {
 			String label = args[0];
 			if (label.equalsIgnoreCase("version")) {
-				mailer.chat("&6Currently running version &r" + labyrinth.getDescription().getVersion()).queue();
+				messageComposer.chat("&6Currently running version &r" + labyrinth.getDescription().getVersion()).queue();
 				return true;
 			}
 			if (label.equalsIgnoreCase("placeholder")) {
-				mailer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]").queue();
+				messageComposer.chat("&cInvalid usage: &6/" + commandLabel + " " + label + " <placeholder> | &8[playerName]").queue();
 				return true;
 			}
 			return true;
@@ -64,10 +64,10 @@ public final class LabyrinthCommand extends Command {
 			String argument = args[1];
 
 			if (label.equalsIgnoreCase("paint")) {
-				ImageBreakdown breakdown = new MessageBreakdown(argument, 24, 24, BlockChar.SOLID);
+				BufferedHeadSkin breakdown = new MessageBreakdown(argument, 24, 24, BlockChar.SOLID);
 				String[] s = breakdown.read();
 				for (String st : s) {
-					mailer.chat(st).deploy();
+					messageComposer.chat(st).deploy();
 				}
 				return true;
 			}

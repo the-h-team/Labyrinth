@@ -1,11 +1,8 @@
 package com.github.sanctum.labyrinth.data.service;
 
-import com.github.sanctum.labyrinth.api.Service;
 import com.github.sanctum.panther.annotation.Note;
 import java.util.Objects;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 /**

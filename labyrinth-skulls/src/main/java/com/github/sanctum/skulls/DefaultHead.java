@@ -1,6 +1,6 @@
 package com.github.sanctum.skulls;
 
-import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +22,7 @@ final class DefaultHead extends CustomHead {
     DefaultHead() {
         this.name = "ABC";
         this.category = "123";
-        this.item = Items.edit().setType(Items.findMaterial("EGG")).build();
+        this.item = CachedMaterialEnums.edit().setType(CachedMaterialEnums.findMaterial("EGG")).build();
     }
 
     DefaultHead(@NotNull String name, @NotNull String category, @NotNull ItemStack item) {

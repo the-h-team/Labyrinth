@@ -1,7 +1,7 @@
 package com.github.sanctum.skulls;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
-import com.github.sanctum.labyrinth.api.LegacyCheckService;
+import com.github.sanctum.labyrinth.data.service.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.panther.file.MemorySpace;
 import com.github.sanctum.panther.file.Node;

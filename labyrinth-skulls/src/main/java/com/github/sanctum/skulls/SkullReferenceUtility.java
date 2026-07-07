@@ -1,7 +1,7 @@
 package com.github.sanctum.skulls;
 
-import com.github.sanctum.labyrinth.library.Item;
-import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.common.CustomItemRecipe;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
 import com.github.sanctum.panther.file.MemorySpace;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,7 +25,7 @@ public class SkullReferenceUtility {
      */
     public static void load(CustomHead object) {
         boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-        Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+        Material type = CachedMaterialEnums.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
         if (object.getItem().getType() != type)
             throw new IllegalStateException(object.getItem().getType().name() + " is not a direct representation of " + type.name());
         heads.add(object);
@@ -247,7 +247,7 @@ public class SkullReferenceUtility {
      */
     private static void load(String name, String category, ItemStack item) {
         boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-        Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+        Material type = CachedMaterialEnums.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 
         if (item.getType() != type)
             throw new IllegalStateException(item.getType().name() + " is not a direct representation of " + type.name());
@@ -264,13 +264,13 @@ public class SkullReferenceUtility {
      */
     public static ItemStack modifyItemStack(ItemStack item, String name) {
         boolean isNew = Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()).contains("PLAYER_HEAD");
-        Material type = Items.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
+        Material type = CachedMaterialEnums.findMaterial(isNew ? "PLAYER_HEAD" : "SKULL_ITEM");
 
         if (item.getType() != type)
             throw new IllegalStateException(item.getType().name() + " is not a direct representation of " + type.name());
 
         CustomHead head = getHead(name);
-        return head != null ? new Item.Edit(head.getItem()).setTitle(item.getItemMeta() != null ? item.getItemMeta().getDisplayName() : head.getName()).setLore(item.getItemMeta() != null && item.getItemMeta().getLore() != null ? item.getItemMeta().getLore().toArray(new String[0]) : new String[]{""}).build() : item;
+        return head != null ? new CustomItemRecipe.Edit(head.getItem()).setTitle(item.getItemMeta() != null ? item.getItemMeta().getDisplayName() : head.getName()).setLore(item.getItemMeta() != null && item.getItemMeta().getLore() != null ? item.getItemMeta().getLore().toArray(new String[0]) : new String[]{""}).build() : item;
 
     }
 

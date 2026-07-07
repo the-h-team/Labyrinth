@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.data.service.Constant;
+import com.github.sanctum.labyrinth.common.Constant;
 import java.util.Random;
 import net.md_5.bungee.api.ChatColor;
 

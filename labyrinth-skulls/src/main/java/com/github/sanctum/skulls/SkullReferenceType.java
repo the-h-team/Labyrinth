@@ -1,6 +1,6 @@
 package com.github.sanctum.skulls;
 
-import com.github.sanctum.labyrinth.library.Items;
+import com.github.sanctum.labyrinth.common.CachedMaterialEnums;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,10 +28,10 @@ public enum SkullReferenceType implements SkullReferenceMeta {
 		if (value.equals("LP")) {
 			boolean isNew = Arrays.stream(Material.values()).anyMatch(m -> m.name().equals("PLAYER_HEAD"));
 			if (isNew) {
-				this.itemStack = new ItemStack(Items.findMaterial("playerhead"));
+				this.itemStack = new ItemStack(CachedMaterialEnums.findMaterial("playerhead"));
 			} else {
 				//noinspection deprecation
-				this.itemStack = new ItemStack(Items.findMaterial("skullitem"), 1, (short) 3);
+				this.itemStack = new ItemStack(CachedMaterialEnums.findMaterial("skullitem"), 1, (short) 3);
 			}
 
 		} else if (value.equals("LC")) {

@@ -4,7 +4,7 @@ import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.data.FileList;
 import com.github.sanctum.labyrinth.data.FileManager;
 
-public enum LabyrinthOption {
+public enum LabyrinthOption implements Service {
 
 	HEAD_PRE_CACHE,
 	IMPL_REGION_SERVICES;

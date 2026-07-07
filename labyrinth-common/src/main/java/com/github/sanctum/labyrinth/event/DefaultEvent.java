@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth.event;
 
 import com.github.sanctum.labyrinth.LabyrinthProvider;
 import com.github.sanctum.labyrinth.formatting.string.ColoredString;
-import com.github.sanctum.labyrinth.library.ListUtils;
+import com.github.sanctum.labyrinth.common.ListUtils;
 import com.github.sanctum.panther.event.Vent;
 import java.util.Collection;
 import java.util.HashSet;

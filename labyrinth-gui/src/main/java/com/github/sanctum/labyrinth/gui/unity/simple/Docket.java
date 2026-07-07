@@ -2,7 +2,7 @@ package com.github.sanctum.labyrinth.gui.unity.simple;
 
 import com.github.sanctum.labyrinth.data.AtlasMap;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
-import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
+import com.github.sanctum.labyrinth.interfacing.JsonCompliant;
 import com.github.sanctum.panther.annotation.Json;
 import com.github.sanctum.panther.annotation.Note;
 import com.github.sanctum.panther.file.MemorySpace;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The optional type used for pagination
  */
-public interface Docket<T> extends JsonIntermediate {
+public interface Docket<T> extends JsonCompliant {
 
 	@Note("A useful variable processing step")
 	default @NotNull Docket<T> load() {
@@ -93,7 +93,7 @@ public interface Docket<T> extends JsonIntermediate {
 	static <V> @NotNull JsonDocket<V> newInstance(@NotNull @Json String json) {
 		return new JsonDocket<>(json, s -> {
 			AtlasMap map = new AtlasMap();
-			map.putAll(JsonIntermediate.convertToMap(JsonIntermediate.toJsonObject(json)));
+			map.putAll(JsonCompliant.convertToMap(JsonCompliant.toJsonObject(json)));
 			return map;
 		});
 	}

@@ -1,0 +1,40 @@
+package com.github.sanctum.labyrinth.data.service;
+
+import com.github.sanctum.labyrinth.task.RenderedTask;
+import com.github.sanctum.labyrinth.task.TaskMonitor;
+import com.github.sanctum.panther.util.Task;
+import com.github.sanctum.panther.util.TaskChain;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.NotNull;
+
+// TODO: description; elaborate on "most" in getConcurrentTaskIds
+public interface TaskService extends Service {
+
+	int SYNCHRONOUS = 0;
+	int ASYNCHRONOUS = 1;
+
+	/**
+	 * Get a queued list of concurrently running task ids, tasks that happen so fast they need extra layer of countermeasures to ensure non-blocking. (Like main thread task for synchronization)
+	 *
+	 * @return a queue of most running task ids, if a task query attempt is blocked the sole purpose of this collection type is to avoid blocks and continue indexing, meaning if necessary, erasure of task completion can take place to ensure non-blocking behavior.
+	 */
+	@NotNull ConcurrentLinkedQueue<Integer> getConcurrentTaskIds();
+
+	/**
+	 * The labyrinth default chain for async/synchronously bound tasks.
+	 *
+	 * @return A task scheduler / map of running/scheduled tasks.
+	 */
+	TaskChain getScheduler(@MagicConstant(intValues = {SYNCHRONOUS, ASYNCHRONOUS}) int runtime);
+
+	/**
+	 * Get the manager for all thread-safe tasks
+	 *
+	 * @return A {@link RenderedTask} & {@link Task} manager.
+	 */
+	default TaskMonitor getTaskMonitor() {
+		return TaskMonitor.getLocalInstance();
+	}
+
+}

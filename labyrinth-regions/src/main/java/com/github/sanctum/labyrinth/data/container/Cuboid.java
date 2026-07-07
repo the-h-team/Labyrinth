@@ -1,13 +1,13 @@
 package com.github.sanctum.labyrinth.data.container;
 
-import com.github.sanctum.labyrinth.api.LegacyCheckService;
+import com.github.sanctum.labyrinth.data.service.LegacyCheckService;
 import com.github.sanctum.labyrinth.data.CuboidAxis;
 import com.github.sanctum.labyrinth.data.CuboidLocation;
 import com.github.sanctum.labyrinth.data.DefaultCuboid;
 import com.github.sanctum.labyrinth.data.DefaultFlag;
 import com.github.sanctum.labyrinth.data.RegionServicesManager;
 import com.github.sanctum.labyrinth.data.SimpleKeyedValue;
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import com.github.sanctum.labyrinth.task.TaskScheduler;
 import com.github.sanctum.panther.util.HUID;
 import java.util.function.Function;

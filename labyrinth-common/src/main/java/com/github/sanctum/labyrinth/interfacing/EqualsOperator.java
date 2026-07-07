@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.interfacing;
 
-import com.github.sanctum.labyrinth.library.StringUtils;
+import com.github.sanctum.labyrinth.common.StringUtils;
 import java.util.Objects;
 
 public interface EqualsOperator {

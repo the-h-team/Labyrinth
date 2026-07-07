@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.library.CommandUtils;
+import com.github.sanctum.labyrinth.common.CommandUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandSendEvent;

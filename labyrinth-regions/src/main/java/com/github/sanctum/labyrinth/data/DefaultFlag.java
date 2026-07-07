@@ -29,7 +29,7 @@ public class DefaultFlag extends Cuboid.Flag {
 
 		public Cuboid.Flag finish() {
 			if (this.subscription != null) {
-				LabyrinthProvider.getInstance().getEventMap().subscribe(subscription);
+				LabyrinthProvider.getInstance().getVentMap().subscribe(subscription);
 			}
 			return new DefaultFlag(this.id);
 		}

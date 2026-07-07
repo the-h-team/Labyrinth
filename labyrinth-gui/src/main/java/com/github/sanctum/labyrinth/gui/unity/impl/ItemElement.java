@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.gui.unity.impl;
 
-import com.github.sanctum.labyrinth.library.Item;
+import com.github.sanctum.labyrinth.common.CustomItemRecipe;
 import com.github.sanctum.labyrinth.gui.unity.construct.Menu;
 
 import java.util.Objects;
@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * An object for encapsulating data to {@link ItemStack} element and using it for a menu.
@@ -103,12 +102,12 @@ public class ItemElement<V> extends Menu.Element<ItemStack, Menu.Click> {
 	 * @param edit the item edit procedure
 	 * @return this item element
 	 */
-	public ItemElement<V> setElement(Function<Item.Edit, ItemStack> edit) {
-		Item.Edit ed;
+	public ItemElement<V> setElement(Function<CustomItemRecipe.Edit, ItemStack> edit) {
+		CustomItemRecipe.Edit ed;
 		if (this.item != null) {
-			ed = new Item.Edit(this.item);
+			ed = new CustomItemRecipe.Edit(this.item);
 		} else {
-			ed = new Item.Edit(Material.DIRT);
+			ed = new CustomItemRecipe.Edit(Material.DIRT);
 		}
 		return setElement(edit.apply(ed));
 	}

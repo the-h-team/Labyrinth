@@ -1,14 +1,9 @@
 package com.github.sanctum.labyrinth.data;
 
-import com.github.sanctum.labyrinth.api.Service;
-
-import com.github.sanctum.panther.util.EasyTypeAdapter;
-import com.google.gson.reflect.TypeToken;
-import org.jetbrains.annotations.ApiStatus;
+import com.github.sanctum.labyrinth.data.service.Service;
 
 import java.util.function.Supplier;
 
-@Deprecated
 public class ServiceType<T extends Service> {
 
 	final Supplier<T> supplier;

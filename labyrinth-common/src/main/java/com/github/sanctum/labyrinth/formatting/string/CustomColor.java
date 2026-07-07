@@ -1,6 +1,6 @@
 package com.github.sanctum.labyrinth.formatting.string;
 
-import com.github.sanctum.labyrinth.interfacing.JsonIntermediate;
+import com.github.sanctum.labyrinth.interfacing.JsonCompliant;
 import com.github.sanctum.panther.file.JsonAdapter;
 import com.github.sanctum.panther.file.Node;
 import com.google.gson.JsonElement;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 @Node.Pointer(value = "CustomColor", type = RandomHex.class)
 @SerializableAs("CustomColor")
 @DelegateDeserialization(RandomHex.class)
-public interface CustomColor extends JsonAdapter<CustomColor>, JsonIntermediate, ConfigurationSerializable {
+public interface CustomColor extends JsonAdapter<CustomColor>, JsonCompliant, ConfigurationSerializable {
 
 	String name();
 

@@ -10,10 +10,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
-import org.bukkit.ChatColor;
+
 import org.jetbrains.annotations.NotNull;
 
-public class MessageBreakdown extends ImageBreakdown implements Iterable<Message> {
+public class MessageBreakdown extends BufferedHeadSkin implements Iterable<Message> {
 
 	final Message[] messages;
 
@@ -94,7 +94,7 @@ public class MessageBreakdown extends ImageBreakdown implements Iterable<Message
 		this.messages = lines;
 	}
 
-	public MessageBreakdown(@NotNull ImageBreakdown breakdown) {
+	public MessageBreakdown(@NotNull BufferedHeadSkin breakdown) {
 		super(breakdown);
 		if (breakdown instanceof MessageBreakdown) {
 			messages = ((MessageBreakdown) breakdown).messages;
